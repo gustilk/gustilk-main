@@ -39,8 +39,15 @@ export function PhotoCropModal({
   const [coverScale, setCoverScale] = useState(1);
   const [userScale, setUserScale] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
+
+  const dragging = useRef(false);
   const lastPoint = useRef({ x: 0, y: 0 });
+  const lastPinchDist = useRef<number | null>(null);
+
+  const userScaleRef = useRef(userScale);
+  const offsetRef = useRef(offset);
+  userScaleRef.current = userScale;
+  offsetRef.current = offset;
 
   useLayoutEffect(() => {
     if (containerRef.current) setContainerW(containerRef.current.offsetWidth);
@@ -61,33 +68,88 @@ export function PhotoCropModal({
     img.src = imgSrc;
   }, [containerW, imgSrc]);
 
-  const dispW = naturalSize ? naturalSize.w * coverScale * userScale : 0;
-  const dispH = naturalSize ? naturalSize.h * coverScale * userScale : 0;
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        dragging.current = true;
+        lastPoint.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        lastPinchDist.current = null;
+      } else if (e.touches.length === 2) {
+        dragging.current = false;
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        lastPinchDist.current = Math.sqrt(dx * dx + dy * dy);
+      }
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      if (e.touches.length === 1 && dragging.current) {
+        const dx = e.touches[0].clientX - lastPoint.current.x;
+        const dy = e.touches[0].clientY - lastPoint.current.y;
+        lastPoint.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        setOffset(o => ({ x: o.x + dx, y: o.y + dy }));
+      } else if (e.touches.length === 2 && lastPinchDist.current !== null) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const ratio = dist / lastPinchDist.current;
+        const newScale = Math.min(5, Math.max(1, userScaleRef.current * ratio));
+        const scaleRatio = newScale / userScaleRef.current;
+
+        const rect = el.getBoundingClientRect();
+        const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+        const my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+
+        setOffset(o => ({
+          x: mx - (mx - o.x) * scaleRatio,
+          y: my - (my - o.y) * scaleRatio,
+        }));
+        setUserScale(newScale);
+        lastPinchDist.current = dist;
+      }
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length < 2) lastPinchDist.current = null;
+      if (e.touches.length === 0) dragging.current = false;
+    };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: false });
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    el.addEventListener("touchend", onTouchEnd);
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+    };
+  }, []);
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    setDragging(true);
+    if (e.pointerType === "touch") return;
+    dragging.current = true;
     lastPoint.current = { x: e.clientX, y: e.clientY };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!dragging) return;
+    if (e.pointerType === "touch" || !dragging.current) return;
     const dx = e.clientX - lastPoint.current.x;
     const dy = e.clientY - lastPoint.current.y;
     lastPoint.current = { x: e.clientX, y: e.clientY };
     setOffset(o => ({ x: o.x + dx, y: o.y + dy }));
   };
 
-  const handlePointerUp = () => setDragging(false);
-
-  const handleZoom = (newUserScale: number) => {
-    if (!containerW) return;
-    const cx = containerW / 2;
-    const cy = containerW / 2;
-    const ratio = newUserScale / userScale;
-    setOffset(o => ({ x: cx - (cx - o.x) * ratio, y: cy - (cy - o.y) * ratio }));
-    setUserScale(newUserScale);
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (e.pointerType === "touch") return;
+    dragging.current = false;
   };
+
+  const dispW = naturalSize ? naturalSize.w * coverScale * userScale : 0;
+  const dispH = naturalSize ? naturalSize.h * coverScale * userScale : 0;
 
   const handleConfirm = () => {
     if (!naturalSize || !containerW) return;
@@ -109,12 +171,12 @@ export function PhotoCropModal({
       <div className="w-full max-w-sm rounded-2xl overflow-hidden" style={{ background: "#1a0a2e", border: "1px solid rgba(201,168,76,0.35)" }}>
         <div className="px-4 py-3 text-center" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
           <p className="text-gold font-serif font-semibold">Position your photo</p>
-          <p className="text-cream/40 text-xs mt-0.5">Drag to reposition · Slider to zoom</p>
+          <p className="text-cream/40 text-xs mt-0.5">Drag to reposition · Pinch to zoom</p>
         </div>
         <div
           ref={containerRef}
           className="relative overflow-hidden select-none"
-          style={{ width: "100%", aspectRatio: "1 / 1", touchAction: "none", cursor: dragging ? "grabbing" : "grab" }}
+          style={{ width: "100%", aspectRatio: "1 / 1", touchAction: "none", cursor: dragging.current ? "grabbing" : "grab" }}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -135,17 +197,7 @@ export function PhotoCropModal({
           }} />
           <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 0 2px rgba(201,168,76,0.5)" }} />
         </div>
-        <div className="px-4 py-3 flex items-center gap-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <span className="text-cream/50 text-base font-bold leading-none">−</span>
-          <input
-            type="range" min={1} max={3} step={0.01} value={userScale}
-            onChange={e => handleZoom(parseFloat(e.target.value))}
-            className="flex-1"
-            style={{ accentColor: "#c9a84c" }}
-          />
-          <span className="text-cream/50 text-base font-bold leading-none">+</span>
-        </div>
-        <div className="flex gap-2 px-4 pb-4">
+        <div className="flex gap-2 px-4 py-4">
           <button
             onClick={onCancel}
             className="flex-1 py-3 rounded-xl text-sm font-medium"
