@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Heart, Shield, Users, Eye, EyeOff, Phone, Mail, ArrowLeft, Globe } from "lucide-react";
-import logoImg from "@assets/Untitled_design_1772024284063.png";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -56,14 +55,14 @@ function Logo() {
     <div className="text-center mb-5">
       <div className="relative inline-flex items-center justify-center mb-1">
         <img
-          src={logoImg}
+          src="/logo-transparent.png"
           alt="Gûstîlk"
           className="relative"
           style={{
-            width: "min(220px, 70vw)",
-            height: "min(220px, 70vw)",
+            width: "min(200px, 65vw)",
+            height: "auto",
             objectFit: "contain",
-            filter: "drop-shadow(0 4px 20px rgba(201,168,76,0.55))",
+            filter: "drop-shadow(0 4px 24px rgba(201,168,76,0.5))",
           }}
         />
       </div>
