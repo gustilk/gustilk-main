@@ -17,6 +17,8 @@ import VerificationPage from "@/pages/VerificationPage";
 import PendingVerificationPage from "@/pages/PendingVerificationPage";
 import SocialSetupPage from "@/pages/SocialSetupPage";
 import BottomNav from "@/components/BottomNav";
+import VideoCallPage, { IncomingCallBanner } from "@/pages/VideoCallPage";
+import { VideoCallContext, useVideoCallProvider } from "@/hooks/useVideoCall";
 import type { User } from "@shared/schema";
 
 function useGustilkUser() {
@@ -45,31 +47,42 @@ function AppShell({ user }: { user: User }) {
   const isEventDetail = location.startsWith("/events/") && location !== "/events";
   const isVerifyPage = location === "/verify" || location === "/pending-verification";
 
+  const callCtx = useVideoCallProvider(user.id);
+  const isInCall = callCtx.callState === "active" || callCtx.callState === "calling" || callCtx.callState === "ringing";
+
   if (!profileIsComplete(user) && location !== "/complete-profile") {
     return <SocialSetupPage user={user} />;
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-ink" style={{ fontFamily: "'Open Sans', sans-serif" }}>
-      <main className="flex-1 overflow-hidden">
-        <Switch>
-          <Route path="/discover" component={() => <DiscoverPage user={user} />} />
-          <Route path="/matches" component={() => <MatchesPage user={user} />} />
-          <Route path="/chat/:matchId" component={({ params }) => <ChatPage user={user} matchId={params.matchId} />} />
-          <Route path="/profile/edit" component={() => <EditProfilePage user={user} />} />
-          <Route path="/profile" component={() => <ProfilePage user={user} />} />
-          <Route path="/premium" component={() => <PremiumPage user={user} />} />
-          <Route path="/events/:eventId" component={({ params }) => <EventDetailPage user={user} eventId={params.eventId} />} />
-          <Route path="/events" component={() => <EventsPage user={user} />} />
-          <Route path="/admin" component={() => <AdminPage user={user} />} />
-          <Route path="/verify" component={() => <VerificationPage user={user} />} />
-          <Route path="/pending-verification" component={() => <PendingVerificationPage user={user} />} />
-          <Route path="/complete-profile" component={() => <SocialSetupPage user={user} />} />
-          <Route path="/" component={() => <Redirect to="/discover" />} />
-        </Switch>
-      </main>
-      {!isChat && !isEventDetail && !isVerifyPage && <BottomNav />}
-    </div>
+    <VideoCallContext.Provider value={callCtx}>
+      <div className="flex flex-col min-h-screen bg-ink" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+        {/* Incoming call banner — shown on top of everything except an active call */}
+        {callCtx.incomingCall && !isInCall && <IncomingCallBanner />}
+
+        {/* Full-screen call overlay */}
+        {isInCall && <VideoCallPage />}
+
+        <main className="flex-1 overflow-hidden">
+          <Switch>
+            <Route path="/discover" component={() => <DiscoverPage user={user} />} />
+            <Route path="/matches" component={() => <MatchesPage user={user} />} />
+            <Route path="/chat/:matchId" component={({ params }) => <ChatPage user={user} matchId={params.matchId} />} />
+            <Route path="/profile/edit" component={() => <EditProfilePage user={user} />} />
+            <Route path="/profile" component={() => <ProfilePage user={user} />} />
+            <Route path="/premium" component={() => <PremiumPage user={user} />} />
+            <Route path="/events/:eventId" component={({ params }) => <EventDetailPage user={user} eventId={params.eventId} />} />
+            <Route path="/events" component={() => <EventsPage user={user} />} />
+            <Route path="/admin" component={() => <AdminPage user={user} />} />
+            <Route path="/verify" component={() => <VerificationPage user={user} />} />
+            <Route path="/pending-verification" component={() => <PendingVerificationPage user={user} />} />
+            <Route path="/complete-profile" component={() => <SocialSetupPage user={user} />} />
+            <Route path="/" component={() => <Redirect to="/discover" />} />
+          </Switch>
+        </main>
+        {!isChat && !isEventDetail && !isVerifyPage && !isInCall && <BottomNav />}
+      </div>
+    </VideoCallContext.Provider>
   );
 }
 

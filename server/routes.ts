@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { setupSession, registerAuthRoutes, isAuthenticated } from "./auth";
 import { profileUpdateSchema } from "@shared/schema";
 import { verifyCountryFromRequest, verifyIraqFromRequest } from "./geo";
+import { setupWs } from "./ws";
 import { z } from "zod";
 
 function getUserId(req: any): string {
@@ -13,6 +14,7 @@ function getUserId(req: any): string {
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
   setupSession(app);
   registerAuthRoutes(app);
+  setupWs(httpServer);
 
   // ─── PROFILE ─────────────────────────────────────────────
   app.put("/api/profile", isAuthenticated, async (req, res) => {
