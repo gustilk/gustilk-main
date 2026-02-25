@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YeziMatch — App Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a0a2e; --gold: #c9a84c; --gold-light: #e8c97a; --cream: #fdf8f0;
+    --plum: #4a1e6b; --plum-mid: #7b3fa0; --rose: #d4608a;
+    --border: rgba(201,168,76,0.25); --glass: rgba(255,255,255,0.06);
+    --success: #10b981; --danger: #ef4444;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif; background: var(--ink); color: var(--cream);
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center; overflow-x: hidden;
+  }
+  body::before {
+    content:''; position:fixed; inset:0;
+    background: radial-gradient(ellipse 60% 50% at 20% 10%, rgba(74,30,107,0.7) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 40% at 80% 80%, rgba(212,96,138,0.3) 0%, transparent 60%);
+    pointer-events:none; z-index:0;
+  }
+  .page-title { font-family:'Playfair Display',serif; font-size:clamp(2rem,5vw,3rem); font-weight:900; color:var(--gold); text-align:center; padding:36px 20px 6px; position:relative; z-index:1; }
+  .page-sub { color:rgba(253,248,240,0.45); text-align:center; margin-bottom:24px; font-size:0.9rem; position:relative; z-index:1; }
+  .screen-tabs { display:flex; gap:7px; flex-wrap:wrap; justify-content:center; padding:0 20px 20px; position:relative; z-index:1; max-width:700px; }
+  .tab { padding:7px 15px; border-radius:30px; cursor:pointer; font-size:0.82rem; font-weight:600; border:1.5px solid var(--border); background:var(--glass); color:rgba(253,248,240,0.65); transition:all 0.2s; backdrop-filter:blur(10px); }
+  .tab:hover { border-color:var(--gold); color:var(--gold); }
+  .tab.active { background:var(--gold); color:var(--ink); border-color:var(--gold); }
+  .phone-wrap { position:relative; z-index:1; padding-bottom:60px; }
+  .phone {
+    width:375px; height:760px; border-radius:48px; border:2px solid rgba(201,168,76,0.4);
+    overflow:hidden; position:relative;
+    box-shadow: 0 0 0 1px rgba(201,168,76,0.1), 0 40px 80px rgba(0,0,0,0.7), 0 0 60px rgba(74,30,107,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+    background:#0d0618;
+  }
+  .phone::before { content:''; position:absolute; top:12px; left:50%; transform:translateX(-50%); width:100px; height:28px; background:#0d0618; border-radius:0 0 20px 20px; z-index:100; border:1.5px solid rgba(201,168,76,0.2); border-top:none; }
+  .screen { width:100%; height:100%; overflow-y:auto; overflow-x:hidden; }
+  .screen::-webkit-scrollbar { display:none; }
+
+  /* ─── SHARED ─── */
+  .inp { width:100%; padding:12px 14px; border-radius:12px; border:1.5px solid rgba(201,168,76,0.25); background:rgba(255,255,255,0.07); color:var(--cream); font-size:0.9rem; font-family:'DM Sans',sans-serif; outline:none; }
+  .inp::placeholder { color:rgba(253,248,240,0.25); }
+  .inp-label { font-size:0.72rem; color:rgba(253,248,240,0.5); margin-bottom:5px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; }
+  .inp-group { width:100%; margin-bottom:12px; }
+  .sel { width:100%; padding:12px 14px; border-radius:12px; border:1.5px solid rgba(201,168,76,0.25); background:rgba(255,255,255,0.07); color:var(--cream); font-size:0.9rem; font-family:'DM Sans',sans-serif; outline:none; appearance:none; }
+  .sel option { background:#2d0f4a; color:var(--cream); }
+  .btn-gold { width:100%; padding:14px; border-radius:12px; border:none; cursor:pointer; background:linear-gradient(135deg,var(--gold),var(--gold-light)); color:var(--ink); font-size:0.95rem; font-weight:700; font-family:'DM Sans',sans-serif; box-shadow:0 6px 20px rgba(201,168,76,0.3); margin-top:6px; }
+  .method-toggle { display:flex; background:rgba(255,255,255,0.07); border-radius:12px; padding:3px; width:100%; margin-bottom:16px; border:1px solid var(--border); }
+  .method-btn { flex:1; padding:9px; border-radius:9px; border:none; cursor:pointer; font-size:0.85rem; font-weight:600; transition:all 0.2s; font-family:'DM Sans',sans-serif; color:rgba(253,248,240,0.45); background:transparent; }
+  .method-btn.active { background:var(--gold); color:var(--ink); }
+  .form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+  .bottom-nav-ui { position:absolute; bottom:0; left:0; right:0; display:flex; background:rgba(13,6,24,0.95); backdrop-filter:blur(20px); border-top:1px solid rgba(201,168,76,0.15); z-index:50; padding-bottom:6px; }
+  .nav-i { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px 0 2px; cursor:pointer; color:rgba(253,248,240,0.3); }
+  .nav-i.on { color:var(--gold); }
+  .nav-i-ico { font-size:1.2rem; }
+  .nav-i-lbl { font-size:0.58rem; font-weight:600; margin-top:2px; letter-spacing:0.05em; text-transform:uppercase; }
+  .auth-footer-txt { color:rgba(253,248,240,0.4); font-size:0.82rem; text-align:center; margin-top:16px; }
+  .auth-footer-txt span { color:var(--gold); cursor:pointer; }
+  .section-h { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--gold); }
+
+  /* ─── LOGIN ─── */
+  .s-login { background:linear-gradient(160deg,#1a0a2e,#2d0f4a); padding:60px 24px 36px; display:flex; flex-direction:column; align-items:center; min-height:100%; }
+  .app-logo { font-size:48px; filter:drop-shadow(0 0 18px rgba(201,168,76,0.5)); margin-bottom:4px; }
+  .app-name { font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:900; color:var(--gold); margin-bottom:2px; }
+  .app-tagline { color:rgba(253,248,240,0.45); font-size:0.8rem; margin-bottom:28px; text-align:center; }
+
+  /* ─── REGISTER ─── */
+  .s-register { background:linear-gradient(160deg,#1a0a2e,#2d0f4a); padding:55px 24px 30px; display:flex; flex-direction:column; align-items:center; min-height:100%; }
+
+  /* ─── PHONE INPUT ─── */
+  .phone-row { display:flex; border:1.5px solid rgba(201,168,76,0.25); border-radius:12px; overflow:hidden; background:rgba(255,255,255,0.07); }
+  .phone-row.focused { border-color:var(--gold); }
+  .dial-badge { padding:12px 12px; background:rgba(201,168,76,0.12); color:var(--gold); font-weight:700; font-size:0.88rem; border-right:1.5px solid rgba(201,168,76,0.2); white-space:nowrap; flex-shrink:0; min-width:52px; text-align:center; }
+  .phone-num-inp { flex:1; padding:12px 12px; background:transparent; border:none; outline:none; color:var(--cream); font-family:'DM Sans',sans-serif; font-size:0.9rem; }
+  .phone-num-inp::placeholder { color:rgba(253,248,240,0.25); }
+  .phone-hint { font-size:0.72rem; margin-top:4px; display:block; }
+  .hint-normal { color:rgba(253,248,240,0.35); }
+  .hint-error { color:#f87171; }
+  .hint-ok { color:#6ee7b7; font-weight:600; }
+  .digit-counter { font-size:0.7rem; color:rgba(253,248,240,0.25); text-align:right; margin-top:2px; }
+
+  /* ─── LANGUAGE CHIPS ─── */
+  .lang-chips-wrap { display:flex; flex-wrap:wrap; gap:7px; margin-top:2px; }
+  .lc {
+    padding:6px 13px; border-radius:20px; border:1.5px solid rgba(201,168,76,0.2);
+    background:rgba(255,255,255,0.05); color:rgba(253,248,240,0.65);
+    font-size:0.8rem; cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif;
+  }
+  .lc:hover { border-color:var(--gold); color:var(--gold); }
+  .lc.on { background:var(--gold); color:var(--ink); border-color:var(--gold); font-weight:700; }
+  .lc.suggested { border-color:rgba(201,168,76,0.5); background:rgba(201,168,76,0.08); color:rgba(253,248,240,0.85); }
+  .suggested-label { font-size:0.68rem; color:rgba(253,248,240,0.3); margin-bottom:5px; }
+
+  /* ─── OTP ─── */
+  .s-otp { background:linear-gradient(160deg,#1a0a2e,#2d0f4a); padding:80px 24px 40px; display:flex; flex-direction:column; align-items:center; min-height:100%; text-align:center; }
+  .otp-boxes { display:flex; gap:9px; margin:20px 0; }
+  .ob { width:42px; height:52px; border-radius:10px; border:2px solid rgba(201,168,76,0.2); background:rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:700; color:var(--gold); }
+  .ob.on { border-color:var(--gold); background:rgba(201,168,76,0.1); }
+
+  /* ─── VERIFY / PENDING ─── */
+  .s-verify { background:linear-gradient(160deg,#1a0a2e,#2d0f4a); padding:55px 24px 36px; display:flex; flex-direction:column; align-items:center; min-height:100%; text-align:center; }
+  .verif-icon-big { font-size:52px; margin-bottom:10px; filter:drop-shadow(0 0 18px rgba(201,168,76,0.4)); }
+  .rule-list { list-style:none; width:100%; margin:16px 0 20px; display:flex; flex-direction:column; gap:8px; }
+  .rule-item { padding:10px 14px; border-radius:10px; font-size:0.82rem; background:rgba(201,168,76,0.07); border:1px solid rgba(201,168,76,0.18); color:rgba(253,248,240,0.75); text-align:left; }
+  .cam-mock { width:100%; aspect-ratio:4/5; border-radius:18px; overflow:hidden; position:relative; background:#0d0618; border:2px solid rgba(201,168,76,0.25); margin-bottom:14px; }
+  .cam-bg { width:100%; height:100%; background:linear-gradient(135deg,#1a0a2e,#3d1260); display:flex; align-items:center; justify-content:center; }
+  .face-oval { width:150px; height:190px; border:3px solid var(--gold); border-radius:50%; box-shadow:0 0 28px rgba(201,168,76,0.3); }
+  .cam-hint-txt { position:absolute; bottom:10px; left:0; right:0; text-align:center; color:rgba(253,248,240,0.5); font-size:0.75rem; }
+  .s-pending { background:linear-gradient(160deg,#1a0a2e,#2d0f4a); padding:80px 24px 40px; display:flex; flex-direction:column; align-items:center; min-height:100%; text-align:center; justify-content:center; }
+  .pulse-ring { width:90px; height:90px; border-radius:50%; border:3px solid var(--gold); display:flex; align-items:center; justify-content:center; font-size:2rem; margin-bottom:18px; animation:pr 2.5s ease-in-out infinite; }
+  @keyframes pr { 0%,100%{box-shadow:0 0 16px rgba(201,168,76,0.2)} 50%{box-shadow:0 0 44px rgba(201,168,76,0.5)} }
+
+  /* ─── DISCOVER ─── */
+  .s-discover { background:#0d0618; display:flex; flex-direction:column; min-height:100%; padding-bottom:68px; }
+  .disc-hdr { padding:46px 18px 10px; display:flex; justify-content:space-between; align-items:center; }
+  .disc-logo-txt { font-family:'Playfair Display',serif; font-size:1.25rem; color:var(--gold); }
+  .filter-btn-ui { padding:7px 14px; border-radius:20px; border:1.5px solid var(--border); background:var(--glass); color:rgba(253,248,240,0.6); font-size:0.75rem; cursor:pointer; backdrop-filter:blur(10px); font-family:'DM Sans',sans-serif; }
+  .card-wrap { padding:0 14px 12px; flex:1; }
+  .p-card { border-radius:26px; overflow:hidden; position:relative; border:1.5px solid rgba(201,168,76,0.2); box-shadow:0 20px 60px rgba(0,0,0,0.6),0 0 40px rgba(74,30,107,0.3); }
+  .p-card-photo { height:370px; position:relative; background:linear-gradient(135deg,#2d0f4a,#4a1e6b,#7b3fa0); display:flex; align-items:center; justify-content:center; }
+  .p-ava { width:110px; height:110px; border-radius:50%; background:rgba(201,168,76,0.12); border:2px solid rgba(201,168,76,0.25); display:flex; align-items:center; justify-content:center; font-size:2.8rem; }
+  .p-caste-tag { position:absolute; top:13px; right:13px; padding:4px 13px; border-radius:20px; font-size:0.75rem; font-weight:700; background:rgba(201,168,76,0.9); color:var(--ink); }
+  .p-grad { position:absolute; bottom:0; left:0; right:0; height:150px; background:linear-gradient(to top,rgba(13,6,24,0.95),transparent); }
+  .p-info { position:absolute; bottom:0; left:0; right:0; padding:14px 18px 18px; }
+  .p-name { font-family:'Playfair Display',serif; font-size:1.5rem; color:white; font-weight:700; }
+  .p-loc { color:rgba(255,255,255,0.6); font-size:0.82rem; margin-top:3px; }
+  .p-bio-pre { color:rgba(255,255,255,0.45); font-size:0.77rem; margin-top:5px; line-height:1.5; }
+  .card-btns { display:flex; justify-content:center; gap:34px; padding:16px 0 6px; }
+  .act-btn { width:60px; height:60px; border-radius:50%; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.3rem; transition:transform 0.15s; }
+  .act-btn:hover { transform:scale(1.1); }
+  .pass-btn { background:rgba(255,255,255,0.07); border:2px solid rgba(255,255,255,0.1); }
+  .like-btn { background:linear-gradient(135deg,var(--plum-mid),var(--rose)); box-shadow:0 8px 24px rgba(212,96,138,0.4); }
+  .counter-txt { text-align:center; color:rgba(253,248,240,0.2); font-size:0.75rem; }
+
+  /* ─── MATCHES ─── */
+  .s-matches { background:#0d0618; min-height:100%; padding-bottom:68px; }
+  .new-m-row { display:flex; gap:10px; padding:0 18px 18px; overflow-x:auto; }
+  .new-m-row::-webkit-scrollbar { display:none; }
+  .new-m-item { display:flex; flex-direction:column; align-items:center; gap:5px; flex-shrink:0; cursor:pointer; }
+  .nm-ring { width:58px; height:58px; border-radius:50%; padding:2px; background:linear-gradient(135deg,var(--gold),var(--rose)); }
+  .nm-inner { width:100%; height:100%; border-radius:50%; border:2.5px solid #0d0618; background:linear-gradient(135deg,#3d1260,#6b2d9a); display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
+  .nm-lbl { font-size:0.68rem; color:rgba(253,248,240,0.5); }
+  .match-row { display:flex; align-items:center; gap:12px; padding:12px 18px; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; }
+  .match-row:hover { background:rgba(255,255,255,0.03); }
+  .m-ava { width:50px; height:50px; border-radius:50%; background:linear-gradient(135deg,#4a1e6b,#7b3fa0); display:flex; align-items:center; justify-content:center; font-size:1.25rem; flex-shrink:0; }
+  .m-ava.unread { box-shadow:0 0 0 2px var(--gold); }
+  .m-info { flex:1; min-width:0; }
+  .m-name { font-weight:600; font-size:0.92rem; }
+  .m-prev { font-size:0.8rem; color:rgba(253,248,240,0.38); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .m-prev.unread { color:var(--gold-light); font-weight:500; }
+  .m-time { font-size:0.7rem; color:rgba(253,248,240,0.28); flex-shrink:0; }
+  .sec-lbl { padding:8px 18px 6px; font-size:0.68rem; color:rgba(253,248,240,0.32); text-transform:uppercase; letter-spacing:0.12em; }
+
+  /* ─── CHAT ─── */
+  .s-chat { background:#0d0618; display:flex; flex-direction:column; height:100%; }
+  .chat-hdr { padding:46px 14px 11px; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.06); flex-shrink:0; }
+  .chat-back-btn { color:var(--gold); font-size:1.1rem; cursor:pointer; padding:4px; }
+  .chat-ava-ui { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#4a1e6b,var(--rose)); display:flex; align-items:center; justify-content:center; font-size:0.95rem; flex-shrink:0; }
+  .chat-msgs { flex:1; padding:14px; display:flex; flex-direction:column; gap:9px; overflow-y:auto; }
+  .msg-row { display:flex; flex-direction:column; }
+  .msg-row.me { align-items:flex-end; }
+  .msg-row.them { align-items:flex-start; }
+  .bub { max-width:74%; padding:9px 13px; border-radius:16px; font-size:0.87rem; line-height:1.5; }
+  .bub.them { background:rgba(255,255,255,0.08); border-bottom-left-radius:3px; }
+  .bub.me { background:linear-gradient(135deg,var(--plum-mid),var(--rose)); color:white; border-bottom-right-radius:3px; }
+  .bub-t { font-size:0.65rem; color:rgba(253,248,240,0.27); margin-top:2px; }
+  .chat-inp-row { padding:10px 14px; display:flex; gap:8px; align-items:center; border-top:1px solid rgba(255,255,255,0.06); flex-shrink:0; }
+  .chat-inp-ui { flex:1; padding:10px 14px; border-radius:22px; border:1.5px solid var(--border); background:rgba(255,255,255,0.06); color:var(--cream); font-size:0.87rem; outline:none; font-family:'DM Sans',sans-serif; }
+  .chat-send-btn { width:42px; height:42px; border-radius:50%; border:none; cursor:pointer; background:linear-gradient(135deg,var(--plum-mid),var(--rose)); color:white; font-size:0.95rem; display:flex; align-items:center; justify-content:center; }
+
+  /* ─── PROFILE ─── */
+  .s-profile { background:#0d0618; min-height:100%; padding-bottom:68px; }
+  .prof-cover { height:200px; position:relative; background:linear-gradient(135deg,#2d0f4a,#6b2d9a,#d4608a); }
+  .prof-cover-ov { position:absolute; inset:0; background:linear-gradient(to bottom,transparent 40%,#0d0618); }
+  .prof-ava-circle { position:absolute; bottom:-38px; left:18px; width:84px; height:84px; border-radius:50%; border:3px solid var(--gold); background:linear-gradient(135deg,#3d1260,var(--plum-mid)); display:flex; align-items:center; justify-content:center; font-size:1.9rem; box-shadow:0 0 28px rgba(201,168,76,0.3); }
+  .prof-body { padding:48px 18px 18px; }
+  .prof-name-row { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:5px; }
+  .prof-nm { font-family:'Playfair Display',serif; font-size:1.4rem; }
+  .edit-btn-ui { padding:6px 14px; border-radius:20px; border:1.5px solid var(--gold); background:transparent; color:var(--gold); font-size:0.76rem; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; }
+  .prof-caste { display:inline-block; padding:3px 13px; border-radius:20px; font-size:0.75rem; font-weight:700; background:rgba(201,168,76,0.12); color:var(--gold); border:1px solid rgba(201,168,76,0.28); margin-bottom:8px; }
+  .prof-loc { color:rgba(253,248,240,0.45); font-size:0.82rem; margin-bottom:12px; }
+  .prof-bio { color:rgba(253,248,240,0.65); font-size:0.85rem; line-height:1.7; margin-bottom:18px; }
+  .prem-banner { display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:14px; background:rgba(201,168,76,0.09); border:1px solid rgba(201,168,76,0.22); margin-bottom:14px; cursor:pointer; }
+  .prem-banner strong { display:block; color:var(--gold); font-size:0.88rem; }
+  .prem-banner span { color:rgba(253,248,240,0.45); font-size:0.75rem; }
+  .sett-row { display:flex; align-items:center; justify-content:space-between; padding:13px 0; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; }
+  .sett-lbl { color:rgba(253,248,240,0.78); font-size:0.87rem; }
+  .sett-val { color:rgba(253,248,240,0.35); font-size:0.82rem; }
+
+  /* ─── PREMIUM ─── */
+  .s-premium { background:#0d0618; min-height:100%; padding:60px 18px 80px; }
+  .prem-head { text-align:center; margin-bottom:20px; }
+  .prem-crown-big { font-size:2.8rem; margin-bottom:6px; }
+  .prem-ttl { font-family:'Playfair Display',serif; font-size:1.7rem; color:var(--gold); margin-bottom:5px; }
+  .prem-sub-txt { color:rgba(253,248,240,0.45); font-size:0.83rem; line-height:1.6; }
+  .ben-list { margin-bottom:20px; display:flex; flex-direction:column; gap:8px; }
+  .ben-item { display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); }
+  .ben-ico { font-size:1.1rem; }
+  .ben-txt { color:rgba(253,248,240,0.75); font-size:0.85rem; }
+  .pay-tabs { display:flex; gap:5px; margin-bottom:14px; background:rgba(255,255,255,0.05); border-radius:12px; padding:3px; }
+  .pay-tab-btn { flex:1; padding:8px 5px; border-radius:9px; border:none; cursor:pointer; font-size:0.74rem; font-weight:600; background:transparent; color:rgba(253,248,240,0.45); font-family:'DM Sans',sans-serif; }
+  .pay-tab-btn.on { background:var(--gold); color:var(--ink); }
+  .pay-box { padding:18px; border-radius:14px; border:1.5px solid var(--border); background:rgba(255,255,255,0.04); margin-bottom:12px; }
+  .card-mock-field { padding:12px 14px; border-radius:10px; border:1.5px solid rgba(255,255,255,0.09); background:rgba(255,255,255,0.05); color:rgba(253,248,240,0.35); font-size:0.85rem; margin-bottom:10px; letter-spacing:0.08em; }
+
+  /* ─── ADMIN ─── */
+  .s-admin { background:#0f0a1a; min-height:100%; }
+  .adm-hdr { padding:46px 18px 14px; background:rgba(201,168,76,0.07); border-bottom:1px solid rgba(201,168,76,0.18); display:flex; justify-content:space-between; align-items:center; }
+  .adm-ttl { font-family:'Playfair Display',serif; color:var(--gold); font-size:1.05rem; }
+  .q-badge { background:var(--gold); color:var(--ink); padding:3px 10px; border-radius:20px; font-size:0.72rem; font-weight:700; }
+  .rev-card { margin:14px; border-radius:18px; overflow:hidden; border:1px solid var(--border); }
+  .rev-user { padding:12px 14px; background:rgba(255,255,255,0.04); display:flex; align-items:center; gap:10px; }
+  .rev-ava { width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#4a1e6b,var(--rose)); display:flex; align-items:center; justify-content:center; font-size:1.05rem; }
+  .rev-nm { font-weight:700; font-size:0.88rem; }
+  .rev-meta { color:rgba(253,248,240,0.45); font-size:0.74rem; }
+  .photos-2col { display:grid; grid-template-columns:1fr 1fr; gap:1px; }
+  .photo-col { position:relative; }
+  .photo-col-lbl { position:absolute; top:7px; left:7px; padding:2px 9px; background:rgba(0,0,0,0.65); border-radius:20px; font-size:0.64rem; color:rgba(255,255,255,0.8); font-weight:600; }
+  .photo-mock { height:150px; display:flex; align-items:center; justify-content:center; font-size:2.4rem; }
+  .pm-profile { background:linear-gradient(135deg,#2d0f4a,#6b2d9a); }
+  .pm-selfie { background:linear-gradient(135deg,#0f2a0f,#1a5a1a); }
+  .adm-btns { display:flex; gap:7px; padding:12px 14px; background:rgba(255,255,255,0.03); }
+  .adm-btn { flex:1; padding:10px; border-radius:10px; border:none; cursor:pointer; font-size:0.76rem; font-weight:700; font-family:'DM Sans',sans-serif; }
+  .ab-ok { background:#162716; color:#5de85d; border:1px solid rgba(93,232,93,0.25); }
+  .ab-rej { background:#2e1c06; color:#f59e0b; border:1px solid rgba(245,158,11,0.25); }
+  .ab-ban { background:#2e0606; color:#ef4444; border:1px solid rgba(239,68,68,0.25); }
+  .q-list { padding:0 14px; }
+  .q-item { display:flex; align-items:center; gap:10px; padding:11px 0; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; }
+  .q-dot { width:7px; height:7px; border-radius:50%; background:var(--gold); flex-shrink:0; }
+  .q-ava { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#2d0f4a,#7b3fa0); display:flex; align-items:center; justify-content:center; font-size:0.95rem; flex-shrink:0; }
+  .q-nm { font-size:0.85rem; font-weight:600; }
+  .q-meta { font-size:0.72rem; color:rgba(253,248,240,0.38); }
+  .q-time { font-size:0.68rem; color:rgba(253,248,240,0.26); margin-left:auto; }
+
+  /* ─── MATCH MODAL ─── */
+  .modal-back { position:absolute; inset:0; background:rgba(0,0,0,0.82); display:flex; align-items:center; justify-content:center; z-index:200; padding:28px; }
+  .modal-card { background:linear-gradient(160deg,#2d0f4a,#1a0a2e); border-radius:26px; padding:30px 22px; text-align:center; width:100%; border:1.5px solid rgba(201,168,76,0.28); box-shadow:0 0 50px rgba(201,168,76,0.18); }
+  .modal-hearts { font-size:2.2rem; margin-bottom:6px; }
+  .modal-ttl { font-family:'Playfair Display',serif; font-size:1.7rem; color:var(--gold); }
+  .modal-sub { color:rgba(253,248,240,0.55); font-size:0.82rem; margin:6px 0 14px; }
+  .ava-pair { display:flex; justify-content:center; margin-bottom:18px; }
+  .ava-p { width:66px; height:66px; border-radius:50%; border:3px solid var(--gold); background:linear-gradient(135deg,#4a1e6b,var(--rose)); display:flex; align-items:center; justify-content:center; font-size:1.7rem; }
+  .ava-p:last-child { margin-left:-14px; }
+</style>
+</head>
+<body>
+
+<h1 class="page-title">🕊️ YeziMatch</h1>
+<p class="page-sub">Interactive App Preview — click any screen</p>
+
+<div class="screen-tabs">
+  <div class="tab active" onclick="show('login')">Login</div>
+  <div class="tab" onclick="show('register')">Register</div>
+  <div class="tab" onclick="show('otp')">Phone OTP</div>
+  <div class="tab" onclick="show('verify')">ID Verify</div>
+  <div class="tab" onclick="show('pending')">Pending</div>
+  <div class="tab" onclick="show('discover')">Discover</div>
+  <div class="tab" onclick="show('match')">It's a Match!</div>
+  <div class="tab" onclick="show('matches')">Matches</div>
+  <div class="tab" onclick="show('chat')">Chat</div>
+  <div class="tab" onclick="show('profile')">Profile</div>
+  <div class="tab" onclick="show('premium')">Premium</div>
+  <div class="tab" onclick="show('admin')">Admin</div>
+</div>
+
+<div class="phone-wrap">
+  <div class="phone">
+
+    <!-- LOGIN -->
+    <div class="screen s-login" id="s-login">
+      <div class="app-logo">🕊️</div>
+      <div class="app-name">YeziMatch</div>
+      <div class="app-tagline">Find your partner within the community</div>
+      <div class="method-toggle" style="width:100%">
+        <button class="method-btn active">✉️ Email</button>
+        <button class="method-btn">📱 Phone</button>
+      </div>
+      <div class="inp-group"><div class="inp-label">Email</div><input class="inp" placeholder="you@example.com" readonly></div>
+      <div class="inp-group"><div class="inp-label">Password</div><input class="inp" type="password" placeholder="••••••••" readonly></div>
+      <button class="btn-gold">Login</button>
+      <div class="auth-footer-txt" style="margin-top:16px">Don't have an account? <span onclick="show('register')">Register</span></div>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="screen s-register" id="s-register" style="display:none">
+      <div style="text-align:center;margin-bottom:14px"><div style="font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--gold)">Create Account</div></div>
+      <div class="method-toggle" style="width:100%">
+        <button class="method-btn active">✉️ Email</button>
+        <button class="method-btn" onclick="show('otp')">📱 Phone</button>
+      </div>
+      <div class="inp-group"><div class="inp-label">Full Name</div><input class="inp" placeholder="Your name" readonly></div>
+      <div class="inp-group"><div class="inp-label">Email</div><input class="inp" placeholder="you@example.com" readonly></div>
+      <div class="form-row-2">
+        <div class="inp-group" style="margin:0"><div class="inp-label">Caste</div>
+          <select class="sel" style="font-size:0.82rem"><option>Murid</option><option>Sheikh</option><option>Pir</option></select>
+        </div>
+        <div class="inp-group" style="margin:0"><div class="inp-label">Gender</div>
+          <select class="sel" style="font-size:0.82rem"><option>Female</option><option>Male</option></select>
+        </div>
+      </div>
+      <div class="form-row-2" style="margin-top:10px">
+        <div class="inp-group" style="margin:0"><div class="inp-label">Birth Date</div><input class="inp" placeholder="DD/MM/YYYY" readonly></div>
+        <div class="inp-group" style="margin:0"><div class="inp-label">Country</div>
+          <select class="sel" id="reg-country" onchange="updateLangs(this.value)" style="font-size:0.78rem">
+            <option value="">Select</option>
+            <option value="Iraq">Iraq (+964)</option>
+            <option value="Germany">Germany (+49)</option>
+            <option value="USA">USA (+1)</option>
+            <option value="Canada">Canada (+1)</option>
+            <option value="Australia">Australia (+61)</option>
+            <option value="Armenia">Armenia (+374)</option>
+            <option value="Netherlands">Netherlands (+31)</option>
+            <option value="Sweden">Sweden (+46)</option>
+            <option value="France">France (+33)</option>
+            <option value="Georgia">Georgia (+995)</option>
+            <option value="Turkey">Turkey (+90)</option>
+            <option value="UK">UK (+44)</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+      <!-- Language chips -->
+      <div class="inp-group" style="margin-top:10px">
+        <div class="inp-label">Language <span id="lang-hint" style="color:rgba(253,248,240,0.3);text-transform:none;letter-spacing:0;font-size:0.68rem"></span></div>
+        <div class="lang-chips-wrap" id="lang-chips">
+          <button class="lc on" onclick="selectLang(this,'en')">🇬🇧 English</button>
+          <button class="lc" onclick="selectLang(this,'ar')">🇮🇶 العربية</button>
+          <button class="lc" onclick="selectLang(this,'ku')">🏳️ کوردی</button>
+          <button class="lc" onclick="selectLang(this,'de')">🇩🇪 Deutsch</button>
+          <button class="lc" onclick="selectLang(this,'hy')">🇦🇲 Հայերեն</button>
+        </div>
+      </div>
+      <button class="btn-gold" style="margin-top:12px" onclick="show('otp')">Create Account →</button>
+      <div class="auth-footer-txt" style="margin-bottom:16px">Already a member? <span onclick="show('login')">Login</span></div>
+    </div>
+
+    <!-- OTP -->
+    <div class="screen s-otp" id="s-otp" style="display:none">
+      <!-- Phone input with country code demo -->
+      <div style="font-size:2.6rem;margin-bottom:8px">📱</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold);margin-bottom:6px">Verify Phone</div>
+      <div style="width:100%;margin-bottom:14px">
+        <div class="inp-label">Country</div>
+        <select class="sel" id="otp-country" onchange="updateOtpPhone(this.value)">
+          <option value="">Select country</option>
+          <option value="Iraq" data-code="+964" data-digits="10" data-ph="750 123 4567">Iraq (+964)</option>
+          <option value="Germany" data-code="+49" data-digits="11" data-ph="151 23456789">Germany (+49)</option>
+          <option value="USA" data-code="+1" data-digits="10" data-ph="555 123 4567">USA (+1)</option>
+          <option value="Canada" data-code="+1" data-digits="10" data-ph="416 123 4567">Canada (+1)</option>
+          <option value="Australia" data-code="+61" data-digits="9" data-ph="412 345 678">Australia (+61)</option>
+          <option value="Armenia" data-code="+374" data-digits="8" data-ph="91 123 456">Armenia (+374)</option>
+          <option value="Netherlands" data-code="+31" data-digits="9" data-ph="6 12345678">Netherlands (+31)</option>
+          <option value="Sweden" data-code="+46" data-digits="9" data-ph="70 123 4567">Sweden (+46)</option>
+          <option value="France" data-code="+33" data-digits="9" data-ph="6 12 34 56 78">France (+33)</option>
+          <option value="Georgia" data-code="+995" data-digits="9" data-ph="555 123 456">Georgia (+995)</option>
+          <option value="Turkey" data-code="+90" data-digits="10" data-ph="555 123 4567">Turkey (+90)</option>
+          <option value="UK" data-code="+44" data-digits="10" data-ph="7700 123456">UK (+44)</option>
+        </select>
+      </div>
+      <div style="width:100%;margin-bottom:6px">
+        <div class="inp-label">Phone Number</div>
+        <div class="phone-row" id="phone-row">
+          <div class="dial-badge" id="dial-code-display">+___</div>
+          <input class="phone-num-inp" id="phone-inp" placeholder="Select country first" readonly oninput="validatePhone(this)">
+        </div>
+        <span class="phone-hint hint-normal" id="phone-status-msg">Select your country to see the correct format</span>
+        <div class="digit-counter" id="digit-counter"></div>
+      </div>
+      <div class="otp-boxes" style="margin:18px 0 10px">
+        <div class="ob on">4</div><div class="ob on">8</div><div class="ob on">2</div>
+        <div class="ob">_</div><div class="ob">_</div><div class="ob">_</div>
+      </div>
+      <div style="color:rgba(253,248,240,0.4);font-size:0.8rem;margin-bottom:12px">We sent a 6-digit code · <span style="color:var(--gold);cursor:pointer">Resend</span></div>
+      <button class="btn-gold">✓ Verify & Continue</button>
+    </div>
+
+    <!-- VERIFY -->
+    <div class="screen s-verify" id="s-verify" style="display:none">
+      <div class="verif-icon-big">🛡️</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold);margin-bottom:8px">Identity Check</div>
+      <div style="color:rgba(253,248,240,0.55);font-size:0.84rem;line-height:1.7;margin-bottom:16px;text-align:center">To protect our community and ensure all members are Yezidi, we need a selfie for admin verification.</div>
+      <ul class="rule-list">
+        <li class="rule-item">✓ Only seen by our admin team — never public</li>
+        <li class="rule-item">✓ Compared to your profile photo to confirm identity</li>
+        <li class="rule-item">✓ Verified within 24–48 hours</li>
+      </ul>
+      <div class="cam-mock">
+        <div class="cam-bg"><div class="face-oval"></div></div>
+        <div class="cam-hint-txt">Position your face inside the oval</div>
+      </div>
+      <button class="btn-gold" onclick="show('pending')">📸 Take Selfie</button>
+    </div>
+
+    <!-- PENDING -->
+    <div class="screen s-pending" id="s-pending" style="display:none">
+      <div class="pulse-ring">⏳</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold);margin-bottom:10px">Under Review</div>
+      <div style="color:rgba(253,248,240,0.55);font-size:0.85rem;line-height:1.7;margin-bottom:8px">Your selfie has been submitted and is being reviewed by our team.</div>
+      <div style="color:rgba(253,248,240,0.45);font-size:0.82rem;line-height:1.7;margin-bottom:26px">Usually <strong style="color:var(--gold-light)">24–48 hours</strong>. We'll notify you once approved.</div>
+      <button class="btn-gold" style="margin-bottom:10px" onclick="show('discover')">I'm Verified — View App ▶</button>
+      <div style="color:rgba(253,248,240,0.35);font-size:0.8rem;cursor:pointer">Complete your profile while you wait →</div>
+    </div>
+
+    <!-- DISCOVER -->
+    <div class="screen s-discover" id="s-discover" style="display:none">
+      <div class="disc-hdr">
+        <div class="disc-logo-txt">🕊️ YeziMatch</div>
+        <button class="filter-btn-ui">⚙ Filters</button>
+      </div>
+      <div class="card-wrap">
+        <div class="p-card">
+          <div class="p-card-photo">
+            <div class="p-ava">👩</div>
+            <div class="p-caste-tag">Murid</div>
+            <div class="p-grad"></div>
+            <div class="p-info">
+              <div class="p-name">Lara, 24</div>
+              <div class="p-loc">📍 Stuttgart, Germany</div>
+              <div class="p-bio-pre">Loves cooking traditional Yezidi food and learning about our culture...</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-btns">
+          <button class="act-btn pass-btn">✕</button>
+          <button class="act-btn like-btn" onclick="show('match')">♥</button>
+        </div>
+        <div class="counter-txt">3 of 12 profiles</div>
+      </div>
+      <div class="bottom-nav-ui">
+        <div class="nav-i on"><div class="nav-i-ico">🔍</div><div class="nav-i-lbl">Discover</div></div>
+        <div class="nav-i" onclick="show('matches')"><div class="nav-i-ico">💜</div><div class="nav-i-lbl">Matches</div></div>
+        <div class="nav-i" onclick="show('profile')"><div class="nav-i-ico">👤</div><div class="nav-i-lbl">Profile</div></div>
+      </div>
+    </div>
+
+    <!-- MATCH MODAL -->
+    <div class="screen s-discover" id="s-match" style="display:none;position:relative">
+      <div class="disc-hdr"><div class="disc-logo-txt">🕊️ YeziMatch</div></div>
+      <div class="card-wrap"><div class="p-card"><div class="p-card-photo"><div class="p-ava">👩</div><div class="p-grad"></div><div class="p-info"><div class="p-name">Lara, 24</div></div></div></div></div>
+      <div class="modal-back">
+        <div class="modal-card">
+          <div class="modal-hearts">💜✨</div>
+          <div class="modal-ttl">It's a Match!</div>
+          <div class="modal-sub">You and <strong>Lara</strong> liked each other</div>
+          <div class="ava-pair"><div class="ava-p">🧑</div><div class="ava-p">👩</div></div>
+          <button class="btn-gold" style="margin-bottom:8px" onclick="show('chat')">Send a Message</button>
+          <div style="color:rgba(253,248,240,0.35);font-size:0.82rem;cursor:pointer;margin-top:6px" onclick="show('discover')">Keep Browsing</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MATCHES -->
+    <div class="screen s-matches" id="s-matches" style="display:none">
+      <div style="padding:46px 18px 10px"><div class="section-h">Matches</div></div>
+      <div class="sec-lbl">New Matches</div>
+      <div class="new-m-row">
+        <div class="new-m-item" onclick="show('chat')"><div class="nm-ring"><div class="nm-inner">👩</div></div><div class="nm-lbl">Lara</div></div>
+        <div class="new-m-item"><div class="nm-ring"><div class="nm-inner">👧</div></div><div class="nm-lbl">Nadia</div></div>
+        <div class="new-m-item"><div class="nm-ring"><div class="nm-inner">👩‍🦱</div></div><div class="nm-lbl">Sara</div></div>
+      </div>
+      <div class="sec-lbl">Messages</div>
+      <div class="match-row" onclick="show('chat')">
+        <div class="m-ava unread">👩</div>
+        <div class="m-info"><div class="m-name">Lara Khalil</div><div class="m-prev unread">New match! Say hello 👋</div></div>
+        <div class="m-time">2m</div>
+      </div>
+      <div class="match-row">
+        <div class="m-ava">👧</div>
+        <div class="m-info"><div class="m-name">Nadia Hassan</div><div class="m-prev">That sounds wonderful...</div></div>
+        <div class="m-time">1h</div>
+      </div>
+      <div class="match-row">
+        <div class="m-ava">👩‍🦱</div>
+        <div class="m-info"><div class="m-name">Sara Mirza</div><div class="m-prev">My family is from Sinjar 🕊️</div></div>
+        <div class="m-time">3h</div>
+      </div>
+      <div class="bottom-nav-ui">
+        <div class="nav-i" onclick="show('discover')"><div class="nav-i-ico">🔍</div><div class="nav-i-lbl">Discover</div></div>
+        <div class="nav-i on"><div class="nav-i-ico">💜</div><div class="nav-i-lbl">Matches</div></div>
+        <div class="nav-i" onclick="show('profile')"><div class="nav-i-ico">👤</div><div class="nav-i-lbl">Profile</div></div>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="screen s-chat" id="s-chat" style="display:none">
+      <div class="chat-hdr">
+        <div class="chat-back-btn" onclick="show('matches')">←</div>
+        <div class="chat-ava-ui">👩</div>
+        <div><div style="font-weight:700;font-size:0.92rem">Lara Khalil</div><div style="font-size:0.72rem;color:var(--gold)">Murid · Germany</div></div>
+      </div>
+      <div class="chat-msgs" id="chat-msgs">
+        <div class="msg-row them"><div class="bub them">Slaw! I saw you're also from Sinjar originally 🕊️</div><div class="bub-t">10:23 AM</div></div>
+        <div class="msg-row me"><div class="bub me">Slaw! Yes, my family is from there. You too? 😊</div><div class="bub-t">10:25 AM</div></div>
+        <div class="msg-row them"><div class="bub them">Yes! We moved to Stuttgart in 2015. Do you speak Kurmanji?</div><div class="bub-t">10:26 AM</div></div>
+        <div class="msg-row me"><div class="bub me">Balê, of course! So great to connect 💜</div><div class="bub-t">10:28 AM</div></div>
+        <div class="msg-row them"><div class="bub them">It's so hard to meet other Yezidis in Germany...</div><div class="bub-t">10:30 AM</div></div>
+      </div>
+      <div class="chat-inp-row">
+        <input class="chat-inp-ui" placeholder="Type a message..." readonly>
+        <button class="chat-send-btn">➤</button>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="screen s-profile" id="s-profile" style="display:none">
+      <div class="prof-cover">
+        <div class="prof-cover-ov"></div>
+        <div class="prof-ava-circle">🧑</div>
+      </div>
+      <div class="prof-body">
+        <div class="prof-name-row"><div class="prof-nm">Ahmed, 27</div><button class="edit-btn-ui">Edit</button></div>
+        <div class="prof-caste">⭐ Murid</div>
+        <div class="prof-loc">📍 Bielefeld, Germany</div>
+        <div class="prof-bio">Engineering student passionate about preserving Yezidi culture. Looking for a serious partner.</div>
+        <div class="prem-banner" onclick="show('premium')">
+          <div style="font-size:1.3rem">⭐</div>
+          <div><strong>Upgrade to Premium</strong><span>Like profiles & send messages</span></div>
+          <div style="color:var(--gold)">→</div>
+        </div>
+        <div style="height:1px;background:rgba(255,255,255,0.07);margin:4px 0 8px"></div>
+        <div class="sett-row"><div class="sett-lbl">🌐 Language</div><div class="sett-val">English ›</div></div>
+        <div class="sett-row"><div class="sett-lbl">🔔 Notifications</div><div class="sett-val">On ›</div></div>
+        <div class="sett-row" style="border:none"><div class="sett-lbl" style="color:#ef4444">Logout</div></div>
+      </div>
+      <div class="bottom-nav-ui">
+        <div class="nav-i" onclick="show('discover')"><div class="nav-i-ico">🔍</div><div class="nav-i-lbl">Discover</div></div>
+        <div class="nav-i" onclick="show('matches')"><div class="nav-i-ico">💜</div><div class="nav-i-lbl">Matches</div></div>
+        <div class="nav-i on"><div class="nav-i-ico">👤</div><div class="nav-i-lbl">Profile</div></div>
+      </div>
+    </div>
+
+    <!-- PREMIUM -->
+    <div class="screen s-premium" id="s-premium" style="display:none">
+      <div class="prem-head">
+        <div class="prem-crown-big">⭐</div>
+        <div class="prem-ttl">Go Premium</div>
+        <div class="prem-sub-txt">Unlock the full YeziMatch experience</div>
+      </div>
+      <div class="ben-list">
+        <div class="ben-item"><div class="ben-ico">♥</div><div class="ben-txt">Unlimited likes</div></div>
+        <div class="ben-item"><div class="ben-ico">💬</div><div class="ben-txt">Unlimited messaging</div></div>
+        <div class="ben-item"><div class="ben-ico">👁️</div><div class="ben-txt">See who liked you</div></div>
+        <div class="ben-item"><div class="ben-ico">⬆️</div><div class="ben-txt">Priority in search results</div></div>
+      </div>
+      <div class="pay-tabs">
+        <button class="pay-tab-btn on">💳 Card</button>
+        <button class="pay-tab-btn">🇮🇶 ZainCash</button>
+        <button class="pay-tab-btn">🇮🇶 FastPay</button>
+      </div>
+      <div class="pay-box">
+        <div class="card-mock-field">1234  5678  ****  ****</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="card-mock-field">MM / YY</div>
+          <div class="card-mock-field">CVV</div>
+        </div>
+      </div>
+      <button class="btn-gold">Pay $9.99 / month</button>
+      <div style="text-align:center;margin-top:10px;color:rgba(253,248,240,0.28);font-size:0.72rem">Iraq: 13,000 IQD/month via ZainCash or FastPay</div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="screen s-admin" id="s-admin" style="display:none">
+      <div class="adm-hdr">
+        <div class="adm-ttl">🛡️ Verification Queue</div>
+        <div class="q-badge">5 pending</div>
+      </div>
+      <div class="rev-card">
+        <div class="rev-user">
+          <div class="rev-ava">👩</div>
+          <div><div class="rev-nm">Nadia Hassan</div><div class="rev-meta">Murid · Germany · 2h ago</div></div>
+        </div>
+        <div class="photos-2col">
+          <div class="photo-col"><div class="photo-mock pm-profile">👩</div><div class="photo-col-lbl">Profile Photo</div></div>
+          <div class="photo-col"><div class="photo-mock pm-selfie">🤳</div><div class="photo-col-lbl">Selfie</div></div>
+        </div>
+        <div class="adm-btns">
+          <button class="adm-btn ab-ok">✓ Approve</button>
+          <button class="adm-btn ab-rej">✕ Reject</button>
+          <button class="adm-btn ab-ban">🚫 Ban</button>
+        </div>
+      </div>
+      <div style="padding:10px 14px 6px;font-size:0.66rem;color:rgba(253,248,240,0.3);text-transform:uppercase;letter-spacing:0.12em">More Pending</div>
+      <div class="q-list">
+        <div class="q-item"><div class="q-dot"></div><div class="q-ava">👨</div><div><div class="q-nm">Omar K.</div><div class="q-meta">Sheikh · Iraq</div></div><div class="q-time">4h ago</div></div>
+        <div class="q-item"><div class="q-dot"></div><div class="q-ava">👩‍🦱</div><div><div class="q-nm">Sara M.</div><div class="q-meta">Pir · USA</div></div><div class="q-time">6h ago</div></div>
+        <div class="q-item"><div class="q-dot"></div><div class="q-ava">👧</div><div><div class="q-nm">Leila D.</div><div class="q-meta">Murid · Sweden</div></div><div class="q-time">8h ago</div></div>
+        <div class="q-item"><div class="q-dot"></div><div class="q-ava">👱‍♀️</div><div><div class="q-nm">Aisha T.</div><div class="q-meta">Murid · Canada</div></div><div class="q-time">10h ago</div></div>
+      </div>
+    </div>
+
+  </div><!-- /phone -->
+</div>
+
+<script>
+// Country data
+const COUNTRIES = {
+  Iraq:        { code:'+964', digits:10, ph:'750 123 4567',   langs:['ku','ar'] },
+  Germany:     { code:'+49',  digits:11, ph:'151 23456789',   langs:['de','ku','ar'] },
+  USA:         { code:'+1',   digits:10, ph:'555 123 4567',   langs:['en'] },
+  Canada:      { code:'+1',   digits:10, ph:'416 123 4567',   langs:['en'] },
+  Australia:   { code:'+61',  digits:9,  ph:'412 345 678',    langs:['en'] },
+  Armenia:     { code:'+374', digits:8,  ph:'91 123 456',     langs:['hy','ku'] },
+  Netherlands: { code:'+31',  digits:9,  ph:'6 12345678',     langs:['de','en','ku'] },
+  Sweden:      { code:'+46',  digits:9,  ph:'70 123 4567',    langs:['en','ku'] },
+  France:      { code:'+33',  digits:9,  ph:'6 12 34 56 78',  langs:['en','ar','ku'] },
+  Georgia:     { code:'+995', digits:9,  ph:'555 123 456',    langs:['ku','en'] },
+  Turkey:      { code:'+90',  digits:10, ph:'555 123 4567',   langs:['ku','ar','en'] },
+  UK:          { code:'+44',  digits:10, ph:'7700 123456',    langs:['en','ku'] },
+};
+
+const LANG_LABELS = {
+  en: '🇬🇧 English', ar: '🇮🇶 العربية', ku: '🏳️ کوردی', de: '🇩🇪 Deutsch', hy: '🇦🇲 Հայերեն'
+};
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const el = document.getElementById('s-' + id);
+  if (el) {
+    el.style.display = id === 'chat' ? 'flex' : 'block';
+    setTimeout(() => {
+      const msgs = document.getElementById('chat-msgs');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+    }, 50);
+  }
+  document.querySelectorAll('.tab').forEach(t => {
+    if (t.textContent.toLowerCase().replace(/[^a-z]/g,'').includes(id.replace('-',''))) t.classList.add('active');
+  });
+}
+
+function selectLang(btn, code) {
+  document.querySelectorAll('.lang-chips-wrap .lc').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+function updateLangs(country) {
+  const c = COUNTRIES[country];
+  const wrap = document.getElementById('lang-chips');
+  const hint = document.getElementById('lang-hint');
+  if (!wrap) return;
+  if (!c) { hint.textContent = ''; return; }
+  
+  hint.textContent = `— suggested for ${country}`;
+  const suggested = c.langs;
+  const all = ['en','ar','ku','de','hy'];
+  const ordered = [...suggested, ...all.filter(l => !suggested.includes(l))];
+  
+  wrap.innerHTML = '';
+  ordered.forEach((code, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'lc' + (i === 0 ? ' on' : '') + (suggested.includes(code) ? ' suggested' : '');
+    btn.textContent = LANG_LABELS[code];
+    btn.onclick = function() { selectLang(this, code); };
+    wrap.appendChild(btn);
+  });
+}
+
+function updateOtpPhone(country) {
+  const c = COUNTRIES[country];
+  const dialDisplay = document.getElementById('dial-code-display');
+  const phoneInp = document.getElementById('phone-inp');
+  const statusMsg = document.getElementById('phone-status-msg');
+  const digitCounter = document.getElementById('digit-counter');
+  const phoneRow = document.getElementById('phone-row');
+  
+  if (!c) {
+    dialDisplay.textContent = '+___';
+    phoneInp.placeholder = 'Select country first';
+    phoneInp.readOnly = true;
+    statusMsg.textContent = 'Select your country to see the correct format';
+    statusMsg.className = 'phone-hint hint-normal';
+    digitCounter.textContent = '';
+    return;
+  }
+  
+  dialDisplay.textContent = c.code;
+  phoneInp.placeholder = c.ph;
+  phoneInp.readOnly = false;
+  phoneInp.value = '';
+  statusMsg.textContent = `${country} numbers: ${c.digits} digits after country code`;
+  statusMsg.className = 'phone-hint hint-normal';
+  digitCounter.textContent = `0 / ${c.digits} digits`;
+}
+
+function validatePhone(inp) {
+  const sel = document.getElementById('otp-country');
+  const country = sel?.value;
+  const c = COUNTRIES[country];
+  if (!c) return;
+  
+  const digits = inp.value.replace(/\D/g, '').length;
+  const counter = document.getElementById('digit-counter');
+  const status = document.getElementById('phone-status-msg');
+  
+  counter.textContent = `${digits} / ${c.digits} digits`;
+  
+  if (digits === 0) {
+    status.textContent = `${country} numbers: ${c.digits} digits required`;
+    status.className = 'phone-hint hint-normal';
+  } else if (digits < c.digits) {
+    status.textContent = `Need ${c.digits - digits} more digit${c.digits - digits > 1 ? 's' : ''}`;
+    status.className = 'phone-hint hint-error';
+    counter.style.color = '#f87171';
+  } else if (digits === c.digits) {
+    const full = c.code + inp.value.replace(/\D/g,'');
+    status.textContent = `✓ Full number: ${full}`;
+    status.className = 'phone-hint hint-ok';
+    counter.style.color = '#6ee7b7';
+  } else {
+    status.textContent = `Too many digits — ${country} needs exactly ${c.digits}`;
+    status.className = 'phone-hint hint-error';
+    counter.style.color = '#f87171';
+  }
+}
+</script>
+</body>
+</html>
