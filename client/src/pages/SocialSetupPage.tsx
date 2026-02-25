@@ -71,14 +71,13 @@ export default function SocialSetupPage({ user }: Props) {
   const [detectedCountryName, setDetectedCountryName] = useState("");
 
   // Step 2 state
-  const [photos, setPhotos] = useState<(string | null)[]>([null, null, null, null, null, null]);
+  const [photos, setPhotos] = useState<(string | null)[]>([null, null]);
   const [selfie, setSelfie] = useState<string | null>(null);
   const [cropTarget, setCropTarget] = useState<{ imgSrc: string; index: number | "selfie" } | null>(null);
 
   const selfieInputRef = useRef<HTMLInputElement>(null);
   const photoInputRefs = [
-    useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null),
   ];
 
   useEffect(() => {
@@ -159,7 +158,7 @@ export default function SocialSetupPage({ user }: Props) {
   };
 
   const step1Valid = data.country && data.city.trim() && agreedGuidelines && agreedTruthful && Number(data.age) >= 18;
-  const step2Valid = photos.filter(Boolean).length >= 1 && selfie;
+  const step2Valid = photos.filter(Boolean).length >= 2 && selfie;
   const canSubmit = step2Valid && !cropTarget;
 
   return (
@@ -379,8 +378,8 @@ export default function SocialSetupPage({ user }: Props) {
             <div className="space-y-6">
               {/* Profile photos */}
               <div>
-                <Label>Profile Photos <span className="text-gold normal-case font-normal">(1–6, at least 1 required)</span></Label>
-                <div className="grid grid-cols-3 gap-2 mt-2">
+                <Label>Profile Photos <span className="text-gold normal-case font-normal">(2 required)</span></Label>
+                <div className="grid grid-cols-2 gap-3 mt-2">
                   {photos.map((photo, idx) => (
                     <div key={idx} className="relative">
                       <input
@@ -423,7 +422,7 @@ export default function SocialSetupPage({ user }: Props) {
                     </div>
                   ))}
                 </div>
-                <p className="text-cream/30 text-xs mt-2 pl-0.5">Choose clear, recent photos of yourself</p>
+                <p className="text-cream/30 text-xs mt-2 pl-0.5">Both photos are required to continue</p>
               </div>
 
               {/* Verification selfie */}
@@ -488,8 +487,8 @@ export default function SocialSetupPage({ user }: Props) {
               <div className="rounded-xl px-4 py-3 flex items-center justify-between"
                 style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(201,168,76,0.12)" }}>
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${photos.filter(Boolean).length >= 1 ? "bg-green-400" : "bg-cream/20"}`} />
-                  <span className="text-cream/50 text-xs">{photos.filter(Boolean).length}/6 photos</span>
+                  <div className={`w-2 h-2 rounded-full ${photos.filter(Boolean).length >= 2 ? "bg-green-400" : "bg-cream/20"}`} />
+                  <span className="text-cream/50 text-xs">{photos.filter(Boolean).length}/2 photos</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${selfie ? "bg-green-400" : "bg-cream/20"}`} />

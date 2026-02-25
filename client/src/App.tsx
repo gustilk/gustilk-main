@@ -40,7 +40,7 @@ function profileIsComplete(user: User): boolean {
     user.age &&
     user.gender &&
     user.photos &&
-    user.photos.length >= 1
+    user.photos.length >= 2
   );
 }
 
