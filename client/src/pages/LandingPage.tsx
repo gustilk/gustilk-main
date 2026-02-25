@@ -156,11 +156,11 @@ function GoldInput({ label, ...props }: React.InputHTMLAttributes<HTMLInputEleme
   );
 }
 
-function SubmitButton({ loading, loadingText, children }: { loading: boolean; loadingText?: string; children: string }) {
+function SubmitButton({ loading, loadingText, disabled, children }: { loading: boolean; loadingText?: string; disabled?: boolean; children: string }) {
   return (
     <button
       type="submit"
-      disabled={loading}
+      disabled={loading || disabled}
       data-testid="button-submit"
       className="w-full py-4 rounded-2xl font-bold text-base disabled:opacity-60"
       style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 8px 32px rgba(201,168,76,0.4)" }}
@@ -176,11 +176,17 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const passwordMismatch = mode === "register" && confirmPassword.length > 0 && password !== confirmPassword;
+  const canSubmit = mode === "login" || (password.length > 0 && password === confirmPassword);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!canSubmit) return;
     setLoading(true);
     try {
       const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
@@ -205,7 +211,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
         {(["login", "register"] as const).map(m => (
           <button
             key={m}
-            onClick={() => setMode(m)}
+            onClick={() => { setMode(m); setConfirmPassword(""); }}
             data-testid={`tab-${m}`}
             className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
             style={mode === m
@@ -247,7 +253,41 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        <SubmitButton loading={loading} loadingText={t("auth.pleaseWait")}>
+        {mode === "register" && (
+          <div>
+            <label className="block text-cream/60 text-xs font-semibold mb-1.5 uppercase tracking-wider">{t("auth.confirmPassword")}</label>
+            <div className="relative">
+              <input
+                type={showConfirmPw ? "text" : "password"}
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                placeholder={t("auth.pwPlaceholderConfirm")}
+                data-testid="input-confirm-password"
+                required
+                className="w-full px-4 py-3 pr-11 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
+                style={{
+                  background: "rgba(255,255,255,0.07)",
+                  border: `1.5px solid ${passwordMismatch ? "rgba(212,96,138,0.7)" : "rgba(201,168,76,0.25)"}`,
+                }}
+                onFocus={e => (e.currentTarget.style.borderColor = passwordMismatch ? "rgba(212,96,138,0.7)" : "#c9a84c")}
+                onBlur={e => (e.currentTarget.style.borderColor = passwordMismatch ? "rgba(212,96,138,0.7)" : "rgba(201,168,76,0.25)")}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPw(p => !p)}
+                data-testid="button-toggle-confirm-password"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40"
+              >
+                {showConfirmPw ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+            {passwordMismatch && (
+              <p className="text-xs mt-1.5 font-medium" style={{ color: "#d4608a" }}>{t("auth.passwordMismatch")}</p>
+            )}
+          </div>
+        )}
+
+        <SubmitButton loading={loading} loadingText={t("auth.pleaseWait")} disabled={!canSubmit}>
           {mode === "login" ? t("auth.signIn") : t("auth.signUp")}
         </SubmitButton>
       </form>
