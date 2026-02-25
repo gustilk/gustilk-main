@@ -20,7 +20,7 @@ export default {
   },
   landing: {
     feature1Title: "Hevalbendiya Kastê",
-    feature1Desc: "Şêx an Pîr an Murîd — bi rêzgirtina kevneşopiyên Êzdiyatiyê",
+    feature1Desc: "Şêx an Pîr an Mirîd — bi rêzgirtina kevneşopiyên Êzdiyatiyê",
     feature2Title: "Bawer û Ewle",
     feature2Desc: "Her profîl bi destan tê verastkirin.",
     feature3Title: "Çalakiyên Civakê",
@@ -82,7 +82,7 @@ export default {
     caste: "Kast",
     sheikh: "Şêx",
     pir: "Pîr",
-    murid: "Murîd",
+    murid: "Mirîd",
     age: "Temen",
     country: "Welat",
     city: "Bajar",
