@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Switch, Route, useLocation, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
@@ -113,6 +113,15 @@ export default function App() {
   const [langChosen, setLangChosen] = useState<boolean>(
     () => !!localStorage.getItem("gustilk_language")
   );
+
+  useEffect(() => {
+    const handler = () => {
+      localStorage.removeItem("gustilk_language");
+      setLangChosen(false);
+    };
+    window.addEventListener("gustilk:pick-language", handler);
+    return () => window.removeEventListener("gustilk:pick-language", handler);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
