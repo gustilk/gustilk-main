@@ -92,14 +92,14 @@ export default function DiscoverPage({ user }: Props) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <div className="text-xs text-cream/50 uppercase tracking-wider mb-2 font-semibold">{t("discover.minAge")}: {minAge}</div>
-              <input type="range" min={18} max={60} value={minAge}
-                onChange={e => setMinAge(Number(e.target.value))}
+              <input type="range" min={18} max={maxAge} value={minAge}
+                onChange={e => setMinAge(Math.min(Number(e.target.value), maxAge))}
                 className="w-full accent-[#c9a84c]" data-testid="filter-min-age" />
             </div>
             <div>
               <div className="text-xs text-cream/50 uppercase tracking-wider mb-2 font-semibold">{t("discover.maxAge")}: {maxAge}</div>
-              <input type="range" min={18} max={80} value={maxAge}
-                onChange={e => setMaxAge(Number(e.target.value))}
+              <input type="range" min={minAge} max={80} value={maxAge}
+                onChange={e => setMaxAge(Math.max(Number(e.target.value), minAge))}
                 className="w-full accent-[#c9a84c]" data-testid="filter-max-age" />
             </div>
           </div>
