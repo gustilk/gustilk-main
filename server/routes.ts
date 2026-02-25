@@ -57,8 +57,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       // Moderate only newly uploaded photos (base64 data URLs, not already-stored ones)
       const existingPhotos: string[] = user?.photos ?? [];
       const newPhotos = allPhotos.filter(p => p.startsWith("data:image") && !existingPhotos.includes(p));
+      console.log(`[routes] profile update: ${allPhotos.length} total photos, ${newPhotos.length} new to scan`);
       if (newPhotos.length > 0) {
         const photoCheck = await moderatePhotos(newPhotos);
+        console.log(`[routes] moderation result: safe=${photoCheck.safe}, reason=${photoCheck.reason ?? "none"}`);
         if (!photoCheck.safe) {
           return res.status(400).json({ error: "One or more photos contain inappropriate or explicit content and cannot be uploaded." });
         }
