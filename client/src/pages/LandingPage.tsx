@@ -59,7 +59,7 @@ function Logo() {
           alt="Gûstîlk"
           className="relative"
           style={{
-            width: "min(200px, 65vw)",
+            width: "min(80px, 26vw)",
             height: "auto",
             objectFit: "contain",
             filter: "drop-shadow(0 4px 24px rgba(201,168,76,0.5))",
