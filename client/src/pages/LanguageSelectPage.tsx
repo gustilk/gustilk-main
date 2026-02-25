@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { LANGUAGE_LIST, LangCode, setLanguage } from "@/i18n";
-import logoImg from "@assets/Untitled_design_1772022829778.png";
+import logoImg from "@assets/Untitled_design_1772023373878.jpeg";
 
 interface Props {
   onSelect: () => void;
@@ -22,28 +22,23 @@ export default function LanguageSelectPage({ onSelect }: Props) {
       style={{ background: "linear-gradient(160deg, #0d0618 0%, #1a0a2e 60%, #0d0618 100%)" }}
     >
       <div className="w-full max-w-sm flex flex-col items-center">
-        <div className="relative mb-6" style={{ width: "120px", height: "120px" }}>
-          <div className="absolute inset-0" style={{
-            background: "radial-gradient(circle, rgba(201,168,76,0.22) 0%, transparent 65%)",
-            filter: "blur(16px)",
-            transform: "scale(1.3)",
+        <div className="relative inline-flex mb-6">
+          <div className="absolute inset-0 rounded-2xl" style={{
+            background: "radial-gradient(circle, rgba(201,168,76,0.28) 0%, transparent 70%)",
+            filter: "blur(14px)",
+            transform: "scale(1.25)",
           }} />
-          <div className="relative overflow-hidden" style={{ width: "120px", height: "120px" }}>
-            <img
-              src={logoImg}
-              alt="Gûstîlk"
-              style={{
-                width: "252px",
-                height: "252px",
-                objectFit: "contain",
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -46%)",
-                filter: "drop-shadow(0 4px 20px rgba(201,168,76,0.5))",
-              }}
-            />
-          </div>
+          <img
+            src={logoImg}
+            alt="Gûstîlk"
+            className="relative rounded-2xl"
+            style={{
+              width: "120px",
+              height: "120px",
+              objectFit: "cover",
+              boxShadow: "0 6px 30px rgba(0,0,0,0.45), 0 0 0 2px rgba(201,168,76,0.35)",
+            }}
+          />
         </div>
 
         <h1

@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { SlidersHorizontal, X, Heart, RefreshCw, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import logoImg from "@assets/Untitled_design_1772022829778.png";
+import logoImg from "@assets/Untitled_design_1772023373878.jpeg";
 import MatchModal from "@/components/MatchModal";
 import type { SafeUser } from "@shared/schema";
 
@@ -70,9 +70,7 @@ export default function DiscoverPage({ user }: Props) {
     <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
       <div className="flex items-center justify-between px-5 pt-12 pb-4">
         <div className="flex items-center gap-2.5">
-          <div className="flex-shrink-0 overflow-hidden" style={{ width: "40px", height: "40px" }}>
-            <img src={logoImg} alt="" style={{ width: "84px", height: "84px", objectFit: "contain", position: "relative", top: "50%", left: "50%", transform: "translate(-50%, -46%)", filter: "drop-shadow(0 2px 6px rgba(201,168,76,0.5))" }} />
-          </div>
+          <img src={logoImg} alt="" className="flex-shrink-0 rounded-xl" style={{ width: "38px", height: "38px", objectFit: "cover", boxShadow: "0 2px 10px rgba(0,0,0,0.4), 0 0 0 1.5px rgba(201,168,76,0.35)" }} />
           <h1 className="font-serif text-2xl text-gold">Gûstîlk</h1>
         </div>
         <button
