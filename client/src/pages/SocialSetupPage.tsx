@@ -56,6 +56,125 @@ async function compressImage(file: File, maxPx = 800, quality = 0.70): Promise<s
   });
 }
 
+function PhotoCropModal({
+  imgSrc,
+  outputSize = 800,
+  onConfirm,
+  onCancel,
+}: {
+  imgSrc: string;
+  outputSize?: number;
+  onConfirm: (base64: string) => void;
+  onCancel: () => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [scale, setScale] = useState(1);
+  const [dragging, setDragging] = useState(false);
+  const lastPoint = useRef({ x: 0, y: 0 });
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    setDragging(true);
+    lastPoint.current = { x: e.clientX, y: e.clientY };
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!dragging) return;
+    const dx = e.clientX - lastPoint.current.x;
+    const dy = e.clientY - lastPoint.current.y;
+    lastPoint.current = { x: e.clientX, y: e.clientY };
+    setPos(p => ({ x: p.x + dx, y: p.y + dy }));
+  };
+
+  const handlePointerUp = () => setDragging(false);
+
+  const handleConfirm = () => {
+    const container = containerRef.current;
+    const imgEl = imgRef.current;
+    if (!container || !imgEl) return;
+    const containerRect = container.getBoundingClientRect();
+    const imgRect = imgEl.getBoundingClientRect();
+    const relX = imgRect.left - containerRect.left;
+    const relY = imgRect.top - containerRect.top;
+    const ratio = outputSize / containerRect.width;
+    const canvas = document.createElement("canvas");
+    canvas.width = outputSize;
+    canvas.height = outputSize;
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "#0d0618";
+    ctx.fillRect(0, 0, outputSize, outputSize);
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, relX * ratio, relY * ratio, imgRect.width * ratio, imgRect.height * ratio);
+      onConfirm(canvas.toDataURL("image/jpeg", 0.72));
+    };
+    img.src = imgSrc;
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.92)" }}>
+      <div className="w-full max-w-sm rounded-2xl overflow-hidden" style={{ background: "#1a0a2e", border: "1px solid rgba(201,168,76,0.35)" }}>
+        <div className="px-4 py-3 text-center" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+          <p className="text-gold font-serif font-semibold">Position your photo</p>
+          <p className="text-cream/40 text-xs mt-0.5">Drag to reposition · Slider to zoom</p>
+        </div>
+        <div
+          ref={containerRef}
+          className="relative overflow-hidden select-none"
+          style={{ width: "100%", aspectRatio: "1 / 1", touchAction: "none", cursor: dragging ? "grabbing" : "grab" }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+        >
+          <img
+            ref={imgRef}
+            src={imgSrc}
+            alt="crop preview"
+            draggable={false}
+            className="w-full h-full object-contain pointer-events-none"
+            style={{ transform: `translate(${pos.x}px, ${pos.y}px) scale(${scale})`, transformOrigin: "50% 50%", userSelect: "none" }}
+          />
+          <div className="absolute inset-0 pointer-events-none" style={{
+            backgroundImage: "linear-gradient(rgba(201,168,76,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,76,0.12) 1px, transparent 1px)",
+            backgroundSize: "33.33% 33.33%",
+          }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 0 2px rgba(201,168,76,0.5)" }} />
+        </div>
+        <div className="px-4 py-3 flex items-center gap-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <span className="text-cream/50 text-base font-bold leading-none">−</span>
+          <input
+            type="range" min={1} max={3} step={0.01} value={scale}
+            onChange={e => setScale(parseFloat(e.target.value))}
+            className="flex-1"
+            style={{ accentColor: "#c9a84c" }}
+          />
+          <span className="text-cream/50 text-base font-bold leading-none">+</span>
+        </div>
+        <div className="flex gap-2 px-4 pb-4">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-3 rounded-xl text-sm font-medium"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(253,248,240,0.6)" }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleConfirm}
+            data-testid="button-crop-confirm"
+            className="flex-1 py-3 rounded-xl text-sm font-bold"
+            style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
+          >
+            Use Photo
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type GeoState = "loading" | "detected" | "unsupported" | "error";
 
 interface Props { user: User }
@@ -93,7 +212,7 @@ export default function SocialSetupPage({ user }: Props) {
   // Step 2 state
   const [photos, setPhotos] = useState<(string | null)[]>([null, null, null]);
   const [selfie, setSelfie] = useState<string | null>(null);
-  const [compressing, setCompressing] = useState(false);
+  const [cropTarget, setCropTarget] = useState<{ imgSrc: string; index: number | "selfie" } | null>(null);
 
   const selfieInputRef = useRef<HTMLInputElement>(null);
   const photoInputRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
@@ -147,37 +266,48 @@ export default function SocialSetupPage({ user }: Props) {
     },
   });
 
-  const handlePhotoChange = async (index: number, file: File | null) => {
-    if (!file) return;
-    setCompressing(true);
-    try {
-      const compressed = await compressImage(file);
-      setPhotos(prev => { const next = [...prev]; next[index] = compressed; return next; });
-    } catch {
-      toast({ title: "Could not process image", variant: "destructive" });
-    } finally {
-      setCompressing(false);
-    }
+  const openCrop = (file: File, index: number | "selfie") => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      if (e.target?.result) setCropTarget({ imgSrc: e.target.result as string, index });
+    };
+    reader.readAsDataURL(file);
   };
 
-  const handleSelfieChange = async (file: File | null) => {
+  const handlePhotoChange = (index: number, file: File | null) => {
     if (!file) return;
-    setCompressing(true);
-    try {
-      const compressed = await compressImage(file, 500, 0.72);
-      setSelfie(compressed);
-    } catch {
-      toast({ title: "Could not process selfie", variant: "destructive" });
-    } finally {
-      setCompressing(false);
+    openCrop(file, index);
+  };
+
+  const handleSelfieChange = (file: File | null) => {
+    if (!file) return;
+    openCrop(file, "selfie");
+  };
+
+  const handleCropConfirm = (base64: string) => {
+    if (!cropTarget) return;
+    if (cropTarget.index === "selfie") {
+      setSelfie(base64);
+    } else {
+      setPhotos(prev => { const next = [...prev]; next[cropTarget.index as number] = base64; return next; });
     }
+    setCropTarget(null);
   };
 
   const step1Valid = data.country && data.city.trim() && agreedGuidelines && agreedTruthful && Number(data.age) >= 18;
   const step2Valid = photos.filter(Boolean).length === 3 && selfie;
-  const canSubmit = step2Valid && !compressing;
+  const canSubmit = step2Valid && !cropTarget;
 
   return (
+    <>
+    {cropTarget && (
+      <PhotoCropModal
+        imgSrc={cropTarget.imgSrc}
+        outputSize={cropTarget.index === "selfie" ? 500 : 800}
+        onConfirm={handleCropConfirm}
+        onCancel={() => setCropTarget(null)}
+      />
+    )}
     <div className="min-h-screen flex items-center justify-center px-5 py-8" style={{ background: "#0d0618" }}>
       <div className="fixed inset-0 pointer-events-none" style={{
         background: "radial-gradient(ellipse 60% 50% at 20% 10%, rgba(74,30,107,0.8) 0%, transparent 70%)",
@@ -524,6 +654,7 @@ export default function SocialSetupPage({ user }: Props) {
         )}
       </div>
     </div>
+    </>
   );
 }
 
