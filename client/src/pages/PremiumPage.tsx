@@ -58,7 +58,7 @@ type CountryConfig = {
 };
 
 const COUNTRY_DATA: Record<string, CountryConfig> = {
-  USA:       { isFree: false, flag: "🇺🇸", methods: ["card", "paypal", "apple_pay", "google_pay", "venmo"] },
+  USA:       { isFree: false, flag: "🇺🇸", methods: ["card", "paypal", "apple_pay", "google_pay"] },
   Canada:    { isFree: false, flag: "🇨🇦", methods: ["card", "paypal", "apple_pay", "google_pay", "interac"] },
   Australia: { isFree: false, flag: "🇦🇺", methods: ["card", "paypal", "apple_pay", "google_pay", "bpay"] },
   Germany:   { isFree: false, flag: "🇩🇪", methods: ["card", "sepa", "paypal", "apple_pay", "google_pay", "klarna", "giropay"] },
