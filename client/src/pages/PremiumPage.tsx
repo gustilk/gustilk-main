@@ -221,7 +221,7 @@ export default function PremiumPage({ user }: Props) {
             <div className="text-xs text-cream/50 uppercase tracking-wider font-semibold">Choose payment method</div>
 
             {/* Method grid */}
-            <div className="grid grid-cols-3 gap-2" data-testid="payment-method-grid">
+            <div className="grid grid-cols-2 gap-2" data-testid="payment-method-grid">
               {config.methods.map(id => {
                 const m = METHODS[id];
                 const isSelected = selectedMethod === id;

@@ -153,8 +153,8 @@ export default function DiscoverPage({ user }: Props) {
               data-testid={`card-profile-${current.id}`}
             >
               <div
-                className="h-[420px] relative flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}
+                className="relative flex items-center justify-center"
+                style={{ height: "min(420px, 52vh)", background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}
               >
                 {current.photos && current.photos.length > 0 ? (
                   <img src={current.photos[0]} alt={current.fullName ?? ""} className="w-full h-full object-cover" />
