@@ -130,16 +130,18 @@ function HomeScreen({ onEmail, onPhone }: { onEmail: () => void; onPhone: () => 
   );
 }
 
-function GoldInput({ label, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { label: string }) {
+function GoldInput({ label, error, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { label: string; error?: boolean }) {
+  const normalBorder = error ? "rgba(212,96,138,0.7)" : "rgba(201,168,76,0.25)";
+  const focusBorder = error ? "rgba(212,96,138,0.9)" : "#c9a84c";
   return (
     <div>
       <label className="block text-cream/60 text-xs font-semibold mb-1.5 uppercase tracking-wider">{label}</label>
       <input
         {...props}
         className="w-full px-4 py-3 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
-        style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.25)" }}
-        onFocus={e => (e.currentTarget.style.borderColor = "#c9a84c")}
-        onBlur={e => (e.currentTarget.style.borderColor = "rgba(201,168,76,0.25)")}
+        style={{ background: "rgba(255,255,255,0.07)", border: `1.5px solid ${normalBorder}` }}
+        onFocus={e => (e.currentTarget.style.borderColor = focusBorder)}
+        onBlur={e => (e.currentTarget.style.borderColor = normalBorder)}
       />
     </div>
   );
@@ -170,16 +172,21 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
   const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const passwordMismatch = mode === "register" && confirmPassword.length > 0 && password !== confirmPassword;
-  const canSubmit = mode === "login" || (password.length > 0 && password === confirmPassword);
+  const canSubmit = emailValid && (mode === "login" || (password.length > 0 && password === confirmPassword));
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
+    if (!emailValid) {
+      toast({ title: t("auth.errorTitle"), description: t("auth.invalidEmail"), variant: "destructive" });
+      return;
+    }
     setLoading(true);
     try {
       const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
-      await apiRequest("POST", endpoint, { email, password });
+      await apiRequest("POST", endpoint, { email: email.trim(), password });
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     } catch (err: any) {
       const msg = await err.message?.match(/\d+: (.+)/)?.[1] || err.message;
@@ -214,7 +221,21 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
       </div>
 
       <form onSubmit={submit} className="space-y-4">
-        <GoldInput label={t("auth.email")} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" data-testid="input-email" required />
+        <div>
+          <GoldInput
+            label={t("auth.email")}
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            data-testid="input-email"
+            error={email.length > 3 && !emailValid}
+            required
+          />
+          {email.length > 3 && !emailValid && (
+            <p className="text-xs mt-1.5 font-medium" style={{ color: "#d4608a" }}>{t("auth.invalidEmail")}</p>
+          )}
+        </div>
 
         <div>
           <label className="block text-cream/60 text-xs font-semibold mb-1.5 uppercase tracking-wider">{t("auth.password")}</label>

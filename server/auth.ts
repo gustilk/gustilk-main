@@ -4,10 +4,14 @@ import connectPgSimple from "connect-pg-simple";
 import bcrypt from "bcryptjs";
 import twilio from "twilio";
 import { randomUUID } from "crypto";
+import { z } from "zod";
 import { pool, db } from "./db";
 import { storage } from "./storage";
 import { users, otpCodes } from "@shared/schema";
 import { eq, and, gt } from "drizzle-orm";
+
+const emailSchema = z.string().email("Please enter a valid email address");
+const phoneSchema = z.string().regex(/^\+[1-9]\d{6,14}$/, "Phone number must be in international format (e.g. +9647701234567)");
 
 const PgSession = connectPgSimple(session);
 
@@ -65,6 +69,10 @@ export function registerAuthRoutes(app: Express) {
     try {
       const { email, password } = req.body;
       if (!email || !password) return res.status(400).json({ message: "Email and password required" });
+
+      const emailResult = emailSchema.safeParse(email.trim());
+      if (!emailResult.success) return res.status(400).json({ message: emailResult.error.errors[0].message });
+
       if (password.length < 6) return res.status(400).json({ message: "Password must be at least 6 characters" });
 
       const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.email, email.toLowerCase().trim()));
@@ -89,6 +97,9 @@ export function registerAuthRoutes(app: Express) {
       const { email, password } = req.body;
       if (!email || !password) return res.status(400).json({ message: "Email and password required" });
 
+      const emailResult = emailSchema.safeParse(email.trim());
+      if (!emailResult.success) return res.status(400).json({ message: emailResult.error.errors[0].message });
+
       const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase().trim()));
       if (!user || !user.passwordHash) return res.status(401).json({ message: "Invalid email or password" });
 
@@ -108,6 +119,8 @@ export function registerAuthRoutes(app: Express) {
       if (!phone) return res.status(400).json({ message: "Phone number required" });
 
       const normalized = phone.replace(/\s+/g, "");
+      const phoneResult = phoneSchema.safeParse(normalized);
+      if (!phoneResult.success) return res.status(400).json({ message: phoneResult.error.errors[0].message });
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
