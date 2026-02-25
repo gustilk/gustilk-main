@@ -153,7 +153,7 @@ export default function SocialSetupPage({ user }: Props) {
       setSelfieChecking(true);
       try {
         const res = await apiRequest("POST", "/api/check-face", { image: base64 });
-        const result = res as { faceDetected: boolean; reason?: string };
+        const result = await res.json() as { faceDetected: boolean; reason?: string };
         if (!result.faceDetected) {
           toast({
             title: t("setup.faceCheckTitle"),
