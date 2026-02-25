@@ -124,22 +124,27 @@ export default function SettingsPage({ user }: Props) {
   };
 
   const handlePushToggle = async (enabled: boolean) => {
-    if (!("Notification" in window)) {
-      toast({ title: "Not supported", description: "Your browser does not support push notifications.", variant: "destructive" });
-      return;
-    }
-    if (enabled) {
-      const permission = await Notification.requestPermission();
-      setPushPermission(permission);
-      if (permission === "granted") {
-        updatePref("pushEnabled", true);
-        toast({ title: "Push notifications on", description: "You'll be notified about new matches and messages." });
-      } else {
-        toast({ title: "Permission denied", description: "Enable notifications in your browser settings to receive alerts.", variant: "destructive" });
-      }
-    } else {
+    if (!enabled) {
       updatePref("pushEnabled", false);
       toast({ title: "Push notifications off", description: "You won't receive push notifications." });
+      return;
+    }
+    if (!("Notification" in window)) {
+      updatePref("pushEnabled", true);
+      toast({ title: "Preference saved", description: "Open the app directly in your browser (not inside a preview) to activate push notifications." });
+      return;
+    }
+    if (Notification.permission === "denied") {
+      toast({ title: "Permission blocked", description: "Enable notifications for this site in your browser settings, then try again.", variant: "destructive" });
+      return;
+    }
+    const permission = await Notification.requestPermission();
+    setPushPermission(permission);
+    if (permission === "granted") {
+      updatePref("pushEnabled", true);
+      toast({ title: "Push notifications on", description: "You'll be notified about new matches and messages." });
+    } else {
+      toast({ title: "Permission not granted", description: "Enable notifications in your browser settings to receive alerts.", variant: "destructive" });
     }
   };
 
