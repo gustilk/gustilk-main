@@ -33,6 +33,18 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         }
       }
 
+      // Enforce 3 profile photos on initial profile setup
+      const isInitialSetup = !user?.caste;
+      if (isInitialSetup) {
+        const submittedPhotos: string[] = (parsed as any).photos ?? [];
+        if (submittedPhotos.length < 3) {
+          return res.status(400).json({ error: "You must upload exactly 3 profile photos to complete your profile." });
+        }
+        if (!(parsed as any).verificationSelfie) {
+          return res.status(400).json({ error: "A verification selfie is required to complete your profile." });
+        }
+      }
+
       const data = user?.country ? rest : parsed;
       const updated = await storage.updateUser(userId, data as any);
       res.json({ user: updated });

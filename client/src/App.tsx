@@ -28,7 +28,15 @@ function useGustilkUser() {
 }
 
 function profileIsComplete(user: User): boolean {
-  return !!(user.caste && user.city && user.country && user.age && user.gender);
+  return !!(
+    user.caste &&
+    user.city &&
+    user.country &&
+    user.age &&
+    user.gender &&
+    user.photos &&
+    user.photos.length >= 3
+  );
 }
 
 function AppShell({ user }: { user: User }) {
