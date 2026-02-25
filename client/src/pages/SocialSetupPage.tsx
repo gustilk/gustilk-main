@@ -230,7 +230,7 @@ export default function SocialSetupPage({ user }: Props) {
           <>
             <div className="text-center mb-7">
               <div className="overflow-hidden mx-auto mb-4" style={{ width: "72px", height: "72px" }}>
-                <img src={logoImg} alt="Gûstîlk" style={{ width: "375px", height: "375px", objectFit: "contain", position: "relative", top: "50%", left: "50%", transform: "translate(-50%, -43%)", filter: "drop-shadow(0 3px 10px rgba(201,168,76,0.5))" }} />
+                <img src={logoImg} alt="Gûstîlk" style={{ width: "469px", height: "469px", objectFit: "contain", position: "relative", top: "50%", left: "50%", transform: "translate(-50%, -43%)", filter: "drop-shadow(0 3px 10px rgba(201,168,76,0.5))" }} />
               </div>
               <h1 className="font-serif text-3xl text-gold mb-1">
                 {(() => {

@@ -33,8 +33,8 @@ export default function LanguageSelectPage({ onSelect }: Props) {
               src={logoImg}
               alt="Gûstîlk"
               style={{
-                width: "475px",
-                height: "475px",
+                width: "594px",
+                height: "594px",
                 objectFit: "contain",
                 position: "absolute",
                 top: "50%",
