@@ -73,6 +73,10 @@ A culturally sensitive dating platform designed exclusively for the Yezidi commu
 ## Environment Variables
 - `DATABASE_URL` — PostgreSQL connection string
 - `SESSION_SECRET` — Express session secret
+- `TWILIO_ACCOUNT_SID` — Twilio Account SID (for SMS OTP delivery)
+- `TWILIO_AUTH_TOKEN` — Twilio Auth Token
+- `TWILIO_PHONE_NUMBER` — Twilio sender phone number (e.g. +14155552671)
+  - NOTE: Twilio Replit integration was dismissed. Add credentials as secrets manually, or re-authorize the integration.
 
 ## Running
 ```bash
