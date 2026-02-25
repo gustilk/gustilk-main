@@ -9,7 +9,7 @@ export interface IStorage {
   updateUser(id: string, data: Partial<InsertUser>): Promise<SafeUser>;
   deleteUser(id: string): Promise<void>;
 
-  getDiscoverProfiles(userId: string, caste: string, minAge: number, maxAge: number): Promise<SafeUser[]>;
+  getDiscoverProfiles(userId: string, caste: string, gender: string, minAge: number, maxAge: number): Promise<SafeUser[]>;
 
   likeUser(fromUserId: string, toUserId: string): Promise<{ matched: boolean; matchId?: string }>;
   dislikeUser(fromUserId: string, toUserId: string): Promise<void>;
@@ -64,14 +64,16 @@ export class DatabaseStorage implements IStorage {
     await db.delete(users).where(eq(users.id, id));
   }
 
-  async getDiscoverProfiles(userId: string, caste: string, minAge: number, maxAge: number): Promise<SafeUser[]> {
+  async getDiscoverProfiles(userId: string, caste: string, gender: string, minAge: number, maxAge: number): Promise<SafeUser[]> {
     const likedIds = db.select({ id: likes.toUserId }).from(likes).where(eq(likes.fromUserId, userId));
     const dislikedIds = db.select({ id: dislikes.toUserId }).from(dislikes).where(eq(dislikes.fromUserId, userId));
+    const oppositeGender = gender === "male" ? "female" : "male";
 
     return db.select().from(users).where(
       and(
         ne(users.id, userId),
         eq(users.caste, caste as any),
+        eq(users.gender, oppositeGender as any),
         sql`${users.age} >= ${minAge}`,
         sql`${users.age} <= ${maxAge}`,
         notInArray(users.id, likedIds),

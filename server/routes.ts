@@ -72,10 +72,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.get("/api/discover", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
-    if (!user || !user.caste) return res.status(400).json({ error: "Profile incomplete" });
+    if (!user || !user.caste || !user.gender) return res.status(400).json({ error: "Profile incomplete" });
     const minAge = parseInt(req.query.minAge as string) || 18;
     const maxAge = parseInt(req.query.maxAge as string) || 80;
-    const profiles = await storage.getDiscoverProfiles(userId, user.caste as string, minAge, maxAge);
+    const profiles = await storage.getDiscoverProfiles(userId, user.caste as string, user.gender as string, minAge, maxAge);
     res.json({ profiles });
   });
 
