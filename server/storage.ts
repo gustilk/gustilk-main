@@ -47,6 +47,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteUser(id: string): Promise<void> {
+    const userMatches = await db.select({ id: matches.id }).from(matches)
+      .where(or(eq(matches.user1Id, id), eq(matches.user2Id, id)));
+    if (userMatches.length > 0) {
+      const matchIds = userMatches.map(m => m.id);
+      for (const matchId of matchIds) {
+        await db.delete(messages).where(eq(messages.matchId, matchId));
+      }
+      await db.delete(matches).where(or(eq(matches.user1Id, id), eq(matches.user2Id, id)));
+    }
+    await db.delete(likes).where(or(eq(likes.fromUserId, id), eq(likes.toUserId, id)));
+    await db.delete(dislikes).where(or(eq(dislikes.fromUserId, id), eq(dislikes.toUserId, id)));
+    await db.delete(eventAttendees).where(eq(eventAttendees.userId, id));
+    await db.delete(reports).where(or(eq(reports.reporterId, id), eq(reports.reportedUserId, id)));
+    await db.delete(otpCodes).where(sql`identifier IN (SELECT email FROM users WHERE id = ${id} UNION SELECT phone FROM users WHERE id = ${id})`);
     await db.delete(users).where(eq(users.id, id));
   }
 
