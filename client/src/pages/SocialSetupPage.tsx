@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -68,11 +68,37 @@ function PhotoCropModal({
   onCancel: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
-  const [pos, setPos] = useState({ x: 0, y: 0 });
-  const [scale, setScale] = useState(1);
+  const [containerW, setContainerW] = useState(0);
+  const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null);
+  const [coverScale, setCoverScale] = useState(1);
+  const [userScale, setUserScale] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const lastPoint = useRef({ x: 0, y: 0 });
+
+  // Measure container width after mount
+  useLayoutEffect(() => {
+    if (containerRef.current) setContainerW(containerRef.current.offsetWidth);
+  }, []);
+
+  // Once we know both containerW and natural dimensions, compute cover layout
+  useEffect(() => {
+    if (!containerW || !imgSrc) return;
+    const img = new Image();
+    img.onload = () => {
+      const nw = img.naturalWidth;
+      const nh = img.naturalHeight;
+      const cs = Math.max(containerW / nw, containerW / nh);
+      setNaturalSize({ w: nw, h: nh });
+      setCoverScale(cs);
+      setUserScale(1);
+      setOffset({ x: (containerW - nw * cs) / 2, y: (containerW - nh * cs) / 2 });
+    };
+    img.src = imgSrc;
+  }, [containerW, imgSrc]);
+
+  const dispW = naturalSize ? naturalSize.w * coverScale * userScale : 0;
+  const dispH = naturalSize ? naturalSize.h * coverScale * userScale : 0;
 
   const handlePointerDown = (e: React.PointerEvent) => {
     setDragging(true);
@@ -85,30 +111,31 @@ function PhotoCropModal({
     const dx = e.clientX - lastPoint.current.x;
     const dy = e.clientY - lastPoint.current.y;
     lastPoint.current = { x: e.clientX, y: e.clientY };
-    setPos(p => ({ x: p.x + dx, y: p.y + dy }));
+    setOffset(o => ({ x: o.x + dx, y: o.y + dy }));
   };
 
   const handlePointerUp = () => setDragging(false);
 
+  const handleZoom = (newUserScale: number) => {
+    if (!containerW) return;
+    const cx = containerW / 2;
+    const cy = containerW / 2;
+    const ratio = newUserScale / userScale;
+    setOffset(o => ({ x: cx - (cx - o.x) * ratio, y: cy - (cy - o.y) * ratio }));
+    setUserScale(newUserScale);
+  };
+
   const handleConfirm = () => {
-    const container = containerRef.current;
-    const imgEl = imgRef.current;
-    if (!container || !imgEl) return;
-    const containerRect = container.getBoundingClientRect();
-    const imgRect = imgEl.getBoundingClientRect();
-    const relX = imgRect.left - containerRect.left;
-    const relY = imgRect.top - containerRect.top;
-    const ratio = outputSize / containerRect.width;
+    if (!naturalSize || !containerW) return;
+    const ratio = outputSize / containerW;
     const canvas = document.createElement("canvas");
     canvas.width = outputSize;
     canvas.height = outputSize;
     const ctx = canvas.getContext("2d")!;
-    ctx.fillStyle = "#0d0618";
-    ctx.fillRect(0, 0, outputSize, outputSize);
     const img = new Image();
     img.onload = () => {
-      ctx.drawImage(img, relX * ratio, relY * ratio, imgRect.width * ratio, imgRect.height * ratio);
-      onConfirm(canvas.toDataURL("image/jpeg", 0.72));
+      ctx.drawImage(img, offset.x * ratio, offset.y * ratio, dispW * ratio, dispH * ratio);
+      onConfirm(canvas.toDataURL("image/jpeg", 0.80));
     };
     img.src = imgSrc;
   };
@@ -129,16 +156,17 @@ function PhotoCropModal({
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerUp}
         >
-          <img
-            ref={imgRef}
-            src={imgSrc}
-            alt="crop preview"
-            draggable={false}
-            className="w-full h-full object-contain pointer-events-none"
-            style={{ transform: `translate(${pos.x}px, ${pos.y}px) scale(${scale})`, transformOrigin: "50% 50%", userSelect: "none" }}
-          />
+          {naturalSize && (
+            <img
+              src={imgSrc}
+              alt="crop preview"
+              draggable={false}
+              className="absolute pointer-events-none"
+              style={{ left: offset.x, top: offset.y, width: dispW, height: dispH, userSelect: "none" }}
+            />
+          )}
           <div className="absolute inset-0 pointer-events-none" style={{
-            backgroundImage: "linear-gradient(rgba(201,168,76,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,76,0.12) 1px, transparent 1px)",
+            backgroundImage: "linear-gradient(rgba(201,168,76,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,76,0.1) 1px, transparent 1px)",
             backgroundSize: "33.33% 33.33%",
           }} />
           <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 0 2px rgba(201,168,76,0.5)" }} />
@@ -146,8 +174,8 @@ function PhotoCropModal({
         <div className="px-4 py-3 flex items-center gap-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
           <span className="text-cream/50 text-base font-bold leading-none">−</span>
           <input
-            type="range" min={1} max={3} step={0.01} value={scale}
-            onChange={e => setScale(parseFloat(e.target.value))}
+            type="range" min={1} max={3} step={0.01} value={userScale}
+            onChange={e => handleZoom(parseFloat(e.target.value))}
             className="flex-1"
             style={{ accentColor: "#c9a84c" }}
           />
