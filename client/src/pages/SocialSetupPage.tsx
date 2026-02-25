@@ -66,10 +66,12 @@ export default function SocialSetupPage({ user }: Props) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/auth/logout");
+      const res = await apiRequest("POST", "/api/auth/logout");
+      return res.json();
     },
     onSuccess: () => {
       queryClient.clear();
+      window.location.reload();
     },
   });
 
@@ -174,35 +176,44 @@ export default function SocialSetupPage({ user }: Props) {
       }} />
       <div className="relative z-10 w-full max-w-sm animate-slide-up">
 
-        {/* Top bar — sign out */}
+        {/* App name */}
+        <div className="text-center mb-5">
+          <span className="font-serif text-2xl font-bold" style={{ color: "#c9a84c" }}>Gûstîlk</span>
+        </div>
+
+        {/* Top bar — back button + step indicator */}
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => logoutMutation.mutate()}
             disabled={logoutMutation.isPending}
             data-testid="button-signout-setup"
-            className="flex items-center gap-1.5 text-xs font-medium"
-            style={{ color: "rgba(253,248,240,0.35)" }}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "rgba(253,248,240,0.6)",
+            }}
           >
             <LogOut size={13} />
-            {logoutMutation.isPending ? "…" : "Sign Out"}
+            {logoutMutation.isPending ? "Signing out…" : "Sign Out"}
           </button>
 
           {/* Step indicator */}
           <div className="flex items-center gap-2">
-          {[1, 2].map(s => (
-            <div key={s} className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
-                style={step === s
-                  ? { background: "#c9a84c", color: "#1a0a2e" }
-                  : step > s
-                    ? { background: "rgba(201,168,76,0.3)", color: "#c9a84c" }
-                    : { background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.3)", border: "1px solid rgba(255,255,255,0.1)" }
-                }>
-                {step > s ? "✓" : s}
+            {[1, 2].map(s => (
+              <div key={s} className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
+                  style={step === s
+                    ? { background: "#c9a84c", color: "#1a0a2e" }
+                    : step > s
+                      ? { background: "rgba(201,168,76,0.3)", color: "#c9a84c" }
+                      : { background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.3)", border: "1px solid rgba(255,255,255,0.1)" }
+                  }>
+                  {step > s ? "✓" : s}
+                </div>
+                {s < 2 && <div className="w-8 h-px" style={{ background: step > s ? "rgba(201,168,76,0.5)" : "rgba(255,255,255,0.1)" }} />}
               </div>
-              {s < 2 && <div className="w-8 h-px" style={{ background: step > s ? "rgba(201,168,76,0.5)" : "rgba(255,255,255,0.1)" }} />}
-            </div>
-          ))}
+            ))}
           </div>
         </div>
 
@@ -215,7 +226,10 @@ export default function SocialSetupPage({ user }: Props) {
                 <Sparkles size={30} color="#c9a84c" />
               </div>
               <h1 className="font-serif text-3xl text-gold mb-1">
-                Almost there, {(user.fullName ?? user.firstName ?? "there").split(" ")[0]}!
+                {(() => {
+                  const name = (user.fullName ?? user.firstName ?? "").split(" ")[0];
+                  return name ? `Welcome, ${name}!` : "Almost there!";
+                })()}
               </h1>
               <p className="text-cream/50 text-sm">Step 1 of 2 — Your profile details</p>
             </div>
