@@ -2,11 +2,10 @@ import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Edit2, Star, LogOut, CheckCircle, Clock, Globe, Bell, FileText, Shield, ChevronRight, X, Trash2, AlertTriangle, Camera, ImagePlus } from "lucide-react";
+import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings } from "lucide-react";
 import logoImg from "@assets/Untitled_design_1772024284063.png";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
-import { LANGUAGE_LIST, LangCode, setLanguage } from "@/i18n";
 import type { SafeUser } from "@shared/schema";
 import { PhotoCropModal } from "@/components/PhotoCropModal";
 
@@ -15,9 +14,7 @@ interface Props { user: SafeUser }
 export default function ProfilePage({ user }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { t, i18n } = useTranslation();
-  const [showLangPicker, setShowLangPicker] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const { t } = useTranslation();
 
   const [localPhotos, setLocalPhotos] = useState<(string | null)[]>(() => {
     const arr: (string | null)[] = Array(6).fill(null);
@@ -34,32 +31,6 @@ export default function ProfilePage({ user }: Props) {
   });
 
   const me = data?.user ?? user;
-
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/auth/logout");
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.clear();
-    },
-  });
-
-  const deleteAccountMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest("DELETE", "/api/account");
-      if (!res.ok) throw new Error("Failed to delete account");
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.clear();
-      window.location.href = "/";
-    },
-    onError: () => {
-      toast({ title: "Could not delete account", description: "Please try again.", variant: "destructive" });
-      setShowDeleteConfirm(false);
-    },
-  });
 
   const savePhotosMutation = useMutation({
     mutationFn: async () => {
@@ -112,12 +83,6 @@ export default function ProfilePage({ user }: Props) {
   };
 
   const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Murid" }[c] ?? c);
-
-  const currentLang = LANGUAGE_LIST.find(l => l.code === i18n.language) ?? LANGUAGE_LIST[0];
-
-  const handleNotifications = () => {
-    toast({ title: "Notifications", description: "Notification settings coming soon." });
-  };
 
   return (
     <>
@@ -351,180 +316,24 @@ export default function ProfilePage({ user }: Props) {
           </button>
         )}
 
-        <div
-          className="rounded-2xl overflow-hidden"
+        <button
+          onClick={() => setLocation("/settings")}
+          data-testid="button-open-settings"
+          className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all text-left"
           style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}
         >
-          <SettingsRow
-            icon={Globe}
-            label={t("profile.language")}
-            sub={`${currentLang.flag} ${currentLang.native}`}
-            onClick={() => setShowLangPicker(true)}
-            testId="button-language"
-          />
-          <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }} />
-          <SettingsRow
-            icon={Bell}
-            label="Notifications"
-            sub="Manage push notifications"
-            onClick={handleNotifications}
-            testId="button-notifications"
-          />
-          <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }} />
-          <SettingsRow
-            icon={FileText}
-            label="Community Guidelines"
-            sub="Read our community rules"
-            onClick={() => toast({ title: "Community Guidelines", description: "Respect, honesty, and cultural sensitivity are core values of our community." })}
-            testId="button-guidelines"
-          />
-          {me.isAdmin && (
-            <>
-              <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }} />
-              <SettingsRow
-                icon={Shield}
-                label="Admin Panel"
-                sub="Manage verification requests"
-                onClick={() => setLocation("/admin")}
-                testId="button-admin"
-              />
-            </>
-          )}
-        </div>
-
-        <button
-          onClick={() => logoutMutation.mutate()}
-          disabled={logoutMutation.isPending}
-          data-testid="button-logout"
-          className="w-full py-3.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-          style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
-        >
-          <LogOut size={16} />
-          {logoutMutation.isPending ? "…" : t("profile.logout")}
+          <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,168,76,0.1)" }}>
+            <Settings size={16} color="#c9a84c" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium" style={{ color: "rgba(253,248,240,0.85)" }}>Settings</p>
+            <p className="text-xs mt-0.5" style={{ color: "rgba(253,248,240,0.35)" }}>Language, notifications, guidelines & more</p>
+          </div>
+          <ChevronRight size={15} color="rgba(253,248,240,0.2)" />
         </button>
-
-        {!showDeleteConfirm ? (
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            data-testid="button-delete-account"
-            className="w-full py-3 rounded-xl text-xs font-medium flex items-center justify-center gap-2 mt-1"
-            style={{ background: "transparent", color: "rgba(239,68,68,0.45)", border: "1px solid rgba(239,68,68,0.12)" }}
-          >
-            <Trash2 size={13} />
-            Delete Account
-          </button>
-        ) : (
-          <div className="rounded-xl p-4 mt-1" style={{ background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.25)" }}>
-            <div className="flex items-start gap-2.5 mb-3">
-              <AlertTriangle size={15} color="#ef4444" className="flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-semibold" style={{ color: "#ef4444" }}>Delete your account?</p>
-                <p className="text-xs mt-0.5" style={{ color: "rgba(253,248,240,0.45)" }}>
-                  This permanently deletes your profile, photos, matches and messages. This cannot be undone.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                data-testid="button-cancel-delete"
-                className="flex-1 py-2.5 rounded-lg text-xs font-semibold"
-                style={{ background: "rgba(255,255,255,0.07)", color: "rgba(253,248,240,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => deleteAccountMutation.mutate()}
-                disabled={deleteAccountMutation.isPending}
-                data-testid="button-confirm-delete"
-                className="flex-1 py-2.5 rounded-lg text-xs font-bold disabled:opacity-50"
-                style={{ background: "#ef4444", color: "white" }}
-              >
-                {deleteAccountMutation.isPending ? "Deleting…" : "Yes, Delete"}
-              </button>
-            </div>
-          </div>
-        )}
       </div>
-
-      {showLangPicker && (
-        <div
-          className="fixed inset-0 z-50 flex flex-col"
-          style={{ background: "rgba(13,6,24,0.97)" }}
-        >
-          <div className="flex items-center justify-between px-5 pt-12 pb-4"
-            style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
-            <h2 className="font-serif text-xl text-gold">{t("profile.changeLanguage")}</h2>
-            <button
-              onClick={() => setShowLangPicker(false)}
-              data-testid="button-close-lang-picker"
-              className="w-9 h-9 rounded-full flex items-center justify-center"
-              style={{ background: "rgba(255,255,255,0.06)" }}
-            >
-              <X size={18} color="rgba(253,248,240,0.6)" />
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto px-5 py-4">
-            <div className="grid grid-cols-2 gap-2.5">
-              {LANGUAGE_LIST.map(({ code, native, flag }) => {
-                const isActive = code === i18n.language;
-                return (
-                  <button
-                    key={code}
-                    data-testid={`button-lang-switch-${code}`}
-                    onClick={() => {
-                      setLanguage(code as LangCode);
-                      setShowLangPicker(false);
-                    }}
-                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-left"
-                    style={{
-                      background: isActive ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.04)",
-                      border: isActive ? "1.5px solid rgba(201,168,76,0.5)" : "1px solid rgba(255,255,255,0.07)",
-                    }}
-                  >
-                    <span className="text-2xl flex-shrink-0">{flag}</span>
-                    <span
-                      className="text-sm font-medium truncate"
-                      style={{ color: isActive ? "#c9a84c" : "rgba(253,248,240,0.75)" }}
-                    >
-                      {native}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
     </>
   );
 }
 
-function SettingsRow({ icon: Icon, label, sub, onClick, testId }: {
-  icon: any;
-  label: string;
-  sub: string;
-  onClick: () => void;
-  testId: string;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      data-testid={testId}
-      className="w-full flex items-center gap-4 px-4 py-3.5 transition-all text-left"
-    >
-      <div
-        className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-        style={{ background: "rgba(201,168,76,0.1)" }}
-      >
-        <Icon size={16} color="#c9a84c" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-cream text-sm font-medium">{label}</p>
-        <p className="text-cream/40 text-xs">{sub}</p>
-      </div>
-      <ChevronRight size={16} color="rgba(253,248,240,0.25)" />
-    </button>
-  );
-}

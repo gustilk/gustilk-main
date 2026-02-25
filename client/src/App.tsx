@@ -14,6 +14,7 @@ import PremiumPage from "@/pages/PremiumPage";
 import EventsPage from "@/pages/EventsPage";
 import EventDetailPage from "@/pages/EventDetailPage";
 import AdminPage from "@/pages/AdminPage";
+import SettingsPage from "@/pages/SettingsPage";
 import VerificationPage from "@/pages/VerificationPage";
 import PendingVerificationPage from "@/pages/PendingVerificationPage";
 import SocialSetupPage from "@/pages/SocialSetupPage";
@@ -48,6 +49,7 @@ function AppShell({ user }: { user: User }) {
   const isChat = location.startsWith("/chat/");
   const isEventDetail = location.startsWith("/events/") && location !== "/events";
   const isVerifyPage = location === "/verify" || location === "/pending-verification";
+  const isSettings = location === "/settings";
 
   const callCtx = useVideoCallProvider(user.id, !!user.isPremium);
   const isInCall = callCtx.callState === "active" || callCtx.callState === "calling" || callCtx.callState === "ringing";
@@ -76,13 +78,14 @@ function AppShell({ user }: { user: User }) {
             <Route path="/events/:eventId" component={({ params }) => <EventDetailPage user={user} eventId={params.eventId} />} />
             <Route path="/events" component={() => <EventsPage user={user} />} />
             <Route path="/admin" component={() => <AdminPage user={user} />} />
+            <Route path="/settings" component={() => <SettingsPage user={user} />} />
             <Route path="/verify" component={() => <VerificationPage user={user} />} />
             <Route path="/pending-verification" component={() => <PendingVerificationPage user={user} />} />
             <Route path="/complete-profile" component={() => <SocialSetupPage user={user} />} />
             <Route path="/" component={() => <Redirect to="/discover" />} />
           </Switch>
         </main>
-        {!isChat && !isEventDetail && !isVerifyPage && !isInCall && <BottomNav />}
+        {!isChat && !isEventDetail && !isVerifyPage && !isInCall && !isSettings && <BottomNav />}
       </div>
     </VideoCallContext.Provider>
   );
