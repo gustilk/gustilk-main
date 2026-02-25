@@ -642,11 +642,9 @@ export default function SocialSetupPage({ user }: Props) {
                   className="flex-1 py-4 rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
                   style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 6px 20px rgba(201,168,76,0.3)" }}
                 >
-                  {compressing
-                    ? <><Loader2 size={15} className="animate-spin" /> Processing…</>
-                    : mutation.isPending
-                      ? <><Loader2 size={15} className="animate-spin" /> Saving…</>
-                      : t("setup.completeProfile")}
+                  {mutation.isPending
+                    ? <><Loader2 size={15} className="animate-spin" /> Saving…</>
+                    : t("setup.completeProfile")}
                 </button>
               </div>
             </div>
