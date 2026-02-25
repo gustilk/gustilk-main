@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings } from "lucide-react";
+import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, StarOff } from "lucide-react";
 import logoImg from "@assets/Untitled_design_1772024284063.png";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -79,6 +79,18 @@ export default function ProfilePage({ user }: Props) {
 
   const removePhoto = (idx: number) => {
     setLocalPhotos(prev => { const next = [...prev]; next[idx] = null; return next; });
+    setPhotosEdited(true);
+  };
+
+  const setAsMain = (idx: number) => {
+    if (idx === 0) return;
+    setLocalPhotos(prev => {
+      const next = [...prev];
+      const main = next[0];
+      next[0] = next[idx];
+      next[idx] = main;
+      return next;
+    });
     setPhotosEdited(true);
   };
 
@@ -268,13 +280,24 @@ export default function ProfilePage({ user }: Props) {
                     >
                       <X size={10} color="white" />
                     </button>
-                    {idx === 0 && (
+                    {idx === 0 ? (
                       <div
-                        className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded text-xs font-bold"
-                        style={{ background: "rgba(201,168,76,0.85)", color: "#1a0a2e" }}
+                        className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded flex items-center gap-1 text-xs font-bold"
+                        style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
                       >
+                        <Star size={9} fill="#1a0a2e" color="#1a0a2e" />
                         Main
                       </div>
+                    ) : (
+                      <button
+                        onClick={() => setAsMain(idx)}
+                        data-testid={`button-set-main-photo-${idx}`}
+                        className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded flex items-center gap-1 text-xs font-semibold transition-all active:scale-95"
+                        style={{ background: "rgba(0,0,0,0.55)", color: "rgba(201,168,76,0.9)", border: "1px solid rgba(201,168,76,0.35)" }}
+                      >
+                        <Star size={9} color="#c9a84c" />
+                        Main
+                      </button>
                     )}
                   </div>
                 ) : (
@@ -292,7 +315,7 @@ export default function ProfilePage({ user }: Props) {
             );
           })}
         </div>
-        <p className="text-xs mt-2" style={{ color: "rgba(253,248,240,0.2)" }}>Tap a photo to replace · × to remove · max 6</p>
+        <p className="text-xs mt-2" style={{ color: "rgba(253,248,240,0.2)" }}>Tap ★ Main to set cover photo · × to remove · max 6</p>
         <input
           ref={fileInputRef}
           type="file"
