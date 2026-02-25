@@ -287,7 +287,7 @@ function VerificationCard({ user, onApprove, onReject, onBan, isPending }: {
               {casteLabel}
             </span>
           </div>
-          <p className="text-cream/40 text-xs">{user.city}, {user.country} · {user.age} yrs</p>
+          <p className="text-cream/40 text-xs">{user.city}{user.state ? `, ${user.state}` : ""}, {user.country} · {user.age} yrs</p>
           <p className="text-cream/30 text-xs mt-0.5">Requested {timeLabel}</p>
         </div>
       </div>

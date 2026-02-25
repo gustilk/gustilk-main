@@ -9,6 +9,8 @@ import { MapPin, Loader2, AlertTriangle, Camera, ImagePlus, X, ChevronRight, Shi
 import type { User } from "@shared/schema";
 import { PhotoCropModal, compressImage } from "@/components/PhotoCropModal";
 
+import { COUNTRY_STATES } from "@/lib/countryStates";
+
 const COUNTRIES = ["USA", "Canada", "Australia", "Germany", "Holland", "Sweden", "Belgium", "France", "Turkey", "Iraq", "Armenia", "Georgia", "Russia", "UK"];
 
 const AGREEMENT_SECTIONS = [
@@ -63,7 +65,7 @@ export default function SocialSetupPage({ user }: Props) {
   });
 
   // Step 1 state
-  const [data, setData] = useState({ caste: "murid", gender: "female", country: "", city: "", dateOfBirth: "" });
+  const [data, setData] = useState({ caste: "murid", gender: "female", country: "", state: "", city: "", dateOfBirth: "" });
   const [agreedGuidelines, setAgreedGuidelines] = useState(false);
   const [showGuidelinesModal, setShowGuidelinesModal] = useState(true);
   const [agreedTruthful, setAgreedTruthful] = useState(false);
@@ -170,7 +172,8 @@ export default function SocialSetupPage({ user }: Props) {
     return d <= cutoff;
   };
   const maxDobDate = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().split("T")[0]; })();
-  const step1Valid = data.country && data.city.trim() && agreedGuidelines && agreedTruthful && isAtLeast18(data.dateOfBirth);
+  const countryHasStates = !!COUNTRY_STATES[data.country];
+  const step1Valid = data.country && (!countryHasStates || data.state) && data.city.trim() && agreedGuidelines && agreedTruthful && isAtLeast18(data.dateOfBirth);
   const step2Valid = photos.filter(Boolean).length >= 2 && selfie;
   const canSubmit = step2Valid && !cropTarget;
 
@@ -301,13 +304,27 @@ export default function SocialSetupPage({ user }: Props) {
                           : t("setup.locationError")}
                       </span>
                     </div>
-                    <GoldSelect value={data.country} onChange={e => setData(d => ({ ...d, country: e.target.value }))} data-testid="select-country">
+                    <GoldSelect value={data.country} onChange={e => setData(d => ({ ...d, country: e.target.value, state: "" }))} data-testid="select-country">
                       <option value="" disabled>Select country…</option>
                       {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
                     </GoldSelect>
                   </>
                 )}
               </div>
+
+              {countryHasStates && (
+                <div>
+                  <Label>State / Province</Label>
+                  <GoldSelect
+                    value={data.state}
+                    onChange={e => setData(d => ({ ...d, state: e.target.value }))}
+                    data-testid="select-state"
+                  >
+                    <option value="" disabled>Select state…</option>
+                    {COUNTRY_STATES[data.country].map(s => <option key={s} value={s}>{s}</option>)}
+                  </GoldSelect>
+                </div>
+              )}
 
               <div>
                 <Label>Date of Birth</Label>

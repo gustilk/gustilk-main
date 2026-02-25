@@ -5,6 +5,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Check } from "lucide-react";
 import type { User } from "@shared/schema";
+import { COUNTRY_STATES } from "@/lib/countryStates";
 
 interface Props { user: User }
 
@@ -19,12 +20,14 @@ export default function EditProfilePage({ user }: Props) {
   const [form, setForm] = useState({
     fullName: user.fullName ?? user.firstName ?? "",
     city: user.city ?? "",
+    state: user.state ?? "",
     country: user.country ?? "Germany",
     age: user.age ?? 22,
     bio: user.bio ?? "",
     occupation: user.occupation ?? "",
     languages: user.languages ?? [],
   });
+  const countryHasStates = !!COUNTRY_STATES[form.country];
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -105,6 +108,21 @@ export default function EditProfilePage({ user }: Props) {
             <GoldInput value={form.city} onChange={inp("city")} placeholder="Your city" data-testid="input-city" />
           </FieldGroup>
         </div>
+
+        {countryHasStates && (
+          <FieldGroup label="State / Province">
+            <select
+              value={form.state}
+              onChange={inp("state")}
+              data-testid="select-state"
+              className="w-full px-4 py-3 rounded-xl text-sm text-cream outline-none appearance-none"
+              style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.25)" }}
+            >
+              <option value="">Select state…</option>
+              {COUNTRY_STATES[form.country].map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </FieldGroup>
+        )}
 
         <FieldGroup label="Country">
           <div

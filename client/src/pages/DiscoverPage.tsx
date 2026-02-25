@@ -202,7 +202,7 @@ export default function DiscoverPage({ user }: Props) {
                   </h2>
                   <div className="flex items-center gap-1.5 mt-1.5">
                     <MapPin size={13} color="rgba(201,168,76,0.8)" />
-                    <p className="text-white/60 text-sm">{current.city}, {current.country}</p>
+                    <p className="text-white/60 text-sm">{current.city}{current.state ? `, ${current.state}` : ""}, {current.country}</p>
                   </div>
                   {current.bio && (
                     <p className="text-white/50 text-xs mt-2 line-clamp-2 leading-relaxed">{current.bio}</p>

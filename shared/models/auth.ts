@@ -30,6 +30,7 @@ export const users = pgTable("users", {
   caste: casteEnum("caste"),
   gender: genderEnum("gender"),
   country: text("country"),
+  state: text("state"),
   city: text("city"),
   age: integer("age"),
   dateOfBirth: text("date_of_birth"),

@@ -173,7 +173,7 @@ export default function ChatPage({ user, matchId }: Props) {
             {otherUser?.fullName ?? "Loading…"}
           </h2>
           <p className="text-cream/40 text-xs">
-            {otherUser ? `${otherUser.city}, ${otherUser.country}` : ""}
+            {otherUser ? `${otherUser.city}${otherUser.state ? `, ${otherUser.state}` : ""}, ${otherUser.country}` : ""}
           </p>
         </div>
         {otherUser && (

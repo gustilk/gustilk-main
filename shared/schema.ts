@@ -87,6 +87,7 @@ export const profileUpdateSchema = z.object({
   caste: z.enum(["sheikh", "pir", "murid"]).optional(),
   gender: z.enum(["male", "female"]).optional(),
   country: z.string().optional(),
+  state: z.string().optional(),
   city: z.string().optional(),
   age: z.number().min(18).max(80).optional(),
   dateOfBirth: z.string().optional(),
