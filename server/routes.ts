@@ -234,5 +234,17 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ users: allUsers });
   });
 
+  // ─── DELETE ACCOUNT ───────────────────────────────────────
+  app.delete("/api/account", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      req.session.destroy(() => {});
+      await storage.deleteUser(userId);
+      res.json({ ok: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   return httpServer;
 }

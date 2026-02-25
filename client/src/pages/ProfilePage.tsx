@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Edit2, Star, LogOut, CheckCircle, Clock, Globe, Bell, FileText, Shield, ChevronRight, X } from "lucide-react";
+import { Edit2, Star, LogOut, CheckCircle, Clock, Globe, Bell, FileText, Shield, ChevronRight, X, Trash2, AlertTriangle } from "lucide-react";
 import logoImg from "@assets/Untitled_design_1772024284063.png";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -16,6 +16,7 @@ export default function ProfilePage({ user }: Props) {
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
   const [showLangPicker, setShowLangPicker] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const { data } = useQuery<{ user: SafeUser }>({
     queryKey: ["/api/auth/me"],
@@ -30,6 +31,22 @@ export default function ProfilePage({ user }: Props) {
     },
     onSuccess: () => {
       queryClient.clear();
+    },
+  });
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("DELETE", "/api/account");
+      if (!res.ok) throw new Error("Failed to delete account");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.clear();
+      window.location.href = "/";
+    },
+    onError: () => {
+      toast({ title: "Could not delete account", description: "Please try again.", variant: "destructive" });
+      setShowDeleteConfirm(false);
     },
   });
 
@@ -235,6 +252,49 @@ export default function ProfilePage({ user }: Props) {
           <LogOut size={16} />
           {logoutMutation.isPending ? "…" : t("profile.logout")}
         </button>
+
+        {!showDeleteConfirm ? (
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            data-testid="button-delete-account"
+            className="w-full py-3 rounded-xl text-xs font-medium flex items-center justify-center gap-2 mt-1"
+            style={{ background: "transparent", color: "rgba(239,68,68,0.45)", border: "1px solid rgba(239,68,68,0.12)" }}
+          >
+            <Trash2 size={13} />
+            Delete Account
+          </button>
+        ) : (
+          <div className="rounded-xl p-4 mt-1" style={{ background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.25)" }}>
+            <div className="flex items-start gap-2.5 mb-3">
+              <AlertTriangle size={15} color="#ef4444" className="flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold" style={{ color: "#ef4444" }}>Delete your account?</p>
+                <p className="text-xs mt-0.5" style={{ color: "rgba(253,248,240,0.45)" }}>
+                  This permanently deletes your profile, photos, matches and messages. This cannot be undone.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                data-testid="button-cancel-delete"
+                className="flex-1 py-2.5 rounded-lg text-xs font-semibold"
+                style={{ background: "rgba(255,255,255,0.07)", color: "rgba(253,248,240,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteAccountMutation.mutate()}
+                disabled={deleteAccountMutation.isPending}
+                data-testid="button-confirm-delete"
+                className="flex-1 py-2.5 rounded-lg text-xs font-bold disabled:opacity-50"
+                style={{ background: "#ef4444", color: "white" }}
+              >
+                {deleteAccountMutation.isPending ? "Deleting…" : "Yes, Delete"}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {showLangPicker && (
