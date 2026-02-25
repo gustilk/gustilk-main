@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Switch, Route, useLocation, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
@@ -16,6 +17,7 @@ import AdminPage from "@/pages/AdminPage";
 import VerificationPage from "@/pages/VerificationPage";
 import PendingVerificationPage from "@/pages/PendingVerificationPage";
 import SocialSetupPage from "@/pages/SocialSetupPage";
+import LanguageSelectPage from "@/pages/LanguageSelectPage";
 import BottomNav from "@/components/BottomNav";
 import VideoCallPage, { IncomingCallBanner } from "@/pages/VideoCallPage";
 import { VideoCallContext, useVideoCallProvider } from "@/hooks/useVideoCall";
@@ -108,11 +110,19 @@ function Router() {
 }
 
 export default function App() {
+  const [langChosen, setLangChosen] = useState<boolean>(
+    () => !!localStorage.getItem("gustilk_language")
+  );
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        <Router />
+        {langChosen ? (
+          <Router />
+        ) : (
+          <LanguageSelectPage onSelect={() => setLangChosen(true)} />
+        )}
       </TooltipProvider>
     </QueryClientProvider>
   );

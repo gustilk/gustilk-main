@@ -37,15 +37,16 @@ New social users (empty city) are shown `SocialSetupPage` to fill caste, gender,
 1. **Caste-based matching** — users only see profiles from their own caste
 2. **Profile management** — photos, bio, occupation, languages
 3. **Discover** — card-based profile browsing with like/dislike, location pin, swipe animation
-4. **Matches** — "Neue Matches" bubbles row + conversations list
-5. **Messaging** — real-time chat; locked behind premium for non-subscribers
-6. **Premium** — $5/month; country-specific payment (SEPA/iDEAL/Klarna/Bancontact/Card); free for Iraq
+4. **Matches** — matches row + conversations list; non-premium users see blurred/hidden identities
+5. **Messaging** — real-time chat; locked behind premium (both GET and POST blocked server-side)
+6. **Premium** — $5/month; Iraq = free (IP-verified); Russia = Card+MIR only
 7. **Verification** — selfie upload flow → admin approval; /verify and /pending-verification pages
 8. **Events** — community event listing with RSVP (Cultural / Meetup / Online filter tabs)
 9. **Reports** — ReportModal in chat; `POST /api/reports`; admin can view/resolve at /admin > Reports tab
 10. **Community guidelines** — checkbox required at registration with collapsible guidelines
 11. **Admin Panel** — verification queue + reports tab with approve/reject/ban/resolve actions
 12. **Match Modal** — dual-avatar display when match occurs
+13. **Internationalization (i18n)** — 11 languages supported; first-launch language picker; changeable from Profile settings; Arabic uses RTL layout. Languages: English, Arabic, Kurdish (Kurmanji), German, Dutch, Swedish, French, Turkish, Armenian, Georgian, Russian
 
 ## Pages / Routes
 - `/discover` — Swipeable profile cards
