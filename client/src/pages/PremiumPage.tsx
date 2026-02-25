@@ -5,7 +5,7 @@ import { SiPaypal, SiApplepay, SiGooglepay, SiVenmo, SiKlarna } from "react-icon
 import type { SafeUser } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import logoImg from "@assets/IMG_1041_1772022423551.jpeg";
+import logoImg from "@assets/Untitled_design_1772022829778.png";
 
 interface Props { user: SafeUser }
 
@@ -154,14 +154,8 @@ export default function PremiumPage({ user }: Props) {
           <ArrowLeft size={22} />
         </button>
         <div className="flex items-center gap-2.5 flex-1">
-          <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0"
-            style={{
-              border: "1.5px solid rgba(201,168,76,0.4)",
-              boxShadow: "0 2px 10px rgba(201,168,76,0.25)",
-              background: "#f9f4eb",
-            }}>
-            <img src={logoImg} alt="" className="w-full h-full object-contain" />
-          </div>
+          <img src={logoImg} alt="" className="w-9 h-9 object-contain flex-shrink-0"
+            style={{ filter: "drop-shadow(0 2px 8px rgba(201,168,76,0.5))" }} />
           <h1 className="font-serif text-2xl text-gold">Premium</h1>
         </div>
       </div>

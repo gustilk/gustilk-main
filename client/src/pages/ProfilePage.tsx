@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Edit2, Star, LogOut, CheckCircle, Clock, Globe, Bell, FileText, Shield, ChevronRight, X } from "lucide-react";
-import logoImg from "@assets/IMG_1041_1772022423551.jpeg";
+import logoImg from "@assets/Untitled_design_1772022829778.png";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { LANGUAGE_LIST, LangCode, setLanguage } from "@/i18n";
@@ -45,14 +45,8 @@ export default function ProfilePage({ user }: Props) {
     <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
       <div className="pt-12 pb-2 px-5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0"
-            style={{
-              border: "1.5px solid rgba(201,168,76,0.4)",
-              boxShadow: "0 2px 12px rgba(201,168,76,0.25)",
-              background: "#f9f4eb",
-            }}>
-            <img src={logoImg} alt="" className="w-full h-full object-contain" />
-          </div>
+          <img src={logoImg} alt="" className="w-10 h-10 object-contain flex-shrink-0"
+            style={{ filter: "drop-shadow(0 2px 8px rgba(201,168,76,0.5))" }} />
           <h1 className="font-serif text-2xl text-gold">{t("profile.title")}</h1>
         </div>
         <button

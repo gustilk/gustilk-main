@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Heart, Shield, Users, Eye, EyeOff, Phone, Mail, ArrowLeft, Globe } from "lucide-react";
-import logoImg from "@assets/IMG_1041_1772022423551.jpeg";
+import logoImg from "@assets/Untitled_design_1772022829778.png";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -54,25 +54,19 @@ function Logo() {
   return (
     <div className="text-center mb-8">
       <div className="relative inline-flex items-center justify-center mb-5">
-        <div className="absolute inset-0 rounded-full"
+        <div className="absolute inset-0"
           style={{
-            background: "radial-gradient(circle, rgba(201,168,76,0.18) 0%, transparent 70%)",
-            filter: "blur(12px)",
-            transform: "scale(1.3)",
+            background: "radial-gradient(circle, rgba(201,168,76,0.22) 0%, transparent 65%)",
+            filter: "blur(18px)",
+            transform: "scale(1.4)",
           }}
         />
-        <div className="relative w-32 h-32 rounded-full overflow-hidden"
-          style={{
-            border: "2px solid rgba(201,168,76,0.35)",
-            boxShadow: "0 0 0 6px rgba(201,168,76,0.08), 0 12px 40px rgba(0,0,0,0.5), 0 0 50px rgba(201,168,76,0.2)",
-            background: "#f9f4eb",
-          }}>
-          <img
-            src={logoImg}
-            alt="Gûstîlk"
-            className="w-full h-full object-contain scale-105"
-          />
-        </div>
+        <img
+          src={logoImg}
+          alt="Gûstîlk"
+          className="relative w-36 h-36 object-contain"
+          style={{ filter: "drop-shadow(0 4px 24px rgba(201,168,76,0.45)) drop-shadow(0 0 8px rgba(201,168,76,0.2))" }}
+        />
       </div>
       <h1 className="font-serif text-5xl font-bold text-gold tracking-wide">Gûstîlk</h1>
       <p className="text-cream/30 text-xs tracking-[0.3em] uppercase mt-1">Yezidi · Community</p>
