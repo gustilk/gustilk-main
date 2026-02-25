@@ -5,6 +5,7 @@ import { SlidersHorizontal, X, Heart, RefreshCw, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import logoImg from "@assets/Untitled_design_1772024284063.png";
 import MatchModal from "@/components/MatchModal";
+import { Slider } from "@/components/ui/slider";
 import type { SafeUser } from "@shared/schema";
 
 interface Props { user: SafeUser }
@@ -89,18 +90,23 @@ export default function DiscoverPage({ user }: Props) {
           className="mx-5 mb-4 p-4 rounded-2xl animate-slide-up"
           style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(201,168,76,0.2)" }}
         >
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <div className="text-xs text-cream/50 uppercase tracking-wider mb-2 font-semibold">{t("discover.minAge")}: {minAge}</div>
-              <input type="range" min={18} max={maxAge} value={minAge}
-                onChange={e => setMinAge(Math.min(Number(e.target.value), maxAge))}
-                className="w-full accent-[#c9a84c]" data-testid="filter-min-age" />
+          <div>
+            <div className="flex justify-between text-xs text-cream/50 uppercase tracking-wider mb-3 font-semibold">
+              <span>{t("discover.minAge")}: {minAge}</span>
+              <span>{t("discover.maxAge")}: {maxAge}</span>
             </div>
-            <div>
-              <div className="text-xs text-cream/50 uppercase tracking-wider mb-2 font-semibold">{t("discover.maxAge")}: {maxAge}</div>
-              <input type="range" min={minAge} max={80} value={maxAge}
-                onChange={e => setMaxAge(Math.max(Number(e.target.value), minAge))}
-                className="w-full accent-[#c9a84c]" data-testid="filter-max-age" />
+            <Slider
+              min={18}
+              max={80}
+              step={1}
+              value={[minAge, maxAge]}
+              onValueChange={([min, max]) => { setMinAge(min); setMaxAge(max); }}
+              data-testid="filter-age-range"
+              className="[&_[role=slider]]:bg-[#c9a84c] [&_[role=slider]]:border-[#c9a84c] [&_.relative]:bg-white/10 [&_[data-orientation=horizontal]]:h-1.5 [&_.absolute]:bg-[#c9a84c]"
+            />
+            <div className="flex justify-between text-xs text-cream/30 mt-1.5">
+              <span>18</span>
+              <span>80</span>
             </div>
           </div>
           <button
