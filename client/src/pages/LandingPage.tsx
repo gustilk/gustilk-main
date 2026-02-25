@@ -19,9 +19,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ background: "#0d0618" }}>
-      <div className="fixed inset-0 pointer-events-none" style={{
-        background: "radial-gradient(ellipse 60% 45% at 15% 5%, rgba(74,30,107,0.45) 0%, transparent 70%), radial-gradient(ellipse 40% 30% at 85% 90%, rgba(212,96,138,0.15) 0%, transparent 65%)"
-      }} />
 
       <button
         onClick={triggerLangPicker}
@@ -58,13 +55,6 @@ function Logo() {
   return (
     <div className="text-center mb-5">
       <div className="relative inline-flex items-center justify-center mb-1">
-        <div className="absolute inset-0"
-          style={{
-            background: "radial-gradient(circle, rgba(201,168,76,0.10) 0%, transparent 60%)",
-            filter: "blur(16px)",
-            transform: "scale(1.2)",
-          }}
-        />
         <img
           src={logoImg}
           alt="Gûstîlk"
