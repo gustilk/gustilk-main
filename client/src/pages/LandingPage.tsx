@@ -188,7 +188,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     } catch (err: any) {
       const msg = await err.message?.match(/\d+: (.+)/)?.[1] || err.message;
-      toast({ title: "Error", description: msg, variant: "destructive" });
+      toast({ title: t("auth.errorTitle"), description: msg, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -269,10 +269,10 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
     try {
       await apiRequest("POST", "/api/auth/send-otp", { phone });
       setStep("otp");
-      toast({ title: "Code sent", description: `A 6-digit code was sent to ${phone}` });
+      toast({ title: t("auth.codeSentTitle"), description: t("auth.codeSentDesc", { phone }) });
     } catch (err: any) {
       const msg = err.message?.match(/\d+: (.+)/)?.[1] || err.message;
-      toast({ title: "Error", description: msg, variant: "destructive" });
+      toast({ title: t("auth.errorTitle"), description: msg, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -286,7 +286,7 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     } catch (err: any) {
       const msg = err.message?.match(/\d+: (.+)/)?.[1] || err.message;
-      toast({ title: "Error", description: msg, variant: "destructive" });
+      toast({ title: t("auth.errorTitle"), description: msg, variant: "destructive" });
     } finally {
       setLoading(false);
     }

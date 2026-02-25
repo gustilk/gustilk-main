@@ -13,15 +13,6 @@ import { COUNTRY_STATES } from "@/lib/countryStates";
 
 const COUNTRIES = ["USA", "Canada", "Australia", "Germany", "Holland", "Sweden", "Belgium", "France", "Turkey", "Iraq", "Armenia", "Georgia", "Russia", "UK"];
 
-const AGREEMENT_SECTIONS = [
-  { title: "1. Respect the Yezidi Faith", body: "Members must respect and honour the Yezidi religion, its sacred traditions, figures, and practices. Any mockery, disrespect, or misrepresentation is strictly forbidden and may result in immediate account removal." },
-  { title: "2. Honour the Community", body: "Treat every member with dignity and respect. Harassment, discrimination, abusive language, or any behaviour that brings shame to the community will not be tolerated." },
-  { title: "3. Be Honest", body: "You must represent yourself truthfully. Fake photos, false names, or misleading information is a serious violation. Gûstîlk is built on trust." },
-  { title: "4. Caste Integrity", body: "You must register under your true caste — Sheikh, Pir, or Mirid. Misrepresenting your caste is a grave dishonour and will result in account deletion." },
-  { title: "5. No Harmful Content", body: "Sharing explicit, offensive, or inappropriate content is prohibited — including photos, messages, or media that conflicts with Yezidi values." },
-  { title: "6. Serious Intentions", body: "Gûstîlk is for genuine connection with the intention of marriage. It must not be used for casual encounters or purposes conflicting with community values." },
-  { title: "7. Privacy & Safety", body: "Do not share another member's personal information without consent. Report any behaviour that makes you or others feel unsafe." },
-];
 
 const COUNTRY_NAME_MAP: Record<string, string> = {
   "United States": "USA", "United States of America": "USA",
@@ -132,7 +123,7 @@ export default function SocialSetupPage({ user }: Props) {
       setLocation("/discover");
     },
     onError: (err: Error) => {
-      toast({ title: "Could not save profile", description: err.message, variant: "destructive" });
+      toast({ title: t("setup.couldNotSave"), description: err.message, variant: "destructive" });
     },
   });
 
@@ -287,7 +278,7 @@ export default function SocialSetupPage({ user }: Props) {
                       <MapPin size={15} color="#c9a84c" />
                       <span className="text-cream text-sm flex-1">{data.country}</span>
                       <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
-                        style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>Detected</span>
+                        style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>{t("setup.detected")}</span>
                     </div>
                     {detectedCountryName !== data.country && (
                       <p className="text-cream/30 text-xs mt-1 pl-1">{detectedCountryName}</p>
@@ -305,7 +296,7 @@ export default function SocialSetupPage({ user }: Props) {
                       </span>
                     </div>
                     <GoldSelect value={data.country} onChange={e => setData(d => ({ ...d, country: e.target.value, state: "" }))} data-testid="select-country">
-                      <option value="" disabled>Select country…</option>
+                      <option value="" disabled>{t("setup.selectCountry")}</option>
                       {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
                     </GoldSelect>
                   </>
@@ -314,13 +305,13 @@ export default function SocialSetupPage({ user }: Props) {
 
               {countryHasStates && (
                 <div>
-                  <Label>State / Province</Label>
+                  <Label>{t("setup.stateProvince")}</Label>
                   <GoldSelect
                     value={data.state}
                     onChange={e => setData(d => ({ ...d, state: e.target.value }))}
                     data-testid="select-state"
                   >
-                    <option value="" disabled>Select state…</option>
+                    <option value="" disabled>{t("setup.selectState")}</option>
                     {COUNTRY_STATES[data.country].map(s => <option key={s} value={s}>{s}</option>)}
                   </GoldSelect>
                 </div>
@@ -339,7 +330,7 @@ export default function SocialSetupPage({ user }: Props) {
                   style={{ background: "rgba(255,255,255,0.07)", border: `1.5px solid ${data.dateOfBirth && !isAtLeast18(data.dateOfBirth) ? "rgba(212,96,138,0.6)" : "rgba(201,168,76,0.25)"}`, colorScheme: "dark" }}
                 />
                 {data.dateOfBirth && !isAtLeast18(data.dateOfBirth) && (
-                  <p className="text-xs mt-1" style={{ color: "#d4608a" }}>You must be at least 18 years old to use Gûstîlk.</p>
+                  <p className="text-xs mt-1" style={{ color: "#d4608a" }}>{t("setup.minAge18")}</p>
                 )}
               </div>
 
@@ -371,10 +362,10 @@ export default function SocialSetupPage({ user }: Props) {
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-sm font-semibold" style={{ color: agreedGuidelines ? "#c9a84c" : "rgba(253,248,240,0.7)" }}>
-                    Community Guidelines
+                    {t("agreement.guidelinesButtonTitle")}
                   </p>
                   <p className="text-xs mt-0.5" style={{ color: agreedGuidelines ? "rgba(201,168,76,0.6)" : "rgba(253,248,240,0.3)" }}>
-                    {agreedGuidelines ? "You have read and agreed" : "Tap to read and agree — required"}
+                    {agreedGuidelines ? t("agreement.guidelinesButtonAgreed") : t("agreement.guidelinesButtonRequired")}
                   </p>
                 </div>
                 <ChevronDown size={16} color="rgba(201,168,76,0.4)" />
@@ -382,7 +373,7 @@ export default function SocialSetupPage({ user }: Props) {
 
               <div className="space-y-3">
                 <Checkbox checked={agreedTruthful} onChange={setAgreedTruthful} testId="checkbox-truthful">
-                  I confirm that all information I provide is truthful and honest
+                  {t("agreement.truthfulCheckbox")}
                 </Checkbox>
               </div>
 
@@ -408,14 +399,14 @@ export default function SocialSetupPage({ user }: Props) {
                 style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.3)" }}>
                 <Camera size={28} color="#c9a84c" />
               </div>
-              <h1 className="font-serif text-2xl text-gold mb-1">Photos & Verification</h1>
-              <p className="text-cream/50 text-sm">Step 2 of 2 — Upload your photos</p>
+              <h1 className="font-serif text-2xl text-gold mb-1">{t("setup.step2Title")}</h1>
+              <p className="text-cream/50 text-sm">{t("setup.step2Subtitle")}</p>
             </div>
 
             <div className="space-y-6">
               {/* Profile photos */}
               <div>
-                <Label>Profile Photos <span className="text-gold normal-case font-normal">(2 required)</span></Label>
+                <Label>{t("setup.profilePhotosLabel")} <span className="text-gold normal-case font-normal">{t("setup.photosRequired")}</span></Label>
                 <div className="grid grid-cols-2 gap-3 mt-2">
                   {photos.map((photo, idx) => (
                     <div key={idx} className="relative">
@@ -459,7 +450,7 @@ export default function SocialSetupPage({ user }: Props) {
                     </div>
                   ))}
                 </div>
-                <p className="text-cream/30 text-xs mt-2 pl-0.5">Both photos are required to continue</p>
+                <p className="text-cream/30 text-xs mt-2 pl-0.5">{t("setup.photoBothRequired")}</p>
               </div>
 
               {/* Verification selfie */}
@@ -472,7 +463,7 @@ export default function SocialSetupPage({ user }: Props) {
                   style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.18)" }}>
                   <Shield size={14} color="#c9a84c" className="flex-shrink-0 mt-0.5" />
                   <p className="text-cream/50 text-xs leading-relaxed">
-                    A clear selfie of your face is required for admin review to verify community membership. It will not be shown to other users.
+                    {t("setup.selfieAdminNote")}
                   </p>
                 </div>
 
@@ -502,7 +493,7 @@ export default function SocialSetupPage({ user }: Props) {
                     <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg flex items-center gap-1.5"
                       style={{ background: "rgba(0,0,0,0.6)" }}>
                       <Shield size={11} color="#c9a84c" />
-                      <span className="text-xs text-cream/80">Admin only</span>
+                      <span className="text-xs text-cream/80">{t("setup.adminOnly")}</span>
                     </div>
                   </div>
                 ) : (
@@ -514,8 +505,8 @@ export default function SocialSetupPage({ user }: Props) {
                     style={{ background: "rgba(255,255,255,0.04)", border: "2px dashed rgba(201,168,76,0.3)" }}
                   >
                     <Camera size={32} color="rgba(201,168,76,0.5)" />
-                    <span className="text-cream/40 text-sm">Take selfie or upload photo</span>
-                    <span className="text-cream/25 text-xs">Face must be clearly visible</span>
+                    <span className="text-cream/40 text-sm">{t("setup.takeSelfie")}</span>
+                    <span className="text-cream/25 text-xs">{t("setup.selfieVisible")}</span>
                   </button>
                 )}
               </div>
@@ -529,7 +520,7 @@ export default function SocialSetupPage({ user }: Props) {
                 </div>
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${selfie ? "bg-green-400" : "bg-cream/20"}`} />
-                  <span className="text-cream/50 text-xs">Selfie {selfie ? "ready" : "required"}</span>
+                  <span className="text-cream/50 text-xs">{selfie ? t("setup.selfieReady") : t("setup.selfieRequiredStatus")}</span>
                 </div>
               </div>
 
@@ -541,7 +532,7 @@ export default function SocialSetupPage({ user }: Props) {
                   className="px-5 py-4 rounded-xl text-sm font-semibold"
                   style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
                 >
-                  Back
+                  {t("common.back")}
                 </button>
                 <button
                   onClick={() => mutation.mutate()}
@@ -551,7 +542,7 @@ export default function SocialSetupPage({ user }: Props) {
                   style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 6px 20px rgba(201,168,76,0.3)" }}
                 >
                   {mutation.isPending
-                    ? <><Loader2 size={15} className="animate-spin" /> Saving…</>
+                    ? <><Loader2 size={15} className="animate-spin" /> {t("setup.saving")}</>
                     : t("setup.completeProfile")}
                 </button>
               </div>
@@ -567,6 +558,7 @@ export default function SocialSetupPage({ user }: Props) {
 function CommunityGuidelinesModal({ onAgree, onClose }: { onAgree: () => void; onClose: () => void }) {
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   const handleScroll = () => {
     const el = scrollRef.current;
@@ -574,6 +566,8 @@ function CommunityGuidelinesModal({ onAgree, onClose }: { onAgree: () => void; o
     const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 20;
     if (atBottom) setHasScrolledToBottom(true);
   };
+
+  const sections = t("agreement.sections", { returnObjects: true }) as Array<{ title: string; body: string }>;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col" style={{ background: "#0d0618" }}>
@@ -587,8 +581,8 @@ function CommunityGuidelinesModal({ onAgree, onClose }: { onAgree: () => void; o
             style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.3)" }}>
             <ScrollText size={26} color="#c9a84c" />
           </div>
-          <h1 className="font-serif text-2xl font-bold" style={{ color: "#c9a84c" }}>Community Guidelines</h1>
-          <p className="text-cream/40 text-sm mt-1">Read carefully — scroll to the bottom to agree</p>
+          <h1 className="font-serif text-2xl font-bold" style={{ color: "#c9a84c" }}>{t("agreement.guidelinesTitle")}</h1>
+          <p className="text-cream/40 text-sm mt-1">{t("agreement.readCarefully")}</p>
         </div>
 
         <div
@@ -596,7 +590,7 @@ function CommunityGuidelinesModal({ onAgree, onClose }: { onAgree: () => void; o
           onScroll={handleScroll}
           className="flex-1 overflow-y-auto px-5 pb-4 space-y-5"
         >
-          {AGREEMENT_SECTIONS.map((s, i) => (
+          {Array.isArray(sections) && sections.map((s, i) => (
             <div key={i} className="rounded-2xl p-4"
               style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.12)" }}>
               <p className="font-serif font-semibold mb-2" style={{ color: "#c9a84c" }}>{s.title}</p>
@@ -607,17 +601,17 @@ function CommunityGuidelinesModal({ onAgree, onClose }: { onAgree: () => void; o
           <div className="rounded-2xl p-4"
             style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.2)" }}>
             <p className="text-cream/50 text-sm leading-relaxed italic">
-              Depending on severity of violations: a warning, temporary suspension, permanent ban, or deletion of your account. The admin team has full authority to enforce these guidelines.
+              {t("agreement.footerWarning")}
             </p>
             <p className="text-sm mt-3 font-medium" style={{ color: "#c9a84c" }}>
-              By using Gûstîlk, you honour not just these rules — but the entire Yezidi community.
+              {t("agreement.footerHonour")}
             </p>
           </div>
 
           {!hasScrolledToBottom && (
             <div className="flex flex-col items-center gap-1 py-2 opacity-50">
               <ChevronDown size={18} color="#c9a84c" className="animate-bounce" />
-              <span className="text-xs text-cream/40">Scroll down to continue</span>
+              <span className="text-xs text-cream/40">{t("agreement.scrollToContinue")}</span>
             </div>
           )}
 
@@ -633,7 +627,7 @@ function CommunityGuidelinesModal({ onAgree, onClose }: { onAgree: () => void; o
             className="w-full py-4 rounded-xl font-bold text-sm transition-all disabled:opacity-40"
             style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: hasScrolledToBottom ? "0 6px 20px rgba(201,168,76,0.35)" : "none" }}
           >
-            {hasScrolledToBottom ? "I Have Read & I Agree" : "Read all guidelines to continue"}
+            {hasScrolledToBottom ? t("agreement.agreeButton") : t("agreement.readFirst")}
           </button>
         </div>
       </div>
