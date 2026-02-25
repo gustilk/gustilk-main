@@ -5,15 +5,11 @@ import en from "./locales/en";
 import ar from "./locales/ar";
 import ku from "./locales/ku";
 import de from "./locales/de";
-import nl from "./locales/nl";
 import sv from "./locales/sv";
-import fr from "./locales/fr";
-import tr from "./locales/tr";
 import hy from "./locales/hy";
-import ka from "./locales/ka";
 import ru from "./locales/ru";
 
-export const LANGUAGES = { en, ar, ku, de, nl, sv, fr, tr, hy, ka, ru } as const;
+export const LANGUAGES = { en, ar, ku, de, sv, hy, ru } as const;
 export type LangCode = keyof typeof LANGUAGES;
 
 export const LANGUAGE_LIST: { code: LangCode; name: string; native: string; flag: string; dir: string }[] =
@@ -25,7 +21,10 @@ export const LANGUAGE_LIST: { code: LangCode; name: string; native: string; flag
     dir: val.lang.dir,
   }));
 
-const savedLang = (localStorage.getItem("gustilk_language") as LangCode) || "en";
+const stored = localStorage.getItem("gustilk_language");
+const isValid = (code: string | null): code is LangCode => !!code && code in LANGUAGES;
+const savedLang: LangCode = isValid(stored) ? stored : "en";
+if (!isValid(stored)) localStorage.setItem("gustilk_language", "en");
 
 i18n.use(initReactI18next).init({
   resources: Object.fromEntries(
