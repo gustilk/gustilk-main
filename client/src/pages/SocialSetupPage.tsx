@@ -435,7 +435,6 @@ export default function SocialSetupPage({ user }: Props) {
                   ref={selfieInputRef}
                   type="file"
                   accept="image/*"
-                  capture="user"
                   className="hidden"
                   data-testid="input-selfie"
                   onChange={e => handleSelfieChange(e.target.files?.[0] ?? null)}
