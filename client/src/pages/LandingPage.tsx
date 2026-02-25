@@ -66,8 +66,8 @@ function Logo() {
             src={logoImg}
             alt="Gûstîlk"
             style={{
-              width: "360px",
-              height: "360px",
+              width: "460px",
+              height: "460px",
               objectFit: "contain",
               position: "absolute",
               top: "50%",
