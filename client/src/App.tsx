@@ -17,29 +17,27 @@ import VerificationPage from "@/pages/VerificationPage";
 import PendingVerificationPage from "@/pages/PendingVerificationPage";
 import SocialSetupPage from "@/pages/SocialSetupPage";
 import BottomNav from "@/components/BottomNav";
-import type { SafeUser } from "@shared/schema";
+import type { User } from "@shared/schema";
 
-export type AuthUser = SafeUser;
-
-function useAuth() {
-  return useQuery<{ user: AuthUser } | null>({
+function useGustilkUser() {
+  return useQuery<{ user: User } | null>({
     queryKey: ["/api/auth/me"],
     retry: false,
     staleTime: 1000 * 60 * 5,
   });
 }
 
-function needsProfileSetup(user: AuthUser): boolean {
-  return !user.city || !user.country || user.city === "" || user.country === "";
+function profileIsComplete(user: User): boolean {
+  return !!(user.caste && user.city && user.country && user.age && user.gender);
 }
 
-function AppShell({ user }: { user: AuthUser }) {
+function AppShell({ user }: { user: User }) {
   const [location] = useLocation();
   const isChat = location.startsWith("/chat/");
   const isEventDetail = location.startsWith("/events/") && location !== "/events";
   const isVerifyPage = location === "/verify" || location === "/pending-verification";
 
-  if (needsProfileSetup(user) && location !== "/complete-profile") {
+  if (!profileIsComplete(user) && location !== "/complete-profile") {
     return <SocialSetupPage user={user} />;
   }
 
@@ -68,7 +66,7 @@ function AppShell({ user }: { user: AuthUser }) {
 }
 
 function Router() {
-  const { data, isLoading } = useAuth();
+  const { data, isLoading } = useGustilkUser();
 
   if (isLoading) {
     return (

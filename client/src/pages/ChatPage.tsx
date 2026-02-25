@@ -85,9 +85,9 @@ export default function ChatPage({ user, matchId }: Props) {
             style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "2px solid rgba(201,168,76,0.3)" }}
           >
             {otherUser?.photos && otherUser.photos.length > 0 ? (
-              <img src={otherUser.photos[0]} alt={otherUser.fullName} className="w-full h-full object-cover" />
+              <img src={otherUser.photos[0]} alt={otherUser.fullName ?? ""} className="w-full h-full object-cover" />
             ) : (
-              otherUser?.fullName.charAt(0)
+              (otherUser?.fullName ?? otherUser?.firstName ?? "M").charAt(0)
             )}
           </div>
           <div className="flex-1 min-w-0">
@@ -164,9 +164,9 @@ export default function ChatPage({ user, matchId }: Props) {
           style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "2px solid rgba(201,168,76,0.3)" }}
         >
           {otherUser?.photos && otherUser.photos.length > 0 ? (
-            <img src={otherUser.photos[0]} alt={otherUser.fullName} className="w-full h-full object-cover" />
+            <img src={otherUser.photos[0]} alt={otherUser.fullName ?? ""} className="w-full h-full object-cover" />
           ) : (
-            otherUser?.fullName.charAt(0)
+            (otherUser?.fullName ?? otherUser?.firstName ?? "M").charAt(0)
           )}
         </div>
         <div className="flex-1 min-w-0">
@@ -251,7 +251,7 @@ export default function ChatPage({ user, matchId }: Props) {
       {showReport && otherUser && (
         <ReportModal
           reportedUserId={otherUser.id}
-          reportedUserName={otherUser.fullName}
+          reportedUserName={otherUser.fullName ?? otherUser.firstName ?? "Member"}
           onClose={() => setShowReport(false)}
         />
       )}

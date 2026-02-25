@@ -1,14 +1,12 @@
 import { db } from "./db";
 import { users, events } from "@shared/schema";
 import { count } from "drizzle-orm";
-import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
 
-const seedUsers = [
+const seedProfiles = [
   {
-    email: "layla.sheikh@example.com",
-    password: "password123",
     fullName: "Layla Ibrahim",
+    email: "layla.sheikh@example.com",
     caste: "sheikh" as const,
     gender: "female" as const,
     country: "Germany",
@@ -20,9 +18,8 @@ const seedUsers = [
     photos: ["/images/profile1.svg"],
   },
   {
-    email: "dilan.sheikh@example.com",
-    password: "password123",
     fullName: "Dilan Hasan",
+    email: "dilan.sheikh@example.com",
     caste: "sheikh" as const,
     gender: "female" as const,
     country: "Sweden",
@@ -34,9 +31,8 @@ const seedUsers = [
     photos: ["/images/profile2.svg"],
   },
   {
-    email: "azar.sheikh@example.com",
-    password: "password123",
     fullName: "Azar Khalaf",
+    email: "azar.sheikh@example.com",
     caste: "sheikh" as const,
     gender: "male" as const,
     country: "USA",
@@ -48,9 +44,8 @@ const seedUsers = [
     photos: ["/images/profile3.svg"],
   },
   {
-    email: "shirin.pir@example.com",
-    password: "password123",
     fullName: "Shirin Dawud",
+    email: "shirin.pir@example.com",
     caste: "pir" as const,
     gender: "female" as const,
     country: "Australia",
@@ -62,33 +57,30 @@ const seedUsers = [
     photos: ["/images/profile4.svg"],
   },
   {
-    email: "admin@gustilk.com",
-    password: "admin1234",
-    fullName: "Admin Gustilk",
-    caste: "sheikh" as const,
+    fullName: "Farhad Mirza",
+    email: "farhad.murid@example.com",
+    caste: "murid" as const,
     gender: "male" as const,
     country: "Germany",
-    city: "Berlin",
-    age: 30,
-    bio: "Platform administrator.",
-    occupation: "Admin",
-    languages: ["Kurdish", "German", "English"],
-    photos: [],
-    isAdmin: true,
+    city: "Bielefeld",
+    age: 29,
+    bio: "Community leader and entrepreneur. I believe in preserving our traditions while embracing the future.",
+    occupation: "Entrepreneur",
+    languages: ["Kurdish", "German", "English", "Arabic"],
+    photos: ["/images/profile5.svg"],
   },
   {
-    email: "demo@gustilk.com",
-    password: "demo1234",
-    fullName: "Khalid Mirza",
-    caste: "sheikh" as const,
-    gender: "male" as const,
-    country: "Germany",
-    city: "Hannover",
-    age: 27,
-    bio: "Demo account — explore Gûstîlk freely. I am a community organizer passionate about Yezidi culture and bringing people together.",
-    occupation: "Community Organizer",
-    languages: ["Kurdish", "German", "English"],
-    photos: ["/images/profile5.svg"],
+    fullName: "Narin Barakat",
+    email: "narin.pir@example.com",
+    caste: "pir" as const,
+    gender: "female" as const,
+    country: "Belgium",
+    city: "Brussels",
+    age: 25,
+    bio: "Passionate about Yezidi heritage and language preservation. I teach Kurdish to diaspora children on weekends.",
+    occupation: "Language Teacher",
+    languages: ["Kurdish", "French", "English"],
+    photos: [],
   },
 ];
 
@@ -165,30 +157,23 @@ export async function seedDatabase() {
   try {
     const [{ value: userCount }] = await db.select({ value: count() }).from(users);
     if (Number(userCount) === 0) {
-      for (const userData of seedUsers) {
-        const hashedPassword = await bcrypt.hash(userData.password, 10);
-        const { isAdmin, ...rest } = userData as any;
+      for (const p of seedProfiles) {
         await db.insert(users).values({
-          ...rest,
           id: randomUUID(),
-          password: hashedPassword,
-          photos: userData.photos,
-          languages: userData.languages,
-          isAdmin: isAdmin ?? false,
+          ...p,
+          photos: p.photos,
+          languages: p.languages,
         });
       }
-      console.log(`Seeded ${seedUsers.length} users.`);
+      console.log(`Seeded ${seedProfiles.length} users.`);
     } else {
       console.log("Users already seeded, skipping.");
     }
 
     const [{ value: eventCount }] = await db.select({ value: count() }).from(events);
     if (Number(eventCount) === 0) {
-      for (const eventData of seedEvents) {
-        await db.insert(events).values({
-          ...eventData,
-          id: randomUUID(),
-        });
+      for (const ev of seedEvents) {
+        await db.insert(events).values({ id: randomUUID(), ...ev });
       }
       console.log(`Seeded ${seedEvents.length} events.`);
     } else {

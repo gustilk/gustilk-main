@@ -20,9 +20,9 @@ function Avatar({ user }: { user: SafeUser }) {
       }}
     >
       {user.photos && user.photos.length > 0 ? (
-        <img src={user.photos[0]} alt={user.fullName} className="w-full h-full object-cover" />
+        <img src={user.photos[0]} alt={user.fullName ?? ""} className="w-full h-full object-cover" />
       ) : (
-        user.fullName.charAt(0)
+        (user.fullName ?? user.firstName ?? "M").charAt(0)
       )}
     </div>
   );
@@ -70,7 +70,7 @@ export default function MatchModal({ matchedUser, currentUser, matchId, onClose 
 
         <h2 className="font-serif text-3xl font-bold text-gold mb-2">It's a Match!</h2>
         <p className="text-cream/60 text-sm mb-6">
-          You and <span className="text-gold font-semibold">{matchedUser.fullName}</span> have liked each other
+          You and <span className="text-gold font-semibold">{matchedUser.fullName ?? matchedUser.firstName ?? "your match"}</span> have liked each other
         </p>
 
         <div className="flex flex-col gap-3">

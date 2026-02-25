@@ -256,7 +256,7 @@ function VerificationCard({ user, onApprove, onReject, onBan, isPending }: {
     ? formatDistanceToNow(new Date(user.createdAt), { addSuffix: true })
     : "";
 
-  const casteLabel = { sheikh: "Sheikh", pir: "Pir", murid: "Murid" }[user.caste] ?? user.caste;
+  const casteLabel = (user.caste ? { sheikh: "Sheikh", pir: "Pir", murid: "Murid" }[user.caste] : null) ?? user.caste ?? "";
 
   return (
     <div
@@ -270,15 +270,15 @@ function VerificationCard({ user, onApprove, onReject, onBan, isPending }: {
           style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "2px solid rgba(201,168,76,0.3)" }}
         >
           {user.photos && user.photos.length > 0 ? (
-            <img src={user.photos[0]} alt={user.fullName} className="w-full h-full object-cover" />
+            <img src={user.photos[0]} alt={user.fullName ?? ""} className="w-full h-full object-cover" />
           ) : (
-            user.fullName.charAt(0)
+            (user.fullName ?? user.firstName ?? "M").charAt(0)
           )}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
             <span className="font-semibold text-cream text-sm" data-testid={`text-admin-name-${user.id}`}>
-              {user.fullName}
+              {user.fullName ?? user.firstName ?? "Member"}
             </span>
             <span
               className="px-2 py-0.5 rounded-full text-[10px] font-bold"

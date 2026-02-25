@@ -62,21 +62,21 @@ export default function ProfilePage({ user }: Props) {
             style={{ background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}
           >
             {me.photos && me.photos.length > 0 ? (
-              <img src={me.photos[0]} alt={me.fullName} className="w-full h-full object-cover" />
+              <img src={me.photos[0]} alt={me.fullName ?? ""} className="w-full h-full object-cover" />
             ) : (
               <div
                 className="w-24 h-24 rounded-full flex items-center justify-center font-serif text-4xl font-bold text-gold"
                 style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.3)" }}
                 data-testid="avatar-placeholder"
               >
-                {me.fullName.charAt(0)}
+                {(me.fullName ?? me.firstName ?? "M").charAt(0)}
               </div>
             )}
             <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.85) 0%, transparent 60%)" }} />
             <div className="absolute bottom-4 left-4 right-4">
               <div className="flex items-end justify-between">
                 <div>
-                  <h2 className="font-serif text-2xl text-white font-bold" data-testid="text-profile-name">{me.fullName}</h2>
+                  <h2 className="font-serif text-2xl text-white font-bold" data-testid="text-profile-name">{me.fullName ?? me.firstName ?? "Member"}</h2>
                   <p className="text-white/60 text-sm">{me.city}, {me.country} · {me.age}</p>
                 </div>
                 <div
@@ -84,7 +84,7 @@ export default function ProfilePage({ user }: Props) {
                   style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
                   data-testid="badge-caste"
                 >
-                  {casteLabel(me.caste)}
+                  {casteLabel(me.caste ?? "murid")}
                 </div>
               </div>
             </div>
@@ -125,7 +125,7 @@ export default function ProfilePage({ user }: Props) {
                 className="px-3 py-1 rounded-full text-xs"
                 style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.5)" }}
               >
-                {me.gender.charAt(0).toUpperCase() + me.gender.slice(1)}
+                {me.gender ? me.gender.charAt(0).toUpperCase() + me.gender.slice(1) : ""}
               </span>
             </div>
 

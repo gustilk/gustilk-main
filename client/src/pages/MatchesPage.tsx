@@ -141,9 +141,9 @@ function NewMatchBubble({ match, isPremium, onClick }: {
           }}
         >
           {other.photos && other.photos.length > 0 ? (
-            <img src={other.photos[0]} alt={other.fullName} className="w-full h-full object-cover" />
+            <img src={other.photos[0]} alt={other.fullName ?? ""} className="w-full h-full object-cover" />
           ) : (
-            other.fullName.charAt(0)
+            (other.fullName ?? other.firstName ?? "M").charAt(0)
           )}
         </div>
         {!isPremium && (
@@ -155,7 +155,7 @@ function NewMatchBubble({ match, isPremium, onClick }: {
           </div>
         )}
       </div>
-      <span className="text-[11px] text-cream/60 font-medium max-w-[60px] truncate">{other.fullName.split(" ")[0]}</span>
+      <span className="text-[11px] text-cream/60 font-medium max-w-[60px] truncate">{(other.fullName ?? other.firstName ?? "Member").split(" ")[0]}</span>
     </button>
   );
 }
@@ -190,9 +190,9 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
           style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "2px solid rgba(201,168,76,0.3)" }}
         >
           {other.photos && other.photos.length > 0 ? (
-            <img src={other.photos[0]} alt={other.fullName} className="w-full h-full object-cover" />
+            <img src={other.photos[0]} alt={other.fullName ?? ""} className="w-full h-full object-cover" />
           ) : (
-            other.fullName.charAt(0)
+            (other.fullName ?? other.firstName ?? "M").charAt(0)
           )}
         </div>
         {hasUnread && !isLocked && (
@@ -208,12 +208,12 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-0.5">
           <span className="font-semibold text-cream text-sm truncate" data-testid={`text-match-name-${match.id}`}>
-            {other.fullName}
+            {other.fullName ?? other.firstName ?? "Member"}
           </span>
           <span className="text-cream/30 text-xs flex-shrink-0">{timeLabel}</span>
         </div>
         <div className="text-xs text-cream/35 mb-1">
-          {other.caste.charAt(0).toUpperCase() + other.caste.slice(1)} · {other.city}
+          {other.caste ? other.caste.charAt(0).toUpperCase() + other.caste.slice(1) : ""} · {other.city}
         </div>
         {isLocked ? (
           <div className="flex items-center gap-1.5">

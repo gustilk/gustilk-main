@@ -151,13 +151,13 @@ export default function DiscoverPage({ user }: Props) {
                 style={{ background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}
               >
                 {current.photos && current.photos.length > 0 ? (
-                  <img src={current.photos[0]} alt={current.fullName} className="w-full h-full object-cover" />
+                  <img src={current.photos[0]} alt={current.fullName ?? ""} className="w-full h-full object-cover" />
                 ) : (
                   <div
                     className="w-28 h-28 rounded-full flex items-center justify-center text-5xl font-serif text-gold"
                     style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.25)" }}
                   >
-                    {current.fullName.charAt(0)}
+                    {(current.fullName ?? current.firstName ?? "M").charAt(0)}
                   </div>
                 )}
 
@@ -166,13 +166,13 @@ export default function DiscoverPage({ user }: Props) {
                   style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
                   data-testid={`badge-caste-${current.id}`}
                 >
-                  {casteLabel(current.caste)}
+                  {casteLabel(current.caste ?? "murid")}
                 </div>
 
                 <div className="absolute bottom-0 left-0 right-0 h-52" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.98), transparent)" }} />
                 <div className="absolute bottom-0 left-0 right-0 p-5">
                   <h2 className="font-serif text-2xl text-white font-bold leading-tight" data-testid={`text-name-${current.id}`}>
-                    {current.fullName}, {current.age}
+                    {current.fullName ?? current.firstName ?? "Member"}, {current.age}
                   </h2>
                   <div className="flex items-center gap-1.5 mt-1.5">
                     <MapPin size={13} color="rgba(201,168,76,0.8)" />

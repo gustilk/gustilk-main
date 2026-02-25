@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Sparkles } from "lucide-react";
-import type { SafeUser } from "@shared/schema";
+import type { User } from "@shared/schema";
 
 const COUNTRIES = ["USA", "Canada", "Australia", "Germany", "Holland", "Sweden", "Belgium", "France", "Turkey", "Iraq", "Armenia", "Georgia", "Russia", "UK"];
 const CASTES = [{ value: "sheikh", label: "Sheikh" }, { value: "pir", label: "Pir" }, { value: "murid", label: "Murid" }];
@@ -14,7 +14,7 @@ const GUIDELINES = [
   "No harassment, offensive content, or misrepresentation",
 ];
 
-interface Props { user: SafeUser }
+interface Props { user: User }
 
 export default function SocialSetupPage({ user }: Props) {
   const [, setLocation] = useLocation();
@@ -55,7 +55,7 @@ export default function SocialSetupPage({ user }: Props) {
             style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.3)" }}>
             <Sparkles size={30} color="#c9a84c" />
           </div>
-          <h1 className="font-serif text-3xl text-gold mb-1">Almost there, {user.fullName.split(" ")[0]}!</h1>
+          <h1 className="font-serif text-3xl text-gold mb-1">Almost there, {(user.fullName ?? user.firstName ?? "there").split(" ")[0]}!</h1>
           <p className="text-cream/50 text-sm">A few details to complete your profile</p>
         </div>
 

@@ -4,9 +4,9 @@ import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Check } from "lucide-react";
-import type { SafeUser } from "@shared/schema";
+import type { User } from "@shared/schema";
 
-interface Props { user: SafeUser }
+interface Props { user: User }
 
 const LANGUAGES = ["Kurdish", "Arabic", "English", "German", "Swedish", "French", "Turkish", "Armenian", "Russian"];
 const COUNTRIES = ["USA", "Canada", "Australia", "Germany", "Holland", "Sweden", "Belgium", "France", "Turkey", "Iraq", "Armenia", "Georgia", "Russia", "UK"];
@@ -15,10 +15,10 @@ export default function EditProfilePage({ user }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [form, setForm] = useState({
-    fullName: user.fullName,
-    city: user.city,
-    country: user.country,
-    age: user.age,
+    fullName: user.fullName ?? user.firstName ?? "",
+    city: user.city ?? "",
+    country: user.country ?? "Germany",
+    age: user.age ?? 22,
     bio: user.bio ?? "",
     occupation: user.occupation ?? "",
     languages: user.languages ?? [],
