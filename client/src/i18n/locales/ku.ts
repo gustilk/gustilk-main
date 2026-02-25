@@ -60,6 +60,8 @@ export default {
     resendCode: "Koda nû bişîne",
     pleaseWait: "Tewre bisekine…",
     otpHint: "Koda welêt binivîse (mînak: +964 ji bo Iraqê)",
+    countryCode: "Koda welêt",
+    searchCountry: "Welêt bigere…",
     otpEnterCode: "Koda 6 reqamî ya ku hate şandin binivîse",
     errorTitle: "Çewtî",
     codeSentTitle: "Kod hate şandin",

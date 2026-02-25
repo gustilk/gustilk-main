@@ -50,6 +50,8 @@ export default {
     otpSent: "A verification code has been sent to your phone.",
     otpCode: "Verification code",
     otpHint: "Include your country code (e.g. +49 for Germany)",
+    countryCode: "Country code",
+    searchCountry: "Search country…",
     otpEnterCode: "Enter the 6-digit code sent to",
     noAccount: "Don't have an account?",
     haveAccount: "Already have an account?",

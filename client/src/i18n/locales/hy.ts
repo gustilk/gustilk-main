@@ -60,6 +60,8 @@ export default {
     resendCode: "Կոդն ուղարկել կրկին",
     pleaseWait: "Խնդրում ենք սպասել…",
     otpHint: "Մուտքագրեք երկրի կոդ (օրինակ՝ +964 Իրաքի համար)",
+    countryCode: "Երկրի կոդ",
+    searchCountry: "Փնտրել երկիր…",
     otpEnterCode: "Մուտքագրեք 6-նիշ կոդը, որն ուղարկվել է",
     errorTitle: "Սխալ",
     codeSentTitle: "Կոդ ուղարկված է",

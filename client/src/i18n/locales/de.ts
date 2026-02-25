@@ -60,6 +60,8 @@ export default {
     resendCode: "Code erneut senden",
     pleaseWait: "Bitte warten…",
     otpHint: "Ländervorwahl eingeben (z.B. +964 für Irak)",
+    countryCode: "Landesvorwahl",
+    searchCountry: "Land suchen…",
     otpEnterCode: "Den 6-stelligen Code eingeben, der gesendet wurde an",
     errorTitle: "Fehler",
     codeSentTitle: "Code gesendet",

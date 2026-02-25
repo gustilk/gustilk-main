@@ -60,6 +60,8 @@ export default {
     resendCode: "Skicka kod igen",
     pleaseWait: "Vänta…",
     otpHint: "Ange landskod (t.ex. +964 för Irak)",
+    countryCode: "Landskod",
+    searchCountry: "Sök land…",
     otpEnterCode: "Ange den 6-siffriga koden som skickades till",
     errorTitle: "Fel",
     codeSentTitle: "Kod skickad",

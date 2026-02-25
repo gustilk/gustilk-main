@@ -60,6 +60,8 @@ export default {
     resendCode: "Отправить код повторно",
     pleaseWait: "Пожалуйста, подождите…",
     otpHint: "Введите код страны (например, +964 для Ирака)",
+    countryCode: "Код страны",
+    searchCountry: "Поиск страны…",
     otpEnterCode: "Введите 6-значный код, отправленный на",
     errorTitle: "Ошибка",
     codeSentTitle: "Код отправлен",

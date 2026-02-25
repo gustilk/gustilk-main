@@ -60,6 +60,8 @@ export default {
     resendCode: "إعادة إرسال الرمز",
     pleaseWait: "يرجى الانتظار…",
     otpHint: "أدخل رمز الدولة (مثال: +964 للعراق)",
+    countryCode: "رمز الدولة",
+    searchCountry: "ابحث عن دولة…",
     otpEnterCode: "أدخل الرمز المكوّن من ٦ أرقام المُرسل إلى",
     errorTitle: "خطأ",
     codeSentTitle: "تم إرسال الرمز",
