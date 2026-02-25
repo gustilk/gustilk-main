@@ -67,7 +67,7 @@ function AppShell({ user }: { user: User }) {
         {/* Full-screen call overlay */}
         {isInCall && <VideoCallPage />}
 
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-hidden" style={{ background: "#0d0618" }}>
           <Switch>
             <Route path="/discover" component={() => <DiscoverPage user={user} />} />
             <Route path="/matches" component={() => <MatchesPage user={user} />} />

@@ -185,7 +185,8 @@ html, body, #root {
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased text-foreground;
+    background-color: #0d0618;
   }
 }
 
