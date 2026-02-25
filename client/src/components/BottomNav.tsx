@@ -1,17 +1,19 @@
 import { useLocation, Link } from "wouter";
 import { Heart, MessageCircle, User, CalendarDays } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import type { MatchWithUser } from "@shared/schema";
 
-const navItems = [
-  { href: "/discover", icon: Heart, label: "Discover" },
-  { href: "/matches", icon: MessageCircle, label: "Matches" },
-  { href: "/events", icon: CalendarDays, label: "Events" },
-  { href: "/profile", icon: User, label: "Profile" },
+const NAV_ITEMS = [
+  { href: "/discover", icon: Heart, tKey: "nav.discover", id: "discover" },
+  { href: "/matches", icon: MessageCircle, tKey: "nav.matches", id: "matches" },
+  { href: "/events", icon: CalendarDays, tKey: "nav.events", id: "events" },
+  { href: "/profile", icon: User, tKey: "nav.profile", id: "profile" },
 ];
 
 export default function BottomNav() {
   const [location] = useLocation();
+  const { t } = useTranslation();
 
   const { data: matchData } = useQuery<{ matches: MatchWithUser[] }>({
     queryKey: ["/api/matches"],
@@ -25,7 +27,7 @@ export default function BottomNav() {
       className="fixed bottom-0 left-0 right-0 z-50 flex"
       style={{ background: "rgba(13,6,24,0.97)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(201,168,76,0.15)" }}
     >
-      {navItems.map(({ href, icon: Icon, label }) => {
+      {NAV_ITEMS.map(({ href, icon: Icon, tKey, id }) => {
         const isActive = location === href || (href === "/discover" && location === "/");
         const isMatches = href === "/matches";
         return (
@@ -34,7 +36,7 @@ export default function BottomNav() {
             href={href}
             className="flex-1 flex flex-col items-center justify-center py-3 gap-0.5 transition-all relative"
             style={{ color: isActive ? "#c9a84c" : "rgba(253,248,240,0.3)" }}
-            data-testid={`nav-${label.toLowerCase()}`}
+            data-testid={`nav-${id}`}
           >
             <div className="relative">
               <Icon size={20} strokeWidth={isActive ? 2 : 1.5} />
@@ -48,7 +50,7 @@ export default function BottomNav() {
                 </span>
               )}
             </div>
-            <span className="text-[10px] font-semibold uppercase tracking-wider">{label}</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider">{t(tKey)}</span>
           </Link>
         );
       })}

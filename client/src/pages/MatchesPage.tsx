@@ -2,12 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Lock, Star, MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useTranslation } from "react-i18next";
 import type { SafeUser, MatchWithUser } from "@shared/schema";
 
 interface Props { user: SafeUser }
 
 export default function MatchesPage({ user }: Props) {
   const [, setLocation] = useLocation();
+  const { t } = useTranslation();
   const isPremium = !!user.isPremium;
 
   const { data, isLoading } = useQuery<{ matches: MatchWithUser[] }>({
@@ -22,7 +24,7 @@ export default function MatchesPage({ user }: Props) {
   return (
     <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
       <div className="pt-12 pb-2 px-5">
-        <h1 className="font-serif text-2xl text-gold">Matches</h1>
+        <h1 className="font-serif text-2xl text-gold">{t("matches.title")}</h1>
       </div>
 
       {isLoading ? (
@@ -35,8 +37,8 @@ export default function MatchesPage({ user }: Props) {
             style={{ border: "2px solid rgba(201,168,76,0.3)" }}>
             <MessageCircle size={32} color="rgba(201,168,76,0.5)" />
           </div>
-          <h3 className="font-serif text-xl text-gold">No matches yet</h3>
-          <p className="text-cream/40 text-sm">Keep discovering profiles and liking the ones you connect with!</p>
+          <h3 className="font-serif text-xl text-gold">{t("matches.noMatches")}</h3>
+          <p className="text-cream/40 text-sm">{t("matches.noMatchesSub")}</p>
         </div>
       ) : (
         <div>
@@ -51,10 +53,10 @@ export default function MatchesPage({ user }: Props) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-cream font-semibold text-sm">
-                    {matches.length} {matches.length === 1 ? "person" : "people"} liked you
+                    {matches.length} {matches.length === 1 ? "person" : "people"} {t("matches.lockedSub")}
                   </p>
                   <p className="text-cream/45 text-xs mt-0.5">
-                    Upgrade to Premium to see who they are, read messages, and start conversations.
+                    {t("matches.upgradeSub")}
                   </p>
                 </div>
                 <button
@@ -63,7 +65,7 @@ export default function MatchesPage({ user }: Props) {
                   className="px-3 py-1.5 rounded-xl text-xs font-bold flex-shrink-0"
                   style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
                 >
-                  Upgrade
+                  {t("matches.upgradeBtn")}
                 </button>
               </div>
             </div>
@@ -74,7 +76,7 @@ export default function MatchesPage({ user }: Props) {
               <div className="px-5 mb-3">
                 <span className="text-[11px] font-bold uppercase tracking-widest"
                   style={{ color: "rgba(201,168,76,0.6)" }}>
-                  {isPremium ? "New Matches" : "New Matches (hidden)"}
+                  {isPremium ? t("matches.newMatches") : t("matches.newMatchesHidden")}
                 </span>
               </div>
               <div className="flex gap-4 px-5 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>

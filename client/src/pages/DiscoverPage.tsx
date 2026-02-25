@@ -2,12 +2,14 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { SlidersHorizontal, X, Heart, RefreshCw, MapPin } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import MatchModal from "@/components/MatchModal";
 import type { SafeUser } from "@shared/schema";
 
 interface Props { user: SafeUser }
 
 export default function DiscoverPage({ user }: Props) {
+  const { t } = useTranslation();
   const [showFilters, setShowFilters] = useState(false);
   const [minAge, setMinAge] = useState(18);
   const [maxAge, setMaxAge] = useState(60);
@@ -74,7 +76,7 @@ export default function DiscoverPage({ user }: Props) {
           style={{ border: "1.5px solid rgba(201,168,76,0.25)", background: "rgba(255,255,255,0.05)", color: "rgba(253,248,240,0.6)" }}
         >
           <SlidersHorizontal size={14} />
-          Filters
+          {t("discover.filters")}
         </button>
       </div>
 
@@ -85,13 +87,13 @@ export default function DiscoverPage({ user }: Props) {
         >
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <div className="text-xs text-cream/50 uppercase tracking-wider mb-2 font-semibold">Min Age: {minAge}</div>
+              <div className="text-xs text-cream/50 uppercase tracking-wider mb-2 font-semibold">{t("discover.minAge")}: {minAge}</div>
               <input type="range" min={18} max={60} value={minAge}
                 onChange={e => setMinAge(Number(e.target.value))}
                 className="w-full accent-[#c9a84c]" data-testid="filter-min-age" />
             </div>
             <div>
-              <div className="text-xs text-cream/50 uppercase tracking-wider mb-2 font-semibold">Max Age: {maxAge}</div>
+              <div className="text-xs text-cream/50 uppercase tracking-wider mb-2 font-semibold">{t("discover.maxAge")}: {maxAge}</div>
               <input type="range" min={18} max={80} value={maxAge}
                 onChange={e => setMaxAge(Number(e.target.value))}
                 className="w-full accent-[#c9a84c]" data-testid="filter-max-age" />
@@ -103,7 +105,7 @@ export default function DiscoverPage({ user }: Props) {
             className="w-full mt-3 py-2.5 rounded-xl text-sm font-bold"
             style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
           >
-            Apply Filters
+            {t("discover.applyFilters")}
           </button>
         </div>
       )}
@@ -112,7 +114,7 @@ export default function DiscoverPage({ user }: Props) {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-96 gap-4">
             <div className="w-12 h-12 border-2 border-gold border-t-transparent rounded-full animate-spin" />
-            <p className="text-cream/40 text-sm">Finding profiles…</p>
+            <p className="text-cream/40 text-sm">{t("discover.finding")}</p>
           </div>
         ) : !current ? (
           <div className="flex flex-col items-center justify-center h-96 gap-4 text-center px-6">
@@ -122,8 +124,8 @@ export default function DiscoverPage({ user }: Props) {
             >
               <Heart size={32} color="rgba(201,168,76,0.5)" />
             </div>
-            <h3 className="font-serif text-xl text-gold">No more profiles</h3>
-            <p className="text-cream/40 text-sm">You've seen everyone in your caste for now. Check back soon!</p>
+            <h3 className="font-serif text-xl text-gold">{t("discover.noMore")}</h3>
+            <p className="text-cream/40 text-sm">{t("discover.noMoreSub")}</p>
             <button
               onClick={handleRefresh}
               data-testid="button-refresh"
@@ -131,7 +133,7 @@ export default function DiscoverPage({ user }: Props) {
               style={{ border: "1.5px solid rgba(201,168,76,0.4)", color: "#c9a84c" }}
             >
               <RefreshCw size={15} />
-              Refresh
+              {t("discover.refresh")}
             </button>
           </div>
         ) : (

@@ -2,30 +2,13 @@ import { useState } from "react";
 import { Heart, Shield, Users, Eye, EyeOff, Phone, Mail, ArrowLeft, Globe } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { LANGUAGE_LIST } from "@/i18n";
 import i18n from "@/i18n";
 
 function triggerLangPicker() {
   window.dispatchEvent(new Event("gustilk:pick-language"));
 }
-
-const FEATURES = [
-  {
-    icon: <Heart size={20} color="#c9a84c" />,
-    title: "Caste-Respectful Matching",
-    desc: "Sheikh, Pir, or Murid — honouring Yezidi tradition.",
-  },
-  {
-    icon: <Shield size={20} color="#c9a84c" />,
-    title: "Verified & Safe",
-    desc: "Every profile is manually reviewed for authenticity.",
-  },
-  {
-    icon: <Users size={20} color="#c9a84c" />,
-    title: "Community Events",
-    desc: "Cultural gatherings and meetups near you and worldwide.",
-  },
-];
 
 type Screen = "home" | "email" | "phone";
 
@@ -85,12 +68,20 @@ function Logo() {
 }
 
 function HomeScreen({ onEmail, onPhone }: { onEmail: () => void; onPhone: () => void }) {
+  const { t } = useTranslation();
+
+  const features = [
+    { icon: <Heart size={20} color="#c9a84c" />, title: t("landing.feature1Title"), desc: t("landing.feature1Desc") },
+    { icon: <Shield size={20} color="#c9a84c" />, title: t("landing.feature2Title"), desc: t("landing.feature2Desc") },
+    { icon: <Users size={20} color="#c9a84c" />, title: t("landing.feature3Title"), desc: t("landing.feature3Desc") },
+  ];
+
   return (
     <div className="w-full animate-slide-up">
       <Logo />
 
       <p className="text-cream/50 text-sm text-center mb-8 leading-relaxed">
-        The exclusive dating app for the Yezidi community — connecting hearts across the diaspora.
+        {t("auth.tagline")}
       </p>
 
       <div className="space-y-3 mb-8">
@@ -101,7 +92,7 @@ function HomeScreen({ onEmail, onPhone }: { onEmail: () => void; onPhone: () => 
           style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 8px 32px rgba(201,168,76,0.4)" }}
         >
           <Mail size={20} />
-          Continue with Email
+          {t("auth.continueEmail")}
         </button>
 
         <button
@@ -111,12 +102,12 @@ function HomeScreen({ onEmail, onPhone }: { onEmail: () => void; onPhone: () => 
           style={{ background: "rgba(255,255,255,0.07)", color: "#fdf8f0", border: "1.5px solid rgba(201,168,76,0.3)" }}
         >
           <Phone size={20} />
-          Continue with Phone
+          {t("auth.continuePhone")}
         </button>
       </div>
 
       <div className="space-y-2.5">
-        {FEATURES.map((f, i) => (
+        {features.map((f, i) => (
           <div key={i} className="flex items-start gap-3 text-left p-3.5 rounded-2xl"
             style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.12)" }}>
             <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -149,7 +140,7 @@ function GoldInput({ label, ...props }: React.InputHTMLAttributes<HTMLInputEleme
   );
 }
 
-function SubmitButton({ loading, children }: { loading: boolean; children: string }) {
+function SubmitButton({ loading, loadingText, children }: { loading: boolean; loadingText?: string; children: string }) {
   return (
     <button
       type="submit"
@@ -158,13 +149,14 @@ function SubmitButton({ loading, children }: { loading: boolean; children: strin
       className="w-full py-4 rounded-2xl font-bold text-base disabled:opacity-60"
       style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 8px 32px rgba(201,168,76,0.4)" }}
     >
-      {loading ? "Please wait…" : children}
+      {loading ? (loadingText ?? "Please wait…") : children}
     </button>
   );
 }
 
 function EmailScreen({ onBack }: { onBack: () => void }) {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -189,7 +181,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
   return (
     <div className="w-full animate-slide-up">
       <button onClick={onBack} data-testid="button-back" className="flex items-center gap-2 text-cream/50 text-sm mb-6">
-        <ArrowLeft size={16} /> Back
+        <ArrowLeft size={16} /> {t("common.back")}
       </button>
       <Logo />
 
@@ -205,22 +197,22 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
               : { color: "rgba(253,248,240,0.4)" }
             }
           >
-            {m === "login" ? "Sign In" : "Create Account"}
+            {m === "login" ? t("auth.signIn") : t("auth.signUp")}
           </button>
         ))}
       </div>
 
       <form onSubmit={submit} className="space-y-4">
-        <GoldInput label="Email address" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" data-testid="input-email" required />
+        <GoldInput label={t("auth.email")} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" data-testid="input-email" required />
 
         <div>
-          <label className="block text-cream/60 text-xs font-semibold mb-1.5 uppercase tracking-wider">Password</label>
+          <label className="block text-cream/60 text-xs font-semibold mb-1.5 uppercase tracking-wider">{t("auth.password")}</label>
           <div className="relative">
             <input
               type={showPw ? "text" : "password"}
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder={mode === "register" ? "At least 6 characters" : "Your password"}
+              placeholder={mode === "register" ? t("auth.pwPlaceholderRegister") : t("auth.pwPlaceholderLogin")}
               data-testid="input-password"
               required
               className="w-full px-4 py-3 pr-11 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
@@ -239,7 +231,9 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        <SubmitButton loading={loading}>{mode === "login" ? "Sign In" : "Create Account"}</SubmitButton>
+        <SubmitButton loading={loading} loadingText={t("auth.pleaseWait")}>
+          {mode === "login" ? t("auth.signIn") : t("auth.signUp")}
+        </SubmitButton>
       </form>
     </div>
   );
@@ -247,6 +241,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
 
 function PhoneScreen({ onBack }: { onBack: () => void }) {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
@@ -284,14 +279,14 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
   return (
     <div className="w-full animate-slide-up">
       <button onClick={() => step === "otp" ? setStep("phone") : onBack()} data-testid="button-back" className="flex items-center gap-2 text-cream/50 text-sm mb-6">
-        <ArrowLeft size={16} /> Back
+        <ArrowLeft size={16} /> {t("common.back")}
       </button>
       <Logo />
 
       {step === "phone" ? (
         <form onSubmit={sendOtp} className="space-y-4">
           <GoldInput
-            label="Phone number"
+            label={t("auth.phone")}
             type="tel"
             value={phone}
             onChange={e => setPhone(e.target.value)}
@@ -299,16 +294,16 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
             data-testid="input-phone"
             required
           />
-          <p className="text-cream/35 text-xs text-center">Include your country code (e.g. +49 for Germany)</p>
-          <SubmitButton loading={loading}>Send Verification Code</SubmitButton>
+          <p className="text-cream/35 text-xs text-center">{t("auth.otpHint")}</p>
+          <SubmitButton loading={loading} loadingText={t("auth.pleaseWait")}>{t("auth.sendCode")}</SubmitButton>
         </form>
       ) : (
         <form onSubmit={verifyOtp} className="space-y-4">
           <p className="text-cream/60 text-sm text-center mb-2">
-            Enter the 6-digit code sent to <span className="text-gold font-semibold">{phone}</span>
+            {t("auth.otpEnterCode")} <span className="text-gold font-semibold">{phone}</span>
           </p>
           <GoldInput
-            label="Verification code"
+            label={t("auth.otpCode")}
             type="text"
             inputMode="numeric"
             maxLength={6}
@@ -318,14 +313,14 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
             data-testid="input-otp"
             required
           />
-          <SubmitButton loading={loading}>Verify & Continue</SubmitButton>
+          <SubmitButton loading={loading} loadingText={t("auth.pleaseWait")}>{t("auth.verifyAndContinue")}</SubmitButton>
           <button
             type="button"
             onClick={() => { setCode(""); sendOtp(new Event("") as any); }}
             data-testid="button-resend"
             className="w-full text-cream/40 text-sm text-center"
           >
-            Resend code
+            {t("auth.resendCode")}
           </button>
         </form>
       )}
