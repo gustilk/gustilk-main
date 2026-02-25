@@ -1,30 +1,17 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
+import { setupSession, registerAuthRoutes, isAuthenticated } from "./auth";
 import { profileUpdateSchema } from "@shared/schema";
 import { z } from "zod";
 
 function getUserId(req: any): string {
-  return req.user?.claims?.sub;
+  return req.session?.userId;
 }
 
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
-  await setupAuth(app);
+  setupSession(app);
   registerAuthRoutes(app);
-
-  // ─── AUTH / ME ────────────────────────────────────────────
-  // Returns full Gustilk profile for the logged-in Replit user
-  app.get("/api/auth/me", isAuthenticated, async (req, res) => {
-    try {
-      const userId = getUserId(req);
-      const user = await storage.getUserById(userId);
-      if (!user) return res.status(404).json({ error: "Profile not found" });
-      res.json({ user });
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  });
 
   // ─── PROFILE ─────────────────────────────────────────────
   app.put("/api/profile", isAuthenticated, async (req, res) => {
@@ -40,7 +27,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.get("/api/profile/:userId", isAuthenticated, async (req: any, res) => {
-    const user = await storage.getUserById(req.params.userId as string as string);
+    const user = await storage.getUserById(req.params.userId as string);
     if (!user) return res.status(404).json({ error: "User not found" });
     res.json({ user });
   });
