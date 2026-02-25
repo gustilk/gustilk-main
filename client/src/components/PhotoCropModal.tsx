@@ -34,20 +34,24 @@ export function PhotoCropModal({
   onCancel: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
   const [containerW, setContainerW] = useState(0);
   const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null);
   const [coverScale, setCoverScale] = useState(1);
-  const [userScale, setUserScale] = useState(1);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+
+  // Render state — only used to trigger re-render after gesture ends
+  const [renderTick, setRenderTick] = useState(0);
+
+  // Gesture state kept in refs so touch handlers always read the latest values
+  const scaleRef = useRef(1);      // userScale
+  const offsetRef = useRef({ x: 0, y: 0 });
+  const coverScaleRef = useRef(1);
 
   const dragging = useRef(false);
   const lastPoint = useRef({ x: 0, y: 0 });
   const lastPinchDist = useRef<number | null>(null);
 
-  const userScaleRef = useRef(userScale);
-  const offsetRef = useRef(offset);
-  userScaleRef.current = userScale;
-  offsetRef.current = offset;
+  const rafId = useRef<number | null>(null);
 
   useLayoutEffect(() => {
     if (containerRef.current) setContainerW(containerRef.current.offsetWidth);
@@ -60,19 +64,44 @@ export function PhotoCropModal({
       const nw = img.naturalWidth;
       const nh = img.naturalHeight;
       const cs = Math.max(containerW / nw, containerW / nh);
+      const initOffset = { x: (containerW - nw * cs) / 2, y: (containerW - nh * cs) / 2 };
       setNaturalSize({ w: nw, h: nh });
       setCoverScale(cs);
-      setUserScale(1);
-      setOffset({ x: (containerW - nw * cs) / 2, y: (containerW - nh * cs) / 2 });
+      coverScaleRef.current = cs;
+      scaleRef.current = 1;
+      offsetRef.current = initOffset;
+      setRenderTick(t => t + 1);
     };
     img.src = imgSrc;
   }, [containerW, imgSrc]);
+
+  // Apply transform directly to the img DOM node — bypasses React re-render on every frame
+  const applyTransform = () => {
+    const el = imgRef.current;
+    if (!el || !naturalSize) return;
+    const s = scaleRef.current;
+    const cs = coverScaleRef.current;
+    const o = offsetRef.current;
+    el.style.left = `${o.x}px`;
+    el.style.top = `${o.y}px`;
+    el.style.width = `${naturalSize.w * cs * s}px`;
+    el.style.height = `${naturalSize.h * cs * s}px`;
+  };
+
+  const scheduleApply = () => {
+    if (rafId.current !== null) return;
+    rafId.current = requestAnimationFrame(() => {
+      rafId.current = null;
+      applyTransform();
+    });
+  };
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
     const onTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
       if (e.touches.length === 1) {
         dragging.current = true;
         lastPoint.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -91,31 +120,40 @@ export function PhotoCropModal({
         const dx = e.touches[0].clientX - lastPoint.current.x;
         const dy = e.touches[0].clientY - lastPoint.current.y;
         lastPoint.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        setOffset(o => ({ x: o.x + dx, y: o.y + dy }));
+        offsetRef.current = { x: offsetRef.current.x + dx, y: offsetRef.current.y + dy };
+        scheduleApply();
       } else if (e.touches.length === 2 && lastPinchDist.current !== null) {
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
         const dist = Math.sqrt(dx * dx + dy * dy);
         const ratio = dist / lastPinchDist.current;
-        const newScale = Math.min(5, Math.max(1, userScaleRef.current * ratio));
-        const scaleRatio = newScale / userScaleRef.current;
+
+        const prevScale = scaleRef.current;
+        const newScale = Math.min(5, Math.max(1, prevScale * ratio));
+        const scaleRatio = newScale / prevScale;
 
         const rect = el.getBoundingClientRect();
         const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
         const my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
 
-        setOffset(o => ({
-          x: mx - (mx - o.x) * scaleRatio,
-          y: my - (my - o.y) * scaleRatio,
-        }));
-        setUserScale(newScale);
+        offsetRef.current = {
+          x: mx - (mx - offsetRef.current.x) * scaleRatio,
+          y: my - (my - offsetRef.current.y) * scaleRatio,
+        };
+        scaleRef.current = newScale;
         lastPinchDist.current = dist;
+        scheduleApply();
       }
     };
 
     const onTouchEnd = (e: TouchEvent) => {
       if (e.touches.length < 2) lastPinchDist.current = null;
       if (e.touches.length === 0) dragging.current = false;
+      if (e.touches.length === 1) {
+        dragging.current = true;
+        lastPoint.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+      setRenderTick(t => t + 1);
     };
 
     el.addEventListener("touchstart", onTouchStart, { passive: false });
@@ -125,8 +163,9 @@ export function PhotoCropModal({
       el.removeEventListener("touchstart", onTouchStart);
       el.removeEventListener("touchmove", onTouchMove);
       el.removeEventListener("touchend", onTouchEnd);
+      if (rafId.current !== null) cancelAnimationFrame(rafId.current);
     };
-  }, []);
+  }, [naturalSize]);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (e.pointerType === "touch") return;
@@ -140,7 +179,8 @@ export function PhotoCropModal({
     const dx = e.clientX - lastPoint.current.x;
     const dy = e.clientY - lastPoint.current.y;
     lastPoint.current = { x: e.clientX, y: e.clientY };
-    setOffset(o => ({ x: o.x + dx, y: o.y + dy }));
+    offsetRef.current = { x: offsetRef.current.x + dx, y: offsetRef.current.y + dy };
+    scheduleApply();
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
@@ -148,11 +188,13 @@ export function PhotoCropModal({
     dragging.current = false;
   };
 
-  const dispW = naturalSize ? naturalSize.w * coverScale * userScale : 0;
-  const dispH = naturalSize ? naturalSize.h * coverScale * userScale : 0;
-
   const handleConfirm = () => {
     if (!naturalSize || !containerW) return;
+    const s = scaleRef.current;
+    const cs = coverScaleRef.current;
+    const o = offsetRef.current;
+    const dispW = naturalSize.w * cs * s;
+    const dispH = naturalSize.h * cs * s;
     const ratio = outputSize / containerW;
     const canvas = document.createElement("canvas");
     canvas.width = outputSize;
@@ -160,11 +202,15 @@ export function PhotoCropModal({
     const ctx = canvas.getContext("2d")!;
     const img = new Image();
     img.onload = () => {
-      ctx.drawImage(img, offset.x * ratio, offset.y * ratio, dispW * ratio, dispH * ratio);
+      ctx.drawImage(img, o.x * ratio, o.y * ratio, dispW * ratio, dispH * ratio);
       onConfirm(canvas.toDataURL("image/jpeg", 0.80));
     };
     img.src = imgSrc;
   };
+
+  const initDispW = naturalSize ? naturalSize.w * coverScale * scaleRef.current : 0;
+  const initDispH = naturalSize ? naturalSize.h * coverScale * scaleRef.current : 0;
+  const initOffset = offsetRef.current;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.92)" }}>
@@ -176,7 +222,7 @@ export function PhotoCropModal({
         <div
           ref={containerRef}
           className="relative overflow-hidden select-none"
-          style={{ width: "100%", aspectRatio: "1 / 1", touchAction: "none", cursor: dragging.current ? "grabbing" : "grab" }}
+          style={{ width: "100%", aspectRatio: "1 / 1", touchAction: "none", cursor: "grab" }}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -184,11 +230,18 @@ export function PhotoCropModal({
         >
           {naturalSize && (
             <img
+              ref={imgRef}
               src={imgSrc}
               alt="crop preview"
               draggable={false}
               className="absolute pointer-events-none"
-              style={{ left: offset.x, top: offset.y, width: dispW, height: dispH, userSelect: "none" }}
+              style={{
+                left: initOffset.x,
+                top: initOffset.y,
+                width: initDispW,
+                height: initDispH,
+                userSelect: "none",
+              }}
             />
           )}
           <div className="absolute inset-0 pointer-events-none" style={{
