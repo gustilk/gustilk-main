@@ -13,9 +13,14 @@ export interface ModerationResult {
 export async function moderateImage(base64DataUrl: string): Promise<ModerationResult> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-5-nano",
-      max_completion_tokens: 30,
+      model: "gpt-5-mini",
+      max_completion_tokens: 10,
       messages: [
+        {
+          role: "system",
+          content:
+            "You are a strict content moderation system. Your only job is to detect explicit sexual content in images. You must reply with exactly one word.",
+        },
         {
           role: "user",
           content: [
@@ -25,21 +30,27 @@ export async function moderateImage(base64DataUrl: string): Promise<ModerationRe
             },
             {
               type: "text",
-              text: 'Does this image contain nudity, explicit sexual content, pornography, or genitalia? Reply with exactly one word: SAFE or UNSAFE',
+              text: "Does this image contain any of the following: nudity, bare genitalia, bare female breasts, explicit sexual acts, or pornographic content? Reply with exactly one word: SAFE or UNSAFE",
             },
           ],
         },
       ],
     });
 
-    const answer = response.choices[0]?.message?.content?.trim().toUpperCase() ?? "SAFE";
+    const answer = (response.choices[0]?.message?.content ?? "").trim().toUpperCase();
+    console.log(`[moderation] scan result: "${answer}"`);
+
     if (answer.includes("UNSAFE")) {
       return { safe: false, reason: "Explicit or inappropriate content detected" };
     }
+    if (!answer.includes("SAFE")) {
+      console.warn(`[moderation] unexpected response: "${answer}" — treating as UNSAFE`);
+      return { safe: false, reason: "Content could not be verified as safe" };
+    }
     return { safe: true };
   } catch (err: any) {
-    console.error("[moderation] Error scanning image:", err?.message ?? err);
-    return { safe: true };
+    console.error("[moderation] scan failed:", err?.message ?? err);
+    return { safe: false, reason: "Photo could not be scanned — please try again" };
   }
 }
 
