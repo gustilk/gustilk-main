@@ -60,7 +60,7 @@ function AppShell({ user }: { user: User }) {
 
   return (
     <VideoCallContext.Provider value={callCtx}>
-      <div className="flex flex-col min-h-screen bg-ink" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+      <div className="flex flex-col min-h-screen" style={{ background: "#0d0618", fontFamily: "'Open Sans', sans-serif" }}>
         {/* Incoming call banner — shown on top of everything except an active call */}
         {callCtx.incomingCall && !isInCall && <IncomingCallBanner />}
 
@@ -96,7 +96,7 @@ function Router() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-ink">
+      <div className="flex items-center justify-center min-h-screen" style={{ background: "#0d0618" }}>
         <div className="text-center">
           <div className="font-serif text-4xl text-gold mb-3">Gûstîlk</div>
           <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin mx-auto" />

@@ -18,7 +18,7 @@ export default function LandingPage() {
   const currentLang = LANGUAGE_LIST.find(l => l.code === i18n.language) ?? LANGUAGE_LIST[0];
 
   return (
-    <div className="min-h-screen flex flex-col bg-ink relative overflow-hidden">
+    <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ background: "#0d0618" }}>
       <div className="fixed inset-0 pointer-events-none" style={{
         background: "radial-gradient(ellipse 70% 60% at 15% 5%, rgba(74,30,107,0.9) 0%, transparent 65%), radial-gradient(ellipse 50% 40% at 85% 85%, rgba(212,96,138,0.3) 0%, transparent 60%)"
       }} />
