@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import logoImg from "@assets/Untitled_design_1772024284063.png";
 import { MapPin, Loader2, AlertTriangle, Camera, ImagePlus, X, ChevronRight, Shield, LogOut } from "lucide-react";
 import type { User } from "@shared/schema";
+import { PhotoCropModal, compressImage } from "@/components/PhotoCropModal";
 
 const COUNTRIES = ["USA", "Canada", "Australia", "Germany", "Holland", "Sweden", "Belgium", "France", "Turkey", "Iraq", "Armenia", "Georgia", "Russia", "UK"];
 
@@ -32,175 +33,6 @@ const COUNTRY_NAME_MAP: Record<string, string> = {
 function mapCountry(apiName: string): string | null {
   if (COUNTRY_NAME_MAP[apiName]) return COUNTRY_NAME_MAP[apiName];
   return COUNTRIES.find(c => c.toLowerCase() === apiName.toLowerCase()) ?? null;
-}
-
-async function compressImage(file: File, maxPx = 800, quality = 0.70): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      let { width, height } = img;
-      if (width > maxPx || height > maxPx) {
-        if (width > height) { height = Math.round((height / width) * maxPx); width = maxPx; }
-        else { width = Math.round((width / height) * maxPx); height = maxPx; }
-      }
-      const canvas = document.createElement("canvas");
-      canvas.width = width; canvas.height = height;
-      const ctx = canvas.getContext("2d")!;
-      ctx.drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL("image/jpeg", quality));
-    };
-    img.onerror = reject;
-    img.src = url;
-  });
-}
-
-function PhotoCropModal({
-  imgSrc,
-  outputSize = 800,
-  onConfirm,
-  onCancel,
-}: {
-  imgSrc: string;
-  outputSize?: number;
-  onConfirm: (base64: string) => void;
-  onCancel: () => void;
-}) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [containerW, setContainerW] = useState(0);
-  const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null);
-  const [coverScale, setCoverScale] = useState(1);
-  const [userScale, setUserScale] = useState(1);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
-  const lastPoint = useRef({ x: 0, y: 0 });
-
-  // Measure container width after mount
-  useLayoutEffect(() => {
-    if (containerRef.current) setContainerW(containerRef.current.offsetWidth);
-  }, []);
-
-  // Once we know both containerW and natural dimensions, compute cover layout
-  useEffect(() => {
-    if (!containerW || !imgSrc) return;
-    const img = new Image();
-    img.onload = () => {
-      const nw = img.naturalWidth;
-      const nh = img.naturalHeight;
-      const cs = Math.max(containerW / nw, containerW / nh);
-      setNaturalSize({ w: nw, h: nh });
-      setCoverScale(cs);
-      setUserScale(1);
-      setOffset({ x: (containerW - nw * cs) / 2, y: (containerW - nh * cs) / 2 });
-    };
-    img.src = imgSrc;
-  }, [containerW, imgSrc]);
-
-  const dispW = naturalSize ? naturalSize.w * coverScale * userScale : 0;
-  const dispH = naturalSize ? naturalSize.h * coverScale * userScale : 0;
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    setDragging(true);
-    lastPoint.current = { x: e.clientX, y: e.clientY };
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!dragging) return;
-    const dx = e.clientX - lastPoint.current.x;
-    const dy = e.clientY - lastPoint.current.y;
-    lastPoint.current = { x: e.clientX, y: e.clientY };
-    setOffset(o => ({ x: o.x + dx, y: o.y + dy }));
-  };
-
-  const handlePointerUp = () => setDragging(false);
-
-  const handleZoom = (newUserScale: number) => {
-    if (!containerW) return;
-    const cx = containerW / 2;
-    const cy = containerW / 2;
-    const ratio = newUserScale / userScale;
-    setOffset(o => ({ x: cx - (cx - o.x) * ratio, y: cy - (cy - o.y) * ratio }));
-    setUserScale(newUserScale);
-  };
-
-  const handleConfirm = () => {
-    if (!naturalSize || !containerW) return;
-    const ratio = outputSize / containerW;
-    const canvas = document.createElement("canvas");
-    canvas.width = outputSize;
-    canvas.height = outputSize;
-    const ctx = canvas.getContext("2d")!;
-    const img = new Image();
-    img.onload = () => {
-      ctx.drawImage(img, offset.x * ratio, offset.y * ratio, dispW * ratio, dispH * ratio);
-      onConfirm(canvas.toDataURL("image/jpeg", 0.80));
-    };
-    img.src = imgSrc;
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.92)" }}>
-      <div className="w-full max-w-sm rounded-2xl overflow-hidden" style={{ background: "#1a0a2e", border: "1px solid rgba(201,168,76,0.35)" }}>
-        <div className="px-4 py-3 text-center" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-          <p className="text-gold font-serif font-semibold">Position your photo</p>
-          <p className="text-cream/40 text-xs mt-0.5">Drag to reposition · Slider to zoom</p>
-        </div>
-        <div
-          ref={containerRef}
-          className="relative overflow-hidden select-none"
-          style={{ width: "100%", aspectRatio: "1 / 1", touchAction: "none", cursor: dragging ? "grabbing" : "grab" }}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
-        >
-          {naturalSize && (
-            <img
-              src={imgSrc}
-              alt="crop preview"
-              draggable={false}
-              className="absolute pointer-events-none"
-              style={{ left: offset.x, top: offset.y, width: dispW, height: dispH, userSelect: "none" }}
-            />
-          )}
-          <div className="absolute inset-0 pointer-events-none" style={{
-            backgroundImage: "linear-gradient(rgba(201,168,76,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,76,0.1) 1px, transparent 1px)",
-            backgroundSize: "33.33% 33.33%",
-          }} />
-          <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 0 2px rgba(201,168,76,0.5)" }} />
-        </div>
-        <div className="px-4 py-3 flex items-center gap-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <span className="text-cream/50 text-base font-bold leading-none">−</span>
-          <input
-            type="range" min={1} max={3} step={0.01} value={userScale}
-            onChange={e => handleZoom(parseFloat(e.target.value))}
-            className="flex-1"
-            style={{ accentColor: "#c9a84c" }}
-          />
-          <span className="text-cream/50 text-base font-bold leading-none">+</span>
-        </div>
-        <div className="flex gap-2 px-4 pb-4">
-          <button
-            onClick={onCancel}
-            className="flex-1 py-3 rounded-xl text-sm font-medium"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(253,248,240,0.6)" }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleConfirm}
-            data-testid="button-crop-confirm"
-            className="flex-1 py-3 rounded-xl text-sm font-bold"
-            style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
-          >
-            Use Photo
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 type GeoState = "loading" | "detected" | "unsupported" | "error";
@@ -238,12 +70,15 @@ export default function SocialSetupPage({ user }: Props) {
   const [detectedCountryName, setDetectedCountryName] = useState("");
 
   // Step 2 state
-  const [photos, setPhotos] = useState<(string | null)[]>([null, null, null]);
+  const [photos, setPhotos] = useState<(string | null)[]>([null, null, null, null, null, null]);
   const [selfie, setSelfie] = useState<string | null>(null);
   const [cropTarget, setCropTarget] = useState<{ imgSrc: string; index: number | "selfie" } | null>(null);
 
   const selfieInputRef = useRef<HTMLInputElement>(null);
-  const photoInputRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
+  const photoInputRefs = [
+    useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null),
+  ];
 
   useEffect(() => {
     let cancelled = false;
@@ -323,7 +158,7 @@ export default function SocialSetupPage({ user }: Props) {
   };
 
   const step1Valid = data.country && data.city.trim() && agreedGuidelines && agreedTruthful && Number(data.age) >= 18;
-  const step2Valid = photos.filter(Boolean).length === 3 && selfie;
+  const step2Valid = photos.filter(Boolean).length >= 1 && selfie;
   const canSubmit = step2Valid && !cropTarget;
 
   return (
@@ -535,7 +370,7 @@ export default function SocialSetupPage({ user }: Props) {
             <div className="space-y-6">
               {/* Profile photos */}
               <div>
-                <Label>Profile Photos <span className="text-gold normal-case font-normal">(3 required)</span></Label>
+                <Label>Profile Photos <span className="text-gold normal-case font-normal">(1–6, at least 1 required)</span></Label>
                 <div className="grid grid-cols-3 gap-2 mt-2">
                   {photos.map((photo, idx) => (
                     <div key={idx} className="relative">
@@ -644,8 +479,8 @@ export default function SocialSetupPage({ user }: Props) {
               <div className="rounded-xl px-4 py-3 flex items-center justify-between"
                 style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(201,168,76,0.12)" }}>
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${photos.filter(Boolean).length === 3 ? "bg-green-400" : "bg-cream/20"}`} />
-                  <span className="text-cream/50 text-xs">{photos.filter(Boolean).length}/3 photos</span>
+                  <div className={`w-2 h-2 rounded-full ${photos.filter(Boolean).length >= 1 ? "bg-green-400" : "bg-cream/20"}`} />
+                  <span className="text-cream/50 text-xs">{photos.filter(Boolean).length}/6 photos</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${selfie ? "bg-green-400" : "bg-cream/20"}`} />

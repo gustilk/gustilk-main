@@ -35,16 +35,22 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         }
       }
 
-      // Enforce 3 profile photos on initial profile setup
+      // Enforce at least 1 profile photo on initial profile setup
       const isInitialSetup = !user?.caste;
       if (isInitialSetup) {
         const submittedPhotos: string[] = (parsed as any).photos ?? [];
-        if (submittedPhotos.length < 3) {
-          return res.status(400).json({ error: "You must upload exactly 3 profile photos to complete your profile." });
+        if (submittedPhotos.length < 1) {
+          return res.status(400).json({ error: "You must upload at least one profile photo to complete your profile." });
         }
         if (!(parsed as any).verificationSelfie) {
           return res.status(400).json({ error: "A verification selfie is required to complete your profile." });
         }
+      }
+
+      // Enforce max 6 photos at all times
+      const allPhotos: string[] = (parsed as any).photos ?? [];
+      if (allPhotos.length > 6) {
+        return res.status(400).json({ error: "You can upload a maximum of 6 photos." });
       }
 
       const data = user?.country ? rest : parsed;

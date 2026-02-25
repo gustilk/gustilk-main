@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Edit2, Star, LogOut, CheckCircle, Clock, Globe, Bell, FileText, Shield, ChevronRight, X, Trash2, AlertTriangle } from "lucide-react";
+import { Edit2, Star, LogOut, CheckCircle, Clock, Globe, Bell, FileText, Shield, ChevronRight, X, Trash2, AlertTriangle, Camera, ImagePlus } from "lucide-react";
 import logoImg from "@assets/Untitled_design_1772024284063.png";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { LANGUAGE_LIST, LangCode, setLanguage } from "@/i18n";
 import type { SafeUser } from "@shared/schema";
+import { PhotoCropModal } from "@/components/PhotoCropModal";
 
 interface Props { user: SafeUser }
 
@@ -17,6 +18,16 @@ export default function ProfilePage({ user }: Props) {
   const { t, i18n } = useTranslation();
   const [showLangPicker, setShowLangPicker] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const [localPhotos, setLocalPhotos] = useState<(string | null)[]>(() => {
+    const arr: (string | null)[] = Array(6).fill(null);
+    (user.photos ?? []).forEach((p, i) => { arr[i] = p; });
+    return arr;
+  });
+  const [photosEdited, setPhotosEdited] = useState(false);
+  const [cropTarget, setCropTarget] = useState<{ imgSrc: string; slotIdx: number } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const pendingSlotRef = useRef<number>(0);
 
   const { data } = useQuery<{ user: SafeUser }>({
     queryKey: ["/api/auth/me"],
@@ -50,6 +61,56 @@ export default function ProfilePage({ user }: Props) {
     },
   });
 
+  const savePhotosMutation = useMutation({
+    mutationFn: async () => {
+      const photos = localPhotos.filter(Boolean) as string[];
+      const res = await apiRequest("PUT", "/api/profile", { photos });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? "Failed to save photos");
+      }
+      return res.json();
+    },
+    onSuccess: (data) => {
+      const arr: (string | null)[] = Array(6).fill(null);
+      ((data.user as SafeUser).photos ?? []).forEach((p: string, i: number) => { arr[i] = p; });
+      setLocalPhotos(arr);
+      setPhotosEdited(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      toast({ title: "Photos updated" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Could not save photos", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const openPicker = (slotIdx: number) => {
+    pendingSlotRef.current = slotIdx;
+    if (fileInputRef.current) { fileInputRef.current.value = ""; fileInputRef.current.click(); }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      if (ev.target?.result) setCropTarget({ imgSrc: ev.target.result as string, slotIdx: pendingSlotRef.current });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropConfirm = (base64: string) => {
+    if (!cropTarget) return;
+    setLocalPhotos(prev => { const next = [...prev]; next[cropTarget.slotIdx] = base64; return next; });
+    setPhotosEdited(true);
+    setCropTarget(null);
+  };
+
+  const removePhoto = (idx: number) => {
+    setLocalPhotos(prev => { const next = [...prev]; next[idx] = null; return next; });
+    setPhotosEdited(true);
+  };
+
   const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Murid" }[c] ?? c);
 
   const currentLang = LANGUAGE_LIST.find(l => l.code === i18n.language) ?? LANGUAGE_LIST[0];
@@ -59,6 +120,15 @@ export default function ProfilePage({ user }: Props) {
   };
 
   return (
+    <>
+    {cropTarget && (
+      <PhotoCropModal
+        imgSrc={cropTarget.imgSrc}
+        outputSize={800}
+        onConfirm={handleCropConfirm}
+        onCancel={() => setCropTarget(null)}
+      />
+    )}
     <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
       <div className="pt-12 pb-2 px-5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
@@ -186,6 +256,86 @@ export default function ProfilePage({ user }: Props) {
             )}
           </div>
         </div>
+      </div>
+
+      {/* ── Photo Gallery ── */}
+      <div className="px-5 mt-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-xs text-cream/40 uppercase tracking-wider font-semibold">My Photos</h3>
+          {photosEdited && (
+            <button
+              onClick={() => savePhotosMutation.mutate()}
+              disabled={savePhotosMutation.isPending}
+              data-testid="button-save-photos"
+              className="px-4 py-1.5 rounded-full text-xs font-bold disabled:opacity-50"
+              style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
+            >
+              {savePhotosMutation.isPending ? "Saving…" : "Save Photos"}
+            </button>
+          )}
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {Array.from({ length: 6 }).map((_, idx) => {
+            const photo = localPhotos[idx];
+            return (
+              <div key={idx} className="relative">
+                {photo ? (
+                  <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
+                    <img
+                      src={photo}
+                      alt={`Photo ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                      data-testid={`img-profile-photo-${idx}`}
+                    />
+                    <button
+                      onClick={() => openPicker(idx)}
+                      data-testid={`button-replace-photo-${idx}`}
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{ background: "rgba(0,0,0,0.0)" }}
+                    >
+                      <Camera size={20} color="white" style={{ opacity: 0 }} />
+                    </button>
+                    <button
+                      onClick={() => removePhoto(idx)}
+                      data-testid={`button-remove-photo-${idx}`}
+                      className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full flex items-center justify-center z-10"
+                      style={{ background: "rgba(212,96,138,0.9)" }}
+                    >
+                      <X size={10} color="white" />
+                    </button>
+                    {idx === 0 && (
+                      <div
+                        className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded text-xs font-bold"
+                        style={{ background: "rgba(201,168,76,0.85)", color: "#1a0a2e" }}
+                      >
+                        Main
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => openPicker(idx)}
+                    data-testid={`button-add-photo-${idx}`}
+                    className="w-full rounded-2xl flex flex-col items-center justify-center gap-1"
+                    style={{ aspectRatio: "1 / 1", background: "rgba(255,255,255,0.03)", border: "2px dashed rgba(201,168,76,0.18)" }}
+                  >
+                    <ImagePlus size={20} color="rgba(201,168,76,0.28)" />
+                    <span className="text-xs" style={{ color: "rgba(253,248,240,0.18)" }}>Photo {idx + 1}</span>
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <p className="text-xs mt-2" style={{ color: "rgba(253,248,240,0.2)" }}>Tap a photo to replace · × to remove · max 6</p>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          data-testid="input-photo-upload"
+          onChange={handleFileChange}
+        />
       </div>
 
       <div className="px-5 mt-5 space-y-3">
@@ -347,6 +497,7 @@ export default function ProfilePage({ user }: Props) {
         </div>
       )}
     </div>
+    </>
   );
 }
 
