@@ -94,7 +94,7 @@ export default function ProfilePage({ user }: Props) {
     setPhotosEdited(true);
   };
 
-  const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Murid" }[c] ?? c);
+  const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[c] ?? c);
 
   return (
     <>

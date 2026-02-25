@@ -256,7 +256,7 @@ function VerificationCard({ user, onApprove, onReject, onBan, isPending }: {
     ? formatDistanceToNow(new Date(user.createdAt), { addSuffix: true })
     : "";
 
-  const casteLabel = (user.caste ? { sheikh: "Sheikh", pir: "Pir", murid: "Murid" }[user.caste] : null) ?? user.caste ?? "";
+  const casteLabel = (user.caste ? { sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[user.caste] : null) ?? user.caste ?? "";
 
   return (
     <div

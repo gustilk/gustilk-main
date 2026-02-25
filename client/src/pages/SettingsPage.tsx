@@ -26,7 +26,7 @@ const COMMUNITY_GUIDELINES = [
   },
   {
     title: "4. Caste Integrity",
-    body: "You must register under your true caste — Sheikh, Pir, or Murid. Misrepresenting your caste is a grave dishonour and will result in account deletion.",
+    body: "You must register under your true caste — Sheikh, Pir, or Mirid. Misrepresenting your caste is a grave dishonour and will result in account deletion.",
   },
   {
     title: "5. No Harmful Content",

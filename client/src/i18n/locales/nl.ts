@@ -20,7 +20,7 @@ export default {
   },
   landing: {
     feature1Title: "Kaste-gebaseerde matching",
-    feature1Desc: "Sjeik, Pir of Murid — met respect voor jezidische tradities",
+    feature1Desc: "Sjeik, Pir of Mirid — met respect voor jezidische tradities",
     feature2Title: "Betrouwbaar en veilig",
     feature2Desc: "Elk profiel wordt handmatig geverifieerd.",
     feature3Title: "Community-evenementen",
@@ -82,7 +82,7 @@ export default {
     caste: "Kaste",
     sheikh: "Sjeik",
     pir: "Pir",
-    murid: "Murid",
+    murid: "Mirid",
     age: "Leeftijd",
     country: "Land",
     city: "Stad",

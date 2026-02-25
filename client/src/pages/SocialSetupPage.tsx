@@ -15,7 +15,7 @@ const AGREEMENT_SECTIONS = [
   { title: "1. Respect the Yezidi Faith", body: "Members must respect and honour the Yezidi religion, its sacred traditions, figures, and practices. Any mockery, disrespect, or misrepresentation is strictly forbidden and may result in immediate account removal." },
   { title: "2. Honour the Community", body: "Treat every member with dignity and respect. Harassment, discrimination, abusive language, or any behaviour that brings shame to the community will not be tolerated." },
   { title: "3. Be Honest", body: "You must represent yourself truthfully. Fake photos, false names, or misleading information is a serious violation. Gûstîlk is built on trust." },
-  { title: "4. Caste Integrity", body: "You must register under your true caste — Sheikh, Pir, or Murid. Misrepresenting your caste is a grave dishonour and will result in account deletion." },
+  { title: "4. Caste Integrity", body: "You must register under your true caste — Sheikh, Pir, or Mirid. Misrepresenting your caste is a grave dishonour and will result in account deletion." },
   { title: "5. No Harmful Content", body: "Sharing explicit, offensive, or inappropriate content is prohibited — including photos, messages, or media that conflicts with Yezidi values." },
   { title: "6. Serious Intentions", body: "Gûstîlk is for genuine connection with the intention of marriage. It must not be used for casual encounters or purposes conflicting with community values." },
   { title: "7. Privacy & Safety", body: "Do not share another member's personal information without consent. Report any behaviour that makes you or others feel unsafe." },

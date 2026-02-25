@@ -82,7 +82,7 @@ export default {
     caste: "Caste",
     sheikh: "Sheikh",
     pir: "Pir",
-    murid: "Murid",
+    murid: "Mirid",
     age: "Âge",
     country: "Pays",
     city: "Ville",

@@ -20,7 +20,7 @@ export default {
   },
   landing: {
     feature1Title: "Caste-Respectful Matching",
-    feature1Desc: "Sheikh, Pir, or Murid — honouring Yezidi tradition.",
+    feature1Desc: "Sheikh, Pir, or Mirid — honouring Yezidi tradition.",
     feature2Title: "Verified & Safe",
     feature2Desc: "Every profile is manually reviewed for authenticity.",
     feature3Title: "Community Events",
@@ -82,7 +82,7 @@ export default {
     caste: "Caste",
     sheikh: "Sheikh",
     pir: "Pir",
-    murid: "Murid",
+    murid: "Mirid",
     age: "Age",
     country: "Country",
     city: "City",

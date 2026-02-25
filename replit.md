@@ -5,7 +5,7 @@ A culturally sensitive dating platform designed exclusively for the Yezidi commu
 ## Overview
 
 **App Name**: Gûstîlk (means "Ring" in Kurdish — symbolizing commitment)
-**Purpose**: Connect Yezidi singles within their caste (Sheikh, Pir, Murid)
+**Purpose**: Connect Yezidi singles within their caste (Sheikh, Pir, Mirid)
 
 ## Architecture
 
