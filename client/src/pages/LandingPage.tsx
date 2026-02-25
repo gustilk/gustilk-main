@@ -53,11 +53,11 @@ export default function LandingPage() {
 function Logo() {
   return (
     <div className="text-center mb-5">
-      <div className="relative inline-flex items-center justify-center mb-1">
+      <div className="relative inline-flex items-center justify-center mb-1" style={{ perspective: "600px" }}>
         <img
           src="/logo-transparent.png"
           alt="Gûstîlk"
-          className="relative"
+          className="relative logo-flip"
           style={{
             width: "min(80px, 26vw)",
             height: "auto",
