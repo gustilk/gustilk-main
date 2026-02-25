@@ -34,6 +34,7 @@ export default function ChatPage({ user, matchId }: Props) {
       return res.json();
     },
     refetchInterval: 5000,
+    enabled: !!user.isPremium,
   });
 
   const messages = msgData?.messages ?? [];
@@ -68,80 +69,74 @@ export default function ChatPage({ user, matchId }: Props) {
   };
 
   if (!user.isPremium) {
-    const waitingCount = messages.filter(m => m.senderId !== user.id).length;
     return (
       <div className="flex flex-col h-screen" style={{ background: "#0d0618" }}>
-        <div
-          className="flex items-center gap-3 px-4 pt-12 pb-3"
-          style={{ background: "rgba(13,6,24,0.97)", borderBottom: "1px solid rgba(201,168,76,0.15)" }}
-        >
-          <button
-            onClick={() => setLocation("/matches")}
-            data-testid="button-back"
-            className="text-cream/60"
-          >
+        {/* Header — back button only, no identity revealed */}
+        <div className="flex items-center gap-3 px-4 pt-12 pb-3"
+          style={{ background: "rgba(13,6,24,0.97)", borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
+          <button onClick={() => setLocation("/matches")} data-testid="button-back" className="text-cream/60">
             <ArrowLeft size={22} />
           </button>
-          <div
-            className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-serif text-lg font-bold text-gold overflow-hidden"
-            style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "2px solid rgba(201,168,76,0.3)" }}
-          >
-            {otherUser?.photos && otherUser.photos.length > 0 ? (
-              <img src={otherUser.photos[0]} alt={otherUser.fullName ?? ""} className="w-full h-full object-cover" />
-            ) : (
-              (otherUser?.fullName ?? otherUser?.firstName ?? "M").charAt(0)
-            )}
+          {/* Blurred avatar — identity hidden */}
+          <div className="relative w-10 h-10 flex-shrink-0">
+            <div className="w-10 h-10 rounded-full overflow-hidden"
+              style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", filter: "blur(4px)", border: "2px solid rgba(201,168,76,0.2)" }}>
+              {otherUser?.photos?.[0] && (
+                <img src={otherUser.photos[0]} alt="" className="w-full h-full object-cover" />
+              )}
+            </div>
+            <div className="absolute inset-0 rounded-full flex items-center justify-center">
+              <Lock size={13} color="#c9a84c" />
+            </div>
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-cream font-semibold text-sm" data-testid="text-chat-name">
-              {otherUser?.fullName ?? "Loading…"}
+            <h2 className="text-cream/30 font-semibold text-sm" data-testid="text-chat-name">
+              Hidden member
             </h2>
-            <p className="text-cream/40 text-xs">
-              {otherUser ? `${otherUser.city}, ${otherUser.country}` : ""}
-            </p>
+            <p className="text-cream/25 text-xs">Upgrade to see their profile</p>
           </div>
-          {otherUser && (
-            <button
-              onClick={() => setShowReport(true)}
-              data-testid="button-report-user"
-              className="p-2 rounded-xl"
-              style={{ color: "rgba(253,248,240,0.35)" }}
-              title="Report user"
-            >
-              <Flag size={18} />
-            </button>
-          )}
         </div>
 
-        <div className="flex-1 flex flex-col items-center justify-center px-6 text-center gap-5">
-          <div
-            className="w-24 h-24 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(245,158,11,0.1)", border: "2px solid rgba(245,158,11,0.3)" }}
-          >
-            <Lock size={36} color="#f59e0b" />
+        {/* Lock screen body */}
+        <div className="flex-1 flex flex-col items-center justify-center px-6 text-center gap-6">
+          <div className="w-24 h-24 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(201,168,76,0.08)", border: "2px solid rgba(201,168,76,0.25)" }}>
+            <Lock size={36} color="#c9a84c" />
           </div>
+
           <div>
-            <h3 className="font-serif text-2xl text-gold mb-2">
-              {waitingCount > 0 ? `${waitingCount} Nachricht${waitingCount !== 1 ? "en" : ""} warten` : "Nachrichten gesperrt"}
-            </h3>
-            <p className="text-cream/50 text-sm leading-relaxed">
-              Wechsle zu Premium, um alle Nachrichten zu lesen und zu senden.
+            <h3 className="font-serif text-2xl text-gold mb-2">Messages Locked</h3>
+            <p className="text-cream/50 text-sm leading-relaxed max-w-xs">
+              Upgrade to Premium to read and send messages, reveal who matched with you, and unlock all features.
             </p>
           </div>
+
+          <div className="w-full max-w-xs space-y-2">
+            {[
+              "Read and send messages",
+              "See who liked and matched you",
+              "Make and receive video calls",
+            ].map((benefit, i) => (
+              <div key={i} className="flex items-center gap-3 px-4 py-2.5 rounded-xl"
+                style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.12)" }}>
+                <Star size={13} fill="#c9a84c" color="#c9a84c" className="flex-shrink-0" />
+                <span className="text-cream/60 text-xs">{benefit}</span>
+              </div>
+            ))}
+          </div>
+
           <button
             onClick={() => setLocation("/premium")}
             data-testid="button-upgrade-chat"
-            className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold text-sm"
-            style={{ background: "linear-gradient(135deg, #f59e0b, #f97316)", color: "white", boxShadow: "0 8px 24px rgba(245,158,11,0.3)" }}
+            className="flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-sm"
+            style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 8px 24px rgba(201,168,76,0.3)" }}
           >
-            <Star size={17} fill="white" />
-            Premium — $5/Monat
+            <Star size={17} fill="#1a0a2e" color="#1a0a2e" />
+            Upgrade to Premium — $5/month
           </button>
-          <button
-            onClick={() => setLocation("/matches")}
-            className="text-cream/40 text-sm"
-          >
-            Zurück zu Matches
+
+          <button onClick={() => setLocation("/matches")} className="text-cream/35 text-sm">
+            Back to Matches
           </button>
         </div>
       </div>

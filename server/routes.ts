@@ -96,6 +96,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // ─── MESSAGES ─────────────────────────────────────────────
   app.get("/api/messages/:matchId", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
+    const user = await storage.getUserById(userId);
+    if (!user?.isPremium) return res.status(403).json({ error: "Premium required to view messages" });
     const match = await storage.getMatch(req.params.matchId as string);
     if (!match || (match.user1Id !== userId && match.user2Id !== userId)) {
       return res.status(403).json({ error: "Forbidden" });
