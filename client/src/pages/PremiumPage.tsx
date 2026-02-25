@@ -44,7 +44,6 @@ const COUNTRY_DATA: Record<string, { isFree: boolean; flag: string; payment: Pay
   UK:          { isFree: false, flag: "🇬🇧", payment: { id: "card",      label: "Credit/Debit Card",  fields: [{ key: "card", label: "Card number", placeholder: "4242 4242 4242 4242" }, { key: "expiry", label: "MM/YY", placeholder: "12/27" }, { key: "cvv", label: "CVV", placeholder: "123", type: "password" }] } },
 };
 
-const ZAINCASH_FASTPAY_COUNTRIES = ["Iraq"];
 
 function getCountryData(country: string) {
   return COUNTRY_DATA[country] ?? COUNTRY_DATA["USA"];
@@ -54,14 +53,12 @@ export default function PremiumPage({ user }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [showCountryPicker, setShowCountryPicker] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState(user.country || "Germany");
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [useLocalPayment, setUseLocalPayment] = useState<string | null>(null);
 
+  const selectedCountry = user.country ?? "Germany";
   const countryInfo = getCountryData(selectedCountry);
   const isFree = countryInfo.isFree;
-  const paymentMethod = useLocalPayment ?? countryInfo.payment.id;
   const isIraq = selectedCountry === "Iraq";
 
   if (user.isPremium) {
@@ -98,12 +95,6 @@ export default function PremiumPage({ user }: Props) {
         : `${countryInfo.payment.label} integration coming soon. Contact support@gustilk.com.`,
     });
   };
-
-  const sortedCountries = Object.entries(COUNTRY_DATA).sort((a, b) => {
-    if (a[1].isFree) return -1;
-    if (b[1].isFree) return 1;
-    return a[0].localeCompare(b[0]);
-  });
 
   return (
     <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
@@ -150,43 +141,18 @@ export default function PremiumPage({ user }: Props) {
           )}
         </div>
 
-        <button
-          onClick={() => setShowCountryPicker(s => !s)}
-          data-testid="button-country-picker"
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all"
-          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(201,168,76,0.2)" }}
+        <div
+          data-testid="display-country"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl"
+          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.12)" }}
         >
           <Globe size={16} color="#c9a84c" />
-          <span className="text-cream/70 text-sm flex-1 text-left">
+          <span className="text-cream/70 text-sm flex-1">
             {countryInfo.flag} {selectedCountry}
             {isFree && <span className="ml-2 text-xs font-bold" style={{ color: "#10b981" }}>Free</span>}
           </span>
           <span className="text-cream/30 text-xs">{countryInfo.payment.label}</span>
-        </button>
-
-        {showCountryPicker && (
-          <div className="rounded-2xl overflow-hidden animate-slide-up max-h-64 overflow-y-auto"
-            style={{ border: "1px solid rgba(201,168,76,0.2)", background: "rgba(255,255,255,0.04)" }}>
-            {sortedCountries.map(([country, info]) => (
-              <button
-                key={country}
-                onClick={() => { setSelectedCountry(country); setUseLocalPayment(null); setShowCountryPicker(false); setFieldValues({}); }}
-                data-testid={`country-${country}`}
-                className="w-full flex items-center gap-3 px-4 py-3 transition-all text-left"
-                style={selectedCountry === country ? { background: "rgba(201,168,76,0.1)" } : {}}
-              >
-                <span className="text-xl">{info.flag}</span>
-                <span className="flex-1 text-cream text-sm">{country}</span>
-                <span className="text-cream/35 text-xs">{info.payment.label}</span>
-                {info.isFree && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                    style={{ background: "rgba(16,185,129,0.2)", color: "#10b981" }}>FREE</span>
-                )}
-                {selectedCountry === country && <Check size={14} color="#c9a84c" />}
-              </button>
-            ))}
-          </div>
-        )}
+        </div>
 
         <div className="rounded-2xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}>
           {BENEFITS.map(({ icon: Icon, text }) => (

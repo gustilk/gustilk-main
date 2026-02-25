@@ -8,8 +8,10 @@ import type { User } from "@shared/schema";
 
 interface Props { user: User }
 
-const LANGUAGES = ["Kurdish", "Arabic", "English", "German", "Swedish", "French", "Turkish", "Armenian", "Russian"];
-const COUNTRIES = ["USA", "Canada", "Australia", "Germany", "Holland", "Sweden", "Belgium", "France", "Turkey", "Iraq", "Armenia", "Georgia", "Russia", "UK"];
+const LANGUAGES = [
+  "Kurdish", "Arabic", "English", "German", "Swedish", "French",
+  "Turkish", "Armenian", "Russian", "Dutch", "Spanish", "Georgian",
+];
 
 export default function EditProfilePage({ user }: Props) {
   const [, setLocation] = useLocation();
@@ -105,15 +107,15 @@ export default function EditProfilePage({ user }: Props) {
         </div>
 
         <FieldGroup label="Country">
-          <select
-            value={form.country}
-            onChange={inp("country")}
-            data-testid="select-country"
-            className="w-full px-4 py-3 rounded-xl text-sm text-cream outline-none appearance-none"
-            style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.25)" }}
+          <div
+            data-testid="display-country"
+            className="w-full px-4 py-3 rounded-xl text-sm flex items-center justify-between"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1.5px solid rgba(201,168,76,0.12)", color: "rgba(253,248,240,0.5)" }}
           >
-            {COUNTRIES.map(c => <option key={c} value={c} style={{ background: "#2d0f4a" }}>{c}</option>)}
-          </select>
+            <span>{user.country ?? "—"}</span>
+            <span className="text-xs" style={{ color: "rgba(201,168,76,0.5)" }}>Locked</span>
+          </div>
+          <p className="text-xs mt-1.5" style={{ color: "rgba(253,248,240,0.3)" }}>Country cannot be changed after signup</p>
         </FieldGroup>
 
         <FieldGroup label="Languages I speak">

@@ -17,7 +17,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.put("/api/profile", isAuthenticated, async (req, res) => {
     try {
       const userId = getUserId(req);
-      const data = profileUpdateSchema.parse(req.body);
+      const parsed = profileUpdateSchema.parse(req.body);
+      const user = await storage.getUserById(userId);
+      // Country is locked once set — ignore any country update if the user already has one
+      const { country: _ignored, ...rest } = parsed as any;
+      const data = user?.country ? rest : parsed;
       const updated = await storage.updateUser(userId, data as any);
       res.json({ user: updated });
     } catch (err: any) {
