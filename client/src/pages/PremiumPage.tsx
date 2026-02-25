@@ -154,8 +154,9 @@ export default function PremiumPage({ user }: Props) {
           <ArrowLeft size={22} />
         </button>
         <div className="flex items-center gap-2.5 flex-1">
-          <img src={logoImg} alt="" className="w-9 h-9 object-contain flex-shrink-0"
-            style={{ filter: "drop-shadow(0 2px 8px rgba(201,168,76,0.5))" }} />
+          <div className="flex-shrink-0 overflow-hidden" style={{ width: "36px", height: "36px" }}>
+            <img src={logoImg} alt="" style={{ width: "76px", height: "76px", objectFit: "contain", position: "relative", top: "50%", left: "50%", transform: "translate(-50%, -46%)", filter: "drop-shadow(0 2px 6px rgba(201,168,76,0.5))" }} />
+          </div>
           <h1 className="font-serif text-2xl text-gold">Premium</h1>
         </div>
       </div>

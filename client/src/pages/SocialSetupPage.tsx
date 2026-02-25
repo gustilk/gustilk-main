@@ -229,8 +229,9 @@ export default function SocialSetupPage({ user }: Props) {
         {step === 1 && (
           <>
             <div className="text-center mb-7">
-              <img src={logoImg} alt="Gûstîlk" className="w-24 h-24 object-contain mx-auto mb-4"
-                style={{ filter: "drop-shadow(0 4px 16px rgba(201,168,76,0.5))" }} />
+              <div className="overflow-hidden mx-auto mb-4" style={{ width: "96px", height: "96px" }}>
+                <img src={logoImg} alt="Gûstîlk" style={{ width: "200px", height: "200px", objectFit: "contain", position: "relative", top: "50%", left: "50%", transform: "translate(-50%, -46%)", filter: "drop-shadow(0 4px 16px rgba(201,168,76,0.5))" }} />
+              </div>
               <h1 className="font-serif text-3xl text-gold mb-1">
                 {(() => {
                   const name = (user.fullName ?? user.firstName ?? "").split(" ")[0];

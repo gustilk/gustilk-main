@@ -25,8 +25,9 @@ export default function MatchesPage({ user }: Props) {
   return (
     <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
       <div className="pt-12 pb-2 px-5 flex items-center gap-2.5">
-        <img src={logoImg} alt="" className="w-10 h-10 object-contain flex-shrink-0"
-          style={{ filter: "drop-shadow(0 2px 8px rgba(201,168,76,0.5))" }} />
+        <div className="flex-shrink-0 overflow-hidden" style={{ width: "40px", height: "40px" }}>
+          <img src={logoImg} alt="" style={{ width: "84px", height: "84px", objectFit: "contain", position: "relative", top: "50%", left: "50%", transform: "translate(-50%, -46%)", filter: "drop-shadow(0 2px 6px rgba(201,168,76,0.5))" }} />
+        </div>
         <h1 className="font-serif text-2xl text-gold">{t("matches.title")}</h1>
       </div>
 
