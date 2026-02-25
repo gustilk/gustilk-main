@@ -34,7 +34,11 @@ export default function LandingPage() {
         }}
       >
         <Globe size={13} />
-        {currentLang.flag} {currentLang.native}
+        {currentLang.flag.startsWith("/") ? (
+          <img src={currentLang.flag} alt="" className="rounded-sm object-cover" style={{ width: "18px", height: "13px" }} />
+        ) : (
+          currentLang.flag
+        )} {currentLang.native}
       </button>
 
       <div className="relative z-10 flex flex-col items-center justify-start flex-1 px-6 pt-12 pb-6 max-w-sm mx-auto w-full">

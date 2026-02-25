@@ -72,7 +72,11 @@ export default function LanguageSelectPage({ onSelect }: Props) {
                   transform: isActive ? "scale(1.02)" : "scale(1)",
                 }}
               >
-                <span className="text-2xl flex-shrink-0">{flag}</span>
+                {flag.startsWith("/") ? (
+                  <img src={flag} alt="" className="flex-shrink-0 rounded-sm object-cover" style={{ width: "28px", height: "20px" }} />
+                ) : (
+                  <span className="text-2xl flex-shrink-0">{flag}</span>
+                )}
                 <span
                   className="text-sm font-medium truncate"
                   style={{ color: isActive ? "#c9a84c" : "rgba(253,248,240,0.75)" }}
