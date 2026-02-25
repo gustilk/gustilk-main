@@ -8,10 +8,36 @@ import type { User } from "@shared/schema";
 
 const COUNTRIES = ["USA", "Canada", "Australia", "Germany", "Holland", "Sweden", "Belgium", "France", "Turkey", "Iraq", "Armenia", "Georgia", "Russia", "UK"];
 const CASTES = [{ value: "sheikh", label: "Sheikh" }, { value: "pir", label: "Pir" }, { value: "murid", label: "Murid" }];
-const GUIDELINES = [
-  "Respect the Yezidi caste system and cultural traditions",
-  "Use authentic photos and honest information",
-  "No harassment, offensive content, or misrepresentation",
+
+const AGREEMENT_SECTIONS = [
+  {
+    title: "1. Respect the Yezidi Faith",
+    body: "Members must respect and honour the Yezidi religion, its sacred traditions, figures, and practices. Any mockery, disrespect, or misrepresentation is strictly forbidden and may result in immediate account removal.",
+  },
+  {
+    title: "2. Honour the Community",
+    body: "Treat every member with dignity and respect. Harassment, discrimination, abusive language, or any behaviour that brings shame to the community will not be tolerated.",
+  },
+  {
+    title: "3. Be Honest",
+    body: "You must represent yourself truthfully. Fake photos, false names, or misleading information is a serious violation. Gûstîlk is built on trust.",
+  },
+  {
+    title: "4. Caste Integrity",
+    body: "You must register under your true caste — Sheikh, Pir, or Murid. Misrepresenting your caste is a grave dishonour and will result in account deletion.",
+  },
+  {
+    title: "5. No Harmful Content",
+    body: "Sharing explicit, offensive, or inappropriate content is prohibited — including photos, messages, or media that conflicts with Yezidi values.",
+  },
+  {
+    title: "6. Serious Intentions",
+    body: "Gûstîlk is for genuine connection with the intention of marriage. It must not be used for casual encounters or purposes conflicting with community values.",
+  },
+  {
+    title: "7. Privacy & Safety",
+    body: "Do not share another member's personal information without consent. Report any behaviour that makes you or others feel unsafe.",
+  },
 ];
 
 // Map ipapi.co country_name values to our app's country list
@@ -58,7 +84,8 @@ export default function SocialSetupPage({ user }: Props) {
     city: "",
     age: 22,
   });
-  const [agreed, setAgreed] = useState(false);
+  const [agreedGuidelines, setAgreedGuidelines] = useState(false);
+  const [agreedTruthful, setAgreedTruthful] = useState(false);
   const [geoState, setGeoState] = useState<GeoState>("loading");
   const [detectedCountryName, setDetectedCountryName] = useState("");
 
@@ -108,7 +135,7 @@ export default function SocialSetupPage({ user }: Props) {
     },
   });
 
-  const canSubmit = data.country && data.city.trim() && agreed && Number(data.age) >= 18;
+  const canSubmit = data.country && data.city.trim() && agreedGuidelines && agreedTruthful && Number(data.age) >= 18;
 
   return (
     <div className="min-h-screen flex items-center justify-center px-5 py-8" style={{ background: "#0d0618" }}>
@@ -225,32 +252,67 @@ export default function SocialSetupPage({ user }: Props) {
             </div>
           </div>
 
-          {/* Community guidelines */}
-          <div className="rounded-2xl p-4 space-y-2"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(201,168,76,0.15)" }}>
-            {GUIDELINES.map((g, i) => (
-              <div key={i} className="flex items-start gap-2">
-                <span className="text-gold text-xs mt-0.5 flex-shrink-0">✦</span>
-                <p className="text-cream/50 text-xs leading-relaxed">{g}</p>
+          {/* Community Agreement */}
+          <div className="rounded-2xl overflow-hidden"
+            style={{ border: "1px solid rgba(201,168,76,0.2)" }}>
+            <div className="px-4 py-3" style={{ background: "rgba(201,168,76,0.07)", borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
+              <p className="text-gold font-serif text-sm font-semibold">Gûstîlk — Community Agreement</p>
+              <p className="text-cream/40 text-xs mt-0.5">Gûstîlk is a sacred space. By joining, you agree to uphold the values, traditions, and honour of the Yezidi faith.</p>
+            </div>
+            <div className="p-4 space-y-3 max-h-52 overflow-y-auto"
+              style={{ background: "rgba(255,255,255,0.02)" }}
+              data-testid="agreement-scroll">
+              {AGREEMENT_SECTIONS.map((s, i) => (
+                <div key={i}>
+                  <p className="text-gold/80 text-xs font-semibold mb-0.5">{s.title}</p>
+                  <p className="text-cream/45 text-xs leading-relaxed">{s.body}</p>
+                </div>
+              ))}
+              <div className="pt-1" style={{ borderTop: "1px solid rgba(201,168,76,0.12)" }}>
+                <p className="text-cream/40 text-xs leading-relaxed italic">
+                  Depending on severity of violations: a warning, temporary suspension, permanent ban, or deletion of your account. The admin team has full authority to enforce these guidelines.
+                </p>
+                <p className="text-gold/60 text-xs mt-2 font-medium">
+                  By using Gûstîlk, you honour not just these rules — but the entire Yezidi community.
+                </p>
               </div>
-            ))}
+            </div>
           </div>
 
-          <label className="flex items-start gap-3 cursor-pointer" data-testid="checkbox-guidelines">
-            <div
-              onClick={() => setAgreed(a => !a)}
-              className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0 mt-0.5 transition-all"
-              style={agreed
-                ? { background: "#c9a84c" }
-                : { border: "1.5px solid rgba(201,168,76,0.4)", background: "rgba(255,255,255,0.05)" }
-              }
-            >
-              {agreed && <span className="text-ink text-xs font-bold">✓</span>}
-            </div>
-            <span className="text-cream/55 text-xs leading-relaxed">
-              I agree to follow the community guidelines based on Yezidi faith and cultural values
-            </span>
-          </label>
+          {/* Confirmation checkboxes */}
+          <div className="space-y-3">
+            <label className="flex items-start gap-3 cursor-pointer" data-testid="checkbox-guidelines">
+              <div
+                onClick={() => setAgreedGuidelines(a => !a)}
+                className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0 mt-0.5 transition-all"
+                style={agreedGuidelines
+                  ? { background: "#c9a84c" }
+                  : { border: "1.5px solid rgba(201,168,76,0.4)", background: "rgba(255,255,255,0.05)" }
+                }
+              >
+                {agreedGuidelines && <span className="text-ink text-xs font-bold">✓</span>}
+              </div>
+              <span className="text-cream/55 text-xs leading-relaxed">
+                I have read and agree to the Community Guidelines
+              </span>
+            </label>
+
+            <label className="flex items-start gap-3 cursor-pointer" data-testid="checkbox-truthful">
+              <div
+                onClick={() => setAgreedTruthful(a => !a)}
+                className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0 mt-0.5 transition-all"
+                style={agreedTruthful
+                  ? { background: "#c9a84c" }
+                  : { border: "1.5px solid rgba(201,168,76,0.4)", background: "rgba(255,255,255,0.05)" }
+                }
+              >
+                {agreedTruthful && <span className="text-ink text-xs font-bold">✓</span>}
+              </div>
+              <span className="text-cream/55 text-xs leading-relaxed">
+                I confirm that all information I provide is truthful and honest
+              </span>
+            </label>
+          </div>
 
           <button
             onClick={() => mutation.mutate()}
