@@ -88,7 +88,7 @@ export const profileUpdateSchema = z.object({
   gender: z.enum(["male", "female"]).optional(),
   country: z.string().optional(),
   city: z.string().optional(),
-  age: z.number().min(16).max(80).optional(),
+  age: z.number().min(18).max(80).optional(),
   dateOfBirth: z.string().optional(),
   bio: z.string().max(500).optional(),
   occupation: z.string().max(100).optional(),

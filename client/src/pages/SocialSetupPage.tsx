@@ -162,15 +162,15 @@ export default function SocialSetupPage({ user }: Props) {
     setCropTarget(null);
   };
 
-  const isAtLeast16 = (dob: string) => {
+  const isAtLeast18 = (dob: string) => {
     if (!dob) return false;
     const d = new Date(dob);
     const cutoff = new Date();
-    cutoff.setFullYear(cutoff.getFullYear() - 16);
+    cutoff.setFullYear(cutoff.getFullYear() - 18);
     return d <= cutoff;
   };
-  const maxDobDate = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 16); return d.toISOString().split("T")[0]; })();
-  const step1Valid = data.country && data.city.trim() && agreedGuidelines && agreedTruthful && isAtLeast16(data.dateOfBirth);
+  const maxDobDate = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().split("T")[0]; })();
+  const step1Valid = data.country && data.city.trim() && agreedGuidelines && agreedTruthful && isAtLeast18(data.dateOfBirth);
   const step2Valid = photos.filter(Boolean).length >= 2 && selfie;
   const canSubmit = step2Valid && !cropTarget;
 
@@ -319,10 +319,10 @@ export default function SocialSetupPage({ user }: Props) {
                   onChange={e => setData(d => ({ ...d, dateOfBirth: e.target.value }))}
                   data-testid="input-date-of-birth"
                   className="w-full px-3 py-3 rounded-xl text-sm text-cream outline-none"
-                  style={{ background: "rgba(255,255,255,0.07)", border: `1.5px solid ${data.dateOfBirth && !isAtLeast16(data.dateOfBirth) ? "rgba(212,96,138,0.6)" : "rgba(201,168,76,0.25)"}`, colorScheme: "dark" }}
+                  style={{ background: "rgba(255,255,255,0.07)", border: `1.5px solid ${data.dateOfBirth && !isAtLeast18(data.dateOfBirth) ? "rgba(212,96,138,0.6)" : "rgba(201,168,76,0.25)"}`, colorScheme: "dark" }}
                 />
-                {data.dateOfBirth && !isAtLeast16(data.dateOfBirth) && (
-                  <p className="text-xs mt-1" style={{ color: "#d4608a" }}>You must be at least 16 years old to use Gûstîlk.</p>
+                {data.dateOfBirth && !isAtLeast18(data.dateOfBirth) && (
+                  <p className="text-xs mt-1" style={{ color: "#d4608a" }}>You must be at least 18 years old to use Gûstîlk.</p>
                 )}
               </div>
 
