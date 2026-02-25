@@ -4,6 +4,7 @@ import { ArrowLeft, Star, Check, Eye, Heart, MessageCircle, Users, Globe, Credit
 import { SiPaypal, SiApplepay, SiGooglepay, SiVenmo, SiKlarna } from "react-icons/si";
 import type { SafeUser } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface Props { user: SafeUser }
 
@@ -111,14 +112,33 @@ export default function PremiumPage({ user }: Props) {
 
   const handlePay = async () => {
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1500));
+    if (isFree) {
+      try {
+        const res = await apiRequest("POST", "/api/premium/subscribe", {});
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          toast({
+            title: "Location verification failed",
+            description: body.error ?? "Free membership is only available from Iraq.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+        await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+        toast({ title: "Welcome to Premium!", description: "Your free Iraqi membership is now active." });
+        setLocation("/discover");
+      } catch {
+        toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
+      }
+    } else {
+      await new Promise(r => setTimeout(r, 1500));
+      toast({
+        title: "Payment setup required",
+        description: `${method?.label ?? "Payment"} integration coming soon. Contact support@gustilk.com.`,
+      });
+    }
     setLoading(false);
-    toast({
-      title: isFree ? "Welcome to Premium!" : "Payment setup required",
-      description: isFree
-        ? "Premium is free for users in Iraq. Contact us to activate your account."
-        : `${method?.label ?? "Payment"} integration coming soon. Contact support@gustilk.com.`,
-    });
   };
 
   const selectMethod = (id: string) => {

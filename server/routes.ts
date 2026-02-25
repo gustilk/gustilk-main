@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupSession, registerAuthRoutes, isAuthenticated } from "./auth";
 import { profileUpdateSchema } from "@shared/schema";
+import { verifyCountryFromRequest, verifyIraqFromRequest } from "./geo";
 import { z } from "zod";
 
 function getUserId(req: any): string {
@@ -19,8 +20,19 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const userId = getUserId(req);
       const parsed = profileUpdateSchema.parse(req.body);
       const user = await storage.getUserById(userId);
+
       // Country is locked once set — ignore any country update if the user already has one
       const { country: _ignored, ...rest } = parsed as any;
+
+      if (!user?.country && (parsed as any).country) {
+        // First time setting country — verify server-side that the IP matches
+        const claimedCountry: string = (parsed as any).country;
+        const geoCheck = await verifyCountryFromRequest(req, claimedCountry);
+        if (!geoCheck.allowed) {
+          return res.status(403).json({ error: geoCheck.reason ?? "Location verification failed." });
+        }
+      }
+
       const data = user?.country ? rest : parsed;
       const updated = await storage.updateUser(userId, data as any);
       res.json({ user: updated });
@@ -126,6 +138,16 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // ─── PREMIUM ──────────────────────────────────────────────
   app.post("/api/premium/subscribe", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
+    const user = await storage.getUserById(userId);
+
+    // Iraq users get free premium — but we verify server-side that the connection is actually from Iraq
+    if (user?.country === "Iraq") {
+      const geoCheck = await verifyIraqFromRequest(req);
+      if (!geoCheck.isIraq) {
+        return res.status(403).json({ error: geoCheck.reason ?? "Free membership is only available from Iraq." });
+      }
+    }
+
     const until = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     await storage.updateUser(userId, { isPremium: true, premiumUntil: until });
     res.json({ ok: true });
