@@ -15,6 +15,7 @@ import EventDetailPage from "@/pages/EventDetailPage";
 import AdminPage from "@/pages/AdminPage";
 import VerificationPage from "@/pages/VerificationPage";
 import PendingVerificationPage from "@/pages/PendingVerificationPage";
+import SocialSetupPage from "@/pages/SocialSetupPage";
 import BottomNav from "@/components/BottomNav";
 import type { SafeUser } from "@shared/schema";
 
@@ -28,11 +29,19 @@ function useAuth() {
   });
 }
 
+function needsProfileSetup(user: AuthUser): boolean {
+  return !user.city || !user.country || user.city === "" || user.country === "";
+}
+
 function AppShell({ user }: { user: AuthUser }) {
   const [location] = useLocation();
   const isChat = location.startsWith("/chat/");
   const isEventDetail = location.startsWith("/events/") && location !== "/events";
   const isVerifyPage = location === "/verify" || location === "/pending-verification";
+
+  if (needsProfileSetup(user) && location !== "/complete-profile") {
+    return <SocialSetupPage user={user} />;
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-ink" style={{ fontFamily: "'Open Sans', sans-serif" }}>
@@ -49,6 +58,7 @@ function AppShell({ user }: { user: AuthUser }) {
           <Route path="/admin" component={() => <AdminPage user={user} />} />
           <Route path="/verify" component={() => <VerificationPage user={user} />} />
           <Route path="/pending-verification" component={() => <PendingVerificationPage user={user} />} />
+          <Route path="/complete-profile" component={() => <SocialSetupPage user={user} />} />
           <Route path="/" component={() => <Redirect to="/discover" />} />
         </Switch>
       </main>

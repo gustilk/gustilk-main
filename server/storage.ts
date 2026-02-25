@@ -6,7 +6,10 @@ import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
 
 export interface IStorage {
-  createUser(data: InsertUser & { password: string }): Promise<SafeUser>;
+  createUser(data: InsertUser & { password?: string }): Promise<SafeUser>;
+  findOrCreateSocialUser(provider: "google" | "facebook" | "instagram" | "snapchat", socialId: string, profile: {
+    email?: string; fullName?: string; photo?: string;
+  }): Promise<{ user: User; isNew: boolean }>;
   getUserById(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByPhone(phone: string): Promise<User | undefined>;
@@ -44,8 +47,8 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  async createUser(data: InsertUser & { password: string }): Promise<SafeUser> {
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+  async createUser(data: InsertUser & { password?: string }): Promise<SafeUser> {
+    const hashedPassword = data.password ? await bcrypt.hash(data.password, 10) : "";
     const id = randomUUID();
     const [user] = await db.insert(users).values({
       ...data,
@@ -54,6 +57,46 @@ export class DatabaseStorage implements IStorage {
     }).returning();
     const { password: _, ...safe } = user;
     return safe;
+  }
+
+  async findOrCreateSocialUser(
+    provider: "google" | "facebook" | "instagram" | "snapchat",
+    socialId: string,
+    profile: { email?: string; fullName?: string; photo?: string }
+  ): Promise<{ user: User; isNew: boolean }> {
+    const col = {
+      google: users.googleId,
+      facebook: users.facebookId,
+      instagram: users.instagramId,
+      snapchat: users.snapchatId,
+    }[provider];
+
+    const [existing] = await db.select().from(users).where(eq(col, socialId));
+    if (existing) return { user: existing, isNew: false };
+
+    if (profile.email) {
+      const [byEmail] = await db.select().from(users).where(eq(users.email, profile.email));
+      if (byEmail) {
+        const [updated] = await db.update(users).set({ [col.name]: socialId }).where(eq(users.id, byEmail.id)).returning();
+        return { user: updated, isNew: false };
+      }
+    }
+
+    const id = randomUUID();
+    const [newUser] = await db.insert(users).values({
+      id,
+      email: profile.email ?? null,
+      [col.name]: socialId,
+      password: "",
+      fullName: profile.fullName ?? "New Member",
+      caste: "murid",
+      gender: "female",
+      country: "",
+      city: "",
+      age: 25,
+      photos: profile.photo ? [profile.photo] : [],
+    } as any).returning();
+    return { user: newUser, isNew: true };
   }
 
   async getUserById(id: string): Promise<User | undefined> {

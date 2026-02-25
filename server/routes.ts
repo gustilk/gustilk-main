@@ -40,6 +40,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const user = await storage.getUserByIdentifier(identifier);
     if (!user) return res.status(401).json({ error: "No account found with that email or phone" });
 
+    if (!user.password) return res.status(401).json({ error: "This account uses social login — please sign in with Google, Facebook, Instagram, or Snapchat." });
     const bcrypt = await import("bcryptjs");
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(401).json({ error: "Incorrect password" });
@@ -116,11 +117,149 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ user: safe });
   });
 
+  // ─── SOCIAL OAUTH ─────────────────────────────────────────
+  function oauthSuccessRedirect(req: any, res: any) {
+    const user = req.user as any;
+    if (user?._socialNew || !user?.caste || !user?.city) {
+      return res.redirect("/#setup");
+    }
+    res.redirect("/discover");
+  }
+
+  // Google
+  if (process.env.GOOGLE_CLIENT_ID) {
+    app.get("/api/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+    app.get("/api/auth/google/callback",
+      passport.authenticate("google", { failureRedirect: "/#social-error" }),
+      oauthSuccessRedirect
+    );
+  } else {
+    app.get("/api/auth/google", (_req, res) => res.redirect("/#no-google"));
+  }
+
+  // Facebook
+  if (process.env.FACEBOOK_APP_ID) {
+    app.get("/api/auth/facebook", passport.authenticate("facebook", { scope: ["email"] }));
+    app.get("/api/auth/facebook/callback",
+      passport.authenticate("facebook", { failureRedirect: "/#social-error" }),
+      oauthSuccessRedirect
+    );
+  } else {
+    app.get("/api/auth/facebook", (_req, res) => res.redirect("/#no-facebook"));
+  }
+
+  // Instagram (uses Meta OAuth with instagram_basic scope)
+  const IG_ID = process.env.INSTAGRAM_CLIENT_ID;
+  const IG_SECRET = process.env.INSTAGRAM_CLIENT_SECRET;
+  app.get("/api/auth/instagram", (_req, res) => {
+    if (!IG_ID) return res.redirect("/#no-instagram");
+    const baseUrl = process.env.REPLIT_DOMAINS
+      ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}`
+      : "http://localhost:5000";
+    const params = new URLSearchParams({
+      client_id: IG_ID,
+      redirect_uri: `${baseUrl}/api/auth/instagram/callback`,
+      scope: "user_profile,user_media",
+      response_type: "code",
+    });
+    res.redirect(`https://api.instagram.com/oauth/authorize?${params}`);
+  });
+  app.get("/api/auth/instagram/callback", async (req, res) => {
+    if (!IG_ID || !IG_SECRET) return res.redirect("/#no-instagram");
+    const { code } = req.query;
+    if (!code) return res.redirect("/#social-error");
+    try {
+      const baseUrl = process.env.REPLIT_DOMAINS
+        ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}`
+        : "http://localhost:5000";
+      const formData = new URLSearchParams({
+        client_id: IG_ID, client_secret: IG_SECRET,
+        grant_type: "authorization_code",
+        redirect_uri: `${baseUrl}/api/auth/instagram/callback`,
+        code: String(code),
+      });
+      const tokenRes = await fetch("https://api.instagram.com/oauth/access_token", {
+        method: "POST", body: formData,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      });
+      const tokenData = await tokenRes.json() as any;
+      if (!tokenData.user_id) return res.redirect("/#social-error");
+      const profileRes = await fetch(`https://graph.instagram.com/${tokenData.user_id}?fields=id,username&access_token=${tokenData.access_token}`);
+      const profile = await profileRes.json() as any;
+      const { user, isNew } = await storage.findOrCreateSocialUser("instagram", String(profile.id), {
+        fullName: profile.username,
+      });
+      req.login({ ...user, _socialNew: isNew } as any, (err) => {
+        if (err) return res.redirect("/#social-error");
+        oauthSuccessRedirect(req, res);
+      });
+    } catch { res.redirect("/#social-error"); }
+  });
+
+  // Snapchat
+  const SC_ID = process.env.SNAPCHAT_CLIENT_ID;
+  const SC_SECRET = process.env.SNAPCHAT_CLIENT_SECRET;
+  app.get("/api/auth/snapchat", (_req, res) => {
+    if (!SC_ID) return res.redirect("/#no-snapchat");
+    const baseUrl = process.env.REPLIT_DOMAINS
+      ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}`
+      : "http://localhost:5000";
+    const params = new URLSearchParams({
+      client_id: SC_ID,
+      redirect_uri: `${baseUrl}/api/auth/snapchat/callback`,
+      scope: "https://auth.snapchat.com/oauth2/api/user.display_name https://auth.snapchat.com/oauth2/api/user.bitmoji.avatar",
+      response_type: "code",
+    });
+    res.redirect(`https://accounts.snapchat.com/accounts/oauth2/auth?${params}`);
+  });
+  app.get("/api/auth/snapchat/callback", async (req, res) => {
+    if (!SC_ID || !SC_SECRET) return res.redirect("/#no-snapchat");
+    const { code } = req.query;
+    if (!code) return res.redirect("/#social-error");
+    try {
+      const baseUrl = process.env.REPLIT_DOMAINS
+        ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}`
+        : "http://localhost:5000";
+      const creds = Buffer.from(`${SC_ID}:${SC_SECRET}`).toString("base64");
+      const tokenRes = await fetch("https://accounts.snapchat.com/accounts/oauth2/token", {
+        method: "POST",
+        headers: { "Authorization": `Basic ${creds}`, "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ grant_type: "authorization_code", code: String(code), redirect_uri: `${baseUrl}/api/auth/snapchat/callback` }),
+      });
+      const tokenData = await tokenRes.json() as any;
+      if (!tokenData.access_token) return res.redirect("/#social-error");
+      const meRes = await fetch("https://kit.snapchat.com/v1/me", {
+        headers: { Authorization: `Bearer ${tokenData.access_token}` },
+      });
+      const me = await meRes.json() as any;
+      const snapId = me.data?.me?.externalId || me.data?.me?.displayName;
+      if (!snapId) return res.redirect("/#social-error");
+      const { user, isNew } = await storage.findOrCreateSocialUser("snapchat", snapId, {
+        fullName: me.data?.me?.displayName,
+      });
+      req.login({ ...user, _socialNew: isNew } as any, (err) => {
+        if (err) return res.redirect("/#social-error");
+        oauthSuccessRedirect(req, res);
+      });
+    } catch { res.redirect("/#social-error"); }
+  });
+
+  // Check which providers are configured
+  app.get("/api/auth/providers", (_req, res) => {
+    res.json({
+      google: !!process.env.GOOGLE_CLIENT_ID,
+      facebook: !!process.env.FACEBOOK_APP_ID,
+      instagram: !!process.env.INSTAGRAM_CLIENT_ID,
+      snapchat: !!process.env.SNAPCHAT_CLIENT_ID,
+    });
+  });
+
   // ─── PROFILE ─────────────────────────────────────────────
   const profileUpdateSchema = z.object({
     fullName: z.string().min(2).optional(),
-    city: z.string().min(1).optional(),
-    country: z.string().min(1).optional(),
+    city: z.string().optional(),
+    country: z.string().optional(),
+    caste: z.enum(["sheikh", "pir", "murid"]).optional(),
     bio: z.string().max(500).optional(),
     occupation: z.string().max(100).optional(),
     languages: z.array(z.string()).optional(),

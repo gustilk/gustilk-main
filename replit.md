@@ -19,9 +19,19 @@ A culturally sensitive dating platform designed exclusively for the Yezidi commu
 
 ### Backend
 - **Express.js** with TypeScript
-- **Passport.js** (local strategy) + express-session
+- **Passport.js** (local + Google + Facebook strategies) + express-session
 - **PostgreSQL** via Drizzle ORM
 - **connect-pg-simple** for session storage
+- Manual OAuth for Instagram and Snapchat (no Passport strategies available)
+
+## Social OAuth
+Configured via environment secrets. Providers activate automatically when keys are set:
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` → Google OAuth (passport-google-oauth20)
+- `FACEBOOK_APP_ID` / `FACEBOOK_APP_SECRET` → Facebook OAuth (passport-facebook)
+- `INSTAGRAM_CLIENT_ID` / `INSTAGRAM_CLIENT_SECRET` → Instagram manual OAuth
+- `SNAPCHAT_CLIENT_ID` / `SNAPCHAT_CLIENT_SECRET` → Snapchat manual OAuth
+Callback URLs: `https://<domain>/api/auth/<provider>/callback`
+New social users (empty city) are shown `SocialSetupPage` to fill caste, gender, country, city.
 
 ## Key Features
 1. **Caste-based matching** — users only see profiles from their own caste
