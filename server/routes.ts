@@ -2,9 +2,10 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, requireAuth } from "./auth";
-import { registerSchema, loginSchema } from "@shared/schema";
+import { registerSchema, sendOtpSchema, verifyOtpSchema } from "@shared/schema";
 import passport from "passport";
 import { z } from "zod";
+import { generateOtp, sendSms } from "./twilio";
 
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
   setupAuth(app);
@@ -13,9 +14,15 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.post("/api/auth/register", async (req, res) => {
     try {
       const data = registerSchema.parse(req.body);
-      const existing = await storage.getUserByEmail(data.email);
-      if (existing) return res.status(400).json({ error: "Email already in use" });
-      const user = await storage.createUser(data);
+      if (data.email) {
+        const existing = await storage.getUserByEmail(data.email);
+        if (existing) return res.status(400).json({ error: "Email already in use" });
+      }
+      if (data.phone) {
+        const existing = await storage.getUserByPhone(data.phone);
+        if (existing) return res.status(400).json({ error: "Phone number already in use" });
+      }
+      const user = await storage.createUser(data as any);
       req.login(user as any, (err) => {
         if (err) return res.status(500).json({ error: "Login failed after register" });
         res.json({ user });
@@ -26,21 +33,76 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  app.post("/api/auth/login", (req, res, next) => {
-    try {
-      loginSchema.parse(req.body);
-    } catch (err: any) {
-      return res.status(400).json({ error: "Invalid email or password" });
-    }
-    passport.authenticate("local", (err: any, user: any, info: any) => {
+  app.post("/api/auth/login", async (req, res, next) => {
+    const { identifier, password } = req.body;
+    if (!identifier || !password) return res.status(400).json({ error: "Identifier and password required" });
+
+    const user = await storage.getUserByIdentifier(identifier);
+    if (!user) return res.status(401).json({ error: "No account found with that email or phone" });
+
+    const bcrypt = await import("bcryptjs");
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(401).json({ error: "Incorrect password" });
+
+    req.login(user as any, (err) => {
       if (err) return res.status(500).json({ error: err.message });
-      if (!user) return res.status(401).json({ error: info?.message || "Invalid credentials" });
-      req.login(user, (err2) => {
-        if (err2) return res.status(500).json({ error: err2.message });
-        const { password: _, ...safe } = user;
+      const { password: _, ...safe } = user;
+      res.json({ user: safe });
+    });
+  });
+
+  // ─── OTP ─────────────────────────────────────────────────
+  app.post("/api/auth/send-otp", async (req, res) => {
+    try {
+      const { phone, purpose } = sendOtpSchema.parse(req.body);
+      if (purpose === "login") {
+        const existing = await storage.getUserByPhone(phone);
+        if (!existing) return res.status(404).json({ error: "No account found with this number" });
+      }
+      if (purpose === "register") {
+        const existing = await storage.getUserByPhone(phone);
+        if (existing) return res.status(400).json({ error: "Phone number already registered" });
+      }
+      const code = generateOtp();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+      await storage.createOtp(phone, code, expiresAt);
+      const ok = await sendSms(phone, `Your Gûstîlk code: ${code}. Valid for 10 minutes.`);
+      if (!ok) return res.status(500).json({ error: "Failed to send SMS" });
+      res.json({ ok: true, devCode: process.env.NODE_ENV !== "production" ? code : undefined });
+    } catch (err: any) {
+      if (err?.name === "ZodError") return res.status(400).json({ error: err.errors[0].message });
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/auth/verify-otp", async (req, res) => {
+    try {
+      const { phone, code, registrationData } = verifyOtpSchema.parse(req.body);
+      const valid = await storage.verifyOtp(phone, code);
+      if (!valid) return res.status(400).json({ error: "Invalid or expired code" });
+
+      let user = await storage.getUserByPhone(phone);
+
+      if (!user && registrationData) {
+        await storage.createUser({
+          ...registrationData,
+          phone,
+          email: undefined as any,
+        } as any);
+        user = await storage.getUserByPhone(phone);
+      }
+
+      if (!user) return res.status(400).json({ error: "Account not found. Please register first." });
+
+      req.login(user as any, (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        const { password: _pw, ...safe } = user as any;
         res.json({ user: safe });
       });
-    })(req, res, next);
+    } catch (err: any) {
+      if (err?.name === "ZodError") return res.status(400).json({ error: err.errors[0].message });
+      res.status(500).json({ error: err.message });
+    }
   });
 
   app.post("/api/auth/logout", (req, res) => {

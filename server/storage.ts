@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { users, likes, dislikes, matches, messages, events, eventAttendees, reports } from "@shared/schema";
+import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes } from "@shared/schema";
 import type { User, InsertUser, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report } from "@shared/schema";
 import { eq, and, or, ne, notInArray, desc, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
@@ -9,6 +9,11 @@ export interface IStorage {
   createUser(data: InsertUser & { password: string }): Promise<SafeUser>;
   getUserById(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByPhone(phone: string): Promise<User | undefined>;
+  getUserByIdentifier(identifier: string): Promise<User | undefined>;
+
+  createOtp(identifier: string, code: string, expiresAt: Date): Promise<void>;
+  verifyOtp(identifier: string, code: string): Promise<boolean>;
   updateUser(id: string, data: Partial<InsertUser>): Promise<SafeUser>;
   deleteUser(id: string): Promise<void>;
 
@@ -59,6 +64,32 @@ export class DatabaseStorage implements IStorage {
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
     return user;
+  }
+
+  async getUserByPhone(phone: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.phone, phone));
+    return user;
+  }
+
+  async getUserByIdentifier(identifier: string): Promise<User | undefined> {
+    const isEmail = identifier.includes("@");
+    if (isEmail) return this.getUserByEmail(identifier);
+    return this.getUserByPhone(identifier);
+  }
+
+  async createOtp(identifier: string, code: string, expiresAt: Date): Promise<void> {
+    await db.delete(otpCodes).where(eq(otpCodes.identifier, identifier));
+    await db.insert(otpCodes).values({ id: randomUUID(), identifier, code, expiresAt });
+  }
+
+  async verifyOtp(identifier: string, code: string): Promise<boolean> {
+    const [otp] = await db.select().from(otpCodes).where(
+      and(eq(otpCodes.identifier, identifier), eq(otpCodes.code, code), eq(otpCodes.used, false))
+    );
+    if (!otp) return false;
+    if (new Date() > otp.expiresAt) return false;
+    await db.update(otpCodes).set({ used: true }).where(eq(otpCodes.id, otp.id));
+    return true;
   }
 
   async updateUser(id: string, data: Partial<InsertUser>): Promise<SafeUser> {

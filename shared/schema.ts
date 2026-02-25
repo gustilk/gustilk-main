@@ -6,9 +6,19 @@ export const casteEnum = pgEnum("caste", ["sheikh", "pir", "murid"]);
 export const genderEnum = pgEnum("gender", ["male", "female"]);
 export const verificationStatusEnum = pgEnum("verification_status", ["none", "pending", "approved", "rejected"]);
 
+export const otpCodes = pgTable("otp_codes", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  identifier: text("identifier").notNull(),
+  code: text("code").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const users = pgTable("users", {
   id: varchar("id", { length: 36 }).primaryKey(),
-  email: text("email").notNull().unique(),
+  email: text("email").unique(),
+  phone: text("phone").unique(),
   password: text("password").notNull(),
   fullName: text("full_name").notNull(),
   caste: casteEnum("caste").notNull(),
@@ -108,19 +118,43 @@ export const insertUserSchema = createInsertSchema(users).omit({
 });
 
 export const loginSchema = z.object({
-  email: z.string().email(),
+  identifier: z.string().min(1),
   password: z.string().min(6),
+});
+
+export const sendOtpSchema = z.object({
+  phone: z.string().min(7),
+  purpose: z.enum(["login", "register"]),
+});
+
+export const verifyOtpSchema = z.object({
+  phone: z.string().min(7),
+  code: z.string().length(6),
+  registrationData: z.object({
+    fullName: z.string().min(2),
+    password: z.string().min(6),
+    caste: z.enum(["sheikh", "pir", "murid"]),
+    gender: z.enum(["male", "female"]),
+    country: z.string().min(1),
+    city: z.string().min(1),
+    age: z.number().min(18).max(80),
+    bio: z.string().default(""),
+    occupation: z.string().default(""),
+    languages: z.array(z.string()).default([]),
+  }).optional(),
 });
 
 export const registerSchema = insertUserSchema.extend({
-  email: z.string().email(),
   password: z.string().min(6),
   fullName: z.string().min(2),
   age: z.number().min(18).max(80),
-});
+  email: z.string().email().optional().or(z.literal("")),
+  phone: z.string().min(7).optional().or(z.literal("")),
+}).refine(d => d.email || d.phone, { message: "Email or phone required" });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+export type OtpCode = typeof otpCodes.$inferSelect;
 export type Like = typeof likes.$inferSelect;
 export type Dislike = typeof dislikes.$inferSelect;
 export type Match = typeof matches.$inferSelect;
