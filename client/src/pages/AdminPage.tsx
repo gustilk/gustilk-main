@@ -1,21 +1,33 @@
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { ArrowLeft, CheckCircle, XCircle, Ban, Shield } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, Ban, Shield, Flag } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import type { SafeUser } from "@shared/schema";
+import type { SafeUser, Report } from "@shared/schema";
 
 interface Props { user: SafeUser }
+
+type AdminTab = "verifications" | "reports";
 
 export default function AdminPage({ user }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState<AdminTab>("verifications");
 
-  const { data, isLoading, refetch } = useQuery<{ users: SafeUser[] }>({
+  const { data: verifyData, isLoading: verifyLoading } = useQuery<{ users: SafeUser[] }>({
     queryKey: ["/api/admin/verifications"],
     queryFn: async () => {
       const res = await fetch("/api/admin/verifications", { credentials: "include" });
+      return res.json();
+    },
+  });
+
+  const { data: reportsData, isLoading: reportsLoading } = useQuery<{ reports: Report[] }>({
+    queryKey: ["/api/admin/reports"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/reports", { credentials: "include" });
       return res.json();
     },
   });
@@ -34,6 +46,17 @@ export default function AdminPage({ user }: Props) {
     },
   });
 
+  const resolveMutation = useMutation({
+    mutationFn: async (reportId: string) => {
+      const res = await apiRequest("POST", `/api/admin/reports/${reportId}/resolve`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reports"] });
+      toast({ title: "Report resolved" });
+    },
+  });
+
   if (!user.isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-6 text-center" style={{ background: "#0d0618" }}>
@@ -45,7 +68,9 @@ export default function AdminPage({ user }: Props) {
     );
   }
 
-  const pending = data?.users ?? [];
+  const pending = verifyData?.users ?? [];
+  const reports = (reportsData?.reports ?? []).filter(r => r.status === "pending");
+  const resolvedReports = (reportsData?.reports ?? []).filter(r => r.status !== "pending");
 
   return (
     <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
@@ -58,43 +83,163 @@ export default function AdminPage({ user }: Props) {
         </button>
         <div className="flex items-center gap-2">
           <Shield size={18} color="#c9a84c" />
-          <h1 className="font-serif text-xl text-gold">Bestätigungsanfragen</h1>
+          <h1 className="font-serif text-xl text-gold">Admin Panel</h1>
         </div>
-        {pending.length > 0 && (
-          <span
-            className="ml-auto px-2 py-0.5 rounded-full text-xs font-bold"
-            style={{ background: "#d4608a", color: "white" }}
+        <div className="ml-auto flex items-center gap-2">
+          {pending.length > 0 && (
+            <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: "#7b3fa0", color: "white" }}>
+              {pending.length}
+            </span>
+          )}
+          {reports.length > 0 && (
+            <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: "#d4608a", color: "white" }}>
+              {reports.length}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex px-5 pt-4 gap-2 pb-2">
+        {([["verifications", "Verifications", Shield], ["reports", "Reports", Flag]] as const).map(([tab, label, Icon]) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            data-testid={`tab-${tab}`}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all"
+            style={activeTab === tab
+              ? { background: "rgba(201,168,76,0.15)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.3)" }
+              : { background: "rgba(255,255,255,0.04)", color: "rgba(253,248,240,0.4)", border: "1px solid rgba(255,255,255,0.06)" }
+            }
           >
-            {pending.length}
+            <Icon size={12} />
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div className="px-4 pt-2">
+        {activeTab === "verifications" && (
+          verifyLoading ? (
+            <div className="flex items-center justify-center h-48">
+              <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : pending.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
+              <CheckCircle size={48} color="rgba(16,185,129,0.5)" />
+              <h3 className="font-serif text-xl text-gold">All caught up!</h3>
+              <p className="text-cream/40 text-sm">No pending verification requests.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {pending.map(u => (
+                <VerificationCard
+                  key={u.id}
+                  user={u}
+                  onApprove={() => actionMutation.mutate({ userId: u.id, action: "approve" })}
+                  onReject={() => actionMutation.mutate({ userId: u.id, action: "reject" })}
+                  onBan={() => actionMutation.mutate({ userId: u.id, action: "ban" })}
+                  isPending={actionMutation.isPending}
+                />
+              ))}
+            </div>
+          )
+        )}
+
+        {activeTab === "reports" && (
+          reportsLoading ? (
+            <div className="flex items-center justify-center h-48">
+              <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : reports.length === 0 && resolvedReports.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
+              <Flag size={48} color="rgba(201,168,76,0.3)" />
+              <h3 className="font-serif text-xl text-gold">No reports</h3>
+              <p className="text-cream/40 text-sm">No user reports have been filed.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {reports.map(report => (
+                <ReportCard
+                  key={report.id}
+                  report={report}
+                  onResolve={() => resolveMutation.mutate(report.id)}
+                  isPending={resolveMutation.isPending}
+                />
+              ))}
+              {resolvedReports.length > 0 && (
+                <div>
+                  <p className="text-cream/25 text-xs uppercase tracking-wider mb-2 px-1">Resolved ({resolvedReports.length})</p>
+                  {resolvedReports.map(report => (
+                    <ReportCard
+                      key={report.id}
+                      report={report}
+                      onResolve={() => {}}
+                      isPending={false}
+                      resolved
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ReportCard({ report, onResolve, isPending, resolved }: {
+  report: Report;
+  onResolve: () => void;
+  isPending: boolean;
+  resolved?: boolean;
+}) {
+  const timeLabel = report.createdAt
+    ? formatDistanceToNow(new Date(report.createdAt), { addSuffix: true })
+    : "";
+
+  return (
+    <div
+      className="rounded-2xl p-4 mb-2"
+      style={{
+        background: resolved ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.04)",
+        border: `1px solid ${resolved ? "rgba(255,255,255,0.06)" : "rgba(212,96,138,0.2)"}`,
+        opacity: resolved ? 0.6 : 1,
+      }}
+      data-testid={`report-card-${report.id}`}
+    >
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <Flag size={12} color={resolved ? "rgba(253,248,240,0.3)" : "#d4608a"} />
+            <span className="text-cream text-sm font-semibold">{report.reason}</span>
+          </div>
+          <p className="text-cream/35 text-xs">{timeLabel}</p>
+        </div>
+        {!resolved && (
+          <button
+            onClick={onResolve}
+            disabled={isPending}
+            data-testid={`button-resolve-${report.id}`}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold flex-shrink-0 disabled:opacity-50"
+            style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.3)" }}
+          >
+            <CheckCircle size={12} />
+            Resolve
+          </button>
+        )}
+        {resolved && (
+          <span className="text-xs font-semibold px-2 py-1 rounded-full" style={{ background: "rgba(16,185,129,0.1)", color: "#10b981" }}>
+            Resolved
           </span>
         )}
       </div>
-
-      <div className="px-4 pt-4">
-        {isLoading ? (
-          <div className="flex items-center justify-center h-48">
-            <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : pending.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
-            <CheckCircle size={48} color="rgba(16,185,129,0.5)" />
-            <h3 className="font-serif text-xl text-gold">All caught up!</h3>
-            <p className="text-cream/40 text-sm">No pending verification requests.</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {pending.map(u => (
-              <VerificationCard
-                key={u.id}
-                user={u}
-                onApprove={() => actionMutation.mutate({ userId: u.id, action: "approve" })}
-                onReject={() => actionMutation.mutate({ userId: u.id, action: "reject" })}
-                onBan={() => actionMutation.mutate({ userId: u.id, action: "ban" })}
-                isPending={actionMutation.isPending}
-              />
-            ))}
-          </div>
-        )}
+      {report.description && (
+        <p className="text-cream/40 text-xs leading-relaxed mt-2 px-1">{report.description}</p>
+      )}
+      <div className="flex gap-3 mt-3 text-xs text-cream/25">
+        <span>Reporter: <span className="text-cream/45 font-mono">{report.reporterId.slice(0, 8)}…</span></span>
+        <span>Reported: <span className="text-cream/45 font-mono">{report.reportedUserId.slice(0, 8)}…</span></span>
       </div>
     </div>
   );
@@ -165,7 +310,7 @@ function VerificationCard({ user, onApprove, onReject, onBan, isPending }: {
       )}
 
       <div
-        className="flex gap-2 px-4 pb-4"
+        className="flex gap-2 px-4 pb-4 pt-2"
         style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
       >
         <button

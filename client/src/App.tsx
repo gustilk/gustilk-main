@@ -13,6 +13,8 @@ import PremiumPage from "@/pages/PremiumPage";
 import EventsPage from "@/pages/EventsPage";
 import EventDetailPage from "@/pages/EventDetailPage";
 import AdminPage from "@/pages/AdminPage";
+import VerificationPage from "@/pages/VerificationPage";
+import PendingVerificationPage from "@/pages/PendingVerificationPage";
 import BottomNav from "@/components/BottomNav";
 import type { SafeUser } from "@shared/schema";
 
@@ -30,6 +32,7 @@ function AppShell({ user }: { user: AuthUser }) {
   const [location] = useLocation();
   const isChat = location.startsWith("/chat/");
   const isEventDetail = location.startsWith("/events/") && location !== "/events";
+  const isVerifyPage = location === "/verify" || location === "/pending-verification";
 
   return (
     <div className="flex flex-col min-h-screen bg-ink" style={{ fontFamily: "'Open Sans', sans-serif" }}>
@@ -44,10 +47,12 @@ function AppShell({ user }: { user: AuthUser }) {
           <Route path="/events/:eventId" component={({ params }) => <EventDetailPage user={user} eventId={params.eventId} />} />
           <Route path="/events" component={() => <EventsPage user={user} />} />
           <Route path="/admin" component={() => <AdminPage user={user} />} />
+          <Route path="/verify" component={() => <VerificationPage user={user} />} />
+          <Route path="/pending-verification" component={() => <PendingVerificationPage user={user} />} />
           <Route path="/" component={() => <Redirect to="/discover" />} />
         </Switch>
       </main>
-      {!isChat && !isEventDetail && <BottomNav />}
+      {!isChat && !isEventDetail && !isVerifyPage && <BottomNav />}
     </div>
   );
 }

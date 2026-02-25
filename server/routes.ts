@@ -213,6 +213,24 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
+  // ─── REPORTS ─────────────────────────────────────────────
+  app.post("/api/reports", requireAuth, async (req, res) => {
+    try {
+      const reporterId = (req.user as any).id;
+      const { reportedUserId, reason, description } = z.object({
+        reportedUserId: z.string(),
+        reason: z.string().min(1),
+        description: z.string().max(1000).default(""),
+      }).parse(req.body);
+      if (reporterId === reportedUserId) return res.status(400).json({ error: "Cannot report yourself" });
+      const report = await storage.createReport(reporterId, reportedUserId, reason, description);
+      res.json({ report });
+    } catch (err: any) {
+      if (err?.name === "ZodError") return res.status(400).json({ error: err.errors[0].message });
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // ─── ADMIN ───────────────────────────────────────────────
   app.get("/api/admin/verifications", requireAuth, async (req, res) => {
     try {
@@ -221,6 +239,30 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       if (!adminUser?.isAdmin) return res.status(403).json({ error: "Forbidden" });
       const pending = await storage.getPendingVerifications();
       res.json({ users: pending });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/admin/reports", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const adminUser = await storage.getUserById(userId);
+      if (!adminUser?.isAdmin) return res.status(403).json({ error: "Forbidden" });
+      const reportList = await storage.listReports();
+      res.json({ reports: reportList });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/reports/:reportId/resolve", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const adminUser = await storage.getUserById(userId);
+      if (!adminUser?.isAdmin) return res.status(403).json({ error: "Forbidden" });
+      await storage.resolveReport(req.params.reportId);
+      res.json({ ok: true });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }

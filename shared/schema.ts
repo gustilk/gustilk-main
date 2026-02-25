@@ -77,6 +77,16 @@ export const events = pgTable("events", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const reports = pgTable("reports", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  reporterId: varchar("reporter_id", { length: 36 }).notNull().references(() => users.id),
+  reportedUserId: varchar("reported_user_id", { length: 36 }).notNull().references(() => users.id),
+  reason: text("reason").notNull(),
+  description: text("description").default(""),
+  status: text("status").default("pending"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const eventAttendees = pgTable("event_attendees", {
   id: varchar("id", { length: 36 }).primaryKey(),
   eventId: varchar("event_id", { length: 36 }).notNull().references(() => events.id),
@@ -117,6 +127,7 @@ export type Match = typeof matches.$inferSelect;
 export type Message = typeof messages.$inferSelect;
 export type Event = typeof events.$inferSelect;
 export type EventAttendee = typeof eventAttendees.$inferSelect;
+export type Report = typeof reports.$inferSelect;
 
 export type SafeUser = Omit<User, "password">;
 

@@ -2,9 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { ArrowLeft, Send, Lock, Star } from "lucide-react";
+import { ArrowLeft, Send, Lock, Star, MoreVertical, Flag } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { SafeUser, Message, MatchWithUser } from "@shared/schema";
+import ReportModal from "@/components/ReportModal";
 
 interface Props {
   user: SafeUser;
@@ -14,6 +15,7 @@ interface Props {
 export default function ChatPage({ user, matchId }: Props) {
   const [, setLocation] = useLocation();
   const [text, setText] = useState("");
+  const [showReport, setShowReport] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const { data: matchData } = useQuery<{ matches: MatchWithUser[] }>({
@@ -96,6 +98,17 @@ export default function ChatPage({ user, matchId }: Props) {
               {otherUser ? `${otherUser.city}, ${otherUser.country}` : ""}
             </p>
           </div>
+          {otherUser && (
+            <button
+              onClick={() => setShowReport(true)}
+              data-testid="button-report-user"
+              className="p-2 rounded-xl"
+              style={{ color: "rgba(253,248,240,0.35)" }}
+              title="Report user"
+            >
+              <Flag size={18} />
+            </button>
+          )}
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center px-6 text-center gap-5">
@@ -164,6 +177,17 @@ export default function ChatPage({ user, matchId }: Props) {
             {otherUser ? `${otherUser.city}, ${otherUser.country}` : ""}
           </p>
         </div>
+        {otherUser && (
+          <button
+            onClick={() => setShowReport(true)}
+            data-testid="button-report-user-main"
+            className="p-2 rounded-xl"
+            style={{ color: "rgba(253,248,240,0.35)" }}
+            title="Report user"
+          >
+            <Flag size={18} />
+          </button>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
@@ -223,6 +247,14 @@ export default function ChatPage({ user, matchId }: Props) {
           <Send size={18} color="white" />
         </button>
       </div>
+
+      {showReport && otherUser && (
+        <ReportModal
+          reportedUserId={otherUser.id}
+          reportedUserName={otherUser.fullName}
+          onClose={() => setShowReport(false)}
+        />
+      )}
     </div>
   );
 }

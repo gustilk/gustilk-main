@@ -14,40 +14,55 @@ const BENEFITS = [
   { icon: Star, text: "Priority profile placement" },
 ];
 
-const PAYMENT_METHODS = [
-  { id: "card", label: "Credit/Debit Card", region: "International" },
-  { id: "zaincash", label: "ZainCash", region: "Iraq" },
-  { id: "fastpay", label: "FastPay", region: "Iraq" },
-];
+type PaymentMethod = {
+  id: string;
+  label: string;
+  fields: PaymentField[];
+};
 
-const COUNTRIES = [
-  { code: "IQ", name: "Iraq", flag: "🇮🇶", isFree: true },
-  { code: "DE", name: "Germany", flag: "🇩🇪", isFree: false },
-  { code: "SE", name: "Sweden", flag: "🇸🇪", isFree: false },
-  { code: "US", name: "United States", flag: "🇺🇸", isFree: false },
-  { code: "AU", name: "Australia", flag: "🇦🇺", isFree: false },
-  { code: "GB", name: "United Kingdom", flag: "🇬🇧", isFree: false },
-  { code: "NL", name: "Netherlands", flag: "🇳🇱", isFree: false },
-  { code: "CH", name: "Switzerland", flag: "🇨🇭", isFree: false },
-];
+type PaymentField = {
+  key: string;
+  label: string;
+  placeholder: string;
+  type?: string;
+};
 
-function detectCountry(userCountry: string) {
-  return COUNTRIES.find(c => c.name.toLowerCase() === userCountry.toLowerCase()) ?? COUNTRIES[1];
+const COUNTRY_DATA: Record<string, { isFree: boolean; flag: string; payment: PaymentMethod }> = {
+  Germany:     { isFree: false, flag: "🇩🇪", payment: { id: "sepa",      label: "SEPA Direct Debit",  fields: [{ key: "iban", label: "IBAN", placeholder: "DE89 3704 0044 0532 0130 00" }] } },
+  Holland:     { isFree: false, flag: "🇳🇱", payment: { id: "ideal",     label: "iDEAL",              fields: [{ key: "bank", label: "Bank", placeholder: "ABN AMRO / ING / Rabobank" }] } },
+  Sweden:      { isFree: false, flag: "🇸🇪", payment: { id: "klarna",    label: "Klarna",             fields: [{ key: "email", label: "Email", placeholder: "your@email.com", type: "email" }] } },
+  Belgium:     { isFree: false, flag: "🇧🇪", payment: { id: "bancontact",label: "Bancontact",         fields: [{ key: "card", label: "Card number", placeholder: "6703 xxxx xxxx xxxx" }] } },
+  Iraq:        { isFree: true,  flag: "🇮🇶", payment: { id: "free",      label: "Free",               fields: [] } },
+  USA:         { isFree: false, flag: "🇺🇸", payment: { id: "card",      label: "Credit/Debit Card",  fields: [{ key: "card", label: "Card number", placeholder: "4242 4242 4242 4242" }, { key: "expiry", label: "MM/YY", placeholder: "12/27" }, { key: "cvv", label: "CVV", placeholder: "123", type: "password" }] } },
+  Canada:      { isFree: false, flag: "🇨🇦", payment: { id: "card",      label: "Credit/Debit Card",  fields: [{ key: "card", label: "Card number", placeholder: "4242 4242 4242 4242" }, { key: "expiry", label: "MM/YY", placeholder: "12/27" }, { key: "cvv", label: "CVV", placeholder: "123", type: "password" }] } },
+  Australia:   { isFree: false, flag: "🇦🇺", payment: { id: "card",      label: "Credit/Debit Card",  fields: [{ key: "card", label: "Card number", placeholder: "4242 4242 4242 4242" }, { key: "expiry", label: "MM/YY", placeholder: "12/27" }, { key: "cvv", label: "CVV", placeholder: "123", type: "password" }] } },
+  France:      { isFree: false, flag: "🇫🇷", payment: { id: "card",      label: "Credit/Debit Card",  fields: [{ key: "card", label: "Card number", placeholder: "4242 4242 4242 4242" }, { key: "expiry", label: "MM/YY", placeholder: "12/27" }, { key: "cvv", label: "CVV", placeholder: "123", type: "password" }] } },
+  Turkey:      { isFree: false, flag: "🇹🇷", payment: { id: "card",      label: "Credit/Debit Card",  fields: [{ key: "card", label: "Card number", placeholder: "4242 4242 4242 4242" }, { key: "expiry", label: "MM/YY", placeholder: "12/27" }, { key: "cvv", label: "CVV", placeholder: "123", type: "password" }] } },
+  Armenia:     { isFree: false, flag: "🇦🇲", payment: { id: "card",      label: "Credit/Debit Card",  fields: [{ key: "card", label: "Card number", placeholder: "4242 4242 4242 4242" }, { key: "expiry", label: "MM/YY", placeholder: "12/27" }, { key: "cvv", label: "CVV", placeholder: "123", type: "password" }] } },
+  Georgia:     { isFree: false, flag: "🇬🇪", payment: { id: "card",      label: "Credit/Debit Card",  fields: [{ key: "card", label: "Card number", placeholder: "4242 4242 4242 4242" }, { key: "expiry", label: "MM/YY", placeholder: "12/27" }, { key: "cvv", label: "CVV", placeholder: "123", type: "password" }] } },
+  Russia:      { isFree: false, flag: "🇷🇺", payment: { id: "card",      label: "Credit/Debit Card",  fields: [{ key: "card", label: "Card number", placeholder: "4242 4242 4242 4242" }, { key: "expiry", label: "MM/YY", placeholder: "12/27" }, { key: "cvv", label: "CVV", placeholder: "123", type: "password" }] } },
+  UK:          { isFree: false, flag: "🇬🇧", payment: { id: "card",      label: "Credit/Debit Card",  fields: [{ key: "card", label: "Card number", placeholder: "4242 4242 4242 4242" }, { key: "expiry", label: "MM/YY", placeholder: "12/27" }, { key: "cvv", label: "CVV", placeholder: "123", type: "password" }] } },
+};
+
+const ZAINCASH_FASTPAY_COUNTRIES = ["Iraq"];
+
+function getCountryData(country: string) {
+  return COUNTRY_DATA[country] ?? COUNTRY_DATA["USA"];
 }
 
 export default function PremiumPage({ user }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [method, setMethod] = useState("card");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
   const [loading, setLoading] = useState(false);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState(() => detectCountry(user.country));
+  const [selectedCountry, setSelectedCountry] = useState(user.country || "Germany");
+  const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
+  const [useLocalPayment, setUseLocalPayment] = useState<string | null>(null);
 
-  const isFree = selectedCountry.isFree;
+  const countryInfo = getCountryData(selectedCountry);
+  const isFree = countryInfo.isFree;
+  const paymentMethod = useLocalPayment ?? countryInfo.payment.id;
+  const isIraq = selectedCountry === "Iraq";
 
   if (user.isPremium) {
     return (
@@ -79,10 +94,16 @@ export default function PremiumPage({ user }: Props) {
     toast({
       title: isFree ? "Welcome to Premium!" : "Payment setup required",
       description: isFree
-        ? "Premium is free for users in Iraq. Your account has been upgraded!"
-        : "Payment integration requires API keys. Contact us to complete setup.",
+        ? "Premium is free for users in Iraq. Contact us to activate your account."
+        : `${countryInfo.payment.label} integration coming soon. Contact support@gustilk.com.`,
     });
   };
+
+  const sortedCountries = Object.entries(COUNTRY_DATA).sort((a, b) => {
+    if (a[1].isFree) return -1;
+    if (b[1].isFree) return 1;
+    return a[0].localeCompare(b[0]);
+  });
 
   return (
     <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
@@ -100,27 +121,22 @@ export default function PremiumPage({ user }: Props) {
         <div className="text-center py-2">
           <div className="flex justify-center mb-4">
             {isFree ? (
-              <div
-                className="w-20 h-20 rounded-full flex items-center justify-center text-4xl"
-                style={{ background: "linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.05))", border: "2px solid #c9a84c" }}
-              >
+              <div className="w-20 h-20 rounded-full flex items-center justify-center text-4xl"
+                style={{ background: "rgba(201,168,76,0.08)", border: "2px solid #c9a84c" }}>
                 🎉
               </div>
             ) : (
-              <div
-                className="w-20 h-20 rounded-full flex items-center justify-center animate-pulse-ring"
-                style={{ border: "2px solid #c9a84c" }}
-              >
+              <div className="w-20 h-20 rounded-full flex items-center justify-center animate-pulse-ring"
+                style={{ border: "2px solid #c9a84c" }}>
                 <Star size={36} fill="#c9a84c" color="#c9a84c" />
               </div>
             )}
           </div>
-
           {isFree ? (
             <>
               <h2 className="font-serif text-3xl text-gold mb-1">مجاناً!</h2>
-              <p className="text-cream/60 text-sm mb-1">Premium is free for users in Iraq</p>
-              <p className="text-cream/40 text-xs">As a thank-you to our Yezidi community in the homeland</p>
+              <p className="text-cream/60 text-sm">Premium is free for users in Iraq</p>
+              <p className="text-cream/35 text-xs mt-1">As a thank-you to our Yezidi homeland community</p>
             </>
           ) : (
             <>
@@ -142,113 +158,86 @@ export default function PremiumPage({ user }: Props) {
         >
           <Globe size={16} color="#c9a84c" />
           <span className="text-cream/70 text-sm flex-1 text-left">
-            {selectedCountry.flag} {selectedCountry.name}
-            {selectedCountry.isFree && (
-              <span className="ml-2 text-xs font-bold" style={{ color: "#10b981" }}>Free</span>
-            )}
+            {countryInfo.flag} {selectedCountry}
+            {isFree && <span className="ml-2 text-xs font-bold" style={{ color: "#10b981" }}>Free</span>}
           </span>
-          <span className="text-cream/30 text-xs">Change country</span>
+          <span className="text-cream/30 text-xs">{countryInfo.payment.label}</span>
         </button>
 
         {showCountryPicker && (
-          <div
-            className="rounded-2xl overflow-hidden animate-slide-up"
-            style={{ border: "1px solid rgba(201,168,76,0.2)", background: "rgba(255,255,255,0.04)" }}
-          >
-            {COUNTRIES.map(country => (
+          <div className="rounded-2xl overflow-hidden animate-slide-up max-h-64 overflow-y-auto"
+            style={{ border: "1px solid rgba(201,168,76,0.2)", background: "rgba(255,255,255,0.04)" }}>
+            {sortedCountries.map(([country, info]) => (
               <button
-                key={country.code}
-                onClick={() => { setSelectedCountry(country); setShowCountryPicker(false); }}
-                data-testid={`country-${country.code}`}
+                key={country}
+                onClick={() => { setSelectedCountry(country); setUseLocalPayment(null); setShowCountryPicker(false); setFieldValues({}); }}
+                data-testid={`country-${country}`}
                 className="w-full flex items-center gap-3 px-4 py-3 transition-all text-left"
-                style={selectedCountry.code === country.code ? { background: "rgba(201,168,76,0.1)" } : {}}
+                style={selectedCountry === country ? { background: "rgba(201,168,76,0.1)" } : {}}
               >
-                <span className="text-xl">{country.flag}</span>
-                <span className="flex-1 text-cream text-sm">{country.name}</span>
-                {country.isFree && (
-                  <span
-                    className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                    style={{ background: "rgba(16,185,129,0.2)", color: "#10b981" }}
-                  >
-                    FREE
-                  </span>
+                <span className="text-xl">{info.flag}</span>
+                <span className="flex-1 text-cream text-sm">{country}</span>
+                <span className="text-cream/35 text-xs">{info.payment.label}</span>
+                {info.isFree && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                    style={{ background: "rgba(16,185,129,0.2)", color: "#10b981" }}>FREE</span>
                 )}
-                {selectedCountry.code === country.code && (
-                  <Check size={14} color="#c9a84c" />
-                )}
+                {selectedCountry === country && <Check size={14} color="#c9a84c" />}
               </button>
             ))}
           </div>
         )}
 
-        <div
-          className="rounded-2xl p-5 space-y-3"
-          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}
-        >
+        <div className="rounded-2xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}>
           {BENEFITS.map(({ icon: Icon, text }) => (
             <div key={text} className="flex items-center gap-3">
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ background: "rgba(201,168,76,0.12)" }}
-              >
+              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,168,76,0.12)" }}>
                 <Icon size={15} color="#c9a84c" />
               </div>
               <span className="text-cream/80 text-sm flex-1" data-testid={`benefit-${text.replace(/\s+/g, '-')}`}>{text}</span>
-              <Check size={14} className="ml-auto flex-shrink-0" color="rgba(16,185,129,0.7)" />
+              <Check size={14} color="rgba(16,185,129,0.7)" />
             </div>
           ))}
         </div>
 
         {!isFree && (
           <div>
-            <div className="text-xs text-cream/50 uppercase tracking-wider mb-3 font-semibold">Payment Method</div>
-            <div className="flex rounded-xl p-1 mb-4" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(201,168,76,0.2)" }}>
-              {PAYMENT_METHODS.map(pm => (
-                <button
-                  key={pm.id}
-                  onClick={() => setMethod(pm.id)}
-                  data-testid={`method-${pm.id}`}
-                  className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all text-center"
-                  style={method === pm.id
-                    ? { background: "#c9a84c", color: "#1a0a2e" }
-                    : { color: "rgba(253,248,240,0.45)" }
-                  }
-                >
-                  {pm.label}
-                </button>
-              ))}
+            <div className="text-xs text-cream/50 uppercase tracking-wider mb-3 font-semibold">
+              Payment — {countryInfo.payment.label}
             </div>
 
-            {method === "card" && (
-              <div className="space-y-3" data-testid="form-card">
-                <GoldInput
-                  value={cardNumber} onChange={e => setCardNumber(e.target.value)}
-                  placeholder="Card number" data-testid="input-card-number"
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <GoldInput
-                    value={expiry} onChange={e => setExpiry(e.target.value)}
-                    placeholder="MM / YY" data-testid="input-expiry"
-                  />
-                  <GoldInput
-                    value={cvv} onChange={e => setCvv(e.target.value)}
-                    placeholder="CVV" data-testid="input-cvv"
-                  />
-                </div>
+            {isIraq && (
+              <div className="flex rounded-xl p-1 mb-4" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(201,168,76,0.2)" }}>
+                {[{ id: null, label: "ZainCash" }, { id: "fastpay", label: "FastPay" }].map(pm => (
+                  <button
+                    key={pm.id ?? "zaincash"}
+                    onClick={() => setUseLocalPayment(pm.id)}
+                    data-testid={`method-${pm.id ?? "zaincash"}`}
+                    className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all text-center"
+                    style={useLocalPayment === pm.id
+                      ? { background: "#c9a84c", color: "#1a0a2e" }
+                      : { color: "rgba(253,248,240,0.45)" }}
+                  >
+                    {pm.label}
+                  </button>
+                ))}
               </div>
             )}
 
-            {(method === "zaincash" || method === "fastpay") && (
-              <div data-testid={`form-${method}`}>
-                <GoldInput
-                  value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)}
-                  placeholder="Iraqi phone number (07xx xxxxxxx)" data-testid="input-phone"
-                />
-                <p className="text-cream/30 text-xs mt-2">
-                  You'll be redirected to {method === "zaincash" ? "ZainCash" : "FastPay"} to complete payment.
-                </p>
-              </div>
-            )}
+            <div className="space-y-3" data-testid="form-payment">
+              {countryInfo.payment.fields.map(field => (
+                <div key={field.key}>
+                  <div className="text-xs text-cream/50 mb-1.5 font-semibold">{field.label}</div>
+                  <GoldInput
+                    type={field.type ?? "text"}
+                    value={fieldValues[field.key] ?? ""}
+                    onChange={e => setFieldValues(v => ({ ...v, [field.key]: e.target.value }))}
+                    placeholder={field.placeholder}
+                    data-testid={`input-${field.key}`}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -263,11 +252,11 @@ export default function PremiumPage({ user }: Props) {
           }
         >
           <Star size={17} fill="white" />
-          {loading ? "Processing…" : isFree ? "Get Free Premium — Iraq" : "Subscribe for $5/month"}
+          {loading ? "Processing…" : isFree ? "Get Free Premium — Iraq" : `Subscribe via ${countryInfo.payment.label}`}
         </button>
 
         <p className="text-center text-cream/25 text-xs">
-          {isFree ? "Premium is permanently free for users in Iraq." : "Cancel anytime. Payments processed securely."}
+          {isFree ? "Premium is permanently free for users in Iraq." : "Cancel anytime. Secure payment processing."}
         </p>
       </div>
     </div>

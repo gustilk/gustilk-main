@@ -1,6 +1,6 @@
 import { db } from "./db";
-import { users, likes, dislikes, matches, messages, events, eventAttendees } from "@shared/schema";
-import type { User, InsertUser, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance } from "@shared/schema";
+import { users, likes, dislikes, matches, messages, events, eventAttendees, reports } from "@shared/schema";
+import type { User, InsertUser, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report } from "@shared/schema";
 import { eq, and, or, ne, notInArray, desc, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
@@ -32,6 +32,10 @@ export interface IStorage {
   getPendingVerifications(): Promise<SafeUser[]>;
   updateVerificationStatus(userId: string, status: "approved" | "rejected", isVerified?: boolean): Promise<void>;
   banUser(userId: string): Promise<void>;
+
+  createReport(reporterId: string, reportedUserId: string, reason: string, description: string): Promise<Report>;
+  listReports(): Promise<Report[]>;
+  resolveReport(reportId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -215,6 +219,25 @@ export class DatabaseStorage implements IStorage {
       verificationStatus: "rejected",
       isVerified: false,
     }).where(eq(users.id, userId));
+  }
+
+  async createReport(reporterId: string, reportedUserId: string, reason: string, description: string): Promise<Report> {
+    const [report] = await db.insert(reports).values({
+      id: randomUUID(),
+      reporterId,
+      reportedUserId,
+      reason,
+      description,
+    }).returning();
+    return report;
+  }
+
+  async listReports(): Promise<Report[]> {
+    return db.select().from(reports).orderBy(desc(reports.createdAt));
+  }
+
+  async resolveReport(reportId: string): Promise<void> {
+    await db.update(reports).set({ status: "resolved" }).where(eq(reports.id, reportId));
   }
 }
 
