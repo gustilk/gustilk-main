@@ -13,7 +13,7 @@ export interface ModerationResult {
 export async function moderateImage(base64DataUrl: string): Promise<ModerationResult> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-5-mini",
+      model: "gpt-4o-mini",
       max_completion_tokens: 10,
       messages: [
         {
@@ -62,7 +62,7 @@ export interface FaceCheckResult {
 export async function checkFacePresent(base64DataUrl: string): Promise<FaceCheckResult> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-5-mini",
+      model: "gpt-4o-mini",
       max_completion_tokens: 10,
       messages: [
         {
@@ -89,17 +89,16 @@ export async function checkFacePresent(base64DataUrl: string): Promise<FaceCheck
     const answer = (response.choices[0]?.message?.content ?? "").trim().toUpperCase();
     console.log(`[face-check] result: "${answer}"`);
 
-    if (answer.includes("YES")) {
-      return { faceDetected: true };
-    }
     if (answer.includes("NO")) {
-      return { faceDetected: false, reason: "No clear face detected in the photo" };
+      return { faceDetected: false, reason: "No face detected in the photo" };
     }
-    console.warn(`[face-check] unexpected response: "${answer}" — treating as no face`);
-    return { faceDetected: false, reason: "Face could not be verified — please try again" };
+    // Treat YES or any unexpected/empty response as face detected (fail-open)
+    // Admin reviews every selfie anyway, so being lenient here avoids blocking real users
+    return { faceDetected: true };
   } catch (err: any) {
     console.error("[face-check] scan failed:", err?.message ?? err);
-    return { faceDetected: false, reason: "Face scan failed — please try again" };
+    // Fail-open: let it through and let admin review
+    return { faceDetected: true };
   }
 }
 
