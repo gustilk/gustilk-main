@@ -146,7 +146,7 @@ export default {
     selfieReady: "Selfie ready",
     selfieRequiredStatus: "Selfie required",
     faceCheckTitle: "No Face Detected",
-    faceCheckDesc: "Your selfie must show a clear, visible face — not obscured by sunglasses, masks, or poor lighting. Please try again.",
+    faceCheckDesc: "No face was found in your photo. Please take a selfie where your face is visible and try again.",
     faceChecking: "Scanning face…",
   },
   discover: {

@@ -68,7 +68,7 @@ export async function checkFacePresent(base64DataUrl: string): Promise<FaceCheck
         {
           role: "system",
           content:
-            "You are a face detection system. Your only job is to determine whether a clear human face is visible in a photo. Reply with exactly one word.",
+            "You are a face detection system. Your only job is to determine whether a human face is present in a photo. Reply with exactly one word.",
         },
         {
           role: "user",
@@ -79,7 +79,7 @@ export async function checkFacePresent(base64DataUrl: string): Promise<FaceCheck
             },
             {
               type: "text",
-              text: "Is there at least one clear, recognizable human face clearly visible in this image? The face must be well-lit and not obscured by sunglasses, masks, or other coverings. Reply with exactly one word: YES or NO",
+              text: "Is there a human face visible anywhere in this image? Reply with exactly one word: YES or NO",
             },
           ],
         },

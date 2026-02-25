@@ -146,7 +146,7 @@ export default {
     selfieReady: "Selfî amade ye",
     selfieRequiredStatus: "Selfî pêwîst e",
     faceCheckTitle: "Rû nehat tespîtkirin",
-    faceCheckDesc: "Selfiya te divê rûyê te bi zelal nîşan bide — bê eynak, masik, an ronahiya xirab. Ji kerema xwe dîsa biceribîne.",
+    faceCheckDesc: "Di wêneyê te de rû nehat dîtin. Ji kerema xwe selfiyekê bigire ku tê de rûyê te xuya be û dîsa biceribîne.",
     faceChecking: "Rû tê verastkirin…",
   },
   discover: {
