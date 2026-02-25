@@ -10,8 +10,8 @@ import { COUNTRY_STATES } from "@/lib/countryStates";
 interface Props { user: User }
 
 const LANGUAGES = [
-  "Kurdish", "Arabic", "English", "German", "Swedish", "French",
-  "Turkish", "Armenian", "Russian", "Dutch", "Spanish", "Georgian",
+  "Kurdish", "Arabic", "English", "German", "Swedish",
+  "Armenian", "Russian", "Spanish",
 ];
 
 export default function EditProfilePage({ user }: Props) {
