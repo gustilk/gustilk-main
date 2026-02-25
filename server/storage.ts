@@ -1,6 +1,6 @@
 import { db } from "./db";
-import { users, likes, dislikes, matches, messages } from "@shared/schema";
-import type { User, InsertUser, SafeUser, Match, Message, MatchWithUser } from "@shared/schema";
+import { users, likes, dislikes, matches, messages, events, eventAttendees } from "@shared/schema";
+import type { User, InsertUser, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance } from "@shared/schema";
 import { eq, and, or, ne, notInArray, desc, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
@@ -23,6 +23,15 @@ export interface IStorage {
   getMessages(matchId: string): Promise<Message[]>;
   sendMessage(matchId: string, senderId: string, text: string): Promise<Message>;
   markMessagesRead(matchId: string, userId: string): Promise<void>;
+
+  listEvents(userId: string): Promise<EventWithAttendance[]>;
+  getEvent(eventId: string, userId: string): Promise<EventWithAttendance | undefined>;
+  attendEvent(eventId: string, userId: string): Promise<void>;
+  unattendEvent(eventId: string, userId: string): Promise<void>;
+
+  getPendingVerifications(): Promise<SafeUser[]>;
+  updateVerificationStatus(userId: string, status: "approved" | "rejected", isVerified?: boolean): Promise<void>;
+  banUser(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -63,7 +72,7 @@ export class DatabaseStorage implements IStorage {
     const dislikedRows = await db.select({ id: dislikes.toUserId }).from(dislikes).where(eq(dislikes.fromUserId, userId));
     const excludeIds = [userId, ...likedRows.map(r => r.id), ...dislikedRows.map(r => r.id)];
 
-    let query = db.select().from(users).where(
+    const query = db.select().from(users).where(
       and(
         eq(users.caste, caste as any),
         notInArray(users.id, excludeIds),
@@ -159,6 +168,53 @@ export class DatabaseStorage implements IStorage {
     await db.update(messages).set({ readAt: new Date() }).where(
       and(eq(messages.matchId, matchId), ne(messages.senderId, userId), sql`${messages.readAt} IS NULL`)
     );
+  }
+
+  async listEvents(userId: string): Promise<EventWithAttendance[]> {
+    const allEvents = await db.select().from(events).orderBy(events.date);
+    const attending = await db.select().from(eventAttendees).where(eq(eventAttendees.userId, userId));
+    const attendingSet = new Set(attending.map(a => a.eventId));
+    return allEvents.map(e => ({ ...e, isAttending: attendingSet.has(e.id) }));
+  }
+
+  async getEvent(eventId: string, userId: string): Promise<EventWithAttendance | undefined> {
+    const [event] = await db.select().from(events).where(eq(events.id, eventId));
+    if (!event) return undefined;
+    const [att] = await db.select().from(eventAttendees).where(
+      and(eq(eventAttendees.eventId, eventId), eq(eventAttendees.userId, userId))
+    );
+    return { ...event, isAttending: !!att };
+  }
+
+  async attendEvent(eventId: string, userId: string): Promise<void> {
+    await db.insert(eventAttendees).values({ id: randomUUID(), eventId, userId }).onConflictDoNothing();
+    await db.update(events).set({ attendeeCount: sql`${events.attendeeCount} + 1` }).where(eq(events.id, eventId));
+  }
+
+  async unattendEvent(eventId: string, userId: string): Promise<void> {
+    await db.delete(eventAttendees).where(
+      and(eq(eventAttendees.eventId, eventId), eq(eventAttendees.userId, userId))
+    );
+    await db.update(events).set({ attendeeCount: sql`GREATEST(${events.attendeeCount} - 1, 0)` }).where(eq(events.id, eventId));
+  }
+
+  async getPendingVerifications(): Promise<SafeUser[]> {
+    const pending = await db.select().from(users).where(eq(users.verificationStatus, "pending"));
+    return pending.map(({ password: _, ...safe }) => safe);
+  }
+
+  async updateVerificationStatus(userId: string, status: "approved" | "rejected", isVerified?: boolean): Promise<void> {
+    await db.update(users).set({
+      verificationStatus: status,
+      isVerified: isVerified ?? (status === "approved"),
+    }).where(eq(users.id, userId));
+  }
+
+  async banUser(userId: string): Promise<void> {
+    await db.update(users).set({
+      verificationStatus: "rejected",
+      isVerified: false,
+    }).where(eq(users.id, userId));
   }
 }
 

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Lock, Star } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { SafeUser, Message, MatchWithUser } from "@shared/schema";
 
@@ -63,9 +63,78 @@ export default function ChatPage({ user, matchId }: Props) {
     }
   };
 
+  if (!user.isPremium) {
+    const waitingCount = messages.filter(m => m.senderId !== user.id).length;
+    return (
+      <div className="flex flex-col h-screen" style={{ background: "#0d0618" }}>
+        <div
+          className="flex items-center gap-3 px-4 pt-12 pb-3"
+          style={{ background: "rgba(13,6,24,0.97)", borderBottom: "1px solid rgba(201,168,76,0.15)" }}
+        >
+          <button
+            onClick={() => setLocation("/matches")}
+            data-testid="button-back"
+            className="text-cream/60"
+          >
+            <ArrowLeft size={22} />
+          </button>
+          <div
+            className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-serif text-lg font-bold text-gold overflow-hidden"
+            style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "2px solid rgba(201,168,76,0.3)" }}
+          >
+            {otherUser?.photos && otherUser.photos.length > 0 ? (
+              <img src={otherUser.photos[0]} alt={otherUser.fullName} className="w-full h-full object-cover" />
+            ) : (
+              otherUser?.fullName.charAt(0)
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-cream font-semibold text-sm" data-testid="text-chat-name">
+              {otherUser?.fullName ?? "Loading…"}
+            </h2>
+            <p className="text-cream/40 text-xs">
+              {otherUser ? `${otherUser.city}, ${otherUser.country}` : ""}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex-1 flex flex-col items-center justify-center px-6 text-center gap-5">
+          <div
+            className="w-24 h-24 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(245,158,11,0.1)", border: "2px solid rgba(245,158,11,0.3)" }}
+          >
+            <Lock size={36} color="#f59e0b" />
+          </div>
+          <div>
+            <h3 className="font-serif text-2xl text-gold mb-2">
+              {waitingCount > 0 ? `${waitingCount} Nachricht${waitingCount !== 1 ? "en" : ""} warten` : "Nachrichten gesperrt"}
+            </h3>
+            <p className="text-cream/50 text-sm leading-relaxed">
+              Wechsle zu Premium, um alle Nachrichten zu lesen und zu senden.
+            </p>
+          </div>
+          <button
+            onClick={() => setLocation("/premium")}
+            data-testid="button-upgrade-chat"
+            className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold text-sm"
+            style={{ background: "linear-gradient(135deg, #f59e0b, #f97316)", color: "white", boxShadow: "0 8px 24px rgba(245,158,11,0.3)" }}
+          >
+            <Star size={17} fill="white" />
+            Premium — $5/Monat
+          </button>
+          <button
+            onClick={() => setLocation("/matches")}
+            className="text-cream/40 text-sm"
+          >
+            Zurück zu Matches
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen" style={{ background: "#0d0618" }}>
-      {/* Header */}
       <div
         className="flex items-center gap-3 px-4 pt-12 pb-3"
         style={{ background: "rgba(13,6,24,0.97)", borderBottom: "1px solid rgba(201,168,76,0.15)" }}
@@ -97,7 +166,6 @@ export default function ChatPage({ user, matchId }: Props) {
         </div>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center">
@@ -121,7 +189,6 @@ export default function ChatPage({ user, matchId }: Props) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
       <div
         className="flex items-end gap-3 px-4 py-3"
         style={{ background: "rgba(13,6,24,0.97)", borderTop: "1px solid rgba(201,168,76,0.15)" }}

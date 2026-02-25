@@ -26,30 +26,47 @@ A culturally sensitive dating platform designed exclusively for the Yezidi commu
 ## Key Features
 1. **Caste-based matching** — users only see profiles from their own caste
 2. **Profile management** — photos, bio, occupation, languages
-3. **Discover** — card-based profile browsing with like/dislike
-4. **Matches** — mutual like creates a match
-5. **Messaging** — real-time chat with matches
-6. **Premium** — $5/month subscription (UI ready, payment integration pending)
-7. **Verification** — status display (admin-driven)
+3. **Discover** — card-based profile browsing with like/dislike, location pin, swipe animation
+4. **Matches** — "Neue Matches" bubbles row + conversations list
+5. **Messaging** — real-time chat; locked behind premium for non-subscribers
+6. **Premium** — $5/month subscription; free for Iraq (country selector)
+7. **Verification** — admin approval workflow
+8. **Events** — community event listing with RSVP (Cultural / Meetup / Online filter tabs)
+9. **Admin Panel** — verification queue with approve/reject/ban actions
+10. **Match Modal** — dual-avatar display when match occurs
+
+## Pages / Routes
+- `/discover` — Swipeable profile cards
+- `/matches` — New matches bubbles + conversation list (locked for non-premium)
+- `/chat/:matchId` — Chat screen (locked overlay for non-premium)
+- `/events` — Events list with type filter
+- `/events/:eventId` — Event detail with RSVP
+- `/profile` — My profile + settings menu (Language, Notifications, Community Guidelines, Admin)
+- `/profile/edit` — Edit profile
+- `/premium` — Premium subscription with Iraq detection
+- `/admin` — Admin verification queue (isAdmin users only)
 
 ## Database Schema
-- `users` — profiles with caste, gender, country, photos, etc.
+- `users` — profiles with caste, gender, country, photos, isPremium, isAdmin, verificationSelfie
 - `likes` — unique per (fromUserId, toUserId)
 - `dislikes` — unique per (fromUserId, toUserId)
 - `matches` — created when two users mutually like each other
 - `messages` — within a match conversation
+- `events` — community events (type, date, location, attendeeCount)
+- `eventAttendees` — RSVP join table
 
 ## Design System
-- **Colors**: Deep purple/plum background (#1a0a2e, #0d0618), gold accent (#c9a84c)
+- **Colors**: Deep ink background (#0d0618), gold accent (#c9a84c), plum (#7b3fa0), rose (#d4608a), cream (#fdf8f0)
 - **Typography**: Playfair Display (headings), Open Sans (body)
 - **Theme**: Dark mode by default
 
-## Demo Account
-- Email: demo@gustilk.com
-- Password: demo1234
+## Demo Accounts
+- **Demo user**: demo@gustilk.com / demo1234 (sheikh, Hannover, Germany)
+- **Admin**: admin@gustilk.com / admin1234 (isAdmin: true — can access /admin)
 
 ## Seed Data
-5 seed users across Sheikh and Pir castes with realistic profiles.
+- 6 users: 5 community members + 1 admin, across Sheikh and Pir castes
+- 6 events: 2 cultural, 2 meetup, 2 online across Germany, Sweden, Iraq, International
 
 ## Environment Variables
 - `DATABASE_URL` — PostgreSQL connection string

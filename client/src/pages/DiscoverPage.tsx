@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { SlidersHorizontal, X, Heart, RefreshCw } from "lucide-react";
+import { SlidersHorizontal, X, Heart, RefreshCw, MapPin } from "lucide-react";
 import MatchModal from "@/components/MatchModal";
 import type { SafeUser } from "@shared/schema";
 
@@ -65,7 +65,6 @@ export default function DiscoverPage({ user }: Props) {
 
   return (
     <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
-      {/* Header */}
       <div className="flex items-center justify-between px-5 pt-12 pb-4">
         <h1 className="font-serif text-2xl text-gold">Gûstîlk</h1>
         <button
@@ -79,7 +78,6 @@ export default function DiscoverPage({ user }: Props) {
         </button>
       </div>
 
-      {/* Filters Panel */}
       {showFilters && (
         <div
           className="mx-5 mb-4 p-4 rounded-2xl animate-slide-up"
@@ -110,7 +108,6 @@ export default function DiscoverPage({ user }: Props) {
         </div>
       )}
 
-      {/* Card Area */}
       <div className="flex-1 px-5 pb-4">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-96 gap-4">
@@ -149,21 +146,21 @@ export default function DiscoverPage({ user }: Props) {
               }}
               data-testid={`card-profile-${current.id}`}
             >
-              {/* Photo */}
               <div
-                className="h-96 relative flex items-center justify-center"
+                className="h-[420px] relative flex items-center justify-center"
                 style={{ background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}
               >
                 {current.photos && current.photos.length > 0 ? (
                   <img src={current.photos[0]} alt={current.fullName} className="w-full h-full object-cover" />
                 ) : (
                   <div
-                    className="w-24 h-24 rounded-full flex items-center justify-center text-4xl font-serif text-gold"
+                    className="w-28 h-28 rounded-full flex items-center justify-center text-5xl font-serif text-gold"
                     style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.25)" }}
                   >
                     {current.fullName.charAt(0)}
                   </div>
                 )}
+
                 <div
                   className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold"
                   style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
@@ -171,31 +168,32 @@ export default function DiscoverPage({ user }: Props) {
                 >
                   {casteLabel(current.caste)}
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 h-40" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.97), transparent)" }} />
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <h2 className="font-serif text-2xl text-white font-bold" data-testid={`text-name-${current.id}`}>
+
+                <div className="absolute bottom-0 left-0 right-0 h-52" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.98), transparent)" }} />
+                <div className="absolute bottom-0 left-0 right-0 p-5">
+                  <h2 className="font-serif text-2xl text-white font-bold leading-tight" data-testid={`text-name-${current.id}`}>
                     {current.fullName}, {current.age}
                   </h2>
-                  <p className="text-white/60 text-sm mt-0.5">{current.city}, {current.country}</p>
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <MapPin size={13} color="rgba(201,168,76,0.8)" />
+                    <p className="text-white/60 text-sm">{current.city}, {current.country}</p>
+                  </div>
                   {current.bio && (
-                    <p className="text-white/40 text-xs mt-1.5 line-clamp-2 leading-relaxed">{current.bio}</p>
+                    <p className="text-white/50 text-xs mt-2 line-clamp-2 leading-relaxed">{current.bio}</p>
                   )}
-                </div>
-              </div>
-
-              {/* Info strip */}
-              <div className="p-4" style={{ background: "rgba(13,6,24,0.95)" }}>
-                <div className="flex flex-wrap gap-2">
-                  {current.occupation && (
-                    <span className="px-2.5 py-1 rounded-full text-xs" style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}>
-                      {current.occupation}
-                    </span>
+                  {(current.languages ?? []).length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2.5">
+                      {(current.languages ?? []).slice(0, 3).map(lang => (
+                        <span
+                          key={lang}
+                          className="px-2 py-0.5 rounded-full text-[11px]"
+                          style={{ background: "rgba(201,168,76,0.15)", color: "rgba(201,168,76,0.9)", border: "1px solid rgba(201,168,76,0.2)" }}
+                        >
+                          {lang}
+                        </span>
+                      ))}
+                    </div>
                   )}
-                  {(current.languages ?? []).slice(0, 3).map(lang => (
-                    <span key={lang} className="px-2.5 py-1 rounded-full text-xs" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.5)" }}>
-                      {lang}
-                    </span>
-                  ))}
                 </div>
               </div>
             </div>
@@ -204,14 +202,13 @@ export default function DiscoverPage({ user }: Props) {
               {profiles.length - currentIndex - 1} more profile{profiles.length - currentIndex - 1 !== 1 ? "s" : ""} to discover
             </p>
 
-            {/* Action Buttons */}
             <div className="flex justify-center gap-10 mt-5">
               <button
                 onClick={() => dislikeMutation.mutate(current.id)}
                 disabled={dislikeMutation.isPending || likeMutation.isPending}
                 data-testid="button-dislike"
                 className="w-16 h-16 rounded-full flex items-center justify-center transition-all"
-                style={{ background: "rgba(255,255,255,0.07)", border: "2px solid rgba(255,255,255,0.1)" }}
+                style={{ background: "rgba(255,255,255,0.07)", border: "2px solid rgba(255,255,255,0.12)" }}
               >
                 <X size={24} color="rgba(253,248,240,0.6)" />
               </button>
@@ -229,10 +226,10 @@ export default function DiscoverPage({ user }: Props) {
         )}
       </div>
 
-      {/* Match Modal */}
       {matchData && (
         <MatchModal
           matchedUser={matchData.user}
+          currentUser={user}
           matchId={matchData.matchId}
           onClose={() => setMatchData(null)}
         />

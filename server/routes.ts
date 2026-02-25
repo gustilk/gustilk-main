@@ -65,6 +65,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     photos: z.array(z.string()).optional(),
     age: z.number().min(18).max(80).optional(),
     gender: z.enum(["male", "female"]).optional(),
+    verificationSelfie: z.string().optional(),
+    verificationStatus: z.enum(["none", "pending", "approved", "rejected"]).optional(),
   });
 
   app.put("/api/profile", requireAuth, async (req, res) => {
@@ -163,6 +165,85 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const { text } = z.object({ text: z.string().min(1).max(2000) }).parse(req.body);
       const msg = await storage.sendMessage(req.params.matchId, userId, text);
       res.json({ message: msg });
+    } catch (err: any) {
+      if (err?.name === "ZodError") return res.status(400).json({ error: err.errors[0].message });
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ─── EVENTS ──────────────────────────────────────────────
+  app.get("/api/events", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const eventList = await storage.listEvents(userId);
+      res.json({ events: eventList });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/events/:eventId", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const event = await storage.getEvent(req.params.eventId, userId);
+      if (!event) return res.status(404).json({ error: "Event not found" });
+      res.json({ event });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/events/:eventId/attend", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      await storage.attendEvent(req.params.eventId, userId);
+      res.json({ ok: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.delete("/api/events/:eventId/attend", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      await storage.unattendEvent(req.params.eventId, userId);
+      res.json({ ok: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ─── ADMIN ───────────────────────────────────────────────
+  app.get("/api/admin/verifications", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const adminUser = await storage.getUserById(userId);
+      if (!adminUser?.isAdmin) return res.status(403).json({ error: "Forbidden" });
+      const pending = await storage.getPendingVerifications();
+      res.json({ users: pending });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/verify/:userId", requireAuth, async (req, res) => {
+    try {
+      const adminId = (req.user as any).id;
+      const adminUser = await storage.getUserById(adminId);
+      if (!adminUser?.isAdmin) return res.status(403).json({ error: "Forbidden" });
+
+      const { action } = z.object({ action: z.enum(["approve", "reject", "ban"]) }).parse(req.body);
+      const targetId = req.params.userId;
+
+      if (action === "approve") {
+        await storage.updateVerificationStatus(targetId, "approved", true);
+      } else if (action === "reject") {
+        await storage.updateVerificationStatus(targetId, "rejected", false);
+      } else {
+        await storage.banUser(targetId);
+      }
+
+      res.json({ ok: true });
     } catch (err: any) {
       if (err?.name === "ZodError") return res.status(400).json({ error: err.errors[0].message });
       res.status(500).json({ error: err.message });

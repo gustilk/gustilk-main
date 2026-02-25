@@ -1,7 +1,7 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Edit2, Star, LogOut, CheckCircle, Clock } from "lucide-react";
+import { Edit2, Star, LogOut, CheckCircle, Clock, Globe, Bell, FileText, Shield, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { SafeUser } from "@shared/schema";
 
@@ -29,9 +29,16 @@ export default function ProfilePage({ user }: Props) {
 
   const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Murid" }[c] ?? c);
 
+  const handleLanguage = () => {
+    toast({ title: "Language", description: "Language settings coming soon." });
+  };
+
+  const handleNotifications = () => {
+    toast({ title: "Notifications", description: "Notification settings coming soon." });
+  };
+
   return (
     <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
-      {/* Header */}
       <div className="pt-12 pb-2 px-5 flex items-center justify-between">
         <h1 className="font-serif text-2xl text-gold">My Profile</h1>
         <button
@@ -45,13 +52,11 @@ export default function ProfilePage({ user }: Props) {
         </button>
       </div>
 
-      {/* Profile Card */}
       <div className="px-5 pt-4">
         <div
           className="rounded-3xl overflow-hidden"
           style={{ border: "1px solid rgba(201,168,76,0.2)", background: "rgba(255,255,255,0.03)" }}
         >
-          {/* Photo banner */}
           <div
             className="h-52 relative flex items-center justify-center"
             style={{ background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}
@@ -85,9 +90,7 @@ export default function ProfilePage({ user }: Props) {
             </div>
           </div>
 
-          {/* Details */}
           <div className="p-5 space-y-4">
-            {/* Badges */}
             <div className="flex flex-wrap gap-2">
               {me.isPremium && (
                 <span
@@ -161,8 +164,7 @@ export default function ProfilePage({ user }: Props) {
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="px-5 mt-6 space-y-3">
+      <div className="px-5 mt-5 space-y-3">
         {!me.isPremium && (
           <button
             onClick={() => setLocation("/premium")}
@@ -171,9 +173,51 @@ export default function ProfilePage({ user }: Props) {
             style={{ background: "linear-gradient(135deg, #f59e0b, #f97316)", color: "white" }}
           >
             <Star size={16} fill="white" />
-            Unlock Premium — $5/month
+            Zu Premium wechseln — $5/Monat
           </button>
         )}
+
+        <div
+          className="rounded-2xl overflow-hidden"
+          style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}
+        >
+          <SettingsRow
+            icon={Globe}
+            label="Language"
+            sub="Kurdish, German, English"
+            onClick={handleLanguage}
+            testId="button-language"
+          />
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }} />
+          <SettingsRow
+            icon={Bell}
+            label="Notifications"
+            sub="Manage push notifications"
+            onClick={handleNotifications}
+            testId="button-notifications"
+          />
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }} />
+          <SettingsRow
+            icon={FileText}
+            label="Community Guidelines"
+            sub="Read our community rules"
+            onClick={() => toast({ title: "Community Guidelines", description: "Respect, honesty, and cultural sensitivity are core values of our community." })}
+            testId="button-guidelines"
+          />
+          {me.isAdmin && (
+            <>
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }} />
+              <SettingsRow
+                icon={Shield}
+                label="Admin Panel"
+                sub="Manage verification requests"
+                onClick={() => setLocation("/admin")}
+                testId="button-admin"
+              />
+            </>
+          )}
+        </div>
+
         <button
           onClick={() => logoutMutation.mutate()}
           disabled={logoutMutation.isPending}
@@ -186,5 +230,33 @@ export default function ProfilePage({ user }: Props) {
         </button>
       </div>
     </div>
+  );
+}
+
+function SettingsRow({ icon: Icon, label, sub, onClick, testId }: {
+  icon: any;
+  label: string;
+  sub: string;
+  onClick: () => void;
+  testId: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      data-testid={testId}
+      className="w-full flex items-center gap-4 px-4 py-3.5 transition-all text-left"
+    >
+      <div
+        className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+        style={{ background: "rgba(201,168,76,0.1)" }}
+      >
+        <Icon size={16} color="#c9a84c" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-cream text-sm font-medium">{label}</p>
+        <p className="text-cream/40 text-xs">{sub}</p>
+      </div>
+      <ChevronRight size={16} color="rgba(253,248,240,0.25)" />
+    </button>
   );
 }

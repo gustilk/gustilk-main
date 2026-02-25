@@ -10,6 +10,9 @@ import ChatPage from "@/pages/ChatPage";
 import ProfilePage from "@/pages/ProfilePage";
 import EditProfilePage from "@/pages/EditProfilePage";
 import PremiumPage from "@/pages/PremiumPage";
+import EventsPage from "@/pages/EventsPage";
+import EventDetailPage from "@/pages/EventDetailPage";
+import AdminPage from "@/pages/AdminPage";
 import BottomNav from "@/components/BottomNav";
 import type { SafeUser } from "@shared/schema";
 
@@ -26,6 +29,7 @@ function useAuth() {
 function AppShell({ user }: { user: AuthUser }) {
   const [location] = useLocation();
   const isChat = location.startsWith("/chat/");
+  const isEventDetail = location.startsWith("/events/") && location !== "/events";
 
   return (
     <div className="flex flex-col min-h-screen bg-ink" style={{ fontFamily: "'Open Sans', sans-serif" }}>
@@ -37,10 +41,13 @@ function AppShell({ user }: { user: AuthUser }) {
           <Route path="/profile/edit" component={() => <EditProfilePage user={user} />} />
           <Route path="/profile" component={() => <ProfilePage user={user} />} />
           <Route path="/premium" component={() => <PremiumPage user={user} />} />
+          <Route path="/events/:eventId" component={({ params }) => <EventDetailPage user={user} eventId={params.eventId} />} />
+          <Route path="/events" component={() => <EventsPage user={user} />} />
+          <Route path="/admin" component={() => <AdminPage user={user} />} />
           <Route path="/" component={() => <Redirect to="/discover" />} />
         </Switch>
       </main>
-      {!isChat && <BottomNav />}
+      {!isChat && !isEventDetail && <BottomNav />}
     </div>
   );
 }

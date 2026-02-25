@@ -1,14 +1,34 @@
-import { Heart, MessageCircle, X } from "lucide-react";
+import { MessageCircle, X } from "lucide-react";
 import { useLocation } from "wouter";
 import type { SafeUser } from "@shared/schema";
 
 interface MatchModalProps {
   matchedUser: SafeUser;
+  currentUser: SafeUser;
   matchId: string;
   onClose: () => void;
 }
 
-export default function MatchModal({ matchedUser, matchId, onClose }: MatchModalProps) {
+function Avatar({ user }: { user: SafeUser }) {
+  return (
+    <div
+      className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center font-serif text-3xl font-bold text-gold flex-shrink-0"
+      style={{
+        background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)",
+        border: "3px solid rgba(201,168,76,0.6)",
+        boxShadow: "0 0 24px rgba(201,168,76,0.25)",
+      }}
+    >
+      {user.photos && user.photos.length > 0 ? (
+        <img src={user.photos[0]} alt={user.fullName} className="w-full h-full object-cover" />
+      ) : (
+        user.fullName.charAt(0)
+      )}
+    </div>
+  );
+}
+
+export default function MatchModal({ matchedUser, currentUser, matchId, onClose }: MatchModalProps) {
   const [, setLocation] = useLocation();
 
   const handleChat = () => {
@@ -29,19 +49,23 @@ export default function MatchModal({ matchedUser, matchId, onClose }: MatchModal
         <button
           onClick={onClose}
           data-testid="button-close-modal"
-          className="absolute top-4 right-4 text-cream/40 transition-colors"
+          className="absolute top-4 right-4"
           style={{ color: "rgba(253,248,240,0.4)" }}
         >
           <X size={20} />
         </button>
 
-        <div className="flex justify-center mb-6">
-          <div
-            className="w-20 h-20 rounded-full flex items-center justify-center animate-pulse-ring"
-            style={{ border: "2px solid #c9a84c" }}
-          >
-            <Heart size={36} fill="#c9a84c" color="#c9a84c" />
+        <div className="flex justify-center items-center gap-4 mb-6">
+          <Avatar user={currentUser} />
+          <div className="flex flex-col items-center gap-1">
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center text-xl"
+              style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)" }}
+            >
+              ✦
+            </div>
           </div>
+          <Avatar user={matchedUser} />
         </div>
 
         <h2 className="font-serif text-3xl font-bold text-gold mb-2">It's a Match!</h2>

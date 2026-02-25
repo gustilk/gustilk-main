@@ -22,8 +22,10 @@ export const users = pgTable("users", {
   languages: text("languages").array().default([]),
   isVerified: boolean("is_verified").default(false),
   verificationStatus: verificationStatusEnum("verification_status").default("none"),
+  verificationSelfie: text("verification_selfie").default(""),
   isPremium: boolean("is_premium").default(false),
   premiumUntil: timestamp("premium_until"),
+  isAdmin: boolean("is_admin").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -61,12 +63,37 @@ export const messages = pgTable("messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const events = pgTable("events", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  type: text("type").notNull(),
+  date: timestamp("date").notNull(),
+  location: text("location").notNull(),
+  country: text("country").notNull(),
+  organizer: text("organizer").notNull(),
+  imageUrl: text("image_url").default(""),
+  attendeeCount: integer("attendee_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const eventAttendees = pgTable("event_attendees", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  eventId: varchar("event_id", { length: 36 }).notNull().references(() => events.id),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqueAttendee: uniqueIndex("event_attendees_unique").on(table.eventId, table.userId),
+}));
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   isVerified: true,
   verificationStatus: true,
+  verificationSelfie: true,
   isPremium: true,
   premiumUntil: true,
+  isAdmin: true,
   createdAt: true,
 });
 
@@ -88,6 +115,8 @@ export type Like = typeof likes.$inferSelect;
 export type Dislike = typeof dislikes.$inferSelect;
 export type Match = typeof matches.$inferSelect;
 export type Message = typeof messages.$inferSelect;
+export type Event = typeof events.$inferSelect;
+export type EventAttendee = typeof eventAttendees.$inferSelect;
 
 export type SafeUser = Omit<User, "password">;
 
@@ -95,4 +124,8 @@ export type MatchWithUser = Match & {
   otherUser: SafeUser;
   lastMessage?: Message | null;
   unreadCount?: number;
+};
+
+export type EventWithAttendance = Event & {
+  isAttending: boolean;
 };
