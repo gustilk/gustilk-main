@@ -5,7 +5,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import logoImg from "@assets/Untitled_design_1772024284063.png";
-import { MapPin, Loader2, AlertTriangle, Camera, ImagePlus, X, ChevronRight, Shield, LogOut } from "lucide-react";
+import { MapPin, Loader2, AlertTriangle, Camera, ImagePlus, X, ChevronRight, Shield, LogOut, CheckCircle2, ScrollText, ChevronDown } from "lucide-react";
 import type { User } from "@shared/schema";
 import { PhotoCropModal, compressImage } from "@/components/PhotoCropModal";
 
@@ -65,6 +65,7 @@ export default function SocialSetupPage({ user }: Props) {
   // Step 1 state
   const [data, setData] = useState({ caste: "murid", gender: "female", country: "", city: "", age: 22 });
   const [agreedGuidelines, setAgreedGuidelines] = useState(false);
+  const [showGuidelinesModal, setShowGuidelinesModal] = useState(true);
   const [agreedTruthful, setAgreedTruthful] = useState(false);
   const [geoState, setGeoState] = useState<GeoState>("loading");
   const [detectedCountryName, setDetectedCountryName] = useState("");
@@ -169,6 +170,12 @@ export default function SocialSetupPage({ user }: Props) {
         outputSize={cropTarget.index === "selfie" ? 500 : 800}
         onConfirm={handleCropConfirm}
         onCancel={() => setCropTarget(null)}
+      />
+    )}
+    {showGuidelinesModal && (
+      <CommunityGuidelinesModal
+        onAgree={() => setAgreedGuidelines(true)}
+        onClose={() => setShowGuidelinesModal(false)}
       />
     )}
     <div className="min-h-screen flex items-center justify-center px-5 py-8" style={{ background: "#0d0618" }}>
@@ -309,33 +316,35 @@ export default function SocialSetupPage({ user }: Props) {
                 </div>
               </div>
 
-              <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.2)" }}>
-                <div className="px-4 py-3" style={{ background: "rgba(201,168,76,0.07)", borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
-                  <p className="text-gold font-serif text-sm font-semibold">Gûstîlk — Community Agreement</p>
-                  <p className="text-cream/40 text-xs mt-0.5">Gûstîlk is a sacred space. By joining, you agree to uphold the values, traditions, and honour of the Yezidi faith.</p>
+              <button
+                type="button"
+                onClick={() => setShowGuidelinesModal(true)}
+                data-testid="button-open-guidelines"
+                className="w-full rounded-2xl px-4 py-4 flex items-center gap-3 transition-all active:scale-98"
+                style={agreedGuidelines
+                  ? { background: "rgba(201,168,76,0.1)", border: "1.5px solid rgba(201,168,76,0.5)" }
+                  : { background: "rgba(255,255,255,0.04)", border: "1.5px solid rgba(255,255,255,0.1)" }
+                }
+              >
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: agreedGuidelines ? "rgba(201,168,76,0.2)" : "rgba(255,255,255,0.06)" }}>
+                  {agreedGuidelines
+                    ? <CheckCircle2 size={20} color="#c9a84c" />
+                    : <ScrollText size={20} color="rgba(201,168,76,0.5)" />
+                  }
                 </div>
-                <div className="p-4 space-y-3 max-h-52 overflow-y-auto" style={{ background: "rgba(255,255,255,0.02)" }} data-testid="agreement-scroll">
-                  {AGREEMENT_SECTIONS.map((s, i) => (
-                    <div key={i}>
-                      <p className="text-gold/80 text-xs font-semibold mb-0.5">{s.title}</p>
-                      <p className="text-cream/45 text-xs leading-relaxed">{s.body}</p>
-                    </div>
-                  ))}
-                  <div className="pt-1" style={{ borderTop: "1px solid rgba(201,168,76,0.12)" }}>
-                    <p className="text-cream/40 text-xs leading-relaxed italic">
-                      Depending on severity of violations: a warning, temporary suspension, permanent ban, or deletion of your account. The admin team has full authority to enforce these guidelines.
-                    </p>
-                    <p className="text-gold/60 text-xs mt-2 font-medium">
-                      By using Gûstîlk, you honour not just these rules — but the entire Yezidi community.
-                    </p>
-                  </div>
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-semibold" style={{ color: agreedGuidelines ? "#c9a84c" : "rgba(253,248,240,0.7)" }}>
+                    Community Guidelines
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: agreedGuidelines ? "rgba(201,168,76,0.6)" : "rgba(253,248,240,0.3)" }}>
+                    {agreedGuidelines ? "You have read and agreed" : "Tap to read and agree — required"}
+                  </p>
                 </div>
-              </div>
+                <ChevronDown size={16} color="rgba(201,168,76,0.4)" />
+              </button>
 
               <div className="space-y-3">
-                <Checkbox checked={agreedGuidelines} onChange={setAgreedGuidelines} testId="checkbox-guidelines">
-                  I have read and agree to the Community Guidelines
-                </Checkbox>
                 <Checkbox checked={agreedTruthful} onChange={setAgreedTruthful} testId="checkbox-truthful">
                   I confirm that all information I provide is truthful and honest
                 </Checkbox>
@@ -516,6 +525,91 @@ export default function SocialSetupPage({ user }: Props) {
       </div>
     </div>
     </>
+  );
+}
+
+function CommunityGuidelinesModal({ onAgree, onClose }: { onAgree: () => void; onClose: () => void }) {
+  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 20;
+    if (atBottom) setHasScrolledToBottom(true);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: "#0d0618" }}>
+      <div className="fixed inset-0 pointer-events-none" style={{
+        background: "radial-gradient(ellipse 70% 40% at 50% 0%, rgba(74,30,107,0.7) 0%, transparent 70%)",
+      }} />
+
+      <div className="relative z-10 flex flex-col h-full">
+        <div className="flex-shrink-0 px-5 pt-12 pb-6 text-center">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.3)" }}>
+            <ScrollText size={26} color="#c9a84c" />
+          </div>
+          <h1 className="font-serif text-2xl font-bold" style={{ color: "#c9a84c" }}>Community Guidelines</h1>
+          <p className="text-cream/40 text-sm mt-1">Read carefully — scroll to the bottom to agree</p>
+        </div>
+
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto px-5 pb-4 space-y-5"
+        >
+          {AGREEMENT_SECTIONS.map((s, i) => (
+            <div key={i} className="rounded-2xl p-4"
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.12)" }}>
+              <p className="font-serif font-semibold mb-2" style={{ color: "#c9a84c" }}>{s.title}</p>
+              <p className="text-cream/60 text-sm leading-relaxed">{s.body}</p>
+            </div>
+          ))}
+
+          <div className="rounded-2xl p-4"
+            style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.2)" }}>
+            <p className="text-cream/50 text-sm leading-relaxed italic">
+              Depending on severity of violations: a warning, temporary suspension, permanent ban, or deletion of your account. The admin team has full authority to enforce these guidelines.
+            </p>
+            <p className="text-sm mt-3 font-medium" style={{ color: "#c9a84c" }}>
+              By using Gûstîlk, you honour not just these rules — but the entire Yezidi community.
+            </p>
+          </div>
+
+          {!hasScrolledToBottom && (
+            <div className="flex flex-col items-center gap-1 py-2 opacity-50">
+              <ChevronDown size={18} color="#c9a84c" className="animate-bounce" />
+              <span className="text-xs text-cream/40">Scroll down to continue</span>
+            </div>
+          )}
+
+          <div className="h-4" />
+        </div>
+
+        <div className="flex-shrink-0 px-5 pb-10 pt-4 space-y-3"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(13,6,24,0.95)" }}>
+          <button
+            onClick={() => { onAgree(); onClose(); }}
+            disabled={!hasScrolledToBottom}
+            data-testid="button-agree-guidelines"
+            className="w-full py-4 rounded-xl font-bold text-sm transition-all disabled:opacity-40"
+            style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: hasScrolledToBottom ? "0 6px 20px rgba(201,168,76,0.35)" : "none" }}
+          >
+            {hasScrolledToBottom ? "I Have Read & I Agree" : "Read all guidelines to continue"}
+          </button>
+          <button
+            onClick={onClose}
+            data-testid="button-close-guidelines"
+            className="w-full py-3 rounded-xl text-sm font-medium"
+            style={{ color: "rgba(253,248,240,0.4)" }}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
