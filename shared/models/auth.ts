@@ -32,6 +32,7 @@ export const users = pgTable("users", {
   country: text("country"),
   city: text("city"),
   age: integer("age"),
+  dateOfBirth: text("date_of_birth"),
   bio: text("bio").default(""),
   occupation: text("occupation").default(""),
   photos: text("photos").array().default([]),

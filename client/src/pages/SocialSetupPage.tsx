@@ -63,7 +63,7 @@ export default function SocialSetupPage({ user }: Props) {
   });
 
   // Step 1 state
-  const [data, setData] = useState({ caste: "murid", gender: "female", country: "", city: "", age: 22 });
+  const [data, setData] = useState({ caste: "murid", gender: "female", country: "", city: "", dateOfBirth: "" });
   const [agreedGuidelines, setAgreedGuidelines] = useState(false);
   const [showGuidelinesModal, setShowGuidelinesModal] = useState(true);
   const [agreedTruthful, setAgreedTruthful] = useState(false);
@@ -106,9 +106,14 @@ export default function SocialSetupPage({ user }: Props) {
 
   const mutation = useMutation({
     mutationFn: async () => {
+      const dob = new Date(data.dateOfBirth);
+      const today = new Date();
+      let calculatedAge = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) calculatedAge--;
       const payload = {
         ...data,
-        age: Number(data.age),
+        age: calculatedAge,
         photos: photos.filter(Boolean) as string[],
         verificationSelfie: selfie!,
         verificationStatus: "pending" as const,
@@ -157,7 +162,15 @@ export default function SocialSetupPage({ user }: Props) {
     setCropTarget(null);
   };
 
-  const step1Valid = data.country && data.city.trim() && agreedGuidelines && agreedTruthful && Number(data.age) >= 18;
+  const isAtLeast16 = (dob: string) => {
+    if (!dob) return false;
+    const d = new Date(dob);
+    const cutoff = new Date();
+    cutoff.setFullYear(cutoff.getFullYear() - 16);
+    return d <= cutoff;
+  };
+  const maxDobDate = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 16); return d.toISOString().split("T")[0]; })();
+  const step1Valid = data.country && data.city.trim() && agreedGuidelines && agreedTruthful && isAtLeast16(data.dateOfBirth);
   const step2Valid = photos.filter(Boolean).length >= 2 && selfie;
   const canSubmit = step2Valid && !cropTarget;
 
@@ -296,23 +309,30 @@ export default function SocialSetupPage({ user }: Props) {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>{t("setup.age")}</Label>
-                  <input type="number" value={data.age}
-                    onChange={e => setData(d => ({ ...d, age: parseInt(e.target.value) || 18 }))}
-                    data-testid="input-age"
-                    className="w-full px-3 py-3 rounded-xl text-sm text-cream outline-none"
-                    style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.25)" }} />
-                </div>
-                <div>
-                  <Label>{t("setup.city")}</Label>
-                  <input type="text" placeholder={t("setup.yourCity")} value={data.city}
-                    onChange={e => setData(d => ({ ...d, city: e.target.value }))}
-                    data-testid="input-city"
-                    className="w-full px-3 py-3 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
-                    style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.25)" }} />
-                </div>
+              <div>
+                <Label>Date of Birth</Label>
+                <input
+                  type="date"
+                  value={data.dateOfBirth}
+                  max={maxDobDate}
+                  min="1930-01-01"
+                  onChange={e => setData(d => ({ ...d, dateOfBirth: e.target.value }))}
+                  data-testid="input-date-of-birth"
+                  className="w-full px-3 py-3 rounded-xl text-sm text-cream outline-none"
+                  style={{ background: "rgba(255,255,255,0.07)", border: `1.5px solid ${data.dateOfBirth && !isAtLeast16(data.dateOfBirth) ? "rgba(212,96,138,0.6)" : "rgba(201,168,76,0.25)"}`, colorScheme: "dark" }}
+                />
+                {data.dateOfBirth && !isAtLeast16(data.dateOfBirth) && (
+                  <p className="text-xs mt-1" style={{ color: "#d4608a" }}>You must be at least 16 years old to use Gûstîlk.</p>
+                )}
+              </div>
+
+              <div>
+                <Label>{t("setup.city")}</Label>
+                <input type="text" placeholder={t("setup.yourCity")} value={data.city}
+                  onChange={e => setData(d => ({ ...d, city: e.target.value }))}
+                  data-testid="input-city"
+                  className="w-full px-3 py-3 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
+                  style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.25)" }} />
               </div>
 
               <button

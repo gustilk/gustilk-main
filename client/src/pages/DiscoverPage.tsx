@@ -178,7 +178,17 @@ export default function DiscoverPage({ user }: Props) {
                 <div className="absolute bottom-0 left-0 right-0 h-52" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.98), transparent)" }} />
                 <div className="absolute bottom-0 left-0 right-0 p-5">
                   <h2 className="font-serif text-2xl text-white font-bold leading-tight" data-testid={`text-name-${current.id}`}>
-                    {current.fullName ?? current.firstName ?? "Member"}, {current.age}
+                    {current.fullName ?? current.firstName ?? "Member"}, {(() => {
+                    if ((current as any).dateOfBirth) {
+                      const dob = new Date((current as any).dateOfBirth);
+                      const today = new Date();
+                      let a = today.getFullYear() - dob.getFullYear();
+                      const m = today.getMonth() - dob.getMonth();
+                      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) a--;
+                      return a;
+                    }
+                    return current.age;
+                  })()}
                   </h2>
                   <div className="flex items-center gap-1.5 mt-1.5">
                     <MapPin size={13} color="rgba(201,168,76,0.8)" />

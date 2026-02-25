@@ -148,7 +148,14 @@ export default function ProfilePage({ user }: Props) {
               <div className="flex items-end justify-between">
                 <div>
                   <h2 className="font-serif text-2xl text-white font-bold" data-testid="text-profile-name">{me.fullName ?? me.firstName ?? "Member"}</h2>
-                  <p className="text-white/60 text-sm">{me.city}, {me.country} · {me.age}</p>
+                  <p className="text-white/60 text-sm">{me.city}, {me.country} · {(me as any).dateOfBirth ? (() => {
+                    const dob = new Date((me as any).dateOfBirth);
+                    const today = new Date();
+                    let a = today.getFullYear() - dob.getFullYear();
+                    const m = today.getMonth() - dob.getMonth();
+                    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) a--;
+                    return a;
+                  })() : me.age}</p>
                 </div>
                 <div
                   className="px-3 py-1 rounded-full text-xs font-bold"
