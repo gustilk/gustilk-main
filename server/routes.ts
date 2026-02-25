@@ -6,6 +6,7 @@ import { profileUpdateSchema } from "@shared/schema";
 import { verifyCountryFromRequest, verifyIraqFromRequest } from "./geo";
 import { setupWs } from "./ws";
 import { z } from "zod";
+import { moderatePhotos } from "./moderation";
 
 function getUserId(req: any): string {
   return req.session?.userId;
@@ -51,6 +52,25 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const allPhotos: string[] = (parsed as any).photos ?? [];
       if (allPhotos.length > 6) {
         return res.status(400).json({ error: "You can upload a maximum of 6 photos." });
+      }
+
+      // Moderate only newly uploaded photos (base64 data URLs, not already-stored ones)
+      const existingPhotos: string[] = user?.photos ?? [];
+      const newPhotos = allPhotos.filter(p => p.startsWith("data:image") && !existingPhotos.includes(p));
+      if (newPhotos.length > 0) {
+        const photoCheck = await moderatePhotos(newPhotos);
+        if (!photoCheck.safe) {
+          return res.status(400).json({ error: "One or more photos contain inappropriate or explicit content and cannot be uploaded." });
+        }
+      }
+
+      // Moderate verification selfie if newly submitted
+      const selfie: string | undefined = (parsed as any).verificationSelfie;
+      if (selfie && selfie.startsWith("data:image") && selfie !== user?.verificationSelfie) {
+        const selfieCheck = await moderatePhotos([selfie]);
+        if (!selfieCheck.safe) {
+          return res.status(400).json({ error: "The verification photo contains inappropriate content." });
+        }
       }
 
       const data = user?.country ? rest : parsed;
@@ -179,6 +199,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.post("/api/verify/submit", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const { selfie } = z.object({ selfie: z.string().min(1) }).parse(req.body);
+    if (selfie.startsWith("data:image")) {
+      const check = await moderatePhotos([selfie]);
+      if (!check.safe) {
+        return res.status(400).json({ error: "The verification photo contains inappropriate content." });
+      }
+    }
     await storage.updateUser(userId, { verificationSelfie: selfie, verificationStatus: "pending" });
     res.json({ ok: true });
   });
