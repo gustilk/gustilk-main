@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Lock, Star, MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
+import logoImg from "@assets/IMG_1041_1772022423551.jpeg";
 import type { SafeUser, MatchWithUser } from "@shared/schema";
 
 interface Props { user: SafeUser }
@@ -23,7 +24,15 @@ export default function MatchesPage({ user }: Props) {
 
   return (
     <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
-      <div className="pt-12 pb-2 px-5">
+      <div className="pt-12 pb-2 px-5 flex items-center gap-2.5">
+        <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0"
+          style={{
+            border: "1.5px solid rgba(201,168,76,0.4)",
+            boxShadow: "0 2px 12px rgba(201,168,76,0.25)",
+            background: "#f9f4eb",
+          }}>
+          <img src={logoImg} alt="" className="w-full h-full object-contain" />
+        </div>
         <h1 className="font-serif text-2xl text-gold">{t("matches.title")}</h1>
       </div>
 

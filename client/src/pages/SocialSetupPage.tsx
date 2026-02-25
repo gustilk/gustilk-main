@@ -4,7 +4,8 @@ import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
-import { Sparkles, MapPin, Loader2, AlertTriangle, Camera, ImagePlus, X, ChevronRight, Shield, LogOut } from "lucide-react";
+import logoImg from "@assets/IMG_1041_1772022423551.jpeg";
+import { MapPin, Loader2, AlertTriangle, Camera, ImagePlus, X, ChevronRight, Shield, LogOut } from "lucide-react";
 import type { User } from "@shared/schema";
 
 const COUNTRIES = ["USA", "Canada", "Australia", "Germany", "Holland", "Sweden", "Belgium", "France", "Turkey", "Iraq", "Armenia", "Georgia", "Russia", "UK"];
@@ -228,9 +229,13 @@ export default function SocialSetupPage({ user }: Props) {
         {step === 1 && (
           <>
             <div className="text-center mb-7">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.3)" }}>
-                <Sparkles size={30} color="#c9a84c" />
+              <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4"
+                style={{
+                  border: "2px solid rgba(201,168,76,0.4)",
+                  boxShadow: "0 4px 20px rgba(201,168,76,0.25)",
+                  background: "#f9f4eb",
+                }}>
+                <img src={logoImg} alt="Gûstîlk" className="w-full h-full object-contain" />
               </div>
               <h1 className="font-serif text-3xl text-gold mb-1">
                 {(() => {

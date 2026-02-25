@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Heart, Shield, Users, Eye, EyeOff, Phone, Mail, ArrowLeft, Globe } from "lucide-react";
+import logoImg from "@assets/IMG_1041_1772022423551.jpeg";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -52,17 +53,29 @@ export default function LandingPage() {
 function Logo() {
   return (
     <div className="text-center mb-8">
-      <div className="mb-4" style={{ filter: "drop-shadow(0 0 24px rgba(201,168,76,0.6))" }}>
-        <svg viewBox="0 0 80 80" className="w-20 h-20 mx-auto" fill="none">
-          <circle cx="40" cy="40" r="37" stroke="#c9a84c" strokeWidth="1.5" opacity="0.25"/>
-          <circle cx="40" cy="40" r="30" stroke="#c9a84c" strokeWidth="1" opacity="0.15"/>
-          <path d="M 20 40 Q 28 24 40 21 Q 52 24 60 40 Q 52 58 40 62 Q 28 58 20 40 Z"
-            fill="rgba(201,168,76,0.15)" stroke="#c9a84c" strokeWidth="1.5"/>
-          <circle cx="40" cy="40" r="9" fill="#c9a84c"/>
-          <circle cx="40" cy="40" r="5" fill="#1a0a2e"/>
-        </svg>
+      <div className="relative inline-flex items-center justify-center mb-5">
+        <div className="absolute inset-0 rounded-full"
+          style={{
+            background: "radial-gradient(circle, rgba(201,168,76,0.18) 0%, transparent 70%)",
+            filter: "blur(12px)",
+            transform: "scale(1.3)",
+          }}
+        />
+        <div className="relative w-32 h-32 rounded-full overflow-hidden"
+          style={{
+            border: "2px solid rgba(201,168,76,0.35)",
+            boxShadow: "0 0 0 6px rgba(201,168,76,0.08), 0 12px 40px rgba(0,0,0,0.5), 0 0 50px rgba(201,168,76,0.2)",
+            background: "#f9f4eb",
+          }}>
+          <img
+            src={logoImg}
+            alt="Gûstîlk"
+            className="w-full h-full object-contain scale-105"
+          />
+        </div>
       </div>
       <h1 className="font-serif text-5xl font-bold text-gold tracking-wide">Gûstîlk</h1>
+      <p className="text-cream/30 text-xs tracking-[0.3em] uppercase mt-1">Yezidi · Community</p>
     </div>
   );
 }
