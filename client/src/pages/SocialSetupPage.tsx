@@ -212,7 +212,7 @@ export default function SocialSetupPage({ user }: Props) {
     )}
     <div className="min-h-screen flex items-center justify-center px-5 py-8" style={{ background: "#0d0618" }}>
       <div className="fixed inset-0 pointer-events-none" style={{
-        background: "radial-gradient(ellipse 60% 50% at 20% 10%, rgba(74,30,107,0.8) 0%, transparent 70%)",
+        background: "radial-gradient(ellipse 50% 35% at 20% 10%, rgba(74,30,107,0.35) 0%, transparent 70%)",
       }} />
       <div className="relative z-10 w-full max-w-sm animate-slide-up">
 
