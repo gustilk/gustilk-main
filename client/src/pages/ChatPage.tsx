@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { ArrowLeft, Send, Lock, Star, Flag, Video } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useTranslation } from "react-i18next";
 import type { SafeUser, Message, MatchWithUser } from "@shared/schema";
 import ReportModal from "@/components/ReportModal";
 import { useVideoCallContext } from "@/hooks/useVideoCall";
@@ -15,6 +16,7 @@ interface Props {
 
 export default function ChatPage({ user, matchId }: Props) {
   const [, setLocation] = useLocation();
+  const { t } = useTranslation();
   const [text, setText] = useState("");
   const [showReport, setShowReport] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -91,9 +93,9 @@ export default function ChatPage({ user, matchId }: Props) {
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="text-cream/30 font-semibold text-sm" data-testid="text-chat-name">
-              Hidden member
+              {t("chat.hiddenMember")}
             </h2>
-            <p className="text-cream/25 text-xs">Upgrade to see their profile</p>
+            <p className="text-cream/25 text-xs">{t("chat.hiddenSub")}</p>
           </div>
         </div>
 
@@ -105,17 +107,17 @@ export default function ChatPage({ user, matchId }: Props) {
           </div>
 
           <div>
-            <h3 className="font-serif text-2xl text-gold mb-2">Messages Locked</h3>
+            <h3 className="font-serif text-2xl text-gold mb-2">{t("chat.locked")}</h3>
             <p className="text-cream/50 text-sm leading-relaxed max-w-xs">
-              Upgrade to Premium to read and send messages, reveal who matched with you, and unlock all features.
+              {t("chat.lockedDesc")}
             </p>
           </div>
 
           <div className="w-full max-w-xs space-y-2">
             {[
-              "Read and send messages",
-              "See who liked and matched you",
-              "Make and receive video calls",
+              t("chat.benefitMessages"),
+              t("chat.benefitMatches"),
+              t("chat.benefitCalls"),
             ].map((benefit, i) => (
               <div key={i} className="flex items-center gap-3 px-4 py-2.5 rounded-xl"
                 style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.12)" }}>
@@ -132,11 +134,11 @@ export default function ChatPage({ user, matchId }: Props) {
             style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 8px 24px rgba(201,168,76,0.3)" }}
           >
             <Star size={17} fill="#1a0a2e" color="#1a0a2e" />
-            Upgrade to Premium — $5/month
+            {t("chat.upgradeButton")}
           </button>
 
           <button onClick={() => setLocation("/matches")} className="text-cream/35 text-sm">
-            Back to Matches
+            {t("chat.backToMatches")}
           </button>
         </div>
       </div>
@@ -241,7 +243,7 @@ export default function ChatPage({ user, matchId }: Props) {
             value={text}
             onChange={e => setText(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Send a message…"
+            placeholder={t("chat.placeholder")}
             rows={1}
             data-testid="input-message"
             className="w-full bg-transparent text-cream text-sm outline-none resize-none placeholder-cream/25 leading-relaxed"

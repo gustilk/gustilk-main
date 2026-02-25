@@ -53,7 +53,7 @@ export default function MatchesPage({ user }: Props) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-cream font-semibold text-sm">
-                    {matches.length} {matches.length === 1 ? "person" : "people"} {t("matches.lockedSub")}
+                    {matches.length} {matches.length === 1 ? "person" : "people"} liked you
                   </p>
                   <p className="text-cream/45 text-xs mt-0.5">
                     {t("matches.upgradeSub")}
@@ -97,7 +97,7 @@ export default function MatchesPage({ user }: Props) {
               <div className="px-5 mb-2 mt-4">
                 <span className="text-[11px] font-bold uppercase tracking-widest"
                   style={{ color: "rgba(201,168,76,0.6)" }}>
-                  Messages
+                  {t("matches.messages")}
                 </span>
               </div>
               <div className="px-4 space-y-2">
@@ -169,6 +169,7 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
   isPremium: boolean;
   onClick: () => void;
 }) {
+  const { t } = useTranslation();
   const other = match.otherUser;
   const lastMsg = match.lastMessage;
   const hasUnread = !isPremium ? false : (match.unreadCount || 0) > 0;
@@ -220,7 +221,7 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
           <span className="font-semibold text-sm truncate"
             style={{ color: isPremium ? "rgba(253,248,240,1)" : "rgba(253,248,240,0.25)" }}
             data-testid={`text-match-name-${match.id}`}>
-            {isPremium ? (other.fullName ?? other.firstName ?? "Member") : "Hidden member"}
+            {isPremium ? (other.fullName ?? other.firstName ?? "Member") : t("matches.lockedName")}
           </span>
           {isPremium && (
             <span className="text-cream/30 text-xs flex-shrink-0">{timeLabel}</span>
@@ -236,9 +237,9 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
           <p className="text-xs" style={{ color: isPremium ? "rgba(253,248,240,0.4)" : "rgba(201,168,76,0.7)" }}>
             {isPremium
               ? (lastMsg
-                  ? (lastMsg.senderId === currentUserId ? "You: " : "") + lastMsg.text
-                  : "New match! Say hello")
-              : "Upgrade to see messages & identity"
+                  ? (lastMsg.senderId === currentUserId ? t("matches.youPrefix") : "") + lastMsg.text
+                  : t("matches.newMatchHello"))
+              : t("matches.upgradeToSee")
             }
           </p>
         </div>

@@ -46,7 +46,7 @@ New social users (empty city) are shown `SocialSetupPage` to fill caste, gender,
 10. **Community guidelines** — checkbox required at registration with collapsible guidelines
 11. **Admin Panel** — verification queue + reports tab with approve/reject/ban/resolve actions
 12. **Match Modal** — dual-avatar display when match occurs
-13. **Internationalization (i18n)** — 11 languages supported; first-launch language picker; changeable from Profile settings; Arabic uses RTL layout. Languages: English, Arabic, Kurdish (Kurmanji), German, Dutch, Swedish, French, Turkish, Armenian, Georgian, Russian
+13. **Internationalization (i18n)** — 11 languages fully supported; first-launch language picker; changeable from Profile settings; Arabic/Kurdish use RTL layout. All pages (BottomNav, LandingPage, DiscoverPage, MatchesPage, ChatPage, EventsPage, SocialSetupPage) use `useTranslation()`. All 10 non-English locale files (ar, ku, de, fr, hy, ka, nl, ru, sv, tr) have been fully updated with new keys: `landing.*`, `auth.continueEmail/Phone/tagline/sendCode/verifyAndContinue/resendCode/otpHint/otpEnterCode`, `discover.filters/minAge/maxAge/applyFilters/finding/refresh`, `matches.newMatchesHidden/upgradeBtn/upgradeSub/newMatchHello/upgradeToSee/youPrefix`, `events.subtitle/noEventsFilter/rsvp/attending/details/all/cultural/meetup/online`, `setup.welcomeGreeting/almostThere/step1Subtitle/continueToPhotos/detectingLocation/signOut/signingOut/yourCity`. Languages: English, Arabic, Kurdish (Kurmanji), German, Dutch, Swedish, French, Turkish, Armenian, Georgian, Russian
 
 ## Pages / Routes
 - `/discover` — Swipeable profile cards

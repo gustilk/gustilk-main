@@ -3,11 +3,11 @@ import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { Sparkles, MapPin, Loader2, AlertTriangle, Camera, ImagePlus, X, ChevronRight, Shield, LogOut } from "lucide-react";
 import type { User } from "@shared/schema";
 
 const COUNTRIES = ["USA", "Canada", "Australia", "Germany", "Holland", "Sweden", "Belgium", "France", "Turkey", "Iraq", "Armenia", "Georgia", "Russia", "UK"];
-const CASTES = [{ value: "sheikh", label: "Sheikh" }, { value: "pir", label: "Pir" }, { value: "murid", label: "Murid" }];
 
 const AGREEMENT_SECTIONS = [
   { title: "1. Respect the Yezidi Faith", body: "Members must respect and honour the Yezidi religion, its sacred traditions, figures, and practices. Any mockery, disrespect, or misrepresentation is strictly forbidden and may result in immediate account removal." },
@@ -62,7 +62,14 @@ interface Props { user: User }
 export default function SocialSetupPage({ user }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [step, setStep] = useState<1 | 2>(1);
+
+  const CASTES = [
+    { value: "sheikh", label: t("setup.sheikh") },
+    { value: "pir", label: t("setup.pir") },
+    { value: "murid", label: t("setup.murid") },
+  ];
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
@@ -195,7 +202,7 @@ export default function SocialSetupPage({ user }: Props) {
             }}
           >
             <LogOut size={13} />
-            {logoutMutation.isPending ? "Signing out…" : "Sign Out"}
+            {logoutMutation.isPending ? t("setup.signingOut") : t("setup.signOut")}
           </button>
 
           {/* Step indicator */}
@@ -228,36 +235,36 @@ export default function SocialSetupPage({ user }: Props) {
               <h1 className="font-serif text-3xl text-gold mb-1">
                 {(() => {
                   const name = (user.fullName ?? user.firstName ?? "").split(" ")[0];
-                  return name ? `Welcome, ${name}!` : "Almost there!";
+                  return name ? t("setup.welcomeGreeting", { name }) : t("setup.almostThere");
                 })()}
               </h1>
-              <p className="text-cream/50 text-sm">Step 1 of 2 — Your profile details</p>
+              <p className="text-cream/50 text-sm">{t("setup.step1Subtitle")}</p>
             </div>
 
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label>Caste</Label>
+                  <Label>{t("setup.caste")}</Label>
                   <GoldSelect value={data.caste} onChange={e => setData(d => ({ ...d, caste: e.target.value }))} data-testid="select-caste">
                     {CASTES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                   </GoldSelect>
                 </div>
                 <div>
-                  <Label>Gender</Label>
+                  <Label>{t("setup.gender")}</Label>
                   <GoldSelect value={data.gender} onChange={e => setData(d => ({ ...d, gender: e.target.value }))} data-testid="select-gender">
-                    <option value="female">Female</option>
-                    <option value="male">Male</option>
+                    <option value="female">{t("setup.female")}</option>
+                    <option value="male">{t("setup.male")}</option>
                   </GoldSelect>
                 </div>
               </div>
 
               <div>
-                <Label>Country</Label>
+                <Label>{t("setup.country")}</Label>
                 {geoState === "loading" && (
                   <div className="w-full px-4 py-3 rounded-xl flex items-center gap-3"
                     style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(201,168,76,0.2)" }}>
                     <Loader2 size={16} className="animate-spin text-gold" />
-                    <span className="text-cream/40 text-sm">Detecting your location…</span>
+                    <span className="text-cream/40 text-sm">{t("setup.detectingLocation")}</span>
                   </div>
                 )}
                 {geoState === "detected" && (
@@ -280,8 +287,8 @@ export default function SocialSetupPage({ user }: Props) {
                       <AlertTriangle size={13} color="#f59e0b" />
                       <span className="text-xs" style={{ color: "#f59e0b" }}>
                         {geoState === "unsupported"
-                          ? "Your country isn't on our supported list — please select the closest one."
-                          : "Couldn't detect your location — please select your country."}
+                          ? t("setup.countryNotSupported")
+                          : t("setup.locationError")}
                       </span>
                     </div>
                     <GoldSelect value={data.country} onChange={e => setData(d => ({ ...d, country: e.target.value }))} data-testid="select-country">
@@ -294,7 +301,7 @@ export default function SocialSetupPage({ user }: Props) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label>Age</Label>
+                  <Label>{t("setup.age")}</Label>
                   <input type="number" value={data.age}
                     onChange={e => setData(d => ({ ...d, age: parseInt(e.target.value) || 18 }))}
                     data-testid="input-age"
@@ -302,8 +309,8 @@ export default function SocialSetupPage({ user }: Props) {
                     style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.25)" }} />
                 </div>
                 <div>
-                  <Label>City</Label>
-                  <input type="text" placeholder="Your city" value={data.city}
+                  <Label>{t("setup.city")}</Label>
+                  <input type="text" placeholder={t("setup.yourCity")} value={data.city}
                     onChange={e => setData(d => ({ ...d, city: e.target.value }))}
                     data-testid="input-city"
                     className="w-full px-3 py-3 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
@@ -350,7 +357,7 @@ export default function SocialSetupPage({ user }: Props) {
                 className="w-full py-4 rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
                 style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 6px 20px rgba(201,168,76,0.3)" }}
               >
-                {geoState === "loading" ? "Detecting location…" : "Continue to Photos"}
+                {geoState === "loading" ? t("setup.detectingLocation") : t("setup.continueToPhotos")}
                 <ChevronRight size={16} />
               </button>
             </div>
@@ -511,7 +518,7 @@ export default function SocialSetupPage({ user }: Props) {
                     ? <><Loader2 size={15} className="animate-spin" /> Processing…</>
                     : mutation.isPending
                       ? <><Loader2 size={15} className="animate-spin" /> Saving…</>
-                      : "Complete Profile"}
+                      : t("setup.completeProfile")}
                 </button>
               </div>
             </div>

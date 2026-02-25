@@ -4,16 +4,10 @@ import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { CalendarDays, MapPin, Users, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 import type { SafeUser, EventWithAttendance } from "@shared/schema";
 
 interface Props { user: SafeUser }
-
-const TYPES = [
-  { id: "all", label: "All" },
-  { id: "cultural", label: "Cultural" },
-  { id: "meetup", label: "Meetup" },
-  { id: "online", label: "Online" },
-];
 
 const TYPE_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   cultural: { bg: "rgba(201,168,76,0.12)", text: "#c9a84c", border: "rgba(201,168,76,0.25)" },
@@ -35,7 +29,15 @@ const TYPE_EMOJI: Record<string, string> = {
 
 export default function EventsPage({ user }: Props) {
   const [, setLocation] = useLocation();
+  const { t } = useTranslation();
   const [activeType, setActiveType] = useState("all");
+
+  const TYPES = [
+    { id: "all", label: t("events.all") },
+    { id: "cultural", label: t("events.cultural") },
+    { id: "meetup", label: t("events.meetup") },
+    { id: "online", label: t("events.online") },
+  ];
 
   const { data, isLoading } = useQuery<{ events: EventWithAttendance[] }>({
     queryKey: ["/api/events"],
@@ -63,8 +65,8 @@ export default function EventsPage({ user }: Props) {
   return (
     <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
       <div className="pt-12 pb-4 px-5">
-        <h1 className="font-serif text-2xl text-gold">Events</h1>
-        <p className="text-cream/40 text-sm mt-0.5">Yezidi community events worldwide</p>
+        <h1 className="font-serif text-2xl text-gold">{t("events.title")}</h1>
+        <p className="text-cream/40 text-sm mt-0.5">{t("events.subtitle")}</p>
       </div>
 
       <div className="flex gap-2 px-5 mb-5 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
@@ -91,7 +93,7 @@ export default function EventsPage({ user }: Props) {
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-48 gap-3 text-center px-8">
           <CalendarDays size={36} color="rgba(201,168,76,0.4)" />
-          <p className="text-cream/40 text-sm">No events found for this filter.</p>
+          <p className="text-cream/40 text-sm">{t("events.noEventsFilter")}</p>
         </div>
       ) : (
         <div className="px-4 space-y-3">
@@ -116,6 +118,7 @@ function EventCard({ event, onAttend, onOpen, isPending }: {
   onOpen: () => void;
   isPending: boolean;
 }) {
+  const { t } = useTranslation();
   const typeStyle = TYPE_COLORS[event.type] ?? TYPE_COLORS.cultural;
   const bgGradient = event.imageUrl ? undefined : TYPE_BG[event.type] ?? TYPE_BG.cultural;
   const emoji = TYPE_EMOJI[event.type] ?? "📅";
@@ -182,7 +185,7 @@ function EventCard({ event, onAttend, onOpen, isPending }: {
             : { background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white" }
           }
         >
-          {event.isAttending ? "✓ Attending" : "RSVP"}
+          {event.isAttending ? t("events.attending") : t("events.rsvp")}
         </button>
         <button
           onClick={onOpen}
@@ -190,7 +193,7 @@ function EventCard({ event, onAttend, onOpen, isPending }: {
           className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs text-cream/50 transition-all"
           style={{ border: "1px solid rgba(255,255,255,0.1)" }}
         >
-          Details
+          {t("events.details")}
           <ChevronRight size={13} />
         </button>
       </div>
