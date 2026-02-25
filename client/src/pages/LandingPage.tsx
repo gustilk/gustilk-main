@@ -56,27 +56,22 @@ function Logo() {
       <div className="relative inline-flex items-center justify-center mb-3">
         <div className="absolute inset-0"
           style={{
-            background: "radial-gradient(circle, rgba(201,168,76,0.25) 0%, transparent 65%)",
-            filter: "blur(18px)",
-            transform: "scale(1.3)",
+            background: "radial-gradient(circle, rgba(201,168,76,0.28) 0%, transparent 65%)",
+            filter: "blur(22px)",
+            transform: "scale(1.4)",
           }}
         />
-        <div className="relative overflow-hidden" style={{ width: "110px", height: "110px" }}>
-          <img
-            src={logoImg}
-            alt="Gûstîlk"
-            style={{
-              width: "1440px",
-              height: "1440px",
-              objectFit: "contain",
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -43%)",
-              filter: "drop-shadow(0 4px 16px rgba(201,168,76,0.5))",
-            }}
-          />
-        </div>
+        <img
+          src={logoImg}
+          alt="Gûstîlk"
+          className="relative"
+          style={{
+            width: "220px",
+            height: "220px",
+            objectFit: "contain",
+            filter: "drop-shadow(0 4px 20px rgba(201,168,76,0.55))",
+          }}
+        />
       </div>
       <h1 className="font-serif text-5xl font-bold text-gold tracking-wide">Gûstîlk</h1>
       <p className="text-cream/30 text-xs tracking-[0.3em] uppercase mt-1">Yezidi · Community</p>

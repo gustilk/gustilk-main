@@ -25,25 +25,20 @@ export default function LanguageSelectPage({ onSelect }: Props) {
         <div className="relative inline-flex items-center justify-center mb-6">
           <div className="absolute inset-0" style={{
             background: "radial-gradient(circle, rgba(201,168,76,0.25) 0%, transparent 65%)",
-            filter: "blur(14px)",
+            filter: "blur(16px)",
             transform: "scale(1.3)",
           }} />
-          <div className="relative overflow-hidden" style={{ width: "90px", height: "90px" }}>
-            <img
-              src={logoImg}
-              alt="Gûstîlk"
-              style={{
-                width: "1188px",
-                height: "1188px",
-                objectFit: "contain",
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -43%)",
-                filter: "drop-shadow(0 3px 12px rgba(201,168,76,0.5))",
-              }}
-            />
-          </div>
+          <img
+            src={logoImg}
+            alt="Gûstîlk"
+            className="relative"
+            style={{
+              width: "180px",
+              height: "180px",
+              objectFit: "contain",
+              filter: "drop-shadow(0 3px 14px rgba(201,168,76,0.5))",
+            }}
+          />
         </div>
 
         <h1
