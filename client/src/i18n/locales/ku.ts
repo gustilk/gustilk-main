@@ -1,5 +1,5 @@
 export default {
-  lang: { name: "Kurdish", native: "Kurdî", flag: "🏳️", dir: "ltr" },
+  lang: { name: "Kurmanji", native: "Kurdî", flag: "🦚", dir: "ltr" },
   languagePicker: {
     title: "Bi xêr hatî Gûstîlk",
     subtitle: "Zimanê xwe hilbijêre da berdewam bikî",
