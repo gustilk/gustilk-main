@@ -48,7 +48,7 @@ function getWsUrl() {
   return `${proto}://${window.location.host}/ws`;
 }
 
-export function useVideoCallProvider(userId: string | null): VideoCallCtx {
+export function useVideoCallProvider(userId: string | null, isPremium: boolean): VideoCallCtx {
   const wsRef = useRef<WebSocket | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
@@ -63,6 +63,8 @@ export function useVideoCallProvider(userId: string | null): VideoCallCtx {
   const [callPartnerPhoto, setCallPartnerPhoto] = useState<string | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isCamOff, setIsCamOff] = useState(false);
+  const isPremiumRef = useRef(isPremium);
+  useEffect(() => { isPremiumRef.current = isPremium; }, [isPremium]);
 
   const send = useCallback((msg: object) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -116,6 +118,11 @@ export function useVideoCallProvider(userId: string | null): VideoCallCtx {
     try { msg = JSON.parse(raw); } catch { return; }
 
     if (msg.type === "call:invite") {
+      // Non-premium users cannot receive video calls — auto-reject silently
+      if (!isPremiumRef.current) {
+        send({ type: "call:reject", to: msg.from });
+        return;
+      }
       setIncomingCall({ from: msg.from, fromName: msg.fromName, fromPhoto: msg.fromPhoto ?? null, matchId: msg.matchId });
       setCallPartnerId(msg.from);
       setCallPartnerName(msg.fromName);

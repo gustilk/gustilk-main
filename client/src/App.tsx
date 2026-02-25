@@ -47,7 +47,7 @@ function AppShell({ user }: { user: User }) {
   const isEventDetail = location.startsWith("/events/") && location !== "/events";
   const isVerifyPage = location === "/verify" || location === "/pending-verification";
 
-  const callCtx = useVideoCallProvider(user.id);
+  const callCtx = useVideoCallProvider(user.id, !!user.isPremium);
   const isInCall = callCtx.callState === "active" || callCtx.callState === "calling" || callCtx.callState === "ringing";
 
   if (!profileIsComplete(user) && location !== "/complete-profile") {
