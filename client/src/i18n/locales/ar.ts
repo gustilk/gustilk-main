@@ -145,6 +145,9 @@ export default {
     saving: "جارٍ الحفظ…",
     selfieReady: "السيلفي جاهز",
     selfieRequiredStatus: "السيلفي مطلوب",
+    faceCheckTitle: "لم يتم اكتشاف وجه",
+    faceCheckDesc: "يجب أن تُظهر صورة السيلفي وجهك بوضوح — غير محجوب بالنظارات الشمسية أو الكمامة أو الإضاءة السيئة. يرجى المحاولة مرة أخرى.",
+    faceChecking: "جارٍ فحص الوجه…",
   },
   discover: {
     title: "اكتشاف",

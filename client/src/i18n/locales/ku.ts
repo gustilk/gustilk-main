@@ -145,6 +145,9 @@ export default {
     saving: "Tê tomarkirin…",
     selfieReady: "Selfî amade ye",
     selfieRequiredStatus: "Selfî pêwîst e",
+    faceCheckTitle: "Rû nehat tespîtkirin",
+    faceCheckDesc: "Selfiya te divê rûyê te bi zelal nîşan bide — bê eynak, masik, an ronahiya xirab. Ji kerema xwe dîsa biceribîne.",
+    faceChecking: "Rû tê verastkirin…",
   },
   discover: {
     title: "Keşif bike",

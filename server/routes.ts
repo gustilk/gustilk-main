@@ -6,7 +6,7 @@ import { profileUpdateSchema } from "@shared/schema";
 import { verifyCountryFromRequest, verifyIraqFromRequest } from "./geo";
 import { setupWs } from "./ws";
 import { z } from "zod";
-import { moderatePhotos } from "./moderation";
+import { moderatePhotos, checkFacePresent } from "./moderation";
 
 function getUserId(req: any): string {
   return req.session?.userId;
@@ -16,6 +16,21 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   setupSession(app);
   registerAuthRoutes(app);
   setupWs(httpServer);
+
+  // ─── FACE CHECK ──────────────────────────────────────────
+  app.post("/api/check-face", isAuthenticated, async (req, res) => {
+    try {
+      const { image } = req.body;
+      if (!image || typeof image !== "string" || !image.startsWith("data:image")) {
+        return res.status(400).json({ error: "Invalid image data" });
+      }
+      const result = await checkFacePresent(image);
+      return res.json(result);
+    } catch (err: any) {
+      console.error("[check-face] error:", err?.message ?? err);
+      return res.status(500).json({ faceDetected: false, reason: "Face scan failed — please try again" });
+    }
+  });
 
   // ─── PROFILE ─────────────────────────────────────────────
   app.put("/api/profile", isAuthenticated, async (req, res) => {

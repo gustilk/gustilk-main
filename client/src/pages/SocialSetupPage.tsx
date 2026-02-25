@@ -67,6 +67,7 @@ export default function SocialSetupPage({ user }: Props) {
   const [photos, setPhotos] = useState<(string | null)[]>([null, null]);
   const [selfie, setSelfie] = useState<string | null>(null);
   const [cropTarget, setCropTarget] = useState<{ imgSrc: string; index: number | "selfie" } | null>(null);
+  const [selfieChecking, setSelfieChecking] = useState(false);
 
   const selfieInputRef = useRef<HTMLInputElement>(null);
   const photoInputRefs = [
@@ -145,14 +146,39 @@ export default function SocialSetupPage({ user }: Props) {
     openCrop(file, "selfie");
   };
 
-  const handleCropConfirm = (base64: string) => {
+  const handleCropConfirm = async (base64: string) => {
     if (!cropTarget) return;
+    setCropTarget(null);
     if (cropTarget.index === "selfie") {
-      setSelfie(base64);
+      setSelfieChecking(true);
+      try {
+        const res = await apiRequest("POST", "/api/check-face", { image: base64 });
+        const result = res as { faceDetected: boolean; reason?: string };
+        if (!result.faceDetected) {
+          toast({
+            title: t("setup.faceCheckTitle"),
+            description: t("setup.faceCheckDesc"),
+            variant: "destructive",
+          });
+          setSelfie(null);
+          if (selfieInputRef.current) selfieInputRef.current.value = "";
+        } else {
+          setSelfie(base64);
+        }
+      } catch {
+        toast({
+          title: t("setup.faceCheckTitle"),
+          description: t("setup.faceCheckDesc"),
+          variant: "destructive",
+        });
+        setSelfie(null);
+        if (selfieInputRef.current) selfieInputRef.current.value = "";
+      } finally {
+        setSelfieChecking(false);
+      }
     } else {
       setPhotos(prev => { const next = [...prev]; next[cropTarget.index as number] = base64; return next; });
     }
-    setCropTarget(null);
   };
 
   const isAtLeast18 = (dob: string) => {
@@ -166,7 +192,7 @@ export default function SocialSetupPage({ user }: Props) {
   const countryHasStates = !!COUNTRY_STATES[data.country];
   const step1Valid = data.country && (!countryHasStates || data.state) && data.city.trim() && agreedGuidelines && agreedTruthful && isAtLeast18(data.dateOfBirth);
   const step2Valid = photos.filter(Boolean).length >= 2 && selfie;
-  const canSubmit = step2Valid && !cropTarget;
+  const canSubmit = step2Valid && !cropTarget && !selfieChecking;
 
   return (
     <>
@@ -477,7 +503,13 @@ export default function SocialSetupPage({ user }: Props) {
                   onChange={e => handleSelfieChange(e.target.files?.[0] ?? null)}
                 />
 
-                {selfie ? (
+                {selfieChecking ? (
+                  <div className="w-full h-36 rounded-2xl flex flex-col items-center justify-center gap-3"
+                    style={{ background: "rgba(201,168,76,0.06)", border: "2px solid rgba(201,168,76,0.25)" }}>
+                    <Loader2 size={28} color="#c9a84c" className="animate-spin" />
+                    <span className="text-cream/60 text-sm font-medium">{t("setup.faceChecking")}</span>
+                  </div>
+                ) : selfie ? (
                   <div className="relative">
                     <img src={selfie} className="w-full h-48 object-cover rounded-2xl"
                       style={{ border: "2px solid rgba(201,168,76,0.4)" }} alt="Verification selfie" />
@@ -519,8 +551,8 @@ export default function SocialSetupPage({ user }: Props) {
                   <span className="text-cream/50 text-xs">{photos.filter(Boolean).length}/2 photos</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${selfie ? "bg-green-400" : "bg-cream/20"}`} />
-                  <span className="text-cream/50 text-xs">{selfie ? t("setup.selfieReady") : t("setup.selfieRequiredStatus")}</span>
+                  <div className={`w-2 h-2 rounded-full ${selfie ? "bg-green-400" : selfieChecking ? "bg-gold/60" : "bg-cream/20"}`} />
+                  <span className="text-cream/50 text-xs">{selfieChecking ? t("setup.faceChecking") : selfie ? t("setup.selfieReady") : t("setup.selfieRequiredStatus")}</span>
                 </div>
               </div>
 

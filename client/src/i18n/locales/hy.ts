@@ -145,6 +145,9 @@ export default {
     saving: "Pahpanvum e…",
     selfieReady: "Selfin petrastval e",
     selfieRequiredStatus: "Selfin anhrashest e",
+    faceCheckTitle: "Dzer chi hайtnabervats",
+    faceCheckDesc: "Selfit piti cuyc ta qo dzerqe haskanabar — aranc artasvanerqov, qaghaqavayreh kam vat luysavorman. Krndi nornics.",
+    faceChecking: "Skandrvum e dzerqy…",
   },
   discover: {
     title: "Բացահայտել",

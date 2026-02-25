@@ -145,6 +145,9 @@ export default {
     saving: "Sparar…",
     selfieReady: "Selfie klar",
     selfieRequiredStatus: "Selfie krävs",
+    faceCheckTitle: "Inget ansikte hittades",
+    faceCheckDesc: "Din selfie måste visa ett tydligt, synligt ansikte — inte dolt av solglasögon, mask eller dålig belysning. Försök igen.",
+    faceChecking: "Skannar ansiktet…",
   },
   discover: {
     title: "Upptäck",
