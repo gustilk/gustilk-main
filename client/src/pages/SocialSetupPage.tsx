@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, MapPin, Loader2, AlertTriangle, Camera, ImagePlus, X, ChevronRight, Shield } from "lucide-react";
+import { Sparkles, MapPin, Loader2, AlertTriangle, Camera, ImagePlus, X, ChevronRight, Shield, LogOut } from "lucide-react";
 import type { User } from "@shared/schema";
 
 const COUNTRIES = ["USA", "Canada", "Australia", "Germany", "Holland", "Sweden", "Belgium", "France", "Turkey", "Iraq", "Armenia", "Georgia", "Russia", "UK"];
@@ -63,6 +63,15 @@ export default function SocialSetupPage({ user }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [step, setStep] = useState<1 | 2>(1);
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/auth/logout");
+    },
+    onSuccess: () => {
+      queryClient.clear();
+    },
+  });
 
   // Step 1 state
   const [data, setData] = useState({ caste: "murid", gender: "female", country: "", city: "", age: 22 });
@@ -165,8 +174,21 @@ export default function SocialSetupPage({ user }: Props) {
       }} />
       <div className="relative z-10 w-full max-w-sm animate-slide-up">
 
-        {/* Step indicator */}
-        <div className="flex items-center justify-center gap-2 mb-6">
+        {/* Top bar — sign out */}
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => logoutMutation.mutate()}
+            disabled={logoutMutation.isPending}
+            data-testid="button-signout-setup"
+            className="flex items-center gap-1.5 text-xs font-medium"
+            style={{ color: "rgba(253,248,240,0.35)" }}
+          >
+            <LogOut size={13} />
+            {logoutMutation.isPending ? "…" : "Sign Out"}
+          </button>
+
+          {/* Step indicator */}
+          <div className="flex items-center gap-2">
           {[1, 2].map(s => (
             <div key={s} className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
@@ -181,6 +203,7 @@ export default function SocialSetupPage({ user }: Props) {
               {s < 2 && <div className="w-8 h-px" style={{ background: step > s ? "rgba(201,168,76,0.5)" : "rgba(255,255,255,0.1)" }} />}
             </div>
           ))}
+          </div>
         </div>
 
         {/* ── STEP 1: Profile details ── */}
