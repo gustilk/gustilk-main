@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { SlidersHorizontal, X, Heart, RefreshCw, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import logoImg from "@assets/Untitled_design_1772022829778.png";
+import logoImg from "@assets/Untitled_design_1772024284063.png";
 import MatchModal from "@/components/MatchModal";
 import type { SafeUser } from "@shared/schema";
 

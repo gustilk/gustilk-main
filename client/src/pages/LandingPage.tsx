@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Heart, Shield, Users, Eye, EyeOff, Phone, Mail, ArrowLeft, Globe } from "lucide-react";
-import logoImg from "@assets/Untitled_design_1772022829778.png";
+import logoImg from "@assets/Untitled_design_1772024284063.png";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
