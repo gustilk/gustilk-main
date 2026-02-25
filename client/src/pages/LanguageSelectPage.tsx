@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { LANGUAGE_LIST, LangCode, setLanguage } from "@/i18n";
-import logoImg from "@assets/Untitled_design_1772023373878.jpeg";
+import logoImg from "@assets/Untitled_design_1772022829778.png";
 
 interface Props {
   onSelect: () => void;
@@ -22,23 +22,28 @@ export default function LanguageSelectPage({ onSelect }: Props) {
       style={{ background: "linear-gradient(160deg, #0d0618 0%, #1a0a2e 60%, #0d0618 100%)" }}
     >
       <div className="w-full max-w-sm flex flex-col items-center">
-        <div className="relative inline-flex mb-6">
-          <div className="absolute inset-0 rounded-2xl" style={{
-            background: "radial-gradient(circle, rgba(201,168,76,0.28) 0%, transparent 70%)",
+        <div className="relative inline-flex items-center justify-center mb-6">
+          <div className="absolute inset-0" style={{
+            background: "radial-gradient(circle, rgba(201,168,76,0.25) 0%, transparent 65%)",
             filter: "blur(14px)",
-            transform: "scale(1.25)",
+            transform: "scale(1.3)",
           }} />
-          <img
-            src={logoImg}
-            alt="Gûstîlk"
-            className="relative rounded-2xl"
-            style={{
-              width: "120px",
-              height: "120px",
-              objectFit: "cover",
-              boxShadow: "0 6px 30px rgba(0,0,0,0.45), 0 0 0 2px rgba(201,168,76,0.35)",
-            }}
-          />
+          <div className="relative overflow-hidden" style={{ width: "90px", height: "90px" }}>
+            <img
+              src={logoImg}
+              alt="Gûstîlk"
+              style={{
+                width: "296px",
+                height: "296px",
+                objectFit: "contain",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -43%)",
+                filter: "drop-shadow(0 3px 12px rgba(201,168,76,0.5))",
+              }}
+            />
+          </div>
         </div>
 
         <h1

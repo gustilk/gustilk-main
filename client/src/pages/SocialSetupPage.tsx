@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
-import logoImg from "@assets/Untitled_design_1772023373878.jpeg";
+import logoImg from "@assets/Untitled_design_1772022829778.png";
 import { MapPin, Loader2, AlertTriangle, Camera, ImagePlus, X, ChevronRight, Shield, LogOut } from "lucide-react";
 import type { User } from "@shared/schema";
 
@@ -229,7 +229,9 @@ export default function SocialSetupPage({ user }: Props) {
         {step === 1 && (
           <>
             <div className="text-center mb-7">
-              <img src={logoImg} alt="Gûstîlk" className="rounded-2xl mx-auto mb-4" style={{ width: "96px", height: "96px", objectFit: "cover", boxShadow: "0 4px 20px rgba(0,0,0,0.4), 0 0 0 2px rgba(201,168,76,0.35)" }} />
+              <div className="overflow-hidden mx-auto mb-4" style={{ width: "72px", height: "72px" }}>
+                <img src={logoImg} alt="Gûstîlk" style={{ width: "237px", height: "237px", objectFit: "contain", position: "relative", top: "50%", left: "50%", transform: "translate(-50%, -43%)", filter: "drop-shadow(0 3px 10px rgba(201,168,76,0.5))" }} />
+              </div>
               <h1 className="font-serif text-3xl text-gold mb-1">
                 {(() => {
                   const name = (user.fullName ?? user.firstName ?? "").split(" ")[0];

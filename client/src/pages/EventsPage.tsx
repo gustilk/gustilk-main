@@ -5,7 +5,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { CalendarDays, MapPin, Users, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
-import logoImg from "@assets/Untitled_design_1772023373878.jpeg";
+import logoImg from "@assets/Untitled_design_1772022829778.png";
 import type { SafeUser, EventWithAttendance } from "@shared/schema";
 
 interface Props { user: SafeUser }
@@ -67,7 +67,9 @@ export default function EventsPage({ user }: Props) {
     <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
       <div className="pt-12 pb-4 px-5">
         <div className="flex items-center gap-2.5 mb-0.5">
-          <img src={logoImg} alt="" className="flex-shrink-0 rounded-xl" style={{ width: "38px", height: "38px", objectFit: "cover", boxShadow: "0 2px 10px rgba(0,0,0,0.4), 0 0 0 1.5px rgba(201,168,76,0.35)" }} />
+          <div className="flex-shrink-0 overflow-hidden" style={{ width: "28px", height: "28px" }}>
+            <img src={logoImg} alt="" style={{ width: "92px", height: "92px", objectFit: "contain", position: "relative", top: "50%", left: "50%", transform: "translate(-50%, -43%)", filter: "drop-shadow(0 1px 4px rgba(201,168,76,0.5))" }} />
+          </div>
           <h1 className="font-serif text-2xl text-gold">{t("events.title")}</h1>
         </div>
         <p className="text-cream/40 text-sm mt-0.5 pl-0.5">{t("events.subtitle")}</p>

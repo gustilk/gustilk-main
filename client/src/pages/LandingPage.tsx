@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Heart, Shield, Users, Eye, EyeOff, Phone, Mail, ArrowLeft, Globe } from "lucide-react";
-import logoImg from "@assets/Untitled_design_1772023373878.jpeg";
+import logoImg from "@assets/Untitled_design_1772022829778.png";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -54,24 +54,29 @@ function Logo() {
   return (
     <div className="text-center mb-8">
       <div className="relative inline-flex items-center justify-center mb-3">
-        <div className="absolute inset-0 rounded-3xl"
+        <div className="absolute inset-0"
           style={{
-            background: "radial-gradient(circle, rgba(201,168,76,0.3) 0%, transparent 70%)",
-            filter: "blur(20px)",
-            transform: "scale(1.25)",
+            background: "radial-gradient(circle, rgba(201,168,76,0.25) 0%, transparent 65%)",
+            filter: "blur(18px)",
+            transform: "scale(1.3)",
           }}
         />
-        <img
-          src={logoImg}
-          alt="Gûstîlk"
-          className="relative rounded-3xl"
-          style={{
-            width: "180px",
-            height: "180px",
-            objectFit: "cover",
-            boxShadow: "0 8px 40px rgba(0,0,0,0.5), 0 0 0 2px rgba(201,168,76,0.35)",
-          }}
-        />
+        <div className="relative overflow-hidden" style={{ width: "110px", height: "110px" }}>
+          <img
+            src={logoImg}
+            alt="Gûstîlk"
+            style={{
+              width: "360px",
+              height: "360px",
+              objectFit: "contain",
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -43%)",
+              filter: "drop-shadow(0 4px 16px rgba(201,168,76,0.5))",
+            }}
+          />
+        </div>
       </div>
       <h1 className="font-serif text-5xl font-bold text-gold tracking-wide">Gûstîlk</h1>
       <p className="text-cream/30 text-xs tracking-[0.3em] uppercase mt-1">Yezidi · Community</p>
