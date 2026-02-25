@@ -59,7 +59,6 @@ function Logo() {
         </svg>
       </div>
       <h1 className="font-serif text-5xl font-bold text-gold tracking-wide">Gûstîlk</h1>
-      <p className="text-gold/50 text-xs tracking-[0.2em] uppercase mt-1">ریندانێ کۆمهیگه</p>
     </div>
   );
 }
