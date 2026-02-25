@@ -155,7 +155,7 @@ export default function PremiumPage({ user }: Props) {
         </button>
         <div className="flex items-center gap-2.5 flex-1">
           <div className="flex-shrink-0 overflow-hidden" style={{ width: "28px", height: "28px" }}>
-            <img src={logoImg} alt="" style={{ width: "182px", height: "182px", objectFit: "contain", position: "relative", top: "50%", left: "50%", transform: "translate(-50%, -43%)", filter: "drop-shadow(0 1px 4px rgba(201,168,76,0.5))" }} />
+            <img src={logoImg} alt="" style={{ width: "364px", height: "364px", objectFit: "contain", position: "relative", top: "50%", left: "50%", transform: "translate(-50%, -43%)", filter: "drop-shadow(0 1px 4px rgba(201,168,76,0.5))" }} />
           </div>
           <h1 className="font-serif text-2xl text-gold">Premium</h1>
         </div>
