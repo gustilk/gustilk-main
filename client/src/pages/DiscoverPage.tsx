@@ -15,6 +15,8 @@ export default function DiscoverPage({ user }: Props) {
   const [showFilters, setShowFilters] = useState(false);
   const [minAge, setMinAge] = useState(18);
   const [maxAge, setMaxAge] = useState(60);
+  const [pendingMin, setPendingMin] = useState(18);
+  const [pendingMax, setPendingMax] = useState(60);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [matchData, setMatchData] = useState<{ user: SafeUser; matchId: string } | null>(null);
   const [swipeDir, setSwipeDir] = useState<"left" | "right" | null>(null);
@@ -61,8 +63,10 @@ export default function DiscoverPage({ user }: Props) {
   };
 
   const handleRefresh = () => {
+    setMinAge(pendingMin);
+    setMaxAge(pendingMax);
     setCurrentIndex(0);
-    refetch();
+    setShowFilters(false);
   };
 
   const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[c] ?? c);
@@ -92,15 +96,15 @@ export default function DiscoverPage({ user }: Props) {
         >
           <div>
             <div className="flex justify-between text-xs text-cream/50 uppercase tracking-wider mb-3 font-semibold">
-              <span>{t("discover.minAge")}: {minAge}</span>
-              <span>{t("discover.maxAge")}: {maxAge}</span>
+              <span>{t("discover.minAge")}: {pendingMin}</span>
+              <span>{t("discover.maxAge")}: {pendingMax}</span>
             </div>
             <Slider
               min={18}
               max={80}
               step={1}
-              value={[minAge, maxAge]}
-              onValueChange={([min, max]) => { setMinAge(min); setMaxAge(max); }}
+              value={[pendingMin, pendingMax]}
+              onValueChange={([min, max]) => { setPendingMin(min); setPendingMax(max); }}
               data-testid="filter-age-range"
               className="[&_[role=slider]]:bg-[#c9a84c] [&_[role=slider]]:border-[#c9a84c] [&_.relative]:bg-white/10 [&_[data-orientation=horizontal]]:h-1.5 [&_.absolute]:bg-[#c9a84c]"
             />
