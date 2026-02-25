@@ -635,14 +635,6 @@ function CommunityGuidelinesModal({ onAgree, onClose }: { onAgree: () => void; o
           >
             {hasScrolledToBottom ? "I Have Read & I Agree" : "Read all guidelines to continue"}
           </button>
-          <button
-            onClick={onClose}
-            data-testid="button-close-guidelines"
-            className="w-full py-3 rounded-xl text-sm font-medium"
-            style={{ color: "rgba(253,248,240,0.4)" }}
-          >
-            Close
-          </button>
         </div>
       </div>
     </div>
