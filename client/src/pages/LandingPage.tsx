@@ -37,7 +37,7 @@ export default function LandingPage() {
         {currentLang.flag} {currentLang.native}
       </button>
 
-      <div className="relative z-10 flex flex-col items-center justify-center flex-1 px-6 py-10 max-w-sm mx-auto w-full">
+      <div className="relative z-10 flex flex-col items-center justify-start flex-1 px-6 pt-12 pb-6 max-w-sm mx-auto w-full">
         {screen === "home" && <HomeScreen onEmail={() => setScreen("email")} onPhone={() => setScreen("phone")} />}
         {screen === "email" && <EmailScreen onBack={() => setScreen("home")} />}
         {screen === "phone" && <PhoneScreen onBack={() => setScreen("home")} />}
@@ -52,8 +52,8 @@ export default function LandingPage() {
 
 function Logo() {
   return (
-    <div className="text-center mb-8">
-      <div className="relative inline-flex items-center justify-center mb-3">
+    <div className="text-center mb-5">
+      <div className="relative inline-flex items-center justify-center mb-1">
         <div className="absolute inset-0"
           style={{
             background: "radial-gradient(circle, rgba(201,168,76,0.28) 0%, transparent 65%)",
