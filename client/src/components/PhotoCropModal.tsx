@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export async function compressImage(file: File, maxPx = 800, quality = 0.70): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -35,57 +35,31 @@ export function PhotoCropModal({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-  const [containerW, setContainerW] = useState(0);
-  const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null);
-  const [coverScale, setCoverScale] = useState(1);
 
-  // Render state — only used to trigger re-render after gesture ends
-  const [renderTick, setRenderTick] = useState(0);
+  // Initial cover dimensions (set once on load)
+  const initDim = useRef({ w: 0, h: 0 });
+  // Natural image dimensions
+  const natural = useRef({ w: 0, h: 0 });
 
-  // Gesture state kept in refs so touch handlers always read the latest values
-  const scaleRef = useRef(1);      // userScale
-  const offsetRef = useRef({ x: 0, y: 0 });
-  const coverScaleRef = useRef(1);
+  // Transform state — use CSS transform, never change width/height
+  const tx = useRef(0);
+  const ty = useRef(0);
+  const scale = useRef(1);
+  const minScale = useRef(1);
 
+  // Gesture tracking
   const dragging = useRef(false);
   const lastPoint = useRef({ x: 0, y: 0 });
   const lastPinchDist = useRef<number | null>(null);
-
   const rafId = useRef<number | null>(null);
 
-  useLayoutEffect(() => {
-    if (containerRef.current) setContainerW(containerRef.current.offsetWidth);
-  }, []);
+  const [ready, setReady] = useState(false);
 
-  useEffect(() => {
-    if (!containerW || !imgSrc) return;
-    const img = new Image();
-    img.onload = () => {
-      const nw = img.naturalWidth;
-      const nh = img.naturalHeight;
-      const cs = Math.max(containerW / nw, containerW / nh);
-      const initOffset = { x: (containerW - nw * cs) / 2, y: (containerW - nh * cs) / 2 };
-      setNaturalSize({ w: nw, h: nh });
-      setCoverScale(cs);
-      coverScaleRef.current = cs;
-      scaleRef.current = 1;
-      offsetRef.current = initOffset;
-      setRenderTick(t => t + 1);
-    };
-    img.src = imgSrc;
-  }, [containerW, imgSrc]);
-
-  // Apply transform directly to the img DOM node — bypasses React re-render on every frame
+  // Apply transform via direct DOM mutation — no React re-render per frame
   const applyTransform = () => {
-    const el = imgRef.current;
-    if (!el || !naturalSize) return;
-    const s = scaleRef.current;
-    const cs = coverScaleRef.current;
-    const o = offsetRef.current;
-    el.style.left = `${o.x}px`;
-    el.style.top = `${o.y}px`;
-    el.style.width = `${naturalSize.w * cs * s}px`;
-    el.style.height = `${naturalSize.h * cs * s}px`;
+    const img = imgRef.current;
+    if (!img) return;
+    img.style.transform = `translate(${tx.current}px, ${ty.current}px) scale(${scale.current})`;
   };
 
   const scheduleApply = () => {
@@ -96,9 +70,51 @@ export function PhotoCropModal({
     });
   };
 
+  // Clamp translate so image always covers the container
+  const clampTranslate = () => {
+    const containerSize = containerRef.current?.offsetWidth ?? 0;
+    const s = scale.current;
+    const halfExcessX = (initDim.current.w * s - containerSize) / 2;
+    const halfExcessY = (initDim.current.h * s - containerSize) / 2;
+    tx.current = Math.max(-halfExcessX, Math.min(halfExcessX, tx.current));
+    ty.current = Math.max(-halfExcessY, Math.min(halfExcessY, ty.current));
+  };
+
+  // Load image, calculate cover fill size, centre it
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !imgSrc) return;
+    const containerSize = container.offsetWidth;
+
+    const img = new Image();
+    img.onload = () => {
+      const nw = img.naturalWidth;
+      const nh = img.naturalHeight;
+      natural.current = { w: nw, h: nh };
+
+      const coverScale = Math.max(containerSize / nw, containerSize / nh);
+      initDim.current = { w: nw * coverScale, h: nh * coverScale };
+
+      scale.current = 1;
+      tx.current = 0;
+      ty.current = 0;
+      minScale.current = 1;
+
+      const imgEl = imgRef.current;
+      if (imgEl) {
+        imgEl.style.width = `${initDim.current.w}px`;
+        imgEl.style.height = `${initDim.current.h}px`;
+        imgEl.style.transform = `translate(0px, 0px) scale(1)`;
+      }
+      setReady(true);
+    };
+    img.src = imgSrc;
+  }, [imgSrc]);
+
+  // Touch events
   useEffect(() => {
     const el = containerRef.current;
-    if (!el) return;
+    if (!el || !ready) return;
 
     const onTouchStart = (e: TouchEvent) => {
       e.preventDefault();
@@ -116,32 +132,43 @@ export function PhotoCropModal({
 
     const onTouchMove = (e: TouchEvent) => {
       e.preventDefault();
+
       if (e.touches.length === 1 && dragging.current) {
+        // Pan — just shift translate, clamp so image keeps filling viewport
         const dx = e.touches[0].clientX - lastPoint.current.x;
         const dy = e.touches[0].clientY - lastPoint.current.y;
         lastPoint.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        offsetRef.current = { x: offsetRef.current.x + dx, y: offsetRef.current.y + dy };
+        tx.current += dx;
+        ty.current += dy;
+        clampTranslate();
         scheduleApply();
+
       } else if (e.touches.length === 2 && lastPinchDist.current !== null) {
+        // Pinch-to-zoom using CSS scale — never touches width/height
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
         const dist = Math.sqrt(dx * dx + dy * dy);
         const ratio = dist / lastPinchDist.current;
 
-        const prevScale = scaleRef.current;
-        const newScale = Math.min(5, Math.max(1, prevScale * ratio));
+        const prevScale = scale.current;
+        const newScale = Math.min(5, Math.max(minScale.current, prevScale * ratio));
         const scaleRatio = newScale / prevScale;
 
+        // Keep the pinch midpoint fixed in the viewport.
+        // With transform-origin:center, a point at offset (mx, my) from container
+        // centre stays fixed when we adjust translate by: tx' = mx + (tx - mx) * scaleRatio
         const rect = el.getBoundingClientRect();
-        const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
-        const my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+        const cx = rect.width / 2;
+        const cy = rect.height / 2;
+        const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left - cx;
+        const my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top - cy;
 
-        offsetRef.current = {
-          x: mx - (mx - offsetRef.current.x) * scaleRatio,
-          y: my - (my - offsetRef.current.y) * scaleRatio,
-        };
-        scaleRef.current = newScale;
+        tx.current = mx + (tx.current - mx) * scaleRatio;
+        ty.current = my + (ty.current - my) * scaleRatio;
+        scale.current = newScale;
         lastPinchDist.current = dist;
+
+        clampTranslate();
         scheduleApply();
       }
     };
@@ -153,20 +180,21 @@ export function PhotoCropModal({
         dragging.current = true;
         lastPoint.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       }
-      setRenderTick(t => t + 1);
     };
 
     el.addEventListener("touchstart", onTouchStart, { passive: false });
     el.addEventListener("touchmove", onTouchMove, { passive: false });
     el.addEventListener("touchend", onTouchEnd);
+
     return () => {
       el.removeEventListener("touchstart", onTouchStart);
       el.removeEventListener("touchmove", onTouchMove);
       el.removeEventListener("touchend", onTouchEnd);
       if (rafId.current !== null) cancelAnimationFrame(rafId.current);
     };
-  }, [naturalSize]);
+  }, [ready]);
 
+  // Mouse drag (desktop)
   const handlePointerDown = (e: React.PointerEvent) => {
     if (e.pointerType === "touch") return;
     dragging.current = true;
@@ -176,41 +204,53 @@ export function PhotoCropModal({
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (e.pointerType === "touch" || !dragging.current) return;
-    const dx = e.clientX - lastPoint.current.x;
-    const dy = e.clientY - lastPoint.current.y;
+    tx.current += e.clientX - lastPoint.current.x;
+    ty.current += e.clientY - lastPoint.current.y;
     lastPoint.current = { x: e.clientX, y: e.clientY };
-    offsetRef.current = { x: offsetRef.current.x + dx, y: offsetRef.current.y + dy };
+    clampTranslate();
     scheduleApply();
   };
 
-  const handlePointerUp = (e: React.PointerEvent) => {
-    if (e.pointerType === "touch") return;
-    dragging.current = false;
-  };
+  const handlePointerUp = () => { dragging.current = false; };
 
+  // Crop & export — derive source rect from the CSS transform, draw at natural resolution
   const handleConfirm = () => {
-    if (!naturalSize || !containerW) return;
-    const s = scaleRef.current;
-    const cs = coverScaleRef.current;
-    const o = offsetRef.current;
-    const dispW = naturalSize.w * cs * s;
-    const dispH = naturalSize.h * cs * s;
-    const ratio = outputSize / containerW;
+    const container = containerRef.current;
+    if (!container || !natural.current.w) return;
+
+    const containerSize = container.offsetWidth;
+    const { w: nw, h: nh } = natural.current;
+    const { w: initW, h: initH } = initDim.current;
+    const s = scale.current;
+
+    // Top-left of the displayed image in container-space
+    // (image is centred at container centre, then translated by tx/ty)
+    const imgLeft = containerSize / 2 - (initW * s) / 2 + tx.current;
+    const imgTop  = containerSize / 2 - (initH * s) / 2 + ty.current;
+
+    // Crop window is the entire container square
+    // In display pixels, the crop starts at -imgLeft (how far into the image we are)
+    const cropX = -imgLeft;
+    const cropY = -imgTop;
+
+    // Convert display-pixel crop rect back to natural-image pixels
+    const displayToNatural = nw / (initW * s);
+    const srcX = cropX * displayToNatural;
+    const srcY = cropY * displayToNatural;
+    const srcW = containerSize * displayToNatural;
+    const srcH = containerSize * displayToNatural;
+
     const canvas = document.createElement("canvas");
     canvas.width = outputSize;
     canvas.height = outputSize;
     const ctx = canvas.getContext("2d")!;
     const img = new Image();
     img.onload = () => {
-      ctx.drawImage(img, o.x * ratio, o.y * ratio, dispW * ratio, dispH * ratio);
-      onConfirm(canvas.toDataURL("image/jpeg", 0.80));
+      ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, outputSize, outputSize);
+      onConfirm(canvas.toDataURL("image/jpeg", 0.85));
     };
     img.src = imgSrc;
   };
-
-  const initDispW = naturalSize ? naturalSize.w * coverScale * scaleRef.current : 0;
-  const initDispH = naturalSize ? naturalSize.h * coverScale * scaleRef.current : 0;
-  const initOffset = offsetRef.current;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.92)" }}>
@@ -219,6 +259,7 @@ export function PhotoCropModal({
           <p className="text-gold font-serif font-semibold">Position your photo</p>
           <p className="text-cream/40 text-xs mt-0.5">Drag to reposition · Pinch to zoom</p>
         </div>
+
         <div
           ref={containerRef}
           className="relative overflow-hidden select-none"
@@ -228,7 +269,7 @@ export function PhotoCropModal({
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerUp}
         >
-          {naturalSize && (
+          {ready && (
             <img
               ref={imgRef}
               src={imgSrc}
@@ -236,20 +277,26 @@ export function PhotoCropModal({
               draggable={false}
               className="absolute pointer-events-none"
               style={{
-                left: initOffset.x,
-                top: initOffset.y,
-                width: initDispW,
-                height: initDispH,
+                left: "50%",
+                top: "50%",
+                marginLeft: `-${initDim.current.w / 2}px`,
+                marginTop: `-${initDim.current.h / 2}px`,
+                transformOrigin: "center center",
+                willChange: "transform",
                 userSelect: "none",
               }}
             />
           )}
+
+          {/* Rule-of-thirds grid */}
           <div className="absolute inset-0 pointer-events-none" style={{
             backgroundImage: "linear-gradient(rgba(201,168,76,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,76,0.1) 1px, transparent 1px)",
             backgroundSize: "33.33% 33.33%",
           }} />
+          {/* Border */}
           <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 0 2px rgba(201,168,76,0.5)" }} />
         </div>
+
         <div className="flex gap-2 px-4 py-4">
           <button
             onClick={onCancel}
