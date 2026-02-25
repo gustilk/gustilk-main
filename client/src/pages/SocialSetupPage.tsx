@@ -34,7 +34,7 @@ function mapCountry(apiName: string): string | null {
   return COUNTRIES.find(c => c.toLowerCase() === apiName.toLowerCase()) ?? null;
 }
 
-async function compressImage(file: File, maxPx = 900, quality = 0.78): Promise<string> {
+async function compressImage(file: File, maxPx = 800, quality = 0.70): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -164,7 +164,7 @@ export default function SocialSetupPage({ user }: Props) {
     if (!file) return;
     setCompressing(true);
     try {
-      const compressed = await compressImage(file, 600, 0.82);
+      const compressed = await compressImage(file, 500, 0.72);
       setSelfie(compressed);
     } catch {
       toast({ title: "Could not process selfie", variant: "destructive" });
