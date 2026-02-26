@@ -37,6 +37,7 @@ export default function LanguageSelectPage({ onSelect }: Props) {
               height: "180px",
               objectFit: "contain",
               filter: "drop-shadow(0 3px 14px rgba(201,168,76,0.5))",
+              mixBlendMode: "screen" as React.CSSProperties["mixBlendMode"],
             }}
           />
         </div>
