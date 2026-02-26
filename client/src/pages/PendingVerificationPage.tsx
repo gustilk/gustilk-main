@@ -15,7 +15,7 @@ export default function PendingVerificationPage({ user }: Props) {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.clear();
+      queryClient.setQueryData(["/api/auth/me"], null);
     },
   });
 

@@ -50,8 +50,7 @@ export default function SocialSetupPage({ user }: Props) {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.clear();
-      window.location.reload();
+      queryClient.setQueryData(["/api/auth/me"], null);
     },
   });
 
