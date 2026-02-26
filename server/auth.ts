@@ -38,7 +38,8 @@ export function setupSession(app: Express) {
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: false,
+        sameSite: "lax",
         maxAge: 30 * 24 * 60 * 60 * 1000,
       },
     })
@@ -103,6 +104,7 @@ export function registerAuthRoutes(app: Express) {
       }).returning();
 
       req.session.userId = user.id;
+      await saveSession(req);
       res.json({ user: safeUser(user as any) });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
@@ -124,6 +126,7 @@ export function registerAuthRoutes(app: Express) {
       if (!ok) return res.status(401).json({ message: "Invalid email or password" });
 
       req.session.userId = user.id;
+      await saveSession(req);
       res.json({ user: safeUser(user as any) });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
@@ -238,6 +241,7 @@ export function registerAuthRoutes(app: Express) {
       delete req.session.webAuthnPhone;
 
       req.session.userId = user.id;
+      await saveSession(req);
       res.json({ user: safeUser(user as any) });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
@@ -287,6 +291,7 @@ export function registerAuthRoutes(app: Express) {
       delete req.session.webAuthnPhone;
 
       req.session.userId = user.id;
+      await saveSession(req);
       res.json({ user: safeUser(user as any) });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
