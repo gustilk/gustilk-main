@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes } from "@shared/schema";
+import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys } from "@shared/schema";
 import type { User, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report, InsertUser } from "@shared/schema";
 import { eq, and, or, ne, notInArray, desc, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
@@ -61,6 +61,7 @@ export class DatabaseStorage implements IStorage {
     await db.delete(eventAttendees).where(eq(eventAttendees.userId, id));
     await db.delete(reports).where(or(eq(reports.reporterId, id), eq(reports.reportedUserId, id)));
     await db.delete(otpCodes).where(sql`identifier IN (SELECT email FROM users WHERE id = ${id} UNION SELECT phone FROM users WHERE id = ${id})`);
+    await db.delete(passkeys).where(eq(passkeys.userId, id));
     await db.delete(users).where(eq(users.id, id));
   }
 

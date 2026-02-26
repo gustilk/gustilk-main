@@ -287,8 +287,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.delete("/api/account", isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
-      req.session.destroy(() => {});
       await storage.deleteUser(userId);
+      req.session.destroy(() => {});
       res.json({ ok: true });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
