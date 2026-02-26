@@ -32,10 +32,6 @@ export default function ChatPage({ user, matchId }: Props) {
 
   const { data: msgData, isLoading } = useQuery<{ messages: Message[] }>({
     queryKey: ["/api/messages", matchId],
-    queryFn: async () => {
-      const res = await fetch(`/api/messages/${matchId}`, { credentials: "include" });
-      return res.json();
-    },
     refetchInterval: 5000,
     enabled: !!user.isPremium,
   });

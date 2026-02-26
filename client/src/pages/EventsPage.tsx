@@ -74,18 +74,18 @@ export default function EventsPage({ user }: Props) {
       </div>
 
       <div className="flex gap-2 px-5 mb-5 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
-        {TYPES.map(t => (
+        {TYPES.map(tab => (
           <button
-            key={t.id}
-            onClick={() => setActiveType(t.id)}
-            data-testid={`filter-${t.id}`}
+            key={tab.id}
+            onClick={() => setActiveType(tab.id)}
+            data-testid={`filter-${tab.id}`}
             className="px-4 py-1.5 rounded-full text-xs font-bold flex-shrink-0 transition-all"
-            style={activeType === t.id
+            style={activeType === tab.id
               ? { background: "#c9a84c", color: "#1a0a2e" }
               : { background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.45)", border: "1px solid rgba(201,168,76,0.15)" }
             }
           >
-            {t.label}
+            {tab.label}
           </button>
         ))}
       </div>

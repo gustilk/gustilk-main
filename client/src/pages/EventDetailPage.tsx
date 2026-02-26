@@ -24,10 +24,6 @@ export default function EventDetailPage({ user, eventId }: Props) {
 
   const { data, isLoading } = useQuery<{ event: EventWithAttendance }>({
     queryKey: ["/api/events", eventId],
-    queryFn: async () => {
-      const res = await fetch(`/api/events/${eventId}`, { credentials: "include" });
-      return res.json();
-    },
   });
 
   const attendMutation = useMutation({

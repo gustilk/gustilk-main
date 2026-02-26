@@ -134,6 +134,7 @@ export default function PremiumPage({ user }: Props) {
         } else {
           toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
         }
+      }
     } else {
       await new Promise(r => setTimeout(r, 1500));
       toast({

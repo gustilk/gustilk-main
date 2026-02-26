@@ -61,6 +61,7 @@ export function useVideoCallProvider(userId: string | null, isPremium: boolean):
   const [callPartnerPhoto, setCallPartnerPhoto] = useState<string | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isCamOff, setIsCamOff] = useState(false);
+  const [reconnectCtr, setReconnectCtr] = useState(0);
   const isPremiumRef = useRef(isPremium);
   useEffect(() => { isPremiumRef.current = isPremium; }, [isPremium]);
 
@@ -183,6 +184,7 @@ export function useVideoCallProvider(userId: string | null, isPremium: boolean):
 
     const ws = new WebSocket(getWsUrl());
     wsRef.current = ws;
+    let intentionalClose = false;
 
     ws.onopen = () => {
       ws.send(JSON.stringify({ type: "register", userId }));
@@ -191,16 +193,17 @@ export function useVideoCallProvider(userId: string | null, isPremium: boolean):
     ws.onmessage = (e) => handleMessage(e.data);
 
     ws.onclose = () => {
-      // Attempt reconnect after 3s
-      setTimeout(() => {
-        if (wsRef.current === ws) wsRef.current = null;
-      }, 3000);
+      wsRef.current = null;
+      if (!intentionalClose) {
+        setTimeout(() => setReconnectCtr(c => c + 1), 3000);
+      }
     };
 
     return () => {
+      intentionalClose = true;
       ws.close();
     };
-  }, [userId, handleMessage]);
+  }, [userId, handleMessage, reconnectCtr]);
 
   // ── Actions ───────────────────────────────────────────────
   // toName/toPhoto = who you're calling (shown on your screen)
