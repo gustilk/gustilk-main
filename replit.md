@@ -108,6 +108,18 @@ Server + frontend served on port 5000.
 - **Port**: 5000
 - **Configured and ready to deploy**
 
+## Native Mobile Apps (Capacitor)
+Capacitor v7.5.0 is configured to wrap the web app as a native iOS/Android app.
+- **Config**: `capacitor.config.ts` (app ID: `com.gustilk.app`)
+- **Strategy**: `server.url: 'https://gustilk.com'` — WebView loads live server, all API calls work automatically
+- **Web dir**: `dist/public` (output of `npm run build`)
+- **Full local setup guide**: `MOBILE_SETUP.md`
+- **To add native targets locally**: `npx cap add ios` (macOS only) / `npx cap add android`
+- **To sync after build**: `npx cap sync`
+- **To open in Xcode**: `npx cap open ios`
+- **To open in Android Studio**: `npx cap open android`
+- Packages installed: `@capacitor/core`, `@capacitor/cli`, `@capacitor/ios`, `@capacitor/android`, `@capacitor/status-bar`, `@capacitor/splash-screen`
+
 ## Production Notes
 - Session cookies use `Secure: true` in production (requires HTTPS, handled by Replit)
 - Photo moderation uses OpenAI Vision via Replit AI Integrations
