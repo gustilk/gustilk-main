@@ -64,7 +64,7 @@ function Logo() {
             height: "auto",
             objectFit: "contain",
             filter: "drop-shadow(0 4px 24px rgba(201,168,76,0.5))",
-            mixBlendMode: "screen" as React.CSSProperties["mixBlendMode"],
+
           }}
         />
       </div>
