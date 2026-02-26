@@ -98,8 +98,8 @@ export function registerAuthRoutes(app: Express) {
         email: email.toLowerCase().trim(),
         passwordHash: hash,
         firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        fullName: `${firstName.trim()} ${lastName.trim()}`,
+        lastName: lastName?.trim() || null,
+        fullName: lastName?.trim() ? `${firstName.trim()} ${lastName.trim()}` : firstName.trim(),
       }).returning();
 
       req.session.userId = user.id;
