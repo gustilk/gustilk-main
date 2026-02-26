@@ -165,6 +165,9 @@ export default function SettingsPage({ user }: Props) {
       return res.json();
     },
     onSuccess: () => {
+      localStorage.removeItem("gustilk_email");
+      localStorage.removeItem("gustilk_phone");
+      localStorage.removeItem("gustilk_country_iso");
       queryClient.clear();
       window.location.href = "/";
     },

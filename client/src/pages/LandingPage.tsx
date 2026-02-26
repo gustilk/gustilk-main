@@ -166,7 +166,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [mode, setMode] = useState<"login" | "register">("login");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => localStorage.getItem("gustilk_email") ?? "");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -188,6 +188,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
     try {
       const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
       await apiRequest("POST", endpoint, { email: email.trim(), password });
+      localStorage.setItem("gustilk_email", email.trim());
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     } catch (err: any) {
       const msg = await err.message?.match(/\d+: (.+)/)?.[1] || err.message;
@@ -382,12 +383,17 @@ function CountryPicker({
 function PhoneScreen({ onBack }: { onBack: () => void }) {
   const { toast } = useToast();
   const { t } = useTranslation();
-  const [country, setCountry] = useState(COUNTRY_LIST[0]);
-  const [localNumber, setLocalNumber] = useState("");
+  const savedIso = localStorage.getItem("gustilk_country_iso");
+  const savedPhone = localStorage.getItem("gustilk_phone") ?? "";
+  const [country, setCountry] = useState(
+    () => COUNTRY_LIST.find(c => c.iso === savedIso) ?? COUNTRY_LIST[0]
+  );
+  const [localNumber, setLocalNumber] = useState(savedPhone);
   const [loading, setLoading] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
 
   useEffect(() => {
+    if (savedIso) return;
     fetch("/api/geo/detect")
       .then(r => r.json())
       .then(({ countryCode }: { countryCode: string | null }) => {
@@ -418,6 +424,8 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
         await apiRequest("POST", "/api/auth/passkey/auth-verify", assertResp);
       }
 
+      localStorage.setItem("gustilk_phone", localNumber);
+      localStorage.setItem("gustilk_country_iso", country.iso);
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     } catch (err: any) {
       if (err?.name === "NotAllowedError" || err?.message?.includes("NotAllowedError")) {
