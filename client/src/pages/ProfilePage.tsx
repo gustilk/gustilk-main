@@ -13,7 +13,7 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
   const { t } = useTranslation();
   const photos = (user.photos ?? []).filter(Boolean);
   const [photoIdx, setPhotoIdx] = useState(0);
-  const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Murid" }[c] ?? c);
+  const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[c] ?? c);
   const age = (() => {
     if ((user as any).dateOfBirth) {
       const dob = new Date((user as any).dateOfBirth);
@@ -285,7 +285,7 @@ export default function ProfilePage({ user }: Props) {
     setPhotosEdited(true);
   };
 
-  const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Murid" }[c] ?? c);
+  const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[c] ?? c);
 
   return (
     <>
