@@ -10,6 +10,7 @@ import type { SafeUser } from "@shared/schema";
 import { PhotoCropModal } from "@/components/PhotoCropModal";
 
 function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () => void }) {
+  const { t } = useTranslation();
   const photos = (user.photos ?? []).filter(Boolean);
   const [photoIdx, setPhotoIdx] = useState(0);
   const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[c] ?? c);
@@ -34,7 +35,7 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
       <div className="flex items-center justify-between px-5 pt-12 pb-3 shrink-0">
         <div className="flex items-center gap-2">
           <Eye size={16} color="#c9a84c" />
-          <span className="text-gold text-sm font-semibold">How others see you</span>
+          <span className="text-gold text-sm font-semibold">{t("profile.howOthersSeeYou")}</span>
         </div>
         <button
           onClick={onClose}
@@ -153,13 +154,13 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
           <div className="p-5 space-y-4">
             {user.occupation && (
               <div>
-                <div className="text-xs text-cream/40 uppercase tracking-wider mb-1 font-semibold">Occupation</div>
+                <div className="text-xs text-cream/40 uppercase tracking-wider mb-1 font-semibold">{t("profile.occupation")}</div>
                 <p className="text-cream/70 text-sm" data-testid="preview-text-occupation">{user.occupation}</p>
               </div>
             )}
             {(user.languages ?? []).length > 3 && (
               <div>
-                <div className="text-xs text-cream/40 uppercase tracking-wider mb-2 font-semibold">Languages</div>
+                <div className="text-xs text-cream/40 uppercase tracking-wider mb-2 font-semibold">{t("profile.languages")}</div>
                 <div className="flex flex-wrap gap-2">
                   {(user.languages ?? []).map(lang => (
                     <span
@@ -180,7 +181,7 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
                   style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.3)" }}
                 >
                   <CheckCircle size={11} />
-                  Verified
+                  {t("profile.verified")}
                 </span>
               )}
               {user.isPremium && (
@@ -196,7 +197,7 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
           </div>
         </div>
 
-        <p className="text-center text-cream/25 text-xs mt-4">This is exactly how your profile appears to other members</p>
+        <p className="text-center text-cream/25 text-xs mt-4">{t("profile.previewNote")}</p>
       </div>
     </div>
   );
@@ -242,10 +243,10 @@ export default function ProfilePage({ user }: Props) {
       setLocalPhotos(arr);
       setPhotosEdited(false);
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-      toast({ title: "Photos updated" });
+      toast({ title: t("profile.photosUpdated") });
     },
     onError: (err: Error) => {
-      toast({ title: "Could not save photos", description: err.message, variant: "destructive" });
+      toast({ title: t("profile.couldNotSavePhotos"), description: err.message, variant: "destructive" });
     },
   });
 
@@ -317,7 +318,7 @@ export default function ProfilePage({ user }: Props) {
             style={{ border: "1.5px solid rgba(201,168,76,0.2)", color: "rgba(201,168,76,0.6)" }}
           >
             <Eye size={13} />
-            Preview
+            {t("profile.preview")}
           </button>
           <button
             onClick={() => setLocation("/profile/edit")}
@@ -326,7 +327,7 @@ export default function ProfilePage({ user }: Props) {
             style={{ border: "1.5px solid rgba(201,168,76,0.35)", color: "#c9a84c" }}
           >
             <Edit2 size={13} />
-            Edit
+            {t("profile.edit")}
           </button>
         </div>
       </div>
@@ -395,7 +396,7 @@ export default function ProfilePage({ user }: Props) {
                   data-testid="badge-verified"
                 >
                   <CheckCircle size={11} />
-                  Verified
+                  {t("profile.verified")}
                 </span>
               ) : (
                 <span
@@ -404,7 +405,7 @@ export default function ProfilePage({ user }: Props) {
                   data-testid="badge-unverified"
                 >
                   <Clock size={11} />
-                  {me.verificationStatus === "pending" ? "Pending Verification" : "Unverified"}
+                  {me.verificationStatus === "pending" ? t("profile.pending") : t("discover.verifiedMember")}
                 </span>
               )}
               <span
@@ -417,21 +418,21 @@ export default function ProfilePage({ user }: Props) {
 
             {me.bio && (
               <div>
-                <div className="text-xs text-cream/40 uppercase tracking-wider mb-1.5 font-semibold">About Me</div>
+                <div className="text-xs text-cream/40 uppercase tracking-wider mb-1.5 font-semibold">{t("profile.aboutMe")}</div>
                 <p className="text-cream/70 text-sm leading-relaxed" data-testid="text-bio">{me.bio}</p>
               </div>
             )}
 
             {me.occupation && (
               <div>
-                <div className="text-xs text-cream/40 uppercase tracking-wider mb-1.5 font-semibold">Occupation</div>
+                <div className="text-xs text-cream/40 uppercase tracking-wider mb-1.5 font-semibold">{t("profile.occupation")}</div>
                 <p className="text-cream/70 text-sm" data-testid="text-occupation">{me.occupation}</p>
               </div>
             )}
 
             {me.languages && me.languages.length > 0 && (
               <div>
-                <div className="text-xs text-cream/40 uppercase tracking-wider mb-2 font-semibold">Languages</div>
+                <div className="text-xs text-cream/40 uppercase tracking-wider mb-2 font-semibold">{t("profile.languages")}</div>
                 <div className="flex flex-wrap gap-2">
                   {me.languages.map(lang => (
                     <span
@@ -453,7 +454,7 @@ export default function ProfilePage({ user }: Props) {
       {/* ── Photo Gallery ── */}
       <div className="px-5 mt-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs text-cream/40 uppercase tracking-wider font-semibold">My Photos</h3>
+          <h3 className="text-xs text-cream/40 uppercase tracking-wider font-semibold">{t("profile.photos")}</h3>
           {photosEdited && (
             <button
               onClick={() => savePhotosMutation.mutate()}
@@ -462,7 +463,7 @@ export default function ProfilePage({ user }: Props) {
               className="px-4 py-1.5 rounded-full text-xs font-bold disabled:opacity-50"
               style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
             >
-              {savePhotosMutation.isPending ? "Saving…" : "Save Photos"}
+              {savePhotosMutation.isPending ? t("profile.savingPhotos") : t("profile.savePhotos")}
             </button>
           )}
         </div>
@@ -501,7 +502,7 @@ export default function ProfilePage({ user }: Props) {
                         style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
                       >
                         <Star size={9} fill="#1a0a2e" color="#1a0a2e" />
-                        Main
+                        {t("profile.mainPhoto")}
                       </div>
                     ) : (
                       <button
@@ -511,7 +512,7 @@ export default function ProfilePage({ user }: Props) {
                         style={{ background: "rgba(0,0,0,0.55)", color: "rgba(201,168,76,0.9)", border: "1px solid rgba(201,168,76,0.35)" }}
                       >
                         <Star size={9} color="#c9a84c" />
-                        Main
+                        {t("profile.mainPhoto")}
                       </button>
                     )}
                   </div>
@@ -530,7 +531,7 @@ export default function ProfilePage({ user }: Props) {
             );
           })}
         </div>
-        <p className="text-xs mt-2" style={{ color: "rgba(253,248,240,0.2)" }}>Tap ★ Main to set cover photo · × to remove · max 6</p>
+        <p className="text-xs mt-2" style={{ color: "rgba(253,248,240,0.2)" }}>{t("profile.photoInstruction")}</p>
         <input
           ref={fileInputRef}
           type="file"

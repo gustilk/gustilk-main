@@ -88,6 +88,13 @@ New social users (empty city) are shown `SocialSetupPage` to fill caste, gender,
 - `TWILIO_PHONE_NUMBER` — Twilio sender phone number (e.g. +14155552671)
   - NOTE: Twilio Replit integration was dismissed. Add credentials as secrets manually, or re-authorize the integration.
 
+## Internationalisation (i18n)
+All 7 languages fully translated — keys are in `client/src/i18n/locales/<lang>.ts`.
+Each locale file contains these top-level sections: `lang`, `languagePicker`, `common`, `landing`, `auth`, `agreement`, `setup`, `discover`, `matches`, `chat`, `premium`, `profile`, `events`, `nav`, `admin`, `verification`, `report`, `settings`.
+
+The `settings` section (added session 2025-02) covers: Settings page UI (menu titles, section headers), Notifications subscreen (toggle labels, toast messages), Community Guidelines subscreen (intro + 8th section — Account Suspension), Privacy Policy subscreen (intro + 5 policy sections).
+The `profile` section now includes: `edit`, `preview`, `occupation`, `languages`, `savePhotos`, `savingPhotos`, `mainPhoto`, `aboutMe`, `howOthersSeeYou`, `previewNote`, `photoInstruction`, `photosUpdated`, `couldNotSavePhotos`.
+
 ## Running
 ```bash
 npm run dev
