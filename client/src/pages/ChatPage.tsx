@@ -164,14 +164,14 @@ export default function ChatPage({ user, matchId }: Props) {
           style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "2px solid rgba(201,168,76,0.3)" }}
         >
           {otherUser?.photos && otherUser.photos.length > 0 ? (
-            <ProtectedPhoto src={otherUser.photos[0]} alt={otherUser.fullName ?? ""} className="w-full h-full object-cover" />
+            <ProtectedPhoto src={otherUser.photos[0]} alt={otherUser.firstName ?? ""} className="w-full h-full object-cover" />
           ) : (
-            (otherUser?.fullName ?? otherUser?.firstName ?? "M").charAt(0)
+            (otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "M").charAt(0)
           )}
         </div>
         <div className="flex-1 min-w-0">
           <h2 className="text-cream font-semibold text-sm" data-testid="text-chat-name">
-            {otherUser?.fullName ?? "Loading…"}
+            {otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "Loading…"}
           </h2>
           <p className="text-cream/40 text-xs">
             {otherUser ? `${otherUser.city}${otherUser.state ? `, ${otherUser.state}` : ""}, ${otherUser.country}` : ""}
@@ -183,9 +183,9 @@ export default function ChatPage({ user, matchId }: Props) {
               onClick={() => startCall(
                 matchId,
                 otherUser.id,
-                otherUser.fullName ?? otherUser.firstName ?? "Member",
+                otherUser.firstName ?? otherUser.fullName?.split(" ")[0] ?? "Member",
                 otherUser.photos?.[0] ?? null,
-                user.fullName ?? user.firstName ?? "Member",
+                user.firstName ?? user.fullName?.split(" ")[0] ?? "Member",
                 user.photos?.[0] ?? null,
               )}
               disabled={callState !== "idle"}
@@ -222,7 +222,7 @@ export default function ChatPage({ user, matchId }: Props) {
             >
               <span className="text-2xl text-gold font-serif">✦</span>
             </div>
-            <p className="text-cream/40 text-sm">You matched! Say hello to <strong className="text-gold">{otherUser?.fullName}</strong></p>
+            <p className="text-cream/40 text-sm">You matched! Say hello to <strong className="text-gold">{otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0]}</strong></p>
           </div>
         ) : (
           messages.map(msg => (
@@ -270,7 +270,7 @@ export default function ChatPage({ user, matchId }: Props) {
       {showReport && otherUser && (
         <ReportModal
           reportedUserId={otherUser.id}
-          reportedUserName={otherUser.fullName ?? otherUser.firstName ?? "Member"}
+          reportedUserName={otherUser.firstName ?? otherUser.fullName?.split(" ")[0] ?? "Member"}
           onClose={() => setShowReport(false)}
         />
       )}

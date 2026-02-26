@@ -148,7 +148,7 @@ function NewMatchBubble({ match, isPremium, onClick }: {
           {other.photos && other.photos.length > 0 ? (
             <ProtectedPhoto src={other.photos[0]} alt="" className="w-full h-full object-cover" />
           ) : (
-            (other.fullName ?? other.firstName ?? "M").charAt(0)
+            (other.firstName ?? other.fullName?.split(" ")[0] ?? "M").charAt(0)
           )}
         </div>
         {/* Lock overlay for non-premium */}
@@ -160,7 +160,7 @@ function NewMatchBubble({ match, isPremium, onClick }: {
         )}
       </div>
       <span className="text-[11px] text-cream/60 font-medium max-w-[60px] truncate">
-        {isPremium ? (other.fullName ?? other.firstName ?? "Member").split(" ")[0] : "???"}
+        {isPremium ? (other.firstName ?? other.fullName?.split(" ")[0] ?? "Member") : "???"}
       </span>
     </button>
   );
@@ -203,7 +203,7 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
           {other.photos && other.photos.length > 0 ? (
             <ProtectedPhoto src={other.photos[0]} alt="" className="w-full h-full object-cover" />
           ) : (
-            (other.fullName ?? other.firstName ?? "M").charAt(0)
+            (other.firstName ?? other.fullName?.split(" ")[0] ?? "M").charAt(0)
           )}
         </div>
         {!isPremium && (
@@ -224,7 +224,7 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
           <span className="font-semibold text-sm truncate"
             style={{ color: isPremium ? "rgba(253,248,240,1)" : "rgba(253,248,240,0.25)" }}
             data-testid={`text-match-name-${match.id}`}>
-            {isPremium ? (other.fullName ?? other.firstName ?? "Member") : t("matches.lockedName")}
+            {isPremium ? (other.firstName ?? other.fullName?.split(" ")[0] ?? "Member") : t("matches.lockedName")}
           </span>
           {isPremium && (
             <span className="text-cream/30 text-xs flex-shrink-0">{timeLabel}</span>
