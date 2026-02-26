@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, MapPin, ChevronLeft } from "lucide-react";
+import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, MapPin, ChevronLeft, Shield } from "lucide-react";
 import logoImg from "@assets/Untitled_design_1772024284063.png";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -552,6 +552,24 @@ export default function ProfilePage({ user }: Props) {
           >
             <Star size={16} fill="#1a0a2e" />
             {t("premium.subscribe")}
+          </button>
+        )}
+
+        {me.isAdmin && (
+          <button
+            onClick={() => setLocation("/admin")}
+            data-testid="button-open-admin"
+            className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all text-left"
+            style={{ border: "1px solid rgba(123,63,160,0.3)", background: "rgba(123,63,160,0.1)" }}
+          >
+            <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(123,63,160,0.2)" }}>
+              <Shield size={16} color="#7b3fa0" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium" style={{ color: "rgba(253,248,240,0.85)" }}>Admin Panel</p>
+              <p className="text-xs mt-0.5" style={{ color: "rgba(253,248,240,0.35)" }}>Manage verifications & reports</p>
+            </div>
+            <ChevronRight size={15} color="rgba(253,248,240,0.2)" />
           </button>
         )}
 
