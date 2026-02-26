@@ -2,42 +2,23 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
-import fs from "fs";
-
-const CRASH_LOG = "/tmp/gustilk-crash.log";
-
-function appendCrashLog(msg: string) {
-  try {
-    fs.appendFileSync(CRASH_LOG, `${new Date().toISOString()} ${msg}\n`);
-  } catch {}
-}
-
-process.on("exit", (code) => {
-  appendCrashLog(`[EXIT] code=${code}`);
-  console.error(`[EXIT] process exiting with code=${code}`);
-});
 
 process.on("uncaughtException", (err) => {
-  appendCrashLog(`[CRASH] uncaughtException: ${err?.stack ?? err}`);
-  console.error("[CRASH] uncaughtException:", err);
+  console.error("[ERROR] uncaughtException:", err);
 });
 
 process.on("unhandledRejection", (reason) => {
-  const msg = reason instanceof Error ? reason.stack : String(reason);
-  appendCrashLog(`[CRASH] unhandledRejection: ${msg}`);
-  console.error("[CRASH] unhandledRejection:", reason);
+  console.error("[ERROR] unhandledRejection:", reason);
 });
 
 process.on("SIGTERM", () => {
-  appendCrashLog("[CRASH] SIGTERM received");
-  console.error("[CRASH] SIGTERM received — process being killed externally");
-  process.exit(143);
+  console.log("[INFO] SIGTERM received — shutting down gracefully");
+  process.exit(0);
 });
 
 process.on("SIGINT", () => {
-  appendCrashLog("[CRASH] SIGINT received");
-  console.error("[CRASH] SIGINT received");
-  process.exit(130);
+  console.log("[INFO] SIGINT received — shutting down");
+  process.exit(0);
 });
 
 const app = express();
@@ -115,9 +96,6 @@ app.use((req, res, next) => {
     return res.status(status).json({ message });
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
   if (process.env.NODE_ENV === "production") {
     serveStatic(app);
   } else {
@@ -125,10 +103,6 @@ app.use((req, res, next) => {
     await setupVite(httpServer, app);
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || "5000", 10);
   httpServer.listen(
     {
@@ -138,16 +112,6 @@ app.use((req, res, next) => {
     },
     () => {
       log(`serving on port ${port}`);
-      appendCrashLog(`[START] server listening on port ${port}`);
-
-      let heartbeatCount = 0;
-      const heartbeat = setInterval(() => {
-        heartbeatCount++;
-        const msg = `[HEARTBEAT] #${heartbeatCount} alive at T+${heartbeatCount * 5}s`;
-        appendCrashLog(msg);
-        console.log(msg);
-      }, 5000);
-      heartbeat.unref();
     },
   );
 })();

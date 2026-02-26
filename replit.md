@@ -100,3 +100,17 @@ The `profile` section now includes: `edit`, `preview`, `occupation`, `languages`
 npm run dev
 ```
 Server + frontend served on port 5000.
+
+## Deployment
+- **Target**: VM (always-running, needed for WebSocket/real-time features)
+- **Build command**: `npm run build`
+- **Run command**: `bash -c "NODE_ENV=production node dist/index.cjs"`
+- **Port**: 5000
+- **Configured and ready to deploy**
+
+## Production Notes
+- Session cookies use `Secure: true` in production (requires HTTPS, handled by Replit)
+- Photo moderation uses OpenAI Vision via Replit AI Integrations
+- Face detection for verification selfies uses OpenAI Vision
+- Geo-IP country detection uses ipapi.co (free tier, no API key required)
+- WebAuthn/biometric auth works on HTTPS (deployed app URL or gustilk.com)
