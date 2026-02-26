@@ -109,7 +109,7 @@ export const profileUpdateSchema = z.object({
   languages: z.array(z.string()).optional(),
   photos: z.array(z.string()).optional(),
   verificationSelfie: z.string().optional(),
-  verificationStatus: z.enum(["none", "pending", "approved", "rejected"]).optional(),
+  verificationStatus: z.literal("pending").optional(),
 });
 
 export type OtpCode = typeof otpCodes.$inferSelect;

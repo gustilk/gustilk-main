@@ -13,7 +13,7 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
   const { t } = useTranslation();
   const photos = (user.photos ?? []).filter(Boolean);
   const [photoIdx, setPhotoIdx] = useState(0);
-  const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[c] ?? c);
+  const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Murid" }[c] ?? c);
   const age = (() => {
     if ((user as any).dateOfBirth) {
       const dob = new Date((user as any).dateOfBirth);
@@ -231,10 +231,6 @@ export default function ProfilePage({ user }: Props) {
     mutationFn: async () => {
       const photos = localPhotos.filter(Boolean) as string[];
       const res = await apiRequest("PUT", "/api/profile", { photos });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error ?? "Failed to save photos");
-      }
       return res.json();
     },
     onSuccess: (data) => {
@@ -289,7 +285,7 @@ export default function ProfilePage({ user }: Props) {
     setPhotosEdited(true);
   };
 
-  const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[c] ?? c);
+  const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Murid" }[c] ?? c);
 
   return (
     <>

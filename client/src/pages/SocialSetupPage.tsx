@@ -112,10 +112,6 @@ export default function SocialSetupPage({ user }: Props) {
         verificationStatus: "pending" as const,
       };
       const res = await apiRequest("PUT", "/api/profile", payload);
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error ?? "Failed to save profile");
-      }
       return res.json();
     },
     onSuccess: () => {

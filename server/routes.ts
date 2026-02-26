@@ -2,11 +2,14 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupSession, registerAuthRoutes, isAuthenticated } from "./auth";
-import { profileUpdateSchema } from "@shared/schema";
+import { profileUpdateSchema, users, matches, messages, events, eventAttendees } from "@shared/schema";
 import { verifyCountryFromRequest, verifyIraqFromRequest, getClientIp, lookupIpCountry } from "./geo";
 import { setupWs } from "./ws";
 import { z } from "zod";
 import { moderatePhotos, checkFacePresent } from "./moderation";
+import { db } from "./db";
+import { count, sql, eq, asc, desc, or, ilike } from "drizzle-orm";
+import { randomUUID } from "crypto";
 
 function getUserId(req: any): string {
   return req.session?.userId;
@@ -292,18 +295,25 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
-  app.get("/api/admin/users", isAuthenticated, requireAdmin, async (_req, res) => {
-    const { db } = await import("./db");
-    const { users } = await import("@shared/schema");
-    const { desc } = await import("drizzle-orm");
-    const allUsers = await db.select().from(users).orderBy(desc(users.createdAt));
-    res.json({ users: allUsers });
+  app.get("/api/admin/users", isAuthenticated, requireAdmin, async (req, res) => {
+    const search = ((req.query.search as string) || "").trim();
+    const limit = Math.min(parseInt(req.query.limit as string) || 100, 500);
+    const offset = parseInt(req.query.offset as string) || 0;
+    const whereClause = search
+      ? or(ilike(users.fullName, `%${search}%`), ilike(users.email, `%${search}%`), ilike(users.city, `%${search}%`))
+      : undefined;
+    const [allUsers, [countRow]] = await Promise.all([
+      whereClause
+        ? db.select().from(users).where(whereClause).orderBy(desc(users.createdAt)).limit(limit).offset(offset)
+        : db.select().from(users).orderBy(desc(users.createdAt)).limit(limit).offset(offset),
+      whereClause
+        ? db.select({ n: count() }).from(users).where(whereClause)
+        : db.select({ n: count() }).from(users),
+    ]);
+    res.json({ users: allUsers, total: Number(countRow.n) });
   });
 
   app.patch("/api/admin/users/:id", isAuthenticated, requireAdmin, async (req, res) => {
-    const { db } = await import("./db");
-    const { users } = await import("@shared/schema");
-    const { eq } = await import("drizzle-orm");
     const schema = z.object({
       isPremium: z.boolean().optional(),
       isBanned: z.boolean().optional(),
@@ -331,9 +341,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.get("/api/admin/stats", isAuthenticated, requireAdmin, async (_req, res) => {
-    const { db } = await import("./db");
-    const { users, matches, messages, events } = await import("@shared/schema");
-    const { count, sql } = await import("drizzle-orm");
     const [[tu], [pu], [vu], [bu], [tm], [tms], [te], [nw]] = await Promise.all([
       db.select({ n: count() }).from(users),
       db.select({ n: count() }).from(users).where(sql`${users.isPremium} = true`),
@@ -352,17 +359,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.get("/api/admin/events", isAuthenticated, requireAdmin, async (_req, res) => {
-    const { db } = await import("./db");
-    const { events } = await import("@shared/schema");
-    const { asc } = await import("drizzle-orm");
     const allEvents = await db.select().from(events).orderBy(asc(events.date));
     res.json({ events: allEvents });
   });
 
   app.post("/api/admin/events", isAuthenticated, requireAdmin, async (req, res) => {
-    const { db } = await import("./db");
-    const { events } = await import("@shared/schema");
-    const { randomUUID } = await import("crypto");
     const schema = z.object({
       title: z.string().min(1), description: z.string().min(1),
       type: z.enum(["cultural", "meetup", "online"]),
@@ -379,9 +380,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.patch("/api/admin/events/:id", isAuthenticated, requireAdmin, async (req, res) => {
-    const { db } = await import("./db");
-    const { events } = await import("@shared/schema");
-    const { eq } = await import("drizzle-orm");
     const schema = z.object({
       title: z.string().optional(), description: z.string().optional(),
       type: z.enum(["cultural", "meetup", "online"]).optional(),
@@ -397,9 +395,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.delete("/api/admin/events/:id", isAuthenticated, requireAdmin, async (req, res) => {
-    const { db } = await import("./db");
-    const { events, eventAttendees } = await import("@shared/schema");
-    const { eq } = await import("drizzle-orm");
     await db.delete(eventAttendees).where(eq(eventAttendees.eventId, req.params.id as string));
     await db.delete(events).where(eq(events.id, req.params.id as string));
     res.json({ ok: true });

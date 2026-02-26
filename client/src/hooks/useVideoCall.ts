@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 
+export const VideoCallContext = createContext<VideoCallCtx | null>(null);
+
 const ICE_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:stun1.l.google.com:19302" },
@@ -32,10 +34,6 @@ export interface VideoCallCtx {
   callPartnerName: string;
   callPartnerPhoto: string | null;
 }
-
-import { createContext as _createContext } from "react";
-
-export const VideoCallContext = _createContext<VideoCallCtx | null>(null);
 
 export function useVideoCallContext() {
   const ctx = useContext(VideoCallContext);
