@@ -19,10 +19,9 @@ A culturally sensitive dating platform designed exclusively for the Yezidi commu
 
 ### Backend
 - **Express.js** with TypeScript
-- **Passport.js** (local + Google + Facebook strategies) + express-session
+- Session-based auth (express-session + connect-pg-simple)
 - **PostgreSQL** via Drizzle ORM
-- **connect-pg-simple** for session storage
-- Manual OAuth for Instagram and Snapchat (no Passport strategies available)
+- **@simplewebauthn/server** v13 for WebAuthn/Passkeys biometric auth
 
 ## Social OAuth
 Configured via environment secrets. Providers activate automatically when keys are set:

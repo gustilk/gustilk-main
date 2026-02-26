@@ -66,6 +66,9 @@ export default {
     errorTitle: "Fehler",
     codeSentTitle: "Code gesendet",
     codeSentDesc: "Ein 6-stelliger Code wurde an {{phone}} gesendet",
+    biometricCta: "Mit Biometrie anmelden",
+    biometricInfo: "Nutze deinen Fingerabdruck oder Face ID — kostenlos, sofort und sicher. Keine Codes nötig.",
+    biometricCancelled: "Biometrische Authentifizierung wurde abgebrochen.",
   },
   agreement: {
     title: "Gemeinschaftsvereinbarung",

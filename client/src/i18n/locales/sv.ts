@@ -66,6 +66,9 @@ export default {
     errorTitle: "Fel",
     codeSentTitle: "Kod skickad",
     codeSentDesc: "En 6-siffrig kod skickades till {{phone}}",
+    biometricCta: "Logga in med biometri",
+    biometricInfo: "Använd ditt fingeravtryck eller Face ID — gratis, omedelbart och säkert. Inga koder behövs.",
+    biometricCancelled: "Biometrisk autentisering avbröts.",
   },
   agreement: {
     title: "Gemenskapsavtal",

@@ -66,6 +66,9 @@ export default {
     errorTitle: "Սխալ",
     codeSentTitle: "Կոդ ուղարկված է",
     codeSentDesc: "6-նիշ կոդ ուղարկվել է {{phone}}",
+    biometricCta: "Մուտք կենսաչափությամբ",
+    biometricInfo: "Օգтагорде матнаhетqт — аnвchar, аknthаrut ev аnвtang.",
+    biometricCancelled: "Кенсаchарутьян haваstaciчутьюне chеghаворел е.",
   },
   agreement: {
     title: "Համայնքային համաձայնագիր",

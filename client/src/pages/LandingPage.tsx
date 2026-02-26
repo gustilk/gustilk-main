@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Heart, Shield, Users, Eye, EyeOff, Phone, Mail, ArrowLeft, Globe, ChevronDown, Search, X } from "lucide-react";
+import { Heart, Shield, Users, Eye, EyeOff, Phone, Mail, ArrowLeft, Globe, ChevronDown, Search, X, Fingerprint } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -382,38 +382,37 @@ function CountryPicker({
 function PhoneScreen({ onBack }: { onBack: () => void }) {
   const { toast } = useToast();
   const { t } = useTranslation();
-  const [step, setStep] = useState<"phone" | "otp">("phone");
-  const [country, setCountry] = useState(COUNTRY_LIST[0]); // Iraq default
+  const [country, setCountry] = useState(COUNTRY_LIST[0]);
   const [localNumber, setLocalNumber] = useState("");
-  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const fullPhone = country.dial + localNumber.replace(/^0+/, "");
 
-  async function sendOtp(e: React.FormEvent) {
+  async function handleBiometric(e: React.FormEvent) {
     e.preventDefault();
     if (!localNumber.trim()) return;
     setLoading(true);
     try {
-      await apiRequest("POST", "/api/auth/send-otp", { phone: fullPhone });
-      setStep("otp");
-      toast({ title: t("auth.codeSentTitle"), description: t("auth.codeSentDesc", { phone: fullPhone }) });
-    } catch (err: any) {
-      const msg = err.message?.match(/\d+: (.+)/)?.[1] || err.message;
-      toast({ title: t("auth.errorTitle"), description: msg, variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  }
+      const res = await apiRequest("POST", "/api/auth/passkey/options", { phone: fullPhone });
+      const { type, options } = await res.json();
 
-  async function verifyOtp(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await apiRequest("POST", "/api/auth/verify-otp", { phone: fullPhone, code });
+      if (type === "register") {
+        const { startRegistration } = await import("@simplewebauthn/browser");
+        const attResp = await startRegistration({ optionsJSON: options });
+        await apiRequest("POST", "/api/auth/passkey/register-verify", attResp);
+      } else {
+        const { startAuthentication } = await import("@simplewebauthn/browser");
+        const assertResp = await startAuthentication({ optionsJSON: options });
+        await apiRequest("POST", "/api/auth/passkey/auth-verify", assertResp);
+      }
+
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     } catch (err: any) {
+      if (err?.name === "NotAllowedError" || err?.message?.includes("NotAllowedError")) {
+        toast({ title: t("auth.errorTitle"), description: t("auth.biometricCancelled"), variant: "destructive" });
+        return;
+      }
       const msg = err.message?.match(/\d+: (.+)/)?.[1] || err.message;
       toast({ title: t("auth.errorTitle"), description: msg, variant: "destructive" });
     } finally {
@@ -431,82 +430,60 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
         />
       )}
 
-      <button onClick={() => step === "otp" ? setStep("phone") : onBack()} data-testid="button-back" className="flex items-center gap-2 text-cream/50 text-sm mb-6">
+      <button onClick={onBack} data-testid="button-back" className="flex items-center gap-2 text-cream/50 text-sm mb-6">
         <ArrowLeft size={16} /> {t("common.back")}
       </button>
       <Logo />
 
-      {step === "phone" ? (
-        <form onSubmit={sendOtp} className="space-y-4">
-          <div>
-            <label className="block text-cream/60 text-xs font-semibold mb-1.5 uppercase tracking-wider">{t("auth.phone")}</label>
-            <div className="flex gap-2">
-              {/* Country code selector button */}
-              <button
-                type="button"
-                onClick={() => setPickerOpen(true)}
-                data-testid="button-country-picker"
-                className="flex items-center gap-1.5 px-3 py-3 rounded-xl text-sm font-medium shrink-0 transition-all"
-                style={{
-                  background: "rgba(255,255,255,0.07)",
-                  border: "1.5px solid rgba(201,168,76,0.25)",
-                  color: "#fdf8f0",
-                  minWidth: "96px",
-                }}
-                onFocus={e => (e.currentTarget.style.borderColor = "#c9a84c")}
-                onBlur={e => (e.currentTarget.style.borderColor = "rgba(201,168,76,0.25)")}
-              >
-                <span className="text-lg leading-none">{country.flag}</span>
-                <span className="text-cream/70 font-mono text-xs">{country.dial}</span>
-                <ChevronDown size={12} className="text-cream/30 ml-auto" />
-              </button>
-              {/* Phone number input (local number without country code) */}
-              <input
-                type="tel"
-                value={localNumber}
-                onChange={e => setLocalNumber(e.target.value.replace(/[^\d\s\-()]/g, ""))}
-                placeholder="123 456 7890"
-                data-testid="input-phone"
-                required
-                className="flex-1 px-4 py-3 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
-                style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.25)" }}
-                onFocus={e => (e.currentTarget.style.borderColor = "#c9a84c")}
-                onBlur={e => (e.currentTarget.style.borderColor = "rgba(201,168,76,0.25)")}
-              />
-            </div>
-            <p className="text-cream/30 text-xs mt-1.5 text-center">
-              {country.flag} {country.name} · {country.dial}
-            </p>
+      <form onSubmit={handleBiometric} className="space-y-4">
+        <div>
+          <label className="block text-cream/60 text-xs font-semibold mb-1.5 uppercase tracking-wider">{t("auth.phone")}</label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setPickerOpen(true)}
+              data-testid="button-country-picker"
+              className="flex items-center gap-1.5 px-3 py-3 rounded-xl text-sm font-medium shrink-0 transition-all"
+              style={{
+                background: "rgba(255,255,255,0.07)",
+                border: "1.5px solid rgba(201,168,76,0.25)",
+                color: "#fdf8f0",
+                minWidth: "96px",
+              }}
+              onFocus={e => (e.currentTarget.style.borderColor = "#c9a84c")}
+              onBlur={e => (e.currentTarget.style.borderColor = "rgba(201,168,76,0.25)")}
+            >
+              <span className="text-lg leading-none">{country.flag}</span>
+              <span className="text-cream/70 font-mono text-xs">{country.dial}</span>
+              <ChevronDown size={12} className="text-cream/30 ml-auto" />
+            </button>
+            <input
+              type="tel"
+              value={localNumber}
+              onChange={e => setLocalNumber(e.target.value.replace(/[^\d\s\-()]/g, ""))}
+              placeholder="123 456 7890"
+              data-testid="input-phone"
+              required
+              className="flex-1 px-4 py-3 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
+              style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.25)" }}
+              onFocus={e => (e.currentTarget.style.borderColor = "#c9a84c")}
+              onBlur={e => (e.currentTarget.style.borderColor = "rgba(201,168,76,0.25)")}
+            />
           </div>
-          <SubmitButton loading={loading} loadingText={t("auth.pleaseWait")}>{t("auth.sendCode")}</SubmitButton>
-        </form>
-      ) : (
-        <form onSubmit={verifyOtp} className="space-y-4">
-          <p className="text-cream/60 text-sm text-center mb-2">
-            {t("auth.otpEnterCode")} <span className="text-gold font-semibold">{fullPhone}</span>
+          <p className="text-cream/30 text-xs mt-1.5 text-center">
+            {country.flag} {country.name} · {country.dial}
           </p>
-          <GoldInput
-            label={t("auth.otpCode")}
-            type="text"
-            inputMode="numeric"
-            maxLength={6}
-            value={code}
-            onChange={e => setCode(e.target.value.replace(/\D/g, ""))}
-            placeholder="000000"
-            data-testid="input-otp"
-            required
-          />
-          <SubmitButton loading={loading} loadingText={t("auth.pleaseWait")}>{t("auth.verifyAndContinue")}</SubmitButton>
-          <button
-            type="button"
-            onClick={() => { setCode(""); sendOtp(new Event("") as any); }}
-            data-testid="button-resend"
-            className="w-full text-cream/40 text-sm text-center"
-          >
-            {t("auth.resendCode")}
-          </button>
-        </form>
-      )}
+        </div>
+
+        <div className="flex items-start gap-2.5 px-3 py-2.5 rounded-xl" style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.15)" }}>
+          <Fingerprint size={18} className="text-gold shrink-0 mt-0.5" />
+          <p className="text-cream/50 text-xs leading-relaxed">{t("auth.biometricInfo")}</p>
+        </div>
+
+        <SubmitButton loading={loading} loadingText={t("auth.pleaseWait")} data-testid="button-biometric-submit">
+          {t("auth.biometricCta")}
+        </SubmitButton>
+      </form>
     </div>
   );
 }

@@ -66,6 +66,9 @@ export default {
     errorTitle: "Ошибка",
     codeSentTitle: "Код отправлен",
     codeSentDesc: "6-значный код был отправлен на {{phone}}",
+    biometricCta: "Войти по биометрии",
+    biometricInfo: "Используйте отпечаток пальца или Face ID — бесплатно, мгновенно и безопасно.",
+    biometricCancelled: "Биометрическая аутентификация была отменена.",
   },
   agreement: {
     title: "Общественный договор",

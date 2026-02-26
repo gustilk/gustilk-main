@@ -5,6 +5,19 @@ import { pgTable, varchar, text, integer, boolean, timestamp, uniqueIndex } from
 import { users } from "./models/auth";
 import { z } from "zod";
 
+export const passkeys = pgTable("passkeys", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  credentialId: text("credential_id").notNull().unique(),
+  publicKey: text("public_key").notNull(),
+  counter: integer("counter").notNull().default(0),
+  deviceType: text("device_type").default(""),
+  transports: text("transports").array().default([]),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type Passkey = typeof passkeys.$inferSelect;
+
 export const otpCodes = pgTable("otp_codes", {
   id: varchar("id", { length: 36 }).primaryKey(),
   identifier: text("identifier").notNull(),

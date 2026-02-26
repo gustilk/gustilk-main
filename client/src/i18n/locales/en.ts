@@ -66,6 +66,9 @@ export default {
     errorTitle: "Error",
     codeSentTitle: "Code sent",
     codeSentDesc: "A 6-digit code was sent to {{phone}}",
+    biometricCta: "Sign in with Biometrics",
+    biometricInfo: "Use your fingerprint or Face ID — free, instant, and secure. No codes needed.",
+    biometricCancelled: "Biometric authentication was cancelled. Please try again.",
   },
   agreement: {
     title: "Community Agreement",

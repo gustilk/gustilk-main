@@ -66,6 +66,9 @@ export default {
     errorTitle: "خطأ",
     codeSentTitle: "تم إرسال الرمز",
     codeSentDesc: "تم إرسال رمز مكوّن من ٦ أرقام إلى {{phone}}",
+    biometricCta: "تسجيل الدخول ببصمة الإصبع",
+    biometricInfo: "استخدم بصمتك أو التعرف على الوجه — مجاني وفوري وآمن. لا رموز مطلوبة.",
+    biometricCancelled: "تم إلغاء المصادقة البيومترية. يرجى المحاولة مرة أخرى.",
   },
   agreement: {
     title: "اتفاقية المجتمع",

@@ -2,31 +2,20 @@ import type { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import bcrypt from "bcryptjs";
-import twilio from "twilio";
+import {
+  generateRegistrationOptions,
+  verifyRegistrationResponse,
+  generateAuthenticationOptions,
+  verifyAuthenticationResponse,
+} from "@simplewebauthn/server";
+import type { AuthenticatorTransportFuture } from "@simplewebauthn/server";
 import { randomUUID } from "crypto";
 import { z } from "zod";
 import { pool, db } from "./db";
 import { storage } from "./storage";
-import { users, otpCodes } from "@shared/schema";
+import { users, passkeys } from "@shared/schema";
 import { isValidListedPhone } from "@shared/countries";
-import { eq, and, gt, lt } from "drizzle-orm";
-
-async function sendSms(to: string, body: string): Promise<boolean> {
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  const token = process.env.TWILIO_AUTH_TOKEN;
-  const from = process.env.TWILIO_PHONE_NUMBER;
-  if (!sid || !token || !from) {
-    console.log(`[DEV SMS] To: ${to}\n${body}`);
-    return true;
-  }
-  try {
-    await twilio(sid, token).messages.create({ from, to, body });
-    return true;
-  } catch (err: any) {
-    console.error("[SMS]", err.message);
-    return false;
-  }
-}
+import { eq, and } from "drizzle-orm";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 
@@ -35,6 +24,8 @@ const PgSession = connectPgSimple(session);
 declare module "express-session" {
   interface SessionData {
     userId: string;
+    webAuthnChallenge?: string;
+    webAuthnPhone?: string;
   }
 }
 
@@ -62,6 +53,18 @@ export function isAuthenticated(req: Request, res: Response, next: NextFunction)
 function safeUser(user: Record<string, any>) {
   const { passwordHash: _ph, ...rest } = user;
   return rest;
+}
+
+function getOriginAndRpId(req: Request): { origin: string; rpID: string } {
+  const origin = req.get("origin") || `https://${req.hostname}`;
+  const rpID = new URL(origin).hostname;
+  return { origin, rpID };
+}
+
+function saveSession(req: Request): Promise<void> {
+  return new Promise((resolve, reject) =>
+    req.session.save(err => (err ? reject(err) : resolve()))
+  );
 }
 
 export function registerAuthRoutes(app: Express) {
@@ -123,62 +126,161 @@ export function registerAuthRoutes(app: Express) {
     }
   });
 
-  app.post("/api/auth/send-otp", async (req, res) => {
+  // ── Passkey / Biometric auth ──────────────────────────────────────────────
+
+  app.post("/api/auth/passkey/options", async (req, res) => {
     try {
       const { phone } = req.body;
-      if (!phone) return res.status(400).json({ message: "Phone number required" });
+      if (!phone) return res.status(400).json({ message: "Phone required" });
 
       const normalized = phone.replace(/\s+/g, "");
       if (!isValidListedPhone(normalized)) {
-        return res.status(400).json({ message: "Phone number must start with a country code from the supported list." });
+        return res.status(400).json({ message: "Phone number not supported." });
       }
 
-      const rateLimitWindow = new Date(Date.now() - 60 * 1000);
-      const [recentOtp] = await db
-        .select({ id: otpCodes.id })
-        .from(otpCodes)
-        .where(and(eq(otpCodes.identifier, normalized), gt(otpCodes.createdAt, rateLimitWindow)))
-        .limit(1);
-      if (recentOtp) {
-        return res.status(429).json({ message: "Please wait 60 seconds before requesting a new code." });
+      const { origin, rpID } = getOriginAndRpId(req);
+
+      let [user] = await db.select().from(users).where(eq(users.phone, normalized));
+      const userPasskeys = user
+        ? await db.select().from(passkeys).where(eq(passkeys.userId, user.id))
+        : [];
+
+      if (userPasskeys.length > 0) {
+        const options = await generateAuthenticationOptions({
+          rpID,
+          allowCredentials: userPasskeys.map(p => ({
+            id: p.credentialId,
+            transports: (p.transports ?? []) as AuthenticatorTransportFuture[],
+          })),
+          userVerification: "required",
+          timeout: 60000,
+        });
+
+        req.session.webAuthnChallenge = options.challenge;
+        req.session.webAuthnPhone = normalized;
+        await saveSession(req);
+
+        return res.json({ type: "authenticate", options });
       }
 
-      await db.delete(otpCodes).where(and(eq(otpCodes.identifier, normalized), lt(otpCodes.expiresAt, new Date())));
+      if (!user) {
+        [user] = await db.insert(users).values({ id: randomUUID(), phone: normalized }).returning();
+      }
 
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
-      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+      const options = await generateRegistrationOptions({
+        rpName: "Gûstîlk",
+        rpID,
+        userID: new TextEncoder().encode(user.id),
+        userName: normalized,
+        userDisplayName: user.fullName || normalized,
+        timeout: 60000,
+        attestationType: "none",
+        excludeCredentials: [],
+        authenticatorSelection: {
+          residentKey: "preferred",
+          userVerification: "required",
+          authenticatorAttachment: "platform",
+        },
+      });
 
-      await db.insert(otpCodes).values({ id: randomUUID(), identifier: normalized, code, expiresAt, used: false });
+      req.session.webAuthnChallenge = options.challenge;
+      req.session.webAuthnPhone = normalized;
+      await saveSession(req);
 
-      const sent = await sendSms(normalized, `Your Gûstîlk verification code is: ${code}`);
-      if (!sent) return res.status(500).json({ message: "Failed to send SMS. Please try again." });
-
-      res.json({ ok: true });
+      res.json({ type: "register", options });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }
   });
 
-  app.post("/api/auth/verify-otp", async (req, res) => {
+  app.post("/api/auth/passkey/register-verify", async (req, res) => {
     try {
-      const { phone, code } = req.body;
-      if (!phone || !code) return res.status(400).json({ message: "Phone and code required" });
-
-      const normalized = phone.replace(/\s+/g, "");
-      const [otp] = await db
-        .select()
-        .from(otpCodes)
-        .where(and(eq(otpCodes.identifier, normalized), eq(otpCodes.code, code), eq(otpCodes.used, false), gt(otpCodes.expiresAt, new Date())))
-        .limit(1);
-
-      if (!otp) return res.status(400).json({ message: "Invalid or expired code" });
-
-      await db.update(otpCodes).set({ used: true }).where(eq(otpCodes.id, otp.id));
-
-      let [user] = await db.select().from(users).where(eq(users.phone, normalized));
-      if (!user) {
-        [user] = await db.insert(users).values({ id: randomUUID(), phone: normalized }).returning();
+      const challenge = req.session.webAuthnChallenge;
+      const phone = req.session.webAuthnPhone;
+      if (!challenge || !phone) {
+        return res.status(400).json({ message: "Session expired. Please try again." });
       }
+
+      const { origin, rpID } = getOriginAndRpId(req);
+
+      const verification = await verifyRegistrationResponse({
+        response: req.body,
+        expectedChallenge: challenge,
+        expectedOrigin: origin,
+        expectedRPID: rpID,
+        requireUserVerification: true,
+      });
+
+      if (!verification.verified || !verification.registrationInfo) {
+        return res.status(400).json({ message: "Biometric registration failed. Please try again." });
+      }
+
+      const { credential } = verification.registrationInfo;
+
+      const [user] = await db.select().from(users).where(eq(users.phone, phone));
+      if (!user) return res.status(400).json({ message: "User not found." });
+
+      await db.insert(passkeys).values({
+        id: randomUUID(),
+        userId: user.id,
+        credentialId: credential.id,
+        publicKey: Buffer.from(credential.publicKey).toString("base64url"),
+        counter: credential.counter,
+        deviceType: credential.deviceType,
+        transports: credential.transports ?? [],
+      });
+
+      delete req.session.webAuthnChallenge;
+      delete req.session.webAuthnPhone;
+
+      req.session.userId = user.id;
+      res.json({ user: safeUser(user as any) });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/auth/passkey/auth-verify", async (req, res) => {
+    try {
+      const challenge = req.session.webAuthnChallenge;
+      const phone = req.session.webAuthnPhone;
+      if (!challenge || !phone) {
+        return res.status(400).json({ message: "Session expired. Please try again." });
+      }
+
+      const { origin, rpID } = getOriginAndRpId(req);
+
+      const credentialId = req.body.id;
+      const [dbPasskey] = await db.select().from(passkeys).where(eq(passkeys.credentialId, credentialId));
+      if (!dbPasskey) return res.status(400).json({ message: "Passkey not found." });
+
+      const verification = await verifyAuthenticationResponse({
+        response: req.body,
+        expectedChallenge: challenge,
+        expectedOrigin: origin,
+        expectedRPID: rpID,
+        credential: {
+          id: dbPasskey.credentialId,
+          publicKey: Buffer.from(dbPasskey.publicKey, "base64url"),
+          counter: dbPasskey.counter,
+          transports: (dbPasskey.transports ?? []) as AuthenticatorTransportFuture[],
+        },
+        requireUserVerification: true,
+      });
+
+      if (!verification.verified) {
+        return res.status(400).json({ message: "Biometric authentication failed. Please try again." });
+      }
+
+      await db.update(passkeys)
+        .set({ counter: verification.authenticationInfo.newCounter })
+        .where(eq(passkeys.id, dbPasskey.id));
+
+      const [user] = await db.select().from(users).where(eq(users.id, dbPasskey.userId));
+      if (!user) return res.status(400).json({ message: "User not found." });
+
+      delete req.session.webAuthnChallenge;
+      delete req.session.webAuthnPhone;
 
       req.session.userId = user.id;
       res.json({ user: safeUser(user as any) });

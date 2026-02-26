@@ -66,6 +66,9 @@ export default {
     errorTitle: "Çewtî",
     codeSentTitle: "Kod hate şandin",
     codeSentDesc: "Kodeke 6 reqamî hate şandin {{phone}}",
+    biometricCta: "Çûn jixwe bi Biyometrîk",
+    biometricInfo: "Şopa tiliyê an Face ID bikar bîne — belaş, bilez û ewle.",
+    biometricCancelled: "Perastkirina biyometrîk hat betalkirin. Ji kerema xwe dîsa biceribîne.",
   },
   agreement: {
     title: "Peymannameyî Civakê",
