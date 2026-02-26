@@ -7,6 +7,7 @@ import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
 import type { SafeUser, Message, MatchWithUser } from "@shared/schema";
 import ReportModal from "@/components/ReportModal";
+import ProtectedPhoto from "@/components/ProtectedPhoto";
 import { useVideoCallContext } from "@/hooks/useVideoCall";
 
 interface Props {
@@ -84,7 +85,7 @@ export default function ChatPage({ user, matchId }: Props) {
             <div className="w-10 h-10 rounded-full overflow-hidden"
               style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", filter: "blur(4px)", border: "2px solid rgba(201,168,76,0.2)" }}>
               {otherUser?.photos?.[0] && (
-                <img src={otherUser.photos[0]} alt="" className="w-full h-full object-cover" />
+                <ProtectedPhoto src={otherUser.photos[0]} alt="" className="w-full h-full object-cover" />
               )}
             </div>
             <div className="absolute inset-0 rounded-full flex items-center justify-center">
@@ -163,7 +164,7 @@ export default function ChatPage({ user, matchId }: Props) {
           style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "2px solid rgba(201,168,76,0.3)" }}
         >
           {otherUser?.photos && otherUser.photos.length > 0 ? (
-            <img src={otherUser.photos[0]} alt={otherUser.fullName ?? ""} className="w-full h-full object-cover" />
+            <ProtectedPhoto src={otherUser.photos[0]} alt={otherUser.fullName ?? ""} className="w-full h-full object-cover" />
           ) : (
             (otherUser?.fullName ?? otherUser?.firstName ?? "M").charAt(0)
           )}

@@ -5,6 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
 import logoImg from "@assets/Untitled_design_1772024284063.png";
 import type { SafeUser, MatchWithUser } from "@shared/schema";
+import ProtectedPhoto from "@/components/ProtectedPhoto";
 
 interface Props { user: SafeUser }
 
@@ -145,7 +146,7 @@ function NewMatchBubble({ match, isPremium, onClick }: {
           }}
         >
           {other.photos && other.photos.length > 0 ? (
-            <img src={other.photos[0]} alt="" className="w-full h-full object-cover" />
+            <ProtectedPhoto src={other.photos[0]} alt="" className="w-full h-full object-cover" />
           ) : (
             (other.fullName ?? other.firstName ?? "M").charAt(0)
           )}
@@ -200,7 +201,7 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
           }}
         >
           {other.photos && other.photos.length > 0 ? (
-            <img src={other.photos[0]} alt="" className="w-full h-full object-cover" />
+            <ProtectedPhoto src={other.photos[0]} alt="" className="w-full h-full object-cover" />
           ) : (
             (other.fullName ?? other.firstName ?? "M").charAt(0)
           )}

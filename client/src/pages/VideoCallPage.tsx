@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { PhoneOff, Mic, MicOff, Video, VideoOff, Phone } from "lucide-react";
 import { useVideoCallContext } from "@/hooks/useVideoCall";
+import ProtectedPhoto from "@/components/ProtectedPhoto";
 
 export default function VideoCallPage() {
   const {
@@ -43,7 +44,7 @@ export default function VideoCallPage() {
           <div className="w-28 h-28 rounded-full overflow-hidden flex items-center justify-center"
             style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "3px solid rgba(201,168,76,0.4)" }}>
             {callPartnerPhoto ? (
-              <img src={callPartnerPhoto} className="w-full h-full object-cover" alt={callPartnerName} />
+              <ProtectedPhoto src={callPartnerPhoto} className="w-full h-full object-cover" alt={callPartnerName} />
             ) : (
               <span className="text-gold font-serif text-4xl">
                 {callPartnerName.charAt(0)}
@@ -162,7 +163,7 @@ export function IncomingCallBanner() {
       <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
         style={{ border: "2px solid rgba(201,168,76,0.5)" }}>
         {incomingCall.fromPhoto ? (
-          <img src={incomingCall.fromPhoto} className="w-full h-full object-cover" alt={incomingCall.fromName} />
+          <ProtectedPhoto src={incomingCall.fromPhoto} className="w-full h-full object-cover" alt={incomingCall.fromName} />
         ) : (
           <div className="w-full h-full flex items-center justify-center"
             style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)" }}>

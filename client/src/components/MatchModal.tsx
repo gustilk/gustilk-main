@@ -1,6 +1,7 @@
 import { MessageCircle, X } from "lucide-react";
 import { useLocation } from "wouter";
 import type { SafeUser } from "@shared/schema";
+import ProtectedPhoto from "@/components/ProtectedPhoto";
 
 interface MatchModalProps {
   matchedUser: SafeUser;
@@ -20,7 +21,7 @@ function Avatar({ user }: { user: SafeUser }) {
       }}
     >
       {user.photos && user.photos.length > 0 ? (
-        <img src={user.photos[0]} alt={user.fullName ?? ""} className="w-full h-full object-cover" />
+        <ProtectedPhoto src={user.photos[0]} alt={user.fullName ?? ""} className="w-full h-full object-cover" />
       ) : (
         (user.fullName ?? user.firstName ?? "M").charAt(0)
       )}

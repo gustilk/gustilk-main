@@ -5,6 +5,7 @@ import { SlidersHorizontal, X, Heart, RefreshCw, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import logoImg from "@assets/Untitled_design_1772024284063.png";
 import MatchModal from "@/components/MatchModal";
+import ProtectedPhoto from "@/components/ProtectedPhoto";
 import { Slider } from "@/components/ui/slider";
 import type { SafeUser } from "@shared/schema";
 
@@ -167,7 +168,7 @@ export default function DiscoverPage({ user }: Props) {
                 style={{ height: "min(420px, 52vh)", background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}
               >
                 {current.photos && current.photos.length > 0 ? (
-                  <img src={current.photos[0]} alt={current.fullName ?? ""} className="w-full h-full object-cover" />
+                  <ProtectedPhoto src={current.photos[0]} alt={current.fullName ?? ""} className="w-full h-full object-cover" />
                 ) : (
                   <div
                     className="w-28 h-28 rounded-full flex items-center justify-center text-5xl font-serif text-gold"
