@@ -2,14 +2,31 @@ import type { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import bcrypt from "bcryptjs";
+import twilio from "twilio";
 import { randomUUID } from "crypto";
 import { z } from "zod";
 import { pool, db } from "./db";
 import { storage } from "./storage";
 import { users, otpCodes } from "@shared/schema";
 import { isValidListedPhone } from "@shared/countries";
-import { sendSms } from "./twilio";
 import { eq, and, gt, lt } from "drizzle-orm";
+
+async function sendSms(to: string, body: string): Promise<boolean> {
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
+  const from = process.env.TWILIO_PHONE_NUMBER;
+  if (!sid || !token || !from) {
+    console.log(`[DEV SMS] To: ${to}\n${body}`);
+    return true;
+  }
+  try {
+    await twilio(sid, token).messages.create({ from, to, body });
+    return true;
+  } catch (err: any) {
+    console.error("[SMS]", err.message);
+    return false;
+  }
+}
 
 const emailSchema = z.string().email("Please enter a valid email address");
 
