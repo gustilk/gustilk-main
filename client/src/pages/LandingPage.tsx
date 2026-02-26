@@ -166,6 +166,8 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [mode, setMode] = useState<"login" | "register">("login");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState(() => localStorage.getItem("gustilk_email") ?? "");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -175,7 +177,8 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const passwordMismatch = mode === "register" && confirmPassword.length > 0 && password !== confirmPassword;
-  const canSubmit = emailValid && (mode === "login" || (password.length > 0 && password === confirmPassword));
+  const namesValid = mode === "login" || (firstName.trim().length > 0 && lastName.trim().length > 0);
+  const canSubmit = emailValid && namesValid && (mode === "login" || (password.length > 0 && password === confirmPassword));
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -187,7 +190,11 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
     setLoading(true);
     try {
       const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
-      await apiRequest("POST", endpoint, { email: email.trim(), password });
+      await apiRequest("POST", endpoint, {
+        email: email.trim(),
+        password,
+        ...(mode === "register" ? { firstName: firstName.trim(), lastName: lastName.trim() } : {}),
+      });
       localStorage.setItem("gustilk_email", email.trim());
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     } catch (err: any) {
@@ -209,7 +216,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
         {(["login", "register"] as const).map(m => (
           <button
             key={m}
-            onClick={() => { setMode(m); setConfirmPassword(""); }}
+            onClick={() => { setMode(m); setConfirmPassword(""); setFirstName(""); setLastName(""); }}
             data-testid={`tab-${m}`}
             className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
             style={mode === m
@@ -223,6 +230,33 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
       </div>
 
       <form onSubmit={submit} className="space-y-4">
+        {mode === "register" && (
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <GoldInput
+                label={t("auth.firstName")}
+                type="text"
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+                placeholder={t("auth.firstName")}
+                data-testid="input-first-name"
+                required
+              />
+            </div>
+            <div className="flex-1">
+              <GoldInput
+                label={t("auth.lastName")}
+                type="text"
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+                placeholder={t("auth.lastName")}
+                data-testid="input-last-name"
+                required
+              />
+            </div>
+          </div>
+        )}
+
         <div>
           <GoldInput
             label={t("auth.email")}

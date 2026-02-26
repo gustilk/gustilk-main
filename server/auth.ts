@@ -80,8 +80,9 @@ export function registerAuthRoutes(app: Express) {
 
   app.post("/api/auth/register", async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { email, password, firstName, lastName } = req.body;
       if (!email || !password) return res.status(400).json({ message: "Email and password required" });
+      if (!firstName?.trim() || !lastName?.trim()) return res.status(400).json({ message: "First and last name are required" });
 
       const emailResult = emailSchema.safeParse(email.trim());
       if (!emailResult.success) return res.status(400).json({ message: emailResult.error.errors[0].message });
@@ -96,6 +97,9 @@ export function registerAuthRoutes(app: Express) {
         id: randomUUID(),
         email: email.toLowerCase().trim(),
         passwordHash: hash,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        fullName: `${firstName.trim()} ${lastName.trim()}`,
       }).returning();
 
       req.session.userId = user.id;
