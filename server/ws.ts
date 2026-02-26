@@ -6,8 +6,16 @@ const clients = new Map<string, WebSocket>();
 export function setupWs(httpServer: Server) {
   const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
 
+  wss.on("error", (err) => {
+    console.error("[ws] server error:", err.message);
+  });
+
   wss.on("connection", (ws) => {
     let userId: string | null = null;
+
+    ws.on("error", (err) => {
+      console.error("[ws] client error:", err.message);
+    });
 
     ws.on("message", (raw) => {
       try {

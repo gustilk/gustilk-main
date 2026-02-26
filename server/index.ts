@@ -2,6 +2,43 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import fs from "fs";
+
+const CRASH_LOG = "/tmp/gustilk-crash.log";
+
+function appendCrashLog(msg: string) {
+  try {
+    fs.appendFileSync(CRASH_LOG, `${new Date().toISOString()} ${msg}\n`);
+  } catch {}
+}
+
+process.on("exit", (code) => {
+  appendCrashLog(`[EXIT] code=${code}`);
+  console.error(`[EXIT] process exiting with code=${code}`);
+});
+
+process.on("uncaughtException", (err) => {
+  appendCrashLog(`[CRASH] uncaughtException: ${err?.stack ?? err}`);
+  console.error("[CRASH] uncaughtException:", err);
+});
+
+process.on("unhandledRejection", (reason) => {
+  const msg = reason instanceof Error ? reason.stack : String(reason);
+  appendCrashLog(`[CRASH] unhandledRejection: ${msg}`);
+  console.error("[CRASH] unhandledRejection:", reason);
+});
+
+process.on("SIGTERM", () => {
+  appendCrashLog("[CRASH] SIGTERM received");
+  console.error("[CRASH] SIGTERM received — process being killed externally");
+  process.exit(143);
+});
+
+process.on("SIGINT", () => {
+  appendCrashLog("[CRASH] SIGINT received");
+  console.error("[CRASH] SIGINT received");
+  process.exit(130);
+});
 
 const app = express();
 const httpServer = createServer(app);
@@ -101,6 +138,16 @@ app.use((req, res, next) => {
     },
     () => {
       log(`serving on port ${port}`);
+      appendCrashLog(`[START] server listening on port ${port}`);
+
+      let heartbeatCount = 0;
+      const heartbeat = setInterval(() => {
+        heartbeatCount++;
+        const msg = `[HEARTBEAT] #${heartbeatCount} alive at T+${heartbeatCount * 5}s`;
+        appendCrashLog(msg);
+        console.log(msg);
+      }, 5000);
+      heartbeat.unref();
     },
   );
 })();
