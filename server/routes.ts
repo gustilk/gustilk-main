@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupSession, registerAuthRoutes, isAuthenticated } from "./auth";
 import { profileUpdateSchema } from "@shared/schema";
-import { verifyCountryFromRequest, verifyIraqFromRequest } from "./geo";
+import { verifyCountryFromRequest, verifyIraqFromRequest, getClientIp, lookupIpCountry } from "./geo";
 import { setupWs } from "./ws";
 import { z } from "zod";
 import { moderatePhotos, checkFacePresent } from "./moderation";
@@ -16,6 +16,18 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   setupSession(app);
   registerAuthRoutes(app);
   setupWs(httpServer);
+
+  // ─── GEO DETECT (public — used on login screen) ───────────
+  app.get("/api/geo/detect", async (req, res) => {
+    try {
+      const ip = getClientIp(req);
+      if (!ip) return res.json({ countryCode: null });
+      const geo = await lookupIpCountry(ip);
+      res.json({ countryCode: geo?.countryCode ?? null });
+    } catch {
+      res.json({ countryCode: null });
+    }
+  });
 
   // ─── FACE CHECK ──────────────────────────────────────────
   app.post("/api/check-face", isAuthenticated, async (req, res) => {

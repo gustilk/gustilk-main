@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Heart, Shield, Users, Eye, EyeOff, Phone, Mail, ArrowLeft, Globe, ChevronDown, Search, X, Fingerprint } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -386,6 +386,17 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
   const [localNumber, setLocalNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/geo/detect")
+      .then(r => r.json())
+      .then(({ countryCode }: { countryCode: string | null }) => {
+        if (!countryCode) return;
+        const match = COUNTRY_LIST.find(c => c.iso === countryCode);
+        if (match) setCountry(match);
+      })
+      .catch(() => {});
+  }, []);
 
   const fullPhone = country.dial + localNumber.replace(/^0+/, "");
 
