@@ -82,7 +82,7 @@ export function registerAuthRoutes(app: Express) {
     try {
       const { email, password, firstName, lastName } = req.body;
       if (!email || !password) return res.status(400).json({ message: "Email and password required" });
-      if (!firstName?.trim() || !lastName?.trim()) return res.status(400).json({ message: "First and last name are required" });
+      if (!firstName?.trim()) return res.status(400).json({ message: "First name is required" });
 
       const emailResult = emailSchema.safeParse(email.trim());
       if (!emailResult.success) return res.status(400).json({ message: emailResult.error.errors[0].message });

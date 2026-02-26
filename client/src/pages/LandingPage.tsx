@@ -177,7 +177,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const passwordMismatch = mode === "register" && confirmPassword.length > 0 && password !== confirmPassword;
-  const namesValid = mode === "login" || (firstName.trim().length > 0 && lastName.trim().length > 0);
+  const namesValid = mode === "login" || firstName.trim().length > 0;
   const canSubmit = emailValid && namesValid && (mode === "login" || (password.length > 0 && password === confirmPassword));
 
   async function submit(e: React.FormEvent) {
@@ -251,7 +251,6 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
                 onChange={e => setLastName(e.target.value)}
                 placeholder={t("auth.lastName")}
                 data-testid="input-last-name"
-                required
               />
             </div>
           </div>
