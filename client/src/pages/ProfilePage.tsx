@@ -2,12 +2,205 @@ import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, StarOff } from "lucide-react";
+import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, MapPin, ChevronLeft } from "lucide-react";
 import logoImg from "@assets/Untitled_design_1772024284063.png";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import type { SafeUser } from "@shared/schema";
 import { PhotoCropModal } from "@/components/PhotoCropModal";
+
+function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () => void }) {
+  const photos = (user.photos ?? []).filter(Boolean);
+  const [photoIdx, setPhotoIdx] = useState(0);
+  const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[c] ?? c);
+  const age = (() => {
+    if ((user as any).dateOfBirth) {
+      const dob = new Date((user as any).dateOfBirth);
+      const today = new Date();
+      let a = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) a--;
+      return a;
+    }
+    return user.age;
+  })();
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex flex-col"
+      style={{ background: "rgba(13,6,24,0.97)" }}
+      data-testid="modal-profile-preview"
+    >
+      <div className="flex items-center justify-between px-5 pt-12 pb-3 shrink-0">
+        <div className="flex items-center gap-2">
+          <Eye size={16} color="#c9a84c" />
+          <span className="text-gold text-sm font-semibold">How others see you</span>
+        </div>
+        <button
+          onClick={onClose}
+          data-testid="button-close-preview"
+          className="w-9 h-9 rounded-full flex items-center justify-center"
+          style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)" }}
+        >
+          <X size={16} color="rgba(253,248,240,0.7)" />
+        </button>
+      </div>
+
+      <div className="flex-1 px-4 pb-8 overflow-y-auto">
+        <div
+          className="rounded-3xl overflow-hidden"
+          style={{
+            border: "1.5px solid rgba(201,168,76,0.2)",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(74,30,107,0.3)",
+          }}
+        >
+          <div
+            className="relative flex items-center justify-center"
+            style={{ height: "min(440px, 55vh)", background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}
+          >
+            {photos.length > 0 ? (
+              <img
+                src={photos[photoIdx]}
+                alt={user.fullName ?? ""}
+                className="w-full h-full object-cover"
+                data-testid="preview-main-photo"
+              />
+            ) : (
+              <div
+                className="w-28 h-28 rounded-full flex items-center justify-center text-5xl font-serif text-gold"
+                style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.25)" }}
+              >
+                {(user.fullName ?? user.firstName ?? "M").charAt(0)}
+              </div>
+            )}
+
+            {photos.length > 1 && (
+              <>
+                <button
+                  onClick={() => setPhotoIdx(i => Math.max(0, i - 1))}
+                  data-testid="button-preview-photo-prev"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center"
+                  style={{ background: "rgba(13,6,24,0.6)", border: "1px solid rgba(255,255,255,0.15)" }}
+                  disabled={photoIdx === 0}
+                >
+                  <ChevronLeft size={18} color={photoIdx === 0 ? "rgba(255,255,255,0.2)" : "white"} />
+                </button>
+                <button
+                  onClick={() => setPhotoIdx(i => Math.min(photos.length - 1, i + 1))}
+                  data-testid="button-preview-photo-next"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center"
+                  style={{ background: "rgba(13,6,24,0.6)", border: "1px solid rgba(255,255,255,0.15)" }}
+                  disabled={photoIdx === photos.length - 1}
+                >
+                  <ChevronRight size={18} color={photoIdx === photos.length - 1 ? "rgba(255,255,255,0.2)" : "white"} />
+                </button>
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {photos.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setPhotoIdx(i)}
+                      data-testid={`button-preview-dot-${i}`}
+                      className="rounded-full transition-all"
+                      style={{
+                        width: i === photoIdx ? "18px" : "6px",
+                        height: "6px",
+                        background: i === photoIdx ? "#c9a84c" : "rgba(255,255,255,0.35)",
+                      }}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+
+            <div
+              className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold"
+              style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
+              data-testid="preview-badge-caste"
+            >
+              {casteLabel(user.caste ?? "murid")}
+            </div>
+
+            <div className="absolute bottom-0 left-0 right-0 h-52" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.98), transparent)" }} />
+            <div className="absolute bottom-0 left-0 right-0 p-5">
+              <h2 className="font-serif text-2xl text-white font-bold leading-tight" data-testid="preview-text-name">
+                {user.fullName ?? user.firstName ?? "Member"}{age ? `, ${age}` : ""}
+              </h2>
+              {(user.city || user.country) && (
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  <MapPin size={13} color="rgba(201,168,76,0.8)" />
+                  <p className="text-white/60 text-sm">{user.city}{user.state ? `, ${user.state}` : ""}{user.country ? `, ${user.country}` : ""}</p>
+                </div>
+              )}
+              {user.bio && (
+                <p className="text-white/50 text-xs mt-2 line-clamp-2 leading-relaxed">{user.bio}</p>
+              )}
+              {(user.languages ?? []).length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2.5">
+                  {(user.languages ?? []).slice(0, 3).map(lang => (
+                    <span
+                      key={lang}
+                      className="px-2 py-0.5 rounded-full text-[11px]"
+                      style={{ background: "rgba(201,168,76,0.15)", color: "rgba(201,168,76,0.9)", border: "1px solid rgba(201,168,76,0.2)" }}
+                    >
+                      {lang}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="p-5 space-y-4">
+            {user.occupation && (
+              <div>
+                <div className="text-xs text-cream/40 uppercase tracking-wider mb-1 font-semibold">Occupation</div>
+                <p className="text-cream/70 text-sm" data-testid="preview-text-occupation">{user.occupation}</p>
+              </div>
+            )}
+            {(user.languages ?? []).length > 3 && (
+              <div>
+                <div className="text-xs text-cream/40 uppercase tracking-wider mb-2 font-semibold">Languages</div>
+                <div className="flex flex-wrap gap-2">
+                  {(user.languages ?? []).map(lang => (
+                    <span
+                      key={lang}
+                      className="px-3 py-1 rounded-full text-xs"
+                      style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}
+                    >
+                      {lang}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="flex gap-2">
+              {user.isVerified && (
+                <span
+                  className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold"
+                  style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.3)" }}
+                >
+                  <CheckCircle size={11} />
+                  Verified
+                </span>
+              )}
+              {user.isPremium && (
+                <span
+                  className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold"
+                  style={{ background: "linear-gradient(135deg, #f59e0b, #f97316)", color: "white" }}
+                >
+                  <Star size={11} fill="white" />
+                  Premium
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <p className="text-center text-cream/25 text-xs mt-4">This is exactly how your profile appears to other members</p>
+      </div>
+    </div>
+  );
+}
 
 interface Props { user: SafeUser }
 
@@ -23,6 +216,7 @@ export default function ProfilePage({ user }: Props) {
   });
   const [photosEdited, setPhotosEdited] = useState(false);
   const [cropTarget, setCropTarget] = useState<{ imgSrc: string; slotIdx: number } | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingSlotRef = useRef<number>(0);
 
@@ -106,21 +300,35 @@ export default function ProfilePage({ user }: Props) {
         onCancel={() => setCropTarget(null)}
       />
     )}
+    {previewOpen && (
+      <ProfilePreviewModal user={me} onClose={() => setPreviewOpen(false)} />
+    )}
     <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
       <div className="pt-12 pb-2 px-5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <img src={logoImg} alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
           <h1 className="font-serif text-2xl text-gold">{t("profile.title")}</h1>
         </div>
-        <button
-          onClick={() => setLocation("/profile/edit")}
-          data-testid="button-edit-profile"
-          className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold"
-          style={{ border: "1.5px solid rgba(201,168,76,0.35)", color: "#c9a84c" }}
-        >
-          <Edit2 size={13} />
-          Edit
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setPreviewOpen(true)}
+            data-testid="button-preview-profile"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold"
+            style={{ border: "1.5px solid rgba(201,168,76,0.2)", color: "rgba(201,168,76,0.6)" }}
+          >
+            <Eye size={13} />
+            Preview
+          </button>
+          <button
+            onClick={() => setLocation("/profile/edit")}
+            data-testid="button-edit-profile"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold"
+            style={{ border: "1.5px solid rgba(201,168,76,0.35)", color: "#c9a84c" }}
+          >
+            <Edit2 size={13} />
+            Edit
+          </button>
+        </div>
       </div>
 
       <div className="px-5 pt-4">
