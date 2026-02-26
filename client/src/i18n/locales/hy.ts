@@ -67,8 +67,8 @@ export default {
     codeSentTitle: "Կոդ ուղարկված է",
     codeSentDesc: "6-նիշ կոդ ուղարկվել է {{phone}}",
     biometricCta: "Մուտք կենսաչափությամբ",
-    biometricInfo: "Օգтагорде матнаhетqт — аnвchar, аknthаrut ev аnвtang.",
-    biometricCancelled: "Кенсаchарутьян haваstaciчутьюне chеghаворел е.",
+    biometricInfo: "Օգտագործեք ձեր մատնահետքը կամ Face ID — անվճար, արագ և անվտանգ: Կոդ չի պահանջվում:",
+    biometricCancelled: "Կենսաչափական նույնականացումը չեղարկվել է: Կրկին փորձեք:",
   },
   agreement: {
     title: "Համայնքային համաձայնագիր",
