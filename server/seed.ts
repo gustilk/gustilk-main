@@ -14,7 +14,7 @@ const seedProfiles = [
     age: 24,
     bio: "I love traditional Yezidi music and poetry. Looking for someone who shares my values and appreciates our rich cultural heritage.",
     occupation: "Teacher",
-    languages: ["Kurdish", "German", "English"],
+    languages: ["German", "English"],
     photos: ["/images/profile1.svg"],
   },
   {
@@ -27,7 +27,7 @@ const seedProfiles = [
     age: 26,
     bio: "Medical student with a passion for helping our community. Family-oriented and deeply connected to Yezidi traditions.",
     occupation: "Medical Student",
-    languages: ["Kurdish", "Swedish", "English", "Arabic"],
+    languages: ["Swedish", "English", "Arabic"],
     photos: ["/images/profile2.svg"],
   },
   {
@@ -40,7 +40,7 @@ const seedProfiles = [
     age: 28,
     bio: "Engineer by day, musician by night. I play traditional Yezidi instruments and hope to find a partner who loves our culture.",
     occupation: "Software Engineer",
-    languages: ["Kurdish", "English"],
+    languages: ["English"],
     photos: ["/images/profile3.svg"],
   },
   {
@@ -53,7 +53,7 @@ const seedProfiles = [
     age: 23,
     bio: "Graphic designer who loves art and storytelling. Proud of my Pir heritage and looking to build a beautiful life together.",
     occupation: "Graphic Designer",
-    languages: ["Kurdish", "English"],
+    languages: ["English"],
     photos: ["/images/profile4.svg"],
   },
   {
@@ -66,7 +66,7 @@ const seedProfiles = [
     age: 29,
     bio: "Community leader and entrepreneur. I believe in preserving our traditions while embracing the future.",
     occupation: "Entrepreneur",
-    languages: ["Kurdish", "German", "English", "Arabic"],
+    languages: ["German", "English", "Arabic"],
     photos: ["/images/profile5.svg"],
   },
   {
@@ -79,7 +79,7 @@ const seedProfiles = [
     age: 25,
     bio: "Passionate about Yezidi heritage and language preservation. I teach Kurdish to diaspora children on weekends.",
     occupation: "Language Teacher",
-    languages: ["Kurdish", "French", "English"],
+    languages: ["French", "English"],
     photos: [],
   },
 ];

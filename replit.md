@@ -45,7 +45,7 @@ New social users (empty city) are shown `SocialSetupPage` to fill caste, gender,
 10. **Community guidelines** — checkbox required at registration with collapsible guidelines
 11. **Admin Panel** — verification queue + reports tab with approve/reject/ban/resolve actions
 12. **Match Modal** — dual-avatar display when match occurs
-13. **Internationalization (i18n)** — 7 languages fully supported (en, ar, ku, de, sv, hy, ru); first-launch language picker; changeable from Profile settings; Arabic/Kurdish use RTL layout. All pages use `useTranslation()`. All locale files fully updated with keys for: community guidelines modal (`agreement.sections` as returnObjects array, `agreement.guidelinesTitle/readCarefully/scrollToContinue/agreeButton/readFirst/footerWarning/footerHonour/guidelinesButtonTitle/guidelinesButtonAgreed/guidelinesButtonRequired/truthfulCheckbox`), setup form (`setup.detected/selectCountry/stateProvince/selectState/couldNotSave/minAge18/step2Title/step2Subtitle/profilePhotosLabel/photosRequired/photoBothRequired/selfieAdminNote/takeSelfie/selfieVisible/adminOnly/saving/selfieReady/selfieRequiredStatus`), auth toasts (`auth.errorTitle/codeSentTitle/codeSentDesc`). CommunityGuidelinesModal uses `t()` for all content. All hardcoded English strings replaced with `t()` calls in SocialSetupPage and LandingPage.
+13. **Internationalization (i18n)** — 6 languages fully supported (en, ar, de, sv, hy, ru); first-launch language picker; changeable from Profile settings; Arabic uses RTL layout. All pages use `useTranslation()`. All locale files fully updated with keys for: community guidelines modal (`agreement.sections` as returnObjects array, `agreement.guidelinesTitle/readCarefully/scrollToContinue/agreeButton/readFirst/footerWarning/footerHonour/guidelinesButtonTitle/guidelinesButtonAgreed/guidelinesButtonRequired/truthfulCheckbox`), setup form (`setup.detected/selectCountry/stateProvince/selectState/couldNotSave/minAge18/step2Title/step2Subtitle/profilePhotosLabel/photosRequired/photoBothRequired/selfieAdminNote/takeSelfie/selfieVisible/adminOnly/saving/selfieReady/selfieRequiredStatus`), auth toasts (`auth.errorTitle/codeSentTitle/codeSentDesc`). CommunityGuidelinesModal uses `t()` for all content. All hardcoded English strings replaced with `t()` calls in SocialSetupPage and LandingPage.
 
 ## Pages / Routes
 - `/discover` — Swipeable profile cards
@@ -89,7 +89,7 @@ New social users (empty city) are shown `SocialSetupPage` to fill caste, gender,
   - NOTE: Twilio Replit integration was dismissed. Add credentials as secrets manually, or re-authorize the integration.
 
 ## Internationalisation (i18n)
-All 7 languages fully translated — keys are in `client/src/i18n/locales/<lang>.ts`.
+All 6 languages fully translated — keys are in `client/src/i18n/locales/<lang>.ts`.
 Each locale file contains these top-level sections: `lang`, `languagePicker`, `common`, `landing`, `auth`, `agreement`, `setup`, `discover`, `matches`, `chat`, `premium`, `profile`, `events`, `nav`, `admin`, `verification`, `report`, `settings`.
 
 The `settings` section (added session 2025-02) covers: Settings page UI (menu titles, section headers), Notifications subscreen (toggle labels, toast messages), Community Guidelines subscreen (intro + 8th section — Account Suspension), Privacy Policy subscreen (intro + 5 policy sections).
