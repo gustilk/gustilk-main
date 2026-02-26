@@ -5,7 +5,7 @@ import { SiPaypal, SiApplepay, SiGooglepay, SiVenmo, SiKlarna } from "react-icon
 import type { SafeUser } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import logoImg from "@assets/Untitled_design_1772024284063.png";
+import logoImg from "@assets/logo-gustilk.png";
 
 interface Props { user: SafeUser }
 

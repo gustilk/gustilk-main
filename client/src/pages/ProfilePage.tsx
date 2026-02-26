@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, MapPin, ChevronLeft, Shield } from "lucide-react";
-import logoImg from "@assets/Untitled_design_1772024284063.png";
+import logoImg from "@assets/logo-gustilk.png";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import type { SafeUser } from "@shared/schema";

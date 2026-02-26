@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { Lock, Star, MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
-import logoImg from "@assets/Untitled_design_1772024284063.png";
+import logoImg from "@assets/logo-gustilk.png";
 import type { SafeUser, MatchWithUser } from "@shared/schema";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { LANGUAGE_LIST, LangCode, setLanguage } from "@/i18n";
-import logoImg from "@assets/Untitled_design_1772024284063.png";
+import logoImg from "@assets/logo-gustilk.png";
 
 interface Props {
   onSelect: () => void;

@@ -5,7 +5,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { CalendarDays, MapPin, Users, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
-import logoImg from "@assets/Untitled_design_1772024284063.png";
+import logoImg from "@assets/logo-gustilk.png";
 import type { SafeUser, EventWithAttendance } from "@shared/schema";
 
 interface Props { user: SafeUser }
