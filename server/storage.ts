@@ -27,7 +27,7 @@ export interface IStorage {
   unattendEvent(eventId: string, userId: string): Promise<void>;
 
   getPendingVerifications(): Promise<SafeUser[]>;
-  updateVerificationStatus(userId: string, status: "approved" | "rejected", isVerified?: boolean): Promise<void>;
+  updateVerificationStatus(userId: string, status: "approved" | "rejected" | "banned", isVerified?: boolean): Promise<void>;
   banUser(userId: string): Promise<void>;
 
   createReport(reporterId: string, reportedUserId: string, reason: string, description: string): Promise<Report>;
@@ -79,6 +79,7 @@ export class DatabaseStorage implements IStorage {
         sql`${users.age} <= ${maxAge}`,
         notInArray(users.id, likedIds),
         notInArray(users.id, dislikedIds),
+        sql`${users.verificationStatus} != 'banned'`,
       )
     ).limit(50);
   }
@@ -187,12 +188,12 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(users).where(eq(users.verificationStatus, "pending"));
   }
 
-  async updateVerificationStatus(userId: string, status: "approved" | "rejected", isVerified = false): Promise<void> {
+  async updateVerificationStatus(userId: string, status: "approved" | "rejected" | "banned", isVerified = false): Promise<void> {
     await db.update(users).set({ verificationStatus: status, isVerified, updatedAt: new Date() }).where(eq(users.id, userId));
   }
 
   async banUser(userId: string): Promise<void> {
-    await db.delete(users).where(eq(users.id, userId));
+    await db.update(users).set({ verificationStatus: "banned", isVerified: false, updatedAt: new Date() }).where(eq(users.id, userId));
   }
 
   async createReport(reporterId: string, reportedUserId: string, reason: string, description: string): Promise<Report> {

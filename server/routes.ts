@@ -264,12 +264,16 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.post("/api/admin/verify/:userId", isAuthenticated, requireAdmin, async (req, res) => {
-    const { action } = z.object({ action: z.enum(["approve", "reject"]) }).parse(req.body);
-    await storage.updateVerificationStatus(
-      req.params.userId as string,
-      action === "approve" ? "approved" : "rejected",
-      action === "approve"
-    );
+    const { action } = z.object({ action: z.enum(["approve", "reject", "ban"]) }).parse(req.body);
+    if (action === "ban") {
+      await storage.banUser(req.params.userId as string);
+    } else {
+      await storage.updateVerificationStatus(
+        req.params.userId as string,
+        action === "approve" ? "approved" : "rejected",
+        action === "approve"
+      );
+    }
     res.json({ ok: true });
   });
 
@@ -291,8 +295,114 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.get("/api/admin/users", isAuthenticated, requireAdmin, async (_req, res) => {
     const { db } = await import("./db");
     const { users } = await import("@shared/schema");
-    const allUsers = await db.select().from(users);
+    const { desc } = await import("drizzle-orm");
+    const allUsers = await db.select().from(users).orderBy(desc(users.createdAt));
     res.json({ users: allUsers });
+  });
+
+  app.patch("/api/admin/users/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    const { db } = await import("./db");
+    const { users } = await import("@shared/schema");
+    const { eq } = await import("drizzle-orm");
+    const schema = z.object({
+      isPremium: z.boolean().optional(),
+      isBanned: z.boolean().optional(),
+      isAdmin: z.boolean().optional(),
+    });
+    const data = schema.parse(req.body);
+    const updates: Record<string, unknown> = { updatedAt: new Date() };
+    if (data.isPremium !== undefined) {
+      updates.isPremium = data.isPremium;
+      if (data.isPremium) updates.premiumUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      else updates.premiumUntil = null;
+    }
+    if (data.isBanned !== undefined) {
+      updates.verificationStatus = data.isBanned ? "banned" : "none";
+      if (data.isBanned) updates.isVerified = false;
+    }
+    if (data.isAdmin !== undefined) updates.isAdmin = data.isAdmin;
+    await db.update(users).set(updates).where(eq(users.id, req.params.id as string));
+    res.json({ ok: true });
+  });
+
+  app.delete("/api/admin/users/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    await storage.deleteUser(req.params.id as string);
+    res.json({ ok: true });
+  });
+
+  app.get("/api/admin/stats", isAuthenticated, requireAdmin, async (_req, res) => {
+    const { db } = await import("./db");
+    const { users, matches, messages, events } = await import("@shared/schema");
+    const { count, sql } = await import("drizzle-orm");
+    const [[tu], [pu], [vu], [bu], [tm], [tms], [te], [nw]] = await Promise.all([
+      db.select({ n: count() }).from(users),
+      db.select({ n: count() }).from(users).where(sql`${users.isPremium} = true`),
+      db.select({ n: count() }).from(users).where(sql`${users.isVerified} = true`),
+      db.select({ n: count() }).from(users).where(sql`${users.verificationStatus} = 'banned'`),
+      db.select({ n: count() }).from(matches),
+      db.select({ n: count() }).from(messages),
+      db.select({ n: count() }).from(events),
+      db.select({ n: count() }).from(users).where(sql`${users.createdAt} > now() - interval '7 days'`),
+    ]);
+    res.json({
+      totalUsers: Number(tu.n), premiumUsers: Number(pu.n), verifiedUsers: Number(vu.n),
+      bannedUsers: Number(bu.n), totalMatches: Number(tm.n), totalMessages: Number(tms.n),
+      totalEvents: Number(te.n), newThisWeek: Number(nw.n),
+    });
+  });
+
+  app.get("/api/admin/events", isAuthenticated, requireAdmin, async (_req, res) => {
+    const { db } = await import("./db");
+    const { events } = await import("@shared/schema");
+    const { asc } = await import("drizzle-orm");
+    const allEvents = await db.select().from(events).orderBy(asc(events.date));
+    res.json({ events: allEvents });
+  });
+
+  app.post("/api/admin/events", isAuthenticated, requireAdmin, async (req, res) => {
+    const { db } = await import("./db");
+    const { events } = await import("@shared/schema");
+    const { randomUUID } = await import("crypto");
+    const schema = z.object({
+      title: z.string().min(1), description: z.string().min(1),
+      type: z.enum(["cultural", "meetup", "online"]),
+      date: z.string(), location: z.string().min(1),
+      country: z.string().min(1), organizer: z.string().min(1),
+      imageUrl: z.string().optional(),
+    });
+    const data = schema.parse(req.body);
+    const [event] = await db.insert(events).values({
+      id: randomUUID(), ...data,
+      date: new Date(data.date), imageUrl: data.imageUrl ?? "", attendeeCount: 0,
+    }).returning();
+    res.json({ event });
+  });
+
+  app.patch("/api/admin/events/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    const { db } = await import("./db");
+    const { events } = await import("@shared/schema");
+    const { eq } = await import("drizzle-orm");
+    const schema = z.object({
+      title: z.string().optional(), description: z.string().optional(),
+      type: z.enum(["cultural", "meetup", "online"]).optional(),
+      date: z.string().optional(), location: z.string().optional(),
+      country: z.string().optional(), organizer: z.string().optional(),
+      imageUrl: z.string().optional(),
+    });
+    const data = schema.parse(req.body);
+    const updates: Record<string, unknown> = { ...data };
+    if (data.date) updates.date = new Date(data.date);
+    await db.update(events).set(updates).where(eq(events.id, req.params.id as string));
+    res.json({ ok: true });
+  });
+
+  app.delete("/api/admin/events/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    const { db } = await import("./db");
+    const { events, eventAttendees } = await import("@shared/schema");
+    const { eq } = await import("drizzle-orm");
+    await db.delete(eventAttendees).where(eq(eventAttendees.eventId, req.params.id as string));
+    await db.delete(events).where(eq(events.id, req.params.id as string));
+    res.json({ ok: true });
   });
 
   // ─── DELETE ACCOUNT ───────────────────────────────────────

@@ -13,7 +13,7 @@ export const sessions = pgTable(
 
 export const casteEnum = pgEnum("caste", ["sheikh", "pir", "murid"]);
 export const genderEnum = pgEnum("gender", ["male", "female"]);
-export const verificationStatusEnum = pgEnum("verification_status", ["none", "pending", "approved", "rejected"]);
+export const verificationStatusEnum = pgEnum("verification_status", ["none", "pending", "approved", "rejected", "banned"]);
 
 export const users = pgTable("users", {
   id: varchar("id", { length: 255 }).primaryKey().default(sql`gen_random_uuid()`),
