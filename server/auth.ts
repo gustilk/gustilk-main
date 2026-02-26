@@ -8,10 +8,10 @@ import { z } from "zod";
 import { pool, db } from "./db";
 import { storage } from "./storage";
 import { users, otpCodes } from "@shared/schema";
+import { isValidListedPhone } from "@shared/countries";
 import { eq, and, gt } from "drizzle-orm";
 
 const emailSchema = z.string().email("Please enter a valid email address");
-const phoneSchema = z.string().regex(/^\+[1-9]\d{6,14}$/, "Phone number must be in international format (e.g. +9647701234567)");
 
 const PgSession = connectPgSimple(session);
 
@@ -119,8 +119,10 @@ export function registerAuthRoutes(app: Express) {
       if (!phone) return res.status(400).json({ message: "Phone number required" });
 
       const normalized = phone.replace(/\s+/g, "");
-      const phoneResult = phoneSchema.safeParse(normalized);
-      if (!phoneResult.success) return res.status(400).json({ message: phoneResult.error.errors[0].message });
+      if (!isValidListedPhone(normalized)) {
+        return res.status(400).json({ message: "Phone number must start with a country code from the supported list." });
+      }
+
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 

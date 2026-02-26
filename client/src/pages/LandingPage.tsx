@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { LANGUAGE_LIST } from "@/i18n";
 import i18n from "@/i18n";
+import { COUNTRY_LIST, PINNED_COUNTRY_ISOS } from "@shared/countries";
 
 function triggerLangPicker() {
   window.dispatchEvent(new Event("gustilk:pick-language"));
@@ -305,134 +306,22 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
   );
 }
 
-const PINNED_CODES = ["IQ", "DE", "SE", "AM", "RU", "SY", "TR", "GE"];
-
-const COUNTRY_CODES: { iso: string; name: string; dial: string; flag: string }[] = [
-  { iso: "IQ", name: "Iraq", dial: "+964", flag: "🇮🇶" },
-  { iso: "DE", name: "Germany", dial: "+49", flag: "🇩🇪" },
-  { iso: "SE", name: "Sweden", dial: "+46", flag: "🇸🇪" },
-  { iso: "AM", name: "Armenia", dial: "+374", flag: "🇦🇲" },
-  { iso: "RU", name: "Russia", dial: "+7", flag: "🇷🇺" },
-  { iso: "SY", name: "Syria", dial: "+963", flag: "🇸🇾" },
-  { iso: "TR", name: "Turkey", dial: "+90", flag: "🇹🇷" },
-  { iso: "GE", name: "Georgia", dial: "+995", flag: "🇬🇪" },
-  { iso: "AF", name: "Afghanistan", dial: "+93", flag: "🇦🇫" },
-  { iso: "AL", name: "Albania", dial: "+355", flag: "🇦🇱" },
-  { iso: "DZ", name: "Algeria", dial: "+213", flag: "🇩🇿" },
-  { iso: "AO", name: "Angola", dial: "+244", flag: "🇦🇴" },
-  { iso: "AR", name: "Argentina", dial: "+54", flag: "🇦🇷" },
-  { iso: "AU", name: "Australia", dial: "+61", flag: "🇦🇺" },
-  { iso: "AT", name: "Austria", dial: "+43", flag: "🇦🇹" },
-  { iso: "AZ", name: "Azerbaijan", dial: "+994", flag: "🇦🇿" },
-  { iso: "BH", name: "Bahrain", dial: "+973", flag: "🇧🇭" },
-  { iso: "BD", name: "Bangladesh", dial: "+880", flag: "🇧🇩" },
-  { iso: "BY", name: "Belarus", dial: "+375", flag: "🇧🇾" },
-  { iso: "BE", name: "Belgium", dial: "+32", flag: "🇧🇪" },
-  { iso: "BO", name: "Bolivia", dial: "+591", flag: "🇧🇴" },
-  { iso: "BA", name: "Bosnia", dial: "+387", flag: "🇧🇦" },
-  { iso: "BR", name: "Brazil", dial: "+55", flag: "🇧🇷" },
-  { iso: "BN", name: "Brunei", dial: "+673", flag: "🇧🇳" },
-  { iso: "BG", name: "Bulgaria", dial: "+359", flag: "🇧🇬" },
-  { iso: "CA", name: "Canada", dial: "+1", flag: "🇨🇦" },
-  { iso: "CL", name: "Chile", dial: "+56", flag: "🇨🇱" },
-  { iso: "CN", name: "China", dial: "+86", flag: "🇨🇳" },
-  { iso: "CO", name: "Colombia", dial: "+57", flag: "🇨🇴" },
-  { iso: "HR", name: "Croatia", dial: "+385", flag: "🇭🇷" },
-  { iso: "CY", name: "Cyprus", dial: "+357", flag: "🇨🇾" },
-  { iso: "CZ", name: "Czechia", dial: "+420", flag: "🇨🇿" },
-  { iso: "DK", name: "Denmark", dial: "+45", flag: "🇩🇰" },
-  { iso: "EC", name: "Ecuador", dial: "+593", flag: "🇪🇨" },
-  { iso: "EG", name: "Egypt", dial: "+20", flag: "🇪🇬" },
-  { iso: "EE", name: "Estonia", dial: "+372", flag: "🇪🇪" },
-  { iso: "ET", name: "Ethiopia", dial: "+251", flag: "🇪🇹" },
-  { iso: "FI", name: "Finland", dial: "+358", flag: "🇫🇮" },
-  { iso: "FR", name: "France", dial: "+33", flag: "🇫🇷" },
-  { iso: "GH", name: "Ghana", dial: "+233", flag: "🇬🇭" },
-  { iso: "GR", name: "Greece", dial: "+30", flag: "🇬🇷" },
-  { iso: "HK", name: "Hong Kong", dial: "+852", flag: "🇭🇰" },
-  { iso: "HU", name: "Hungary", dial: "+36", flag: "🇭🇺" },
-  { iso: "IN", name: "India", dial: "+91", flag: "🇮🇳" },
-  { iso: "ID", name: "Indonesia", dial: "+62", flag: "🇮🇩" },
-  { iso: "IE", name: "Ireland", dial: "+353", flag: "🇮🇪" },
-  { iso: "IL", name: "Israel", dial: "+972", flag: "🇮🇱" },
-  { iso: "IT", name: "Italy", dial: "+39", flag: "🇮🇹" },
-  { iso: "JP", name: "Japan", dial: "+81", flag: "🇯🇵" },
-  { iso: "JO", name: "Jordan", dial: "+962", flag: "🇯🇴" },
-  { iso: "KZ", name: "Kazakhstan", dial: "+7", flag: "🇰🇿" },
-  { iso: "KE", name: "Kenya", dial: "+254", flag: "🇰🇪" },
-  { iso: "KW", name: "Kuwait", dial: "+965", flag: "🇰🇼" },
-  { iso: "KG", name: "Kyrgyzstan", dial: "+996", flag: "🇰🇬" },
-  { iso: "LB", name: "Lebanon", dial: "+961", flag: "🇱🇧" },
-  { iso: "LY", name: "Libya", dial: "+218", flag: "🇱🇾" },
-  { iso: "LT", name: "Lithuania", dial: "+370", flag: "🇱🇹" },
-  { iso: "LU", name: "Luxembourg", dial: "+352", flag: "🇱🇺" },
-  { iso: "MY", name: "Malaysia", dial: "+60", flag: "🇲🇾" },
-  { iso: "MV", name: "Maldives", dial: "+960", flag: "🇲🇻" },
-  { iso: "MT", name: "Malta", dial: "+356", flag: "🇲🇹" },
-  { iso: "MX", name: "Mexico", dial: "+52", flag: "🇲🇽" },
-  { iso: "MD", name: "Moldova", dial: "+373", flag: "🇲🇩" },
-  { iso: "MA", name: "Morocco", dial: "+212", flag: "🇲🇦" },
-  { iso: "MM", name: "Myanmar", dial: "+95", flag: "🇲🇲" },
-  { iso: "NL", name: "Netherlands", dial: "+31", flag: "🇳🇱" },
-  { iso: "NZ", name: "New Zealand", dial: "+64", flag: "🇳🇿" },
-  { iso: "NG", name: "Nigeria", dial: "+234", flag: "🇳🇬" },
-  { iso: "NO", name: "Norway", dial: "+47", flag: "🇳🇴" },
-  { iso: "OM", name: "Oman", dial: "+968", flag: "🇴🇲" },
-  { iso: "PK", name: "Pakistan", dial: "+92", flag: "🇵🇰" },
-  { iso: "PS", name: "Palestine", dial: "+970", flag: "🇵🇸" },
-  { iso: "PE", name: "Peru", dial: "+51", flag: "🇵🇪" },
-  { iso: "PH", name: "Philippines", dial: "+63", flag: "🇵🇭" },
-  { iso: "PL", name: "Poland", dial: "+48", flag: "🇵🇱" },
-  { iso: "PT", name: "Portugal", dial: "+351", flag: "🇵🇹" },
-  { iso: "QA", name: "Qatar", dial: "+974", flag: "🇶🇦" },
-  { iso: "RO", name: "Romania", dial: "+40", flag: "🇷🇴" },
-  { iso: "SA", name: "Saudi Arabia", dial: "+966", flag: "🇸🇦" },
-  { iso: "SN", name: "Senegal", dial: "+221", flag: "🇸🇳" },
-  { iso: "RS", name: "Serbia", dial: "+381", flag: "🇷🇸" },
-  { iso: "SG", name: "Singapore", dial: "+65", flag: "🇸🇬" },
-  { iso: "SK", name: "Slovakia", dial: "+421", flag: "🇸🇰" },
-  { iso: "SI", name: "Slovenia", dial: "+386", flag: "🇸🇮" },
-  { iso: "SO", name: "Somalia", dial: "+252", flag: "🇸🇴" },
-  { iso: "ZA", name: "South Africa", dial: "+27", flag: "🇿🇦" },
-  { iso: "KR", name: "South Korea", dial: "+82", flag: "🇰🇷" },
-  { iso: "ES", name: "Spain", dial: "+34", flag: "🇪🇸" },
-  { iso: "LK", name: "Sri Lanka", dial: "+94", flag: "🇱🇰" },
-  { iso: "SD", name: "Sudan", dial: "+249", flag: "🇸🇩" },
-  { iso: "CH", name: "Switzerland", dial: "+41", flag: "🇨🇭" },
-  { iso: "TW", name: "Taiwan", dial: "+886", flag: "🇹🇼" },
-  { iso: "TJ", name: "Tajikistan", dial: "+992", flag: "🇹🇯" },
-  { iso: "TZ", name: "Tanzania", dial: "+255", flag: "🇹🇿" },
-  { iso: "TH", name: "Thailand", dial: "+66", flag: "🇹🇭" },
-  { iso: "TN", name: "Tunisia", dial: "+216", flag: "🇹🇳" },
-  { iso: "TM", name: "Turkmenistan", dial: "+993", flag: "🇹🇲" },
-  { iso: "UG", name: "Uganda", dial: "+256", flag: "🇺🇬" },
-  { iso: "UA", name: "Ukraine", dial: "+380", flag: "🇺🇦" },
-  { iso: "AE", name: "UAE", dial: "+971", flag: "🇦🇪" },
-  { iso: "GB", name: "United Kingdom", dial: "+44", flag: "🇬🇧" },
-  { iso: "US", name: "United States", dial: "+1", flag: "🇺🇸" },
-  { iso: "UZ", name: "Uzbekistan", dial: "+998", flag: "🇺🇿" },
-  { iso: "VE", name: "Venezuela", dial: "+58", flag: "🇻🇪" },
-  { iso: "VN", name: "Vietnam", dial: "+84", flag: "🇻🇳" },
-  { iso: "YE", name: "Yemen", dial: "+967", flag: "🇾🇪" },
-  { iso: "ZM", name: "Zambia", dial: "+260", flag: "🇿🇲" },
-  { iso: "ZW", name: "Zimbabwe", dial: "+263", flag: "🇿🇼" },
-];
 
 function CountryPicker({
   selected,
   onSelect,
   onClose,
 }: {
-  selected: typeof COUNTRY_CODES[0];
-  onSelect: (c: typeof COUNTRY_CODES[0]) => void;
+  selected: typeof COUNTRY_LIST[0];
+  onSelect: (c: typeof COUNTRY_LIST[0]) => void;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const pinned = COUNTRY_CODES.filter(c => PINNED_CODES.includes(c.iso));
-  const rest = COUNTRY_CODES.filter(c => !PINNED_CODES.includes(c.iso)).sort((a, b) => a.name.localeCompare(b.name));
+  const pinned = COUNTRY_LIST.filter(c => PINNED_COUNTRY_ISOS.includes(c.iso));
+  const rest = COUNTRY_LIST.filter(c => !PINNED_COUNTRY_ISOS.includes(c.iso)).sort((a, b) => a.name.localeCompare(b.name));
   const all = [...pinned, ...rest];
 
   const filtered = query.trim()
@@ -494,7 +383,7 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [step, setStep] = useState<"phone" | "otp">("phone");
-  const [country, setCountry] = useState(COUNTRY_CODES[0]); // Iraq default
+  const [country, setCountry] = useState(COUNTRY_LIST[0]); // Iraq default
   const [localNumber, setLocalNumber] = useState("");
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
