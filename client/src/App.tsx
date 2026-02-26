@@ -33,6 +33,7 @@ function useGustilkUser() {
 }
 
 function profileIsComplete(user: User): boolean {
+  if (user.isAdmin) return true;
   return !!(
     user.caste &&
     user.city &&

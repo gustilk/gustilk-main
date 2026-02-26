@@ -2,14 +2,14 @@ import type { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import bcrypt from "bcryptjs";
-import twilio from "twilio";
 import { randomUUID } from "crypto";
 import { z } from "zod";
 import { pool, db } from "./db";
 import { storage } from "./storage";
 import { users, otpCodes } from "@shared/schema";
 import { isValidListedPhone } from "@shared/countries";
-import { eq, and, gt } from "drizzle-orm";
+import { sendSms } from "./twilio";
+import { eq, and, gt, lt } from "drizzle-orm";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 
@@ -40,13 +40,6 @@ export function setupSession(app: Express) {
 export function isAuthenticated(req: Request, res: Response, next: NextFunction) {
   if (req.session?.userId) return next();
   res.status(401).json({ message: "Unauthorized" });
-}
-
-function twilioClient() {
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  const token = process.env.TWILIO_AUTH_TOKEN;
-  if (!sid || !token) throw new Error("Twilio credentials not configured");
-  return twilio(sid, token);
 }
 
 function safeUser(user: Record<string, any>) {
@@ -123,17 +116,25 @@ export function registerAuthRoutes(app: Express) {
         return res.status(400).json({ message: "Phone number must start with a country code from the supported list." });
       }
 
+      const rateLimitWindow = new Date(Date.now() - 60 * 1000);
+      const [recentOtp] = await db
+        .select({ id: otpCodes.id })
+        .from(otpCodes)
+        .where(and(eq(otpCodes.identifier, normalized), gt(otpCodes.createdAt, rateLimitWindow)))
+        .limit(1);
+      if (recentOtp) {
+        return res.status(429).json({ message: "Please wait 60 seconds before requesting a new code." });
+      }
+
+      await db.delete(otpCodes).where(and(eq(otpCodes.identifier, normalized), lt(otpCodes.expiresAt, new Date())));
+
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
       await db.insert(otpCodes).values({ id: randomUUID(), identifier: normalized, code, expiresAt, used: false });
 
-      const client = twilioClient();
-      await client.messages.create({
-        body: `Your Gûstîlk verification code is: ${code}`,
-        from: process.env.TWILIO_PHONE_NUMBER,
-        to: normalized,
-      });
+      const sent = await sendSms(normalized, `Your Gûstîlk verification code is: ${code}`);
+      if (!sent) return res.status(500).json({ message: "Failed to send SMS. Please try again." });
 
       res.json({ ok: true });
     } catch (err: any) {
