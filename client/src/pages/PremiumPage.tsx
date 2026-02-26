@@ -121,7 +121,7 @@ export default function PremiumPage({ user }: Props) {
         setLocation("/discover");
       } catch (err: any) {
         const raw: string = err?.message ?? "";
-        const statusMatch = raw.match(/^(\d+): (.+)$/s);
+        const statusMatch = raw.match(/^(\d+): ([\s\S]+)$/);
         if (statusMatch) {
           const [, status, bodyText] = statusMatch;
           let description = "Please try again.";

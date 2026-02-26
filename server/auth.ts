@@ -233,7 +233,7 @@ export function registerAuthRoutes(app: Express) {
         credentialId: credential.id,
         publicKey: Buffer.from(credential.publicKey).toString("base64url"),
         counter: credential.counter,
-        deviceType: credential.deviceType,
+        deviceType: (credential as any).credentialDeviceType ?? (credential as any).deviceType ?? "",
         transports: credential.transports ?? [],
       });
 

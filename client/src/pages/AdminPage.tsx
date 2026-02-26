@@ -468,8 +468,9 @@ function EventsTab({ events, isLoading, onCreate, onUpdate, onDelete, isPending 
 
   function handleSubmit() {
     if (!form.title || !form.description || !form.date || !form.location || !form.country || !form.organizer) return;
-    if (editEvent) { onUpdate(editEvent.id, form); }
-    else { onCreate(form); }
+    const data = { ...form, date: new Date(form.date) };
+    if (editEvent) { onUpdate(editEvent.id, data); }
+    else { onCreate(data); }
     setShowForm(false);
   }
 
