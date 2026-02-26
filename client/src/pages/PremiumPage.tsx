@@ -115,23 +115,25 @@ export default function PremiumPage({ user }: Props) {
     setLoading(true);
     if (isFree) {
       try {
-        const res = await apiRequest("POST", "/api/premium/subscribe", {});
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          toast({
-            title: "Location verification failed",
-            description: body.error ?? "Free membership is only available from Iraq.",
-            variant: "destructive",
-          });
-          setLoading(false);
-          return;
-        }
+        await apiRequest("POST", "/api/premium/subscribe", {});
         await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
         toast({ title: "Welcome to Premium!", description: "Your free Iraqi membership is now active." });
         setLocation("/discover");
-      } catch {
-        toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
-      }
+      } catch (err: any) {
+        const raw: string = err?.message ?? "";
+        const statusMatch = raw.match(/^(\d+): (.+)$/s);
+        if (statusMatch) {
+          const [, status, bodyText] = statusMatch;
+          let description = "Please try again.";
+          try { description = JSON.parse(bodyText)?.error ?? bodyText; } catch { description = bodyText; }
+          toast({
+            title: status === "403" ? "Location verification failed" : "Something went wrong",
+            description,
+            variant: "destructive",
+          });
+        } else {
+          toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
+        }
     } else {
       await new Promise(r => setTimeout(r, 1500));
       toast({
