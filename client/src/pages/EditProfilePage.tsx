@@ -10,7 +10,7 @@ import { COUNTRY_STATES } from "@/lib/countryStates";
 interface Props { user: User }
 
 const LANGUAGES = [
-  "Arabic", "English", "German", "Swedish",
+  "Arabic", "English", "German",
   "Armenian", "Russian", "Spanish",
 ];
 

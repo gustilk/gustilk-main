@@ -27,7 +27,7 @@ const seedProfiles = [
     age: 26,
     bio: "Medical student with a passion for helping our community. Family-oriented and deeply connected to Yezidi traditions.",
     occupation: "Medical Student",
-    languages: ["Swedish", "English", "Arabic"],
+    languages: ["English", "Arabic"],
     photos: ["/images/profile2.svg"],
   },
   {
