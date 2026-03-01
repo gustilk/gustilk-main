@@ -41,6 +41,7 @@ export function setupSession(app: Express) {
         secure: false,
         sameSite: "lax",
         maxAge: 30 * 24 * 60 * 60 * 1000,
+        domain: process.env.NODE_ENV === "production" ? ".gustilk.com" : undefined,
       },
     })
   );
@@ -56,9 +57,15 @@ function safeUser(user: Record<string, any>) {
   return rest;
 }
 
+const ALLOWED_ORIGINS = [
+  "https://gustilk.com",
+  "https://www.gustilk.com",
+];
+
 function getOriginAndRpId(req: Request): { origin: string; rpID: string } {
   const origin = req.get("origin") || `https://${req.hostname}`;
-  const rpID = new URL(origin).hostname;
+  const hostname = new URL(origin).hostname;
+  const rpID = hostname.replace(/^www\./, "");
   return { origin, rpID };
 }
 
