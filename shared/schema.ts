@@ -72,6 +72,7 @@ export const events = pgTable("events", {
   organizer: text("organizer").notNull(),
   imageUrl: text("image_url").default(""),
   attendeeCount: integer("attendee_count").default(0),
+  creatorId: varchar("creator_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -129,6 +130,7 @@ export type MatchWithUser = Match & {
 
 export type EventWithAttendance = Event & {
   isAttending: boolean;
+  isCreator: boolean;
 };
 
 // Keep InsertUser type for storage compatibility

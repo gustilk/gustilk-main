@@ -160,7 +160,7 @@ export class DatabaseStorage implements IStorage {
     const allEvents = await db.select().from(events).orderBy(events.date);
     const attendedRows = await db.select().from(eventAttendees).where(eq(eventAttendees.userId, userId));
     const attendedIds = new Set(attendedRows.map(r => r.eventId));
-    return allEvents.map(e => ({ ...e, isAttending: attendedIds.has(e.id) }));
+    return allEvents.map(e => ({ ...e, isAttending: attendedIds.has(e.id), isCreator: e.creatorId === userId }));
   }
 
   async getEvent(eventId: string, userId: string): Promise<EventWithAttendance | undefined> {
@@ -169,7 +169,7 @@ export class DatabaseStorage implements IStorage {
     const [attending] = await db.select().from(eventAttendees).where(
       and(eq(eventAttendees.eventId, eventId), eq(eventAttendees.userId, userId))
     );
-    return { ...event, isAttending: !!attending };
+    return { ...event, isAttending: !!attending, isCreator: event.creatorId === userId };
   }
 
   async attendEvent(eventId: string, userId: string): Promise<void> {

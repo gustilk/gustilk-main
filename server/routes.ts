@@ -8,7 +8,7 @@ import { setupWs } from "./ws";
 import { z } from "zod";
 import { moderatePhotos, checkFacePresent } from "./moderation";
 import { db } from "./db";
-import { count, sql, eq, asc, desc, or, ilike } from "drizzle-orm";
+import { count, sql, eq, asc, desc, or, and, ilike } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 function getUserId(req: any): string {
@@ -209,6 +209,53 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
+  app.post("/api/events", isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const schema = z.object({
+      title: z.string().min(1), description: z.string().min(1),
+      type: z.enum(["cultural", "meetup", "online"]),
+      date: z.string(), location: z.string().min(1),
+      country: z.string().min(1), organizer: z.string().min(1),
+      imageUrl: z.string().optional(),
+    });
+    const data = schema.parse(req.body);
+    const [event] = await db.insert(events).values({
+      id: randomUUID(), ...data,
+      date: new Date(data.date), imageUrl: data.imageUrl ?? "",
+      attendeeCount: 0, creatorId: userId,
+    }).returning();
+    res.json({ event });
+  });
+
+  app.patch("/api/events/:id", isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const [event] = await db.select().from(events).where(eq(events.id, req.params.id as string));
+    if (!event) return res.status(404).json({ error: "Event not found" });
+    if (event.creatorId !== userId) return res.status(403).json({ error: "Not your event" });
+    const schema = z.object({
+      title: z.string().optional(), description: z.string().optional(),
+      type: z.enum(["cultural", "meetup", "online"]).optional(),
+      date: z.string().optional(), location: z.string().optional(),
+      country: z.string().optional(), organizer: z.string().optional(),
+      imageUrl: z.string().optional(),
+    });
+    const data = schema.parse(req.body);
+    const updates: Record<string, unknown> = { ...data };
+    if (data.date) updates.date = new Date(data.date);
+    await db.update(events).set(updates).where(eq(events.id, req.params.id as string));
+    res.json({ ok: true });
+  });
+
+  app.delete("/api/events/:id", isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const [event] = await db.select().from(events).where(eq(events.id, req.params.id as string));
+    if (!event) return res.status(404).json({ error: "Event not found" });
+    if (event.creatorId !== userId) return res.status(403).json({ error: "Not your event" });
+    await db.delete(eventAttendees).where(eq(eventAttendees.eventId, req.params.id as string));
+    await db.delete(events).where(eq(events.id, req.params.id as string));
+    res.json({ ok: true });
+  });
+
   // ─── PREMIUM ──────────────────────────────────────────────
   app.post("/api/premium/subscribe", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
@@ -297,11 +344,15 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.get("/api/admin/users", isAuthenticated, requireAdmin, async (req, res) => {
     const search = ((req.query.search as string) || "").trim();
-    const limit = Math.min(parseInt(req.query.limit as string) || 100, 500);
+    const countryFilter = ((req.query.country as string) || "").trim();
+    const cityFilter = ((req.query.city as string) || "").trim();
+    const limit = Math.min(parseInt(req.query.limit as string) || 500, 1000);
     const offset = parseInt(req.query.offset as string) || 0;
-    const whereClause = search
-      ? or(ilike(users.fullName, `%${search}%`), ilike(users.email, `%${search}%`), ilike(users.city, `%${search}%`))
-      : undefined;
+    const conditions: any[] = [];
+    if (search) conditions.push(or(ilike(users.fullName, `%${search}%`), ilike(users.email, `%${search}%`), ilike(users.city, `%${search}%`)));
+    if (countryFilter) conditions.push(ilike(users.country, `%${countryFilter}%`));
+    if (cityFilter) conditions.push(ilike(users.city, `%${cityFilter}%`));
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
     const [allUsers, [countRow]] = await Promise.all([
       whereClause
         ? db.select().from(users).where(whereClause).orderBy(desc(users.createdAt)).limit(limit).offset(offset)

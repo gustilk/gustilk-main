@@ -257,6 +257,77 @@ function OverviewTab({ stats }: { stats: Stats | undefined }) {
   );
 }
 
+function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onDelete }: {
+  u: SafeUser; isMe: boolean; isPending: boolean;
+  onTogglePremium: (id: string, val: boolean) => void;
+  onToggleBan: (id: string, val: boolean) => void;
+  onDelete: (id: string) => void;
+}) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const isBanned = u.verificationStatus === "banned";
+  return (
+    <>
+      <div data-testid={`user-card-${u.id}`}
+        className="rounded-2xl p-3.5"
+        style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${isBanned ? "rgba(239,68,68,0.2)" : u.isAdmin ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.07)"}` }}
+      >
+        <div className="flex items-center gap-3 mb-2.5">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center font-serif font-bold text-gold flex-shrink-0 overflow-hidden"
+            style={{ background: "linear-gradient(135deg,#2d0f4a,#7b3fa0)", border: "2px solid rgba(201,168,76,0.25)" }}>
+            {u.photos && u.photos.length > 0
+              ? <img src={u.photos[0]} alt={u.fullName ?? ""} className="w-full h-full object-cover" />
+              : (u.fullName ?? u.firstName ?? "?").charAt(0)}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-sm font-semibold text-cream">{u.fullName ?? u.firstName ?? "—"}</span>
+              {u.isPremium && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(123,63,160,0.2)", color: "#7b3fa0" }}>Premium</span>}
+              {u.isVerified && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(59,130,246,0.15)", color: "#3b82f6" }}>Verified</span>}
+              {isBanned && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}>Banned</span>}
+              {u.isAdmin && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>Admin</span>}
+            </div>
+            <p className="text-cream/35 text-xs truncate">{u.email}</p>
+            <p className="text-cream/25 text-xs">{[u.caste, u.city, u.country].filter(Boolean).join(" · ")}</p>
+          </div>
+        </div>
+        {!isMe && (
+          <div className="flex gap-1.5 flex-wrap">
+            <button onClick={() => onTogglePremium(u.id, !u.isPremium)} disabled={isPending} data-testid={`button-premium-${u.id}`}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50 transition-all"
+              style={u.isPremium ? { background: "rgba(123,63,160,0.2)", color: "#7b3fa0", border: "1px solid rgba(123,63,160,0.3)" } : { background: "rgba(255,255,255,0.05)", color: "rgba(253,248,240,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}>
+              <Crown size={11} />{u.isPremium ? "Revoke Premium" : "Grant Premium"}
+            </button>
+            <button onClick={() => onToggleBan(u.id, !isBanned)} disabled={isPending} data-testid={`button-ban-${u.id}`}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50 transition-all"
+              style={isBanned ? { background: "rgba(16,185,129,0.12)", color: "#10b981", border: "1px solid rgba(16,185,129,0.25)" } : { background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>
+              <Ban size={11} />{isBanned ? "Unban" : "Ban"}
+            </button>
+            <button onClick={() => setConfirmDelete(true)} disabled={isPending} data-testid={`button-delete-${u.id}`}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50"
+              style={{ background: "rgba(239,68,68,0.06)", color: "rgba(239,68,68,0.6)", border: "1px solid rgba(239,68,68,0.12)" }}>
+              <Trash2 size={11} />Delete
+            </button>
+          </div>
+        )}
+        {isMe && <p className="text-cream/20 text-xs italic px-1">This is your account</p>}
+      </div>
+      {confirmDelete && (
+        <div className="fixed inset-0 flex items-end justify-center z-50 pb-8 px-4" style={{ background: "rgba(0,0,0,0.7)" }}>
+          <div className="w-full max-w-sm rounded-2xl p-6 space-y-4" style={{ background: "#1a0a2e", border: "1px solid rgba(239,68,68,0.3)" }}>
+            <h3 className="font-serif text-lg text-cream">Delete user?</h3>
+            <p className="text-cream/50 text-sm">This will permanently delete the account and all associated data.</p>
+            <div className="flex gap-2">
+              <button onClick={() => setConfirmDelete(false)} className="flex-1 py-2.5 rounded-xl text-sm font-semibold" style={{ background: "rgba(255,255,255,0.07)", color: "rgba(253,248,240,0.6)" }}>Cancel</button>
+              <button onClick={() => { onDelete(u.id); setConfirmDelete(false); }} data-testid="button-confirm-delete"
+                className="flex-1 py-2.5 rounded-xl text-sm font-bold" style={{ background: "rgba(239,68,68,0.2)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBan, onDelete, isPending }: {
   users: SafeUser[]; isLoading: boolean; currentUserId: string;
   onTogglePremium: (id: string, val: boolean) => void;
@@ -265,124 +336,88 @@ function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBa
   isPending: boolean;
 }) {
   const [search, setSearch] = useState("");
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [countryFilter, setCountryFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
 
-  const filtered = users.filter(u =>
-    !search ||
-    u.fullName?.toLowerCase().includes(search.toLowerCase()) ||
-    u.email?.toLowerCase().includes(search.toLowerCase()) ||
-    u.city?.toLowerCase().includes(search.toLowerCase())
-  );
+  const admins = users.filter(u => u.isAdmin);
+  const members = users.filter(u => !u.isAdmin);
+
+  const countries = Array.from(new Set(members.map(u => u.country).filter(Boolean))).sort() as string[];
+  const cities = Array.from(new Set(
+    members.filter(u => !countryFilter || u.country === countryFilter).map(u => u.city).filter(Boolean)
+  )).sort() as string[];
+
+  const filteredMembers = members.filter(u => {
+    const q = search.toLowerCase();
+    const matchSearch = !search || u.fullName?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q) || u.city?.toLowerCase().includes(q);
+    const matchCountry = !countryFilter || u.country === countryFilter;
+    const matchCity = !cityFilter || u.city === cityFilter;
+    return matchSearch && matchCountry && matchCity;
+  });
 
   if (isLoading) return <Spinner />;
 
+  const selectStyle = { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(253,248,240,0.7)" };
+
   return (
-    <div className="space-y-3 pt-1">
-      <div className="relative">
-        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-cream/30" />
-        <input
-          type="text"
-          placeholder="Search by name, email, city…"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          data-testid="input-user-search"
-          className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-cream placeholder-cream/30 outline-none"
-          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
-        />
-      </div>
-      <p className="text-cream/30 text-xs px-1">{filtered.length} user{filtered.length !== 1 ? "s" : ""}</p>
+    <div className="space-y-4 pt-1">
+      {/* Search & filters */}
       <div className="space-y-2">
-        {filtered.map(u => {
-          const isBanned = u.verificationStatus === "banned";
-          const isMe = u.id === currentUserId;
-          return (
-            <div key={u.id} data-testid={`user-card-${u.id}`}
-              className="rounded-2xl p-3.5"
-              style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${isBanned ? "rgba(239,68,68,0.2)" : "rgba(255,255,255,0.07)"}` }}
-            >
-              <div className="flex items-center gap-3 mb-2.5">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center font-serif font-bold text-gold flex-shrink-0 overflow-hidden"
-                  style={{ background: "linear-gradient(135deg,#2d0f4a,#7b3fa0)", border: "2px solid rgba(201,168,76,0.25)" }}>
-                  {u.photos && u.photos.length > 0
-                    ? <img src={u.photos[0]} alt={u.fullName ?? ""} className="w-full h-full object-cover" />
-                    : (u.fullName ?? u.firstName ?? "?").charAt(0)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-sm font-semibold text-cream">{u.fullName ?? u.firstName ?? "—"}</span>
-                    {u.isPremium && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(123,63,160,0.2)", color: "#7b3fa0" }}>Premium</span>}
-                    {u.isVerified && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(59,130,246,0.15)", color: "#3b82f6" }}>Verified</span>}
-                    {isBanned && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}>Banned</span>}
-                    {u.isAdmin && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>Admin</span>}
-                  </div>
-                  <p className="text-cream/35 text-xs truncate">{u.email}</p>
-                  <p className="text-cream/25 text-xs">{[u.caste, u.city, u.country].filter(Boolean).join(" · ")}</p>
-                </div>
-              </div>
-              {!isMe && (
-                <div className="flex gap-1.5 flex-wrap">
-                  <button
-                    onClick={() => onTogglePremium(u.id, !u.isPremium)}
-                    disabled={isPending}
-                    data-testid={`button-premium-${u.id}`}
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50 transition-all"
-                    style={u.isPremium
-                      ? { background: "rgba(123,63,160,0.2)", color: "#7b3fa0", border: "1px solid rgba(123,63,160,0.3)" }
-                      : { background: "rgba(255,255,255,0.05)", color: "rgba(253,248,240,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
-                  >
-                    <Crown size={11} />
-                    {u.isPremium ? "Revoke Premium" : "Grant Premium"}
-                  </button>
-                  <button
-                    onClick={() => onToggleBan(u.id, !isBanned)}
-                    disabled={isPending}
-                    data-testid={`button-ban-${u.id}`}
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50 transition-all"
-                    style={isBanned
-                      ? { background: "rgba(16,185,129,0.12)", color: "#10b981", border: "1px solid rgba(16,185,129,0.25)" }
-                      : { background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
-                  >
-                    <Ban size={11} />
-                    {isBanned ? "Unban" : "Ban"}
-                  </button>
-                  <button
-                    onClick={() => setConfirmDelete(u.id)}
-                    disabled={isPending}
-                    data-testid={`button-delete-${u.id}`}
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50"
-                    style={{ background: "rgba(239,68,68,0.06)", color: "rgba(239,68,68,0.6)", border: "1px solid rgba(239,68,68,0.12)" }}
-                  >
-                    <Trash2 size={11} />
-                    Delete
-                  </button>
-                </div>
-              )}
-              {isMe && <p className="text-cream/20 text-xs italic px-1">This is your account</p>}
-            </div>
-          );
-        })}
+        <div className="relative">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-cream/30" />
+          <input type="text" placeholder="Search by name, email, city…" value={search} onChange={e => setSearch(e.target.value)}
+            data-testid="input-user-search"
+            className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-cream placeholder-cream/30 outline-none"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }} />
+        </div>
+        <div className="flex gap-2">
+          <select value={countryFilter} onChange={e => { setCountryFilter(e.target.value); setCityFilter(""); }}
+            data-testid="select-country-filter"
+            className="flex-1 px-3 py-2 rounded-xl text-xs outline-none"
+            style={selectStyle}>
+            <option value="">All countries</option>
+            {countries.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <select value={cityFilter} onChange={e => setCityFilter(e.target.value)}
+            data-testid="select-city-filter"
+            className="flex-1 px-3 py-2 rounded-xl text-xs outline-none"
+            style={selectStyle}>
+            <option value="">All cities</option>
+            {cities.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
       </div>
-      {confirmDelete && (
-        <div className="fixed inset-0 flex items-end justify-center z-50 pb-8 px-4" style={{ background: "rgba(0,0,0,0.7)" }}>
-          <div className="w-full max-w-sm rounded-2xl p-6 space-y-4" style={{ background: "#1a0a2e", border: "1px solid rgba(239,68,68,0.3)" }}>
-            <h3 className="font-serif text-lg text-cream">Delete user?</h3>
-            <p className="text-cream/50 text-sm">This will permanently delete the account and all associated data.</p>
-            <div className="flex gap-2">
-              <button onClick={() => setConfirmDelete(null)}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
-                style={{ background: "rgba(255,255,255,0.07)", color: "rgba(253,248,240,0.6)" }}>
-                Cancel
-              </button>
-              <button onClick={() => { onDelete(confirmDelete); setConfirmDelete(null); }}
-                data-testid="button-confirm-delete"
-                className="flex-1 py-2.5 rounded-xl text-sm font-bold"
-                style={{ background: "rgba(239,68,68,0.2)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }}>
-                Delete
-              </button>
-            </div>
+
+      {/* Admins section */}
+      {admins.length > 0 && (
+        <div>
+          <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold px-1 mb-2">
+            Admins · {admins.length}
+          </p>
+          <div className="space-y-2">
+            {admins.map(u => (
+              <UserCard key={u.id} u={u} isMe={u.id === currentUserId} isPending={isPending}
+                onTogglePremium={onTogglePremium} onToggleBan={onToggleBan} onDelete={onDelete} />
+            ))}
           </div>
         </div>
       )}
+
+      {/* Members section */}
+      <div>
+        <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold px-1 mb-2">
+          Members · {filteredMembers.length}{(countryFilter || cityFilter) ? ` of ${members.length}` : ""}
+        </p>
+        <div className="space-y-2">
+          {filteredMembers.map(u => (
+            <UserCard key={u.id} u={u} isMe={u.id === currentUserId} isPending={isPending}
+              onTogglePremium={onTogglePremium} onToggleBan={onToggleBan} onDelete={onDelete} />
+          ))}
+          {filteredMembers.length === 0 && (
+            <p className="text-cream/25 text-sm text-center py-6">No members match the selected filters.</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
