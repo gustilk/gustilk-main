@@ -1,108 +1,144 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="120 20 560 640" width="560" height="640">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
   <defs>
-    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#E8C547"/>
-      <stop offset="30%" stop-color="#D4A017"/>
-      <stop offset="50%" stop-color="#F0D060"/>
-      <stop offset="70%" stop-color="#D4A017"/>
-      <stop offset="100%" stop-color="#C49000"/>
+    <linearGradient id="goldOutline" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F0D860"/>
+      <stop offset="25%" stop-color="#D4A520"/>
+      <stop offset="50%" stop-color="#F0D860"/>
+      <stop offset="75%" stop-color="#C89818"/>
+      <stop offset="100%" stop-color="#E0C040"/>
     </linearGradient>
-    <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#D42B2B"/>
-      <stop offset="40%" stop-color="#C41E1E"/>
-      <stop offset="100%" stop-color="#A01515"/>
+    <linearGradient id="redFill" x1="0%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#D63030"/>
+      <stop offset="50%" stop-color="#C02525"/>
+      <stop offset="100%" stop-color="#9A1A1A"/>
     </linearGradient>
-    <linearGradient id="whiteGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <radialGradient id="redHighlight" cx="35%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#E84040" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#C02525" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="whiteFill" x1="20%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="50%" stop-color="#F8F8F8"/>
-      <stop offset="100%" stop-color="#EFEFEF"/>
+      <stop offset="40%" stop-color="#F5F5F5"/>
+      <stop offset="100%" stop-color="#E0E0E0"/>
     </linearGradient>
-    <radialGradient id="eyeBlue" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#0044AA"/>
-      <stop offset="60%" stop-color="#0066CC"/>
-      <stop offset="100%" stop-color="#1155BB"/>
+    <radialGradient id="whiteHighlight" cx="65%" cy="30%" r="55%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#F0F0F0" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="eyeGreen" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#00AA55"/>
-      <stop offset="40%" stop-color="#22BB66"/>
-      <stop offset="100%" stop-color="#118B33"/>
-    </radialGradient>
-    <linearGradient id="featherGold" x1="0%" y1="100%" x2="0%" y2="0%">
-      <stop offset="0%" stop-color="#D4A017"/>
-      <stop offset="50%" stop-color="#E8C547"/>
-      <stop offset="100%" stop-color="#C49000"/>
+    <linearGradient id="featherL" x1="100%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#D4A520"/>
+      <stop offset="50%" stop-color="#EECC55"/>
+      <stop offset="100%" stop-color="#B88A15"/>
     </linearGradient>
-
-    <!-- S-curve clip for red (left) side -->
-    <clipPath id="clipCurveLeft">
-      <path d="M0,0 L400,0 L400,194
-               C430,290 430,340 410,400
-               C390,460 380,520 400,625
-               L0,700 Z"/>
+    <linearGradient id="featherR" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#D4A520"/>
+      <stop offset="50%" stop-color="#EECC55"/>
+      <stop offset="100%" stop-color="#B88A15"/>
+    </linearGradient>
+    <linearGradient id="shaft" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#C89818"/>
+      <stop offset="50%" stop-color="#AA8010"/>
+      <stop offset="100%" stop-color="#907010"/>
+    </linearGradient>
+    <radialGradient id="eyeOuter" cx="50%" cy="48%" r="50%">
+      <stop offset="0%" stop-color="#CCAA30"/>
+      <stop offset="60%" stop-color="#9B7B20"/>
+      <stop offset="100%" stop-color="#7A6018"/>
+    </radialGradient>
+    <radialGradient id="eyeGreen" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#30BB60"/>
+      <stop offset="50%" stop-color="#20944A"/>
+      <stop offset="100%" stop-color="#157035"/>
+    </radialGradient>
+    <radialGradient id="eyeTeal" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#18AABB"/>
+      <stop offset="100%" stop-color="#108090"/>
+    </radialGradient>
+    <radialGradient id="eyeBlue" cx="48%" cy="42%" r="55%">
+      <stop offset="0%" stop-color="#1848BB"/>
+      <stop offset="100%" stop-color="#102880"/>
+    </radialGradient>
+    <linearGradient id="goldDivider" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E8C040"/>
+      <stop offset="50%" stop-color="#D4A520"/>
+      <stop offset="100%" stop-color="#C89818"/>
+    </linearGradient>
+    <filter id="softShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.12"/>
+    </filter>
+    <!-- Inner heart path reused everywhere -->
+    <!-- M512,865 C512,865 185,642 185,435 C185,330 265,258 370,258 C428,258 480,285 512,305 C544,285 596,258 654,258 C759,258 839,330 839,435 C839,642 512,865 512,865 Z -->
+    <!-- Red side: heart shape cut by S-curve on the right -->
+    <clipPath id="redClip">
+      <path d="M512,305
+               L512,258 Z"/>
     </clipPath>
-
-    <!-- S-curve clip for white (right) side -->
-    <clipPath id="clipCurveRight">
-      <path d="M800,0 L400,0 L400,194
-               C430,290 430,340 410,400
-               C390,460 380,520 400,625
-               L800,700 Z"/>
+    <!-- White side: heart shape cut by S-curve on the left -->
+    <clipPath id="whiteClip">
+      <path d="M512,305
+               L512,258 Z"/>
     </clipPath>
   </defs>
-
-  <!-- Gold outline heart -->
-  <path d="M400,640 C400,640 160,460 160,295 C160,205 225,148 310,148 C358,148 392,172 400,185 C408,172 442,148 490,148 C575,148 640,205 640,295 C640,460 400,640 400,640 Z"
-        fill="url(#goldGrad)" />
-
-  <!-- Red left half with S-curve -->
-  <g clip-path="url(#clipCurveLeft)">
-    <path d="M400,625 C400,625 172,448 172,296 C172,212 233,162 313,162 C358,162 390,184 400,197 C408,184 442,162 487,162 C567,162 628,212 628,296 C628,448 400,625 400,625 Z"
-          fill="url(#redGrad)" />
+  <!-- ======================== -->
+  <!-- PEACOCK FEATHER           -->
+  <!-- ======================== -->
+  <!-- Left feather barbs -->
+  <g opacity="0.95">
+    <path d="M512,280 C490,240 430,170 395,110" fill="none" stroke="url(#featherL)" stroke-width="2.8" stroke-linecap="round"/>
+    <path d="M512,280 C495,235 445,175 415,120" fill="none" stroke="url(#featherL)" stroke-width="2.8" stroke-linecap="round"/>
+    <path d="M512,280 C498,232 455,180 430,130" fill="none" stroke="url(#featherL)" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M512,280 C500,228 462,184 442,138" fill="none" stroke="url(#featherL)" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M512,280 C502,225 468,188 452,146" fill="none" stroke="url(#featherL)" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M512,280 C504,222 474,192 462,154" fill="none" stroke="url(#featherL)" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M512,280 C505,220 479,195 470,160" fill="none" stroke="url(#featherL)" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M512,280 C507,218 484,198 478,168" fill="none" stroke="url(#featherL)" stroke-width="2" stroke-linecap="round"/>
+    <path d="M512,280 C508,216 489,202 485,175" fill="none" stroke="url(#featherL)" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M512,280 C509,214 494,206 492,182" fill="none" stroke="url(#featherL)" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M512,280 C510,213 498,210 498,190" fill="none" stroke="url(#featherL)" stroke-width="1.2" stroke-linecap="round"/>
   </g>
-
-  <!-- White right half with S-curve -->
-  <g clip-path="url(#clipCurveRight)">
-    <path d="M400,625 C400,625 172,448 172,296 C172,212 233,162 313,162 C358,162 390,184 400,197 C408,184 442,162 487,162 C567,162 628,212 628,296 C628,448 400,625 400,625 Z"
-          fill="url(#whiteGrad)" />
+  <!-- Right feather barbs -->
+  <g opacity="0.95">
+    <path d="M512,280 C534,240 594,170 629,110" fill="none" stroke="url(#featherR)" stroke-width="2.8" stroke-linecap="round"/>
+    <path d="M512,280 C529,235 579,175 609,120" fill="none" stroke="url(#featherR)" stroke-width="2.8" stroke-linecap="round"/>
+    <path d="M512,280 C526,232 569,180 594,130" fill="none" stroke="url(#featherR)" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M512,280 C524,228 562,184 582,138" fill="none" stroke="url(#featherR)" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M512,280 C522,225 556,188 572,146" fill="none" stroke="url(#featherR)" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M512,280 C520,222 550,192 562,154" fill="none" stroke="url(#featherR)" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M512,280 C519,220 545,195 554,160" fill="none" stroke="url(#featherR)" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M512,280 C517,218 540,198 546,168" fill="none" stroke="url(#featherR)" stroke-width="2" stroke-linecap="round"/>
+    <path d="M512,280 C516,216 535,202 539,175" fill="none" stroke="url(#featherR)" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M512,280 C515,214 530,206 532,182" fill="none" stroke="url(#featherR)" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M512,280 C514,213 526,210 526,190" fill="none" stroke="url(#featherR)" stroke-width="1.2" stroke-linecap="round"/>
   </g>
-
-  <!-- Gold S-curve divider line -->
-  <path d="M400,194 C430,290 430,340 410,400 C390,460 380,520 400,625"
-        fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
-
-  <!-- Feather barbs - left -->
-  <g opacity="0.9">
-    <path d="M400,165 C380,130 340,80 320,40" fill="none" stroke="url(#featherGold)" stroke-width="1.8" stroke-linecap="round"/>
-    <path d="M400,165 C385,128 355,85 340,48" fill="none" stroke="url(#featherGold)" stroke-width="1.6" stroke-linecap="round"/>
-    <path d="M400,165 C388,125 365,88 355,55" fill="none" stroke="url(#featherGold)" stroke-width="1.5" stroke-linecap="round"/>
-    <path d="M400,165 C392,122 375,90 365,60" fill="none" stroke="url(#featherGold)" stroke-width="1.4" stroke-linecap="round"/>
-    <path d="M400,165 C394,120 382,92 374,65" fill="none" stroke="url(#featherGold)" stroke-width="1.3" stroke-linecap="round"/>
-    <path d="M400,165 C396,118 388,93 382,68" fill="none" stroke="url(#featherGold)" stroke-width="1.2" stroke-linecap="round"/>
-    <path d="M400,165 C397,116 392,94 388,72" fill="none" stroke="url(#featherGold)" stroke-width="1.1" stroke-linecap="round"/>
-    <path d="M400,165 C398,115 395,95 393,75" fill="none" stroke="url(#featherGold)" stroke-width="1.0" stroke-linecap="round"/>
-    <path d="M400,165 C399,114 397,96 397,78" fill="none" stroke="url(#featherGold)" stroke-width="0.9" stroke-linecap="round"/>
-  </g>
-
-  <!-- Feather barbs - right -->
-  <g opacity="0.9">
-    <path d="M400,165 C420,130 460,80 480,40" fill="none" stroke="url(#featherGold)" stroke-width="1.8" stroke-linecap="round"/>
-    <path d="M400,165 C415,128 445,85 460,48" fill="none" stroke="url(#featherGold)" stroke-width="1.6" stroke-linecap="round"/>
-    <path d="M400,165 C412,125 435,88 445,55" fill="none" stroke="url(#featherGold)" stroke-width="1.5" stroke-linecap="round"/>
-    <path d="M400,165 C408,122 425,90 435,60" fill="none" stroke="url(#featherGold)" stroke-width="1.4" stroke-linecap="round"/>
-    <path d="M400,165 C406,120 418,92 426,65" fill="none" stroke="url(#featherGold)" stroke-width="1.3" stroke-linecap="round"/>
-    <path d="M400,165 C404,118 412,93 418,68" fill="none" stroke="url(#featherGold)" stroke-width="1.2" stroke-linecap="round"/>
-    <path d="M400,165 C403,116 408,94 412,72" fill="none" stroke="url(#featherGold)" stroke-width="1.1" stroke-linecap="round"/>
-    <path d="M400,165 C402,115 405,95 407,75" fill="none" stroke="url(#featherGold)" stroke-width="1.0" stroke-linecap="round"/>
-    <path d="M400,165 C401,114 403,96 403,78" fill="none" stroke="url(#featherGold)" stroke-width="0.9" stroke-linecap="round"/>
-  </g>
-
-  <!-- Feather shaft -->
-  <line x1="400" y1="175" x2="400" y2="55" stroke="#B8860B" stroke-width="2.5" stroke-linecap="round"/>
-
+  <!-- Central shaft -->
+  <line x1="512" y1="300" x2="512" y2="140" stroke="url(#shaft)" stroke-width="3.5" stroke-linecap="round"/>
   <!-- Peacock eye -->
-  <ellipse cx="400" cy="130" rx="28" ry="32" fill="#8B7332"/>
-  <ellipse cx="400" cy="130" rx="22" ry="26" fill="url(#eyeGreen)"/>
-  <ellipse cx="400" cy="130" rx="15" ry="18" fill="#006688"/>
-  <ellipse cx="400" cy="130" rx="10" ry="12" fill="url(#eyeBlue)"/>
-  <ellipse cx="396" cy="125" rx="4" ry="5" fill="rgba(255,255,255,0.35)"/>
+  <ellipse cx="512" cy="260" rx="38" ry="44" fill="url(#eyeOuter)"/>
+  <ellipse cx="512" cy="260" rx="30" ry="35" fill="url(#eyeGreen)"/>
+  <ellipse cx="512" cy="260" rx="22" ry="26" fill="url(#eyeTeal)"/>
+  <ellipse cx="512" cy="260" rx="14" ry="17" fill="url(#eyeBlue)"/>
+  <ellipse cx="506" cy="253" rx="5" ry="6" fill="rgba(255,255,255,0.4)"/>
+  <!-- ======================== -->
+  <!-- HEART                     -->
+  <!-- ======================== -->
+  <!-- Gold outline -->
+  <path d="M512,880 C512,880 170,650 170,430 C170,320 255,245 365,245 C425,245 480,275 512,295 C544,275 599,245 659,245 C769,245 854,320 854,430 C854,650 512,880 512,880 Z"
+        fill="url(#goldOutline)" filter="url(#softShadow)"/>
+  <!-- Red left half -->
+  <g clip-path="url(#redClip)">
+    <path d="M512,865 C512,865 185,642 185,435 C185,330 265,258 370,258 C428,258 480,285 512,305 C544,285 596,258 654,258 C759,258 839,330 839,435 C839,642 512,865 512,865 Z"
+          fill="url(#redFill)" />
+    <path d="M512,865 C512,865 185,642 185,435 C185,330 265,258 370,258 C428,258 480,285 512,305 C544,285 596,258 654,258 C759,258 839,330 839,435 C839,642 512,865 512,865 Z"
+          fill="url(#redHighlight)" />
+  </g>
+  <!-- White right half -->
+  <g clip-path="url(#whiteClip)">
+    <path d="M512,865 C512,865 185,642 185,435 C185,330 265,258 370,258 C428,258 480,285 512,305 C544,285 596,258 654,258 C759,258 839,330 839,435 C839,642 512,865 512,865 Z"
+          fill="url(#whiteFill)" />
+    <path d="M512,865 C512,865 185,642 185,435 C185,330 265,258 370,258 C428,258 480,285 512,305 C544,285 596,258 654,258 C759,258 839,330 839,435 C839,642 512,865 512,865 Z"
+          fill="url(#whiteHighlight)" />
+  </g>
+  <!-- Single gold S-curve divider — exact same path as clip edges -->
+  <path d="M512,305 C540,430 538,520 522,600 C506,680 498,760 512,865"
+        fill="none" stroke="url(#goldDivider)" stroke-width="3.5" stroke-linecap="round"/>
 </svg>
