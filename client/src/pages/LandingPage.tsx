@@ -203,7 +203,9 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
       localStorage.setItem("gustilk_email", email.trim());
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     } catch (err: any) {
-      const msg: string = err.message?.match(/\d+: (.+)/)?.[1] || err.message || "Something went wrong";
+      const raw: string = err.message?.match(/\d+: (.+)/)?.[1] || err.message || "Something went wrong";
+      let msg: string;
+      try { msg = JSON.parse(raw).message || raw; } catch { msg = raw; }
       const lower = msg.toLowerCase();
       if (lower.includes("password") || lower.includes("credentials") || lower.includes("invalid") || lower.includes("incorrect")) {
         setPasswordError(msg);
