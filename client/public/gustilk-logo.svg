@@ -32,11 +32,21 @@
       <stop offset="50%" stop-color="#E8C547"/>
       <stop offset="100%" stop-color="#C49000"/>
     </linearGradient>
-    <clipPath id="clipLeft">
-      <rect x="0" y="0" width="400" height="700"/>
+
+    <!-- S-curve clip for red (left) side -->
+    <clipPath id="clipCurveLeft">
+      <path d="M0,0 L400,0 L400,194
+               C430,290 430,340 410,400
+               C390,460 380,520 400,625
+               L0,700 Z"/>
     </clipPath>
-    <clipPath id="clipRight">
-      <rect x="400" y="0" width="400" height="700"/>
+
+    <!-- S-curve clip for white (right) side -->
+    <clipPath id="clipCurveRight">
+      <path d="M800,0 L400,0 L400,194
+               C430,290 430,340 410,400
+               C390,460 380,520 400,625
+               L800,700 Z"/>
     </clipPath>
   </defs>
 
@@ -44,22 +54,23 @@
   <path d="M400,640 C400,640 160,460 160,295 C160,205 225,148 310,148 C358,148 392,172 400,185 C408,172 442,148 490,148 C575,148 640,205 640,295 C640,460 400,640 400,640 Z"
         fill="url(#goldGrad)" />
 
-  <!-- Red left half -->
-  <g clip-path="url(#clipLeft)">
+  <!-- Red left half with S-curve -->
+  <g clip-path="url(#clipCurveLeft)">
     <path d="M400,625 C400,625 172,448 172,296 C172,212 233,162 313,162 C358,162 390,184 400,197 C408,184 442,162 487,162 C567,162 628,212 628,296 C628,448 400,625 400,625 Z"
           fill="url(#redGrad)" />
   </g>
 
-  <!-- White right half -->
-  <g clip-path="url(#clipRight)">
+  <!-- White right half with S-curve -->
+  <g clip-path="url(#clipCurveRight)">
     <path d="M400,625 C400,625 172,448 172,296 C172,212 233,162 313,162 C358,162 390,184 400,197 C408,184 442,162 487,162 C567,162 628,212 628,296 C628,448 400,625 400,625 Z"
           fill="url(#whiteGrad)" />
   </g>
 
-  <!-- Gold center divider -->
-  <line x1="400" y1="197" x2="400" y2="625" stroke="url(#goldGrad)" stroke-width="3"/>
+  <!-- Gold S-curve divider line -->
+  <path d="M400,194 C430,290 430,340 410,400 C390,460 380,520 400,625"
+        fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
 
-  <!-- Feather barbs - left side -->
+  <!-- Feather barbs - left -->
   <g opacity="0.9">
     <path d="M400,165 C380,130 340,80 320,40" fill="none" stroke="url(#featherGold)" stroke-width="1.8" stroke-linecap="round"/>
     <path d="M400,165 C385,128 355,85 340,48" fill="none" stroke="url(#featherGold)" stroke-width="1.6" stroke-linecap="round"/>
@@ -72,7 +83,7 @@
     <path d="M400,165 C399,114 397,96 397,78" fill="none" stroke="url(#featherGold)" stroke-width="0.9" stroke-linecap="round"/>
   </g>
 
-  <!-- Feather barbs - right side -->
+  <!-- Feather barbs - right -->
   <g opacity="0.9">
     <path d="M400,165 C420,130 460,80 480,40" fill="none" stroke="url(#featherGold)" stroke-width="1.8" stroke-linecap="round"/>
     <path d="M400,165 C415,128 445,85 460,48" fill="none" stroke="url(#featherGold)" stroke-width="1.6" stroke-linecap="round"/>
@@ -85,21 +96,13 @@
     <path d="M400,165 C401,114 403,96 403,78" fill="none" stroke="url(#featherGold)" stroke-width="0.9" stroke-linecap="round"/>
   </g>
 
-  <!-- Feather rachis (central shaft) -->
+  <!-- Feather shaft -->
   <line x1="400" y1="175" x2="400" y2="55" stroke="#B8860B" stroke-width="2.5" stroke-linecap="round"/>
 
-  <!-- Peacock eye - outer gold-brown ring -->
+  <!-- Peacock eye -->
   <ellipse cx="400" cy="130" rx="28" ry="32" fill="#8B7332"/>
-
-  <!-- Peacock eye - green ring -->
   <ellipse cx="400" cy="130" rx="22" ry="26" fill="url(#eyeGreen)"/>
-
-  <!-- Peacock eye - teal inner -->
   <ellipse cx="400" cy="130" rx="15" ry="18" fill="#006688"/>
-
-  <!-- Peacock eye - blue center -->
   <ellipse cx="400" cy="130" rx="10" ry="12" fill="url(#eyeBlue)"/>
-
-  <!-- Peacock eye - highlight -->
   <ellipse cx="396" cy="125" rx="4" ry="5" fill="rgba(255,255,255,0.35)"/>
 </svg>
