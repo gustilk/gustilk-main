@@ -148,12 +148,13 @@ function GoldInput({ label, error, ...props }: React.InputHTMLAttributes<HTMLInp
   );
 }
 
-function SubmitButton({ loading, loadingText, disabled, children }: { loading: boolean; loadingText?: string; disabled?: boolean; children: string }) {
+function SubmitButton({ loading, loadingText, disabled, onClick, "data-testid": testId, children }: { loading: boolean; loadingText?: string; disabled?: boolean; onClick?: () => void; "data-testid"?: string; children: string }) {
   return (
     <button
       type="submit"
       disabled={loading || disabled}
-      data-testid="button-submit"
+      data-testid={testId ?? "button-submit"}
+      onClick={onClick}
       className="w-full py-4 rounded-2xl font-bold text-base disabled:opacity-60"
       style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 8px 32px rgba(201,168,76,0.4)" }}
     >
