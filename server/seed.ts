@@ -1,7 +1,8 @@
 import { db } from "./db";
 import { users, events } from "@shared/schema";
-import { count } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import bcrypt from "bcryptjs";
 
 const seedProfiles = [
   {
@@ -155,8 +156,31 @@ const seedEvents = [
 
 export async function seedDatabase() {
   try {
+    const [existingAdmin] = await db.select({ id: users.id }).from(users).where(eq(users.email, "admin@gustilk.com"));
+    if (!existingAdmin) {
+      const adminHash = await bcrypt.hash("admin1234", 10);
+      await db.insert(users).values({
+        id: randomUUID(),
+        email: "admin@gustilk.com",
+        passwordHash: adminHash,
+        firstName: "Admin",
+        lastName: "Gustilk",
+        fullName: "Admin Gustilk",
+        isAdmin: true,
+        caste: "murid",
+        gender: "male",
+        country: "USA",
+        state: "Nebraska",
+        city: "Lincoln",
+        age: 42,
+        verificationStatus: "approved",
+        isVerified: true,
+      });
+      console.log("Seeded admin user.");
+    }
+
     const [{ value: userCount }] = await db.select({ value: count() }).from(users);
-    if (Number(userCount) === 0) {
+    if (Number(userCount) === 1) {
       for (const p of seedProfiles) {
         await db.insert(users).values({
           id: randomUUID(),
