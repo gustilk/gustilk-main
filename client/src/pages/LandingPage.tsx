@@ -175,6 +175,8 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
   const [showPw, setShowPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const passwordMismatch = mode === "register" && confirmPassword.length > 0 && password !== confirmPassword;
@@ -185,9 +187,11 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
     e.preventDefault();
     if (!canSubmit) return;
     if (!emailValid) {
-      toast({ title: t("auth.errorTitle"), description: t("auth.invalidEmail"), variant: "destructive" });
+      setEmailError(t("auth.invalidEmail"));
       return;
     }
+    setPasswordError(null);
+    setEmailError(null);
     setLoading(true);
     try {
       const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
@@ -199,8 +203,15 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
       localStorage.setItem("gustilk_email", email.trim());
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     } catch (err: any) {
-      const msg = await err.message?.match(/\d+: (.+)/)?.[1] || err.message;
-      toast({ title: t("auth.errorTitle"), description: msg, variant: "destructive" });
+      const msg: string = err.message?.match(/\d+: (.+)/)?.[1] || err.message || "Something went wrong";
+      const lower = msg.toLowerCase();
+      if (lower.includes("password") || lower.includes("credentials") || lower.includes("invalid") || lower.includes("incorrect")) {
+        setPasswordError(msg);
+      } else if (lower.includes("email") || lower.includes("user") || lower.includes("not found") || lower.includes("exist")) {
+        setEmailError(msg);
+      } else {
+        setPasswordError(msg);
+      }
     } finally {
       setLoading(false);
     }
