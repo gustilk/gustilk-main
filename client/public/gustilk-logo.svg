@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="150 90 724 810" width="1024" height="1024">
   <defs>
     <linearGradient id="goldOutline" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#F0D860"/>
@@ -12,19 +12,11 @@
       <stop offset="50%" stop-color="#C02525"/>
       <stop offset="100%" stop-color="#9A1A1A"/>
     </linearGradient>
-    <radialGradient id="redHighlight" cx="35%" cy="30%" r="60%">
-      <stop offset="0%" stop-color="#E84040" stop-opacity="0.5"/>
-      <stop offset="100%" stop-color="#C02525" stop-opacity="0"/>
-    </radialGradient>
     <linearGradient id="whiteFill" x1="20%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="40%" stop-color="#F5F5F5"/>
-      <stop offset="100%" stop-color="#E0E0E0"/>
+      <stop offset="0%" stop-color="#FDF8F0"/>
+      <stop offset="40%" stop-color="#F0EAE0"/>
+      <stop offset="100%" stop-color="#DDD5C8"/>
     </linearGradient>
-    <radialGradient id="whiteHighlight" cx="65%" cy="30%" r="55%">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
-      <stop offset="100%" stop-color="#F0F0F0" stop-opacity="0"/>
-    </radialGradient>
     <linearGradient id="featherL" x1="100%" y1="100%" x2="0%" y2="0%">
       <stop offset="0%" stop-color="#D4A520"/>
       <stop offset="50%" stop-color="#EECC55"/>
@@ -66,21 +58,14 @@
     <filter id="softShadow" x="-5%" y="-5%" width="110%" height="110%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.12"/>
     </filter>
-    <!-- Inner heart path reused everywhere -->
-    <!-- M512,865 C512,865 185,642 185,435 C185,330 265,258 370,258 C428,258 480,285 512,305 C544,285 596,258 654,258 C759,258 839,330 839,435 C839,642 512,865 512,865 Z -->
-    <!-- Red side: left half of heart, bounded by the S-curve -->
     <clipPath id="redClip">
       <path d="M512,305 C540,430 538,520 522,600 C506,680 498,760 512,865 L185,865 L185,258 L512,258 Z"/>
     </clipPath>
-    <!-- White side: right half of heart, bounded by the S-curve -->
     <clipPath id="whiteClip">
       <path d="M512,305 C540,430 538,520 522,600 C506,680 498,760 512,865 L839,865 L839,258 L512,258 Z"/>
     </clipPath>
   </defs>
-  <!-- ======================== -->
-  <!-- PEACOCK FEATHER           -->
-  <!-- ======================== -->
-  <!-- Left feather barbs -->
+  <!-- PEACOCK FEATHER -->
   <g opacity="0.95">
     <path d="M512,280 C490,240 430,170 395,110" fill="none" stroke="url(#featherL)" stroke-width="2.8" stroke-linecap="round"/>
     <path d="M512,280 C495,235 445,175 415,120" fill="none" stroke="url(#featherL)" stroke-width="2.8" stroke-linecap="round"/>
@@ -94,7 +79,6 @@
     <path d="M512,280 C509,214 494,206 492,182" fill="none" stroke="url(#featherL)" stroke-width="1.5" stroke-linecap="round"/>
     <path d="M512,280 C510,213 498,210 498,190" fill="none" stroke="url(#featherL)" stroke-width="1.2" stroke-linecap="round"/>
   </g>
-  <!-- Right feather barbs -->
   <g opacity="0.95">
     <path d="M512,280 C534,240 594,170 629,110" fill="none" stroke="url(#featherR)" stroke-width="2.8" stroke-linecap="round"/>
     <path d="M512,280 C529,235 579,175 609,120" fill="none" stroke="url(#featherR)" stroke-width="2.8" stroke-linecap="round"/>
@@ -108,31 +92,23 @@
     <path d="M512,280 C515,214 530,206 532,182" fill="none" stroke="url(#featherR)" stroke-width="1.5" stroke-linecap="round"/>
     <path d="M512,280 C514,213 526,210 526,190" fill="none" stroke="url(#featherR)" stroke-width="1.2" stroke-linecap="round"/>
   </g>
-  <!-- Central shaft -->
   <line x1="512" y1="300" x2="512" y2="140" stroke="url(#shaft)" stroke-width="3.5" stroke-linecap="round"/>
-  <!-- Peacock eye -->
   <ellipse cx="512" cy="260" rx="38" ry="44" fill="url(#eyeOuter)"/>
   <ellipse cx="512" cy="260" rx="30" ry="35" fill="url(#eyeGreen)"/>
   <ellipse cx="512" cy="260" rx="22" ry="26" fill="url(#eyeTeal)"/>
   <ellipse cx="512" cy="260" rx="14" ry="17" fill="url(#eyeBlue)"/>
   <ellipse cx="506" cy="253" rx="5" ry="6" fill="rgba(255,255,255,0.4)"/>
-  <!-- ======================== -->
-  <!-- HEART                     -->
-  <!-- ======================== -->
-  <!-- Gold outline -->
+  <!-- HEART -->
   <path d="M512,880 C512,880 170,650 170,430 C170,320 255,245 365,245 C425,245 480,275 512,295 C544,275 599,245 659,245 C769,245 854,320 854,430 C854,650 512,880 512,880 Z"
         fill="url(#goldOutline)" filter="url(#softShadow)"/>
-  <!-- Red left half -->
   <g clip-path="url(#redClip)">
     <path d="M512,865 C512,865 185,642 185,435 C185,330 265,258 370,258 C428,258 480,285 512,305 C544,285 596,258 654,258 C759,258 839,330 839,435 C839,642 512,865 512,865 Z"
           fill="url(#redFill)" />
   </g>
-  <!-- White right half -->
   <g clip-path="url(#whiteClip)">
     <path d="M512,865 C512,865 185,642 185,435 C185,330 265,258 370,258 C428,258 480,285 512,305 C544,285 596,258 654,258 C759,258 839,330 839,435 C839,642 512,865 512,865 Z"
           fill="url(#whiteFill)" />
   </g>
-  <!-- Single gold S-curve divider — exact same path as clip edges -->
   <path d="M512,305 C540,430 538,520 522,600 C506,680 498,760 512,865"
         fill="none" stroke="url(#goldDivider)" stroke-width="3.5" stroke-linecap="round"/>
 </svg>
