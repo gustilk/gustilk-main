@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, MapPin, ChevronLeft, Shield } from "lucide-react";
-import logoImg from "@assets/logo-gustilk.png";
+
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import type { SafeUser } from "@shared/schema";
@@ -304,7 +304,7 @@ export default function ProfilePage({ user }: Props) {
     <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
       <div className="pt-12 pb-2 px-5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <img src={logoImg} alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
+          <img src="/gustilk-logo.svg" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
           <h1 className="font-serif text-2xl text-gold">{t("profile.title")}</h1>
         </div>
         <div className="flex items-center gap-2">

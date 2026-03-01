@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { Lock, Star, MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
-import logoImg from "@assets/logo-gustilk.png";
+
 import type { SafeUser, MatchWithUser } from "@shared/schema";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
 
@@ -26,7 +26,7 @@ export default function MatchesPage({ user }: Props) {
   return (
     <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
       <div className="pt-12 pb-2 px-5 flex items-center gap-2.5">
-        <img src={logoImg} alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
+        <img src="/gustilk-logo.svg" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
         <h1 className="font-serif text-2xl text-gold">{t("matches.title")}</h1>
       </div>
 

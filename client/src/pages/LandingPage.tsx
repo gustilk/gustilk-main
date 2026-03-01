@@ -55,7 +55,7 @@ function Logo() {
     <div className="text-center mb-5">
       <div className="relative inline-flex items-center justify-center mb-1" style={{ perspective: "600px" }}>
         <img
-          src="/logo-transparent.png"
+          src="/gustilk-logo.svg"
           alt="Gûstîlk"
           className="relative logo-flip"
           style={{

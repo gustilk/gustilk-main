@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { LANGUAGE_LIST, LangCode, setLanguage } from "@/i18n";
-import logoImg from "@assets/logo-gustilk.png";
+
 
 interface Props {
   onSelect: () => void;
@@ -29,7 +29,7 @@ export default function LanguageSelectPage({ onSelect }: Props) {
             transform: "scale(1.3)",
           }} />
           <img
-            src={logoImg}
+            src="/gustilk-logo.svg"
             alt="Gûstîlk"
             className="relative"
             style={{
