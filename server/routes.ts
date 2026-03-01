@@ -400,6 +400,61 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
+  // ─── CHANGE EMAIL ─────────────────────────────────────────
+  app.patch("/api/auth/change-email", isAuthenticated, async (req: any, res) => {
+    try {
+      const bcrypt = await import("bcryptjs");
+      const { newEmail, currentPassword } = req.body;
+      if (!newEmail || !currentPassword) return res.status(400).json({ message: "New email and current password are required" });
+      const userId = getUserId(req);
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (!user || !user.passwordHash) return res.status(400).json({ message: "Password authentication not set up for this account" });
+      const ok = await bcrypt.compare(currentPassword, user.passwordHash);
+      if (!ok) return res.status(401).json({ message: "Current password is incorrect" });
+      const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.email, newEmail.toLowerCase().trim()));
+      if (existing) return res.status(409).json({ message: "That email is already in use" });
+      await db.update(users).set({ email: newEmail.toLowerCase().trim() }).where(eq(users.id, userId));
+      res.json({ ok: true });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── CHANGE PASSWORD ──────────────────────────────────────
+  app.patch("/api/auth/change-password", isAuthenticated, async (req: any, res) => {
+    try {
+      const bcrypt = await import("bcryptjs");
+      const { currentPassword, newPassword } = req.body;
+      if (!currentPassword || !newPassword) return res.status(400).json({ message: "Both current and new password are required" });
+      if (newPassword.length < 6) return res.status(400).json({ message: "New password must be at least 6 characters" });
+      const userId = getUserId(req);
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (!user || !user.passwordHash) return res.status(400).json({ message: "Password authentication not set up for this account" });
+      const ok = await bcrypt.compare(currentPassword, user.passwordHash);
+      if (!ok) return res.status(401).json({ message: "Current password is incorrect" });
+      const hash = await bcrypt.hash(newPassword, 10);
+      await db.update(users).set({ passwordHash: hash }).where(eq(users.id, userId));
+      res.json({ ok: true });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── CHANGE PHONE ─────────────────────────────────────────
+  app.patch("/api/auth/change-phone", isAuthenticated, async (req: any, res) => {
+    try {
+      const { newPhone } = req.body;
+      if (!newPhone) return res.status(400).json({ message: "New phone number is required" });
+      const userId = getUserId(req);
+      const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.phone, newPhone.trim()));
+      if (existing && existing.id !== userId) return res.status(409).json({ message: "That phone number is already in use" });
+      await db.update(users).set({ phone: newPhone.trim() }).where(eq(users.id, userId));
+      res.json({ ok: true });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
   // ─── DELETE ACCOUNT ───────────────────────────────────────
   app.delete("/api/account", isAuthenticated, async (req: any, res) => {
     try {

@@ -8,7 +8,7 @@ import { LANGUAGE_LIST, LangCode, setLanguage } from "@/i18n";
 import {
   ChevronLeft, ChevronRight, Globe, Bell, FileText, Shield,
   LogOut, Trash2, AlertTriangle, Lock, Heart, MessageCircle,
-  Star, CalendarDays, Smartphone,
+  Star, CalendarDays, Smartphone, Mail, KeyRound, Phone, Eye, EyeOff, CheckCircle2,
 } from "lucide-react";
 import type { SafeUser } from "@shared/schema";
 
@@ -40,7 +40,7 @@ function saveNotifPrefs(prefs: NotifPrefs) {
 
 interface Props { user: SafeUser }
 
-type SubScreen = null | "guidelines" | "privacy" | "language" | "notifications";
+type SubScreen = null | "guidelines" | "privacy" | "language" | "notifications" | "account";
 
 interface TranslatedSection { title: string; body: string; }
 
@@ -319,6 +319,10 @@ export default function SettingsPage({ user }: Props) {
     );
   }
 
+  if (subScreen === "account") {
+    return <AccountSecurityScreen user={user} onBack={() => setSubScreen(null)} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col pb-24" style={{ background: "#0d0618" }}>
       <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
@@ -347,6 +351,13 @@ export default function SettingsPage({ user }: Props) {
               onClick={() => setSubScreen("notifications")}
               testId="button-settings-notifications"
             />
+          </div>
+        </div>
+
+        <div>
+          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Account Security</p>
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
+            <Row icon={KeyRound} label="Email, Password & Phone" sub="Change your login credentials" onClick={() => setSubScreen("account")} testId="button-settings-account" />
           </div>
         </div>
 
@@ -428,6 +439,185 @@ export default function SettingsPage({ user }: Props) {
         </div>
 
         <p className="text-center text-xs pb-4" style={{ color: "rgba(253,248,240,0.15)" }}>{t("settings.footer")}</p>
+      </div>
+    </div>
+  );
+}
+
+function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () => void }) {
+  const [emailForm, setEmailForm] = useState({ newEmail: "", currentPassword: "" });
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [emailDone, setEmailDone] = useState(false);
+
+  const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [pwError, setPwError] = useState<string | null>(null);
+  const [pwDone, setPwDone] = useState(false);
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+
+  const [phoneForm, setPhoneForm] = useState({ newPhone: user.phone ?? "" });
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [phoneDone, setPhoneDone] = useState(false);
+
+  const parseError = async (err: any) => {
+    const raw: string = err.message?.match(/\d+: (.+)/)?.[1] || err.message || "Something went wrong";
+    try { return JSON.parse(raw).message || raw; } catch { return raw; }
+  };
+
+  const emailMutation = useMutation({
+    mutationFn: () => apiRequest("PATCH", "/api/auth/change-email", emailForm).then(r => r.json()),
+    onSuccess: () => { setEmailDone(true); setEmailError(null); queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] }); },
+    onError: async (err: any) => setEmailError(await parseError(err)),
+  });
+
+  const pwMutation = useMutation({
+    mutationFn: () => apiRequest("PATCH", "/api/auth/change-password", { currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword }).then(r => r.json()),
+    onSuccess: () => { setPwDone(true); setPwError(null); },
+    onError: async (err: any) => setPwError(await parseError(err)),
+  });
+
+  const phoneMutation = useMutation({
+    mutationFn: () => apiRequest("PATCH", "/api/auth/change-phone", { newPhone: phoneForm.newPhone }).then(r => r.json()),
+    onSuccess: () => { setPhoneDone(true); setPhoneError(null); queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] }); },
+    onError: async (err: any) => setPhoneError(await parseError(err)),
+  });
+
+  const inputStyle = {
+    background: "rgba(255,255,255,0.07)",
+    border: "1.5px solid rgba(201,168,76,0.25)",
+    color: "#fdf8f0",
+  };
+  const inputClass = "w-full px-4 py-3 rounded-xl text-sm placeholder-cream/25 outline-none";
+  const labelClass = "block text-cream/50 text-xs font-semibold mb-1.5 uppercase tracking-wider";
+  const errorClass = "text-xs mt-1.5 font-medium";
+  const sectionStyle = { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(201,168,76,0.1)" };
+
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
+      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
+        <button onClick={onBack} data-testid="button-back-account" className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,0.06)" }}>
+          <ChevronLeft size={18} color="rgba(253,248,240,0.7)" />
+        </button>
+        <h1 className="font-serif text-xl text-gold">Account Security</h1>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-5 py-5 pb-20 space-y-5">
+
+        {/* Change Email */}
+        <div className="rounded-2xl p-4 space-y-3" style={sectionStyle}>
+          <div className="flex items-center gap-2 mb-1">
+            <Mail size={16} color="#c9a84c" />
+            <p className="text-sm font-semibold text-gold">Change Email</p>
+          </div>
+          <p className="text-xs text-cream/40 -mt-1">Current: {user.email ?? "Not set"}</p>
+          {emailDone ? (
+            <div className="flex items-center gap-2 py-2" style={{ color: "#10b981" }}>
+              <CheckCircle2 size={16} /><span className="text-sm font-medium">Email updated successfully</span>
+            </div>
+          ) : (
+            <>
+              <div>
+                <label className={labelClass}>New Email</label>
+                <input type="email" value={emailForm.newEmail} onChange={e => { setEmailForm(f => ({ ...f, newEmail: e.target.value })); setEmailError(null); }}
+                  placeholder="new@email.com" data-testid="input-new-email" className={inputClass} style={inputStyle} />
+              </div>
+              <div>
+                <label className={labelClass}>Current Password</label>
+                <input type="password" value={emailForm.currentPassword} onChange={e => { setEmailForm(f => ({ ...f, currentPassword: e.target.value })); setEmailError(null); }}
+                  placeholder="Confirm with your password" data-testid="input-email-current-password" className={inputClass} style={inputStyle} />
+              </div>
+              {emailError && <p className={errorClass} style={{ color: "#d4608a" }}>{emailError}</p>}
+              <button onClick={() => emailMutation.mutate()} disabled={!emailForm.newEmail || !emailForm.currentPassword || emailMutation.isPending}
+                data-testid="button-save-email" className="w-full py-3 rounded-xl text-sm font-bold disabled:opacity-50"
+                style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
+                {emailMutation.isPending ? "Saving…" : "Update Email"}
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Change Password */}
+        <div className="rounded-2xl p-4 space-y-3" style={sectionStyle}>
+          <div className="flex items-center gap-2 mb-1">
+            <KeyRound size={16} color="#c9a84c" />
+            <p className="text-sm font-semibold text-gold">Change Password</p>
+          </div>
+          {pwDone ? (
+            <div className="flex items-center gap-2 py-2" style={{ color: "#10b981" }}>
+              <CheckCircle2 size={16} /><span className="text-sm font-medium">Password changed successfully</span>
+            </div>
+          ) : (
+            <>
+              <div>
+                <label className={labelClass}>Current Password</label>
+                <div className="relative">
+                  <input type={showCurrent ? "text" : "password"} value={pwForm.currentPassword} onChange={e => { setPwForm(f => ({ ...f, currentPassword: e.target.value })); setPwError(null); }}
+                    placeholder="Enter current password" data-testid="input-current-password" className={`${inputClass} pr-11`} style={inputStyle} />
+                  <button type="button" onClick={() => setShowCurrent(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40">
+                    {showCurrent ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className={labelClass}>New Password</label>
+                <div className="relative">
+                  <input type={showNew ? "text" : "password"} value={pwForm.newPassword} onChange={e => { setPwForm(f => ({ ...f, newPassword: e.target.value })); setPwError(null); }}
+                    placeholder="At least 6 characters" data-testid="input-new-password" className={`${inputClass} pr-11`} style={inputStyle} />
+                  <button type="button" onClick={() => setShowNew(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40">
+                    {showNew ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className={labelClass}>Confirm New Password</label>
+                <input type="password" value={pwForm.confirmPassword} onChange={e => setPwForm(f => ({ ...f, confirmPassword: e.target.value }))}
+                  placeholder="Repeat new password" data-testid="input-confirm-new-password" className={inputClass} style={{
+                    ...inputStyle,
+                    border: pwForm.confirmPassword && pwForm.confirmPassword !== pwForm.newPassword ? "1.5px solid rgba(212,96,138,0.7)" : inputStyle.border
+                  }} />
+                {pwForm.confirmPassword && pwForm.confirmPassword !== pwForm.newPassword && (
+                  <p className={errorClass} style={{ color: "#d4608a" }}>Passwords do not match</p>
+                )}
+              </div>
+              {pwError && <p className={errorClass} style={{ color: "#d4608a" }}>{pwError}</p>}
+              <button onClick={() => pwMutation.mutate()}
+                disabled={!pwForm.currentPassword || !pwForm.newPassword || pwForm.newPassword !== pwForm.confirmPassword || pwMutation.isPending}
+                data-testid="button-save-password" className="w-full py-3 rounded-xl text-sm font-bold disabled:opacity-50"
+                style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
+                {pwMutation.isPending ? "Saving…" : "Update Password"}
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Change Phone */}
+        <div className="rounded-2xl p-4 space-y-3" style={sectionStyle}>
+          <div className="flex items-center gap-2 mb-1">
+            <Phone size={16} color="#c9a84c" />
+            <p className="text-sm font-semibold text-gold">Change Phone Number</p>
+          </div>
+          <p className="text-xs text-cream/40 -mt-1">Current: {user.phone ?? "Not set"}</p>
+          {phoneDone ? (
+            <div className="flex items-center gap-2 py-2" style={{ color: "#10b981" }}>
+              <CheckCircle2 size={16} /><span className="text-sm font-medium">Phone number updated successfully</span>
+            </div>
+          ) : (
+            <>
+              <div>
+                <label className={labelClass}>New Phone Number</label>
+                <input type="tel" value={phoneForm.newPhone} onChange={e => { setPhoneForm({ newPhone: e.target.value }); setPhoneError(null); }}
+                  placeholder="+1 555 000 0000" data-testid="input-new-phone" className={inputClass} style={inputStyle} />
+              </div>
+              {phoneError && <p className={errorClass} style={{ color: "#d4608a" }}>{phoneError}</p>}
+              <button onClick={() => phoneMutation.mutate()} disabled={!phoneForm.newPhone || phoneMutation.isPending}
+                data-testid="button-save-phone" className="w-full py-3 rounded-xl text-sm font-bold disabled:opacity-50"
+                style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
+                {phoneMutation.isPending ? "Saving…" : "Update Phone"}
+              </button>
+            </>
+          )}
+        </div>
+
       </div>
     </div>
   );
