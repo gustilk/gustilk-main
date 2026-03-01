@@ -273,14 +273,17 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
             label={t("auth.email")}
             type="email"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={e => { setEmail(e.target.value); setEmailError(null); }}
             placeholder="you@example.com"
             data-testid="input-email"
-            error={email.length > 3 && !emailValid}
+            error={!!(emailError || (email.length > 3 && !emailValid))}
             required
           />
-          {email.length > 3 && !emailValid && (
+          {email.length > 3 && !emailValid && !emailError && (
             <p className="text-xs mt-1.5 font-medium" style={{ color: "#d4608a" }}>{t("auth.invalidEmail")}</p>
+          )}
+          {emailError && (
+            <p className="text-xs mt-1.5 font-medium" style={{ color: "#d4608a" }}>{emailError}</p>
           )}
         </div>
 
@@ -290,14 +293,17 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
             <input
               type={showPw ? "text" : "password"}
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={e => { setPassword(e.target.value); setPasswordError(null); }}
               placeholder={mode === "register" ? t("auth.pwPlaceholderRegister") : t("auth.pwPlaceholderLogin")}
               data-testid="input-password"
               required
               className="w-full px-4 py-3 pr-11 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
-              style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.25)" }}
-              onFocus={e => (e.currentTarget.style.borderColor = "#c9a84c")}
-              onBlur={e => (e.currentTarget.style.borderColor = "rgba(201,168,76,0.25)")}
+              style={{
+                background: "rgba(255,255,255,0.07)",
+                border: `1.5px solid ${passwordError ? "rgba(212,96,138,0.7)" : "rgba(201,168,76,0.25)"}`,
+              }}
+              onFocus={e => (e.currentTarget.style.borderColor = passwordError ? "rgba(212,96,138,0.9)" : "#c9a84c")}
+              onBlur={e => (e.currentTarget.style.borderColor = passwordError ? "rgba(212,96,138,0.7)" : "rgba(201,168,76,0.25)")}
             />
             <button
               type="button"
@@ -308,6 +314,9 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
               {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
+          {passwordError && (
+            <p className="text-xs mt-1.5 font-medium" style={{ color: "#d4608a" }}>{passwordError}</p>
+          )}
         </div>
 
         {mode === "register" && (
