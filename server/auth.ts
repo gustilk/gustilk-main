@@ -41,7 +41,6 @@ export function setupSession(app: Express) {
         secure: false,
         sameSite: "lax",
         maxAge: 30 * 24 * 60 * 60 * 1000,
-        domain: process.env.NODE_ENV === "production" ? ".gustilk.com" : undefined,
       },
     })
   );
