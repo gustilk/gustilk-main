@@ -68,15 +68,13 @@
     </filter>
     <!-- Inner heart path reused everywhere -->
     <!-- M512,865 C512,865 185,642 185,435 C185,330 265,258 370,258 C428,258 480,285 512,305 C544,285 596,258 654,258 C759,258 839,330 839,435 C839,642 512,865 512,865 Z -->
-    <!-- Red side: heart shape cut by S-curve on the right -->
+    <!-- Red side: left half of heart, bounded by the S-curve -->
     <clipPath id="redClip">
-      <path d="M512,305
-               L512,258 Z"/>
+      <path d="M512,305 C540,430 538,520 522,600 C506,680 498,760 512,865 L185,865 L185,258 L512,258 Z"/>
     </clipPath>
-    <!-- White side: heart shape cut by S-curve on the left -->
+    <!-- White side: right half of heart, bounded by the S-curve -->
     <clipPath id="whiteClip">
-      <path d="M512,305
-               L512,258 Z"/>
+      <path d="M512,305 C540,430 538,520 522,600 C506,680 498,760 512,865 L839,865 L839,258 L512,258 Z"/>
     </clipPath>
   </defs>
   <!-- ======================== -->
