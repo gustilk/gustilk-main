@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Heart, Shield, Users, Eye, EyeOff, Phone, Mail, ArrowLeft, Globe, ChevronDown, Search, X, Fingerprint } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { LANGUAGE_LIST } from "@/i18n";
 import i18n from "@/i18n";
@@ -164,7 +163,6 @@ function SubmitButton({ loading, loadingText, disabled, children }: { loading: b
 }
 
 function EmailScreen({ onBack }: { onBack: () => void }) {
-  const { toast } = useToast();
   const { t } = useTranslation();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [firstName, setFirstName] = useState("");
@@ -437,7 +435,6 @@ function CountryPicker({
 }
 
 function PhoneScreen({ onBack }: { onBack: () => void }) {
-  const { toast } = useToast();
   const { t } = useTranslation();
   const savedIso = localStorage.getItem("gustilk_country_iso");
   const savedPhone = localStorage.getItem("gustilk_phone") ?? "";
@@ -447,6 +444,7 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
   const [localNumber, setLocalNumber] = useState(savedPhone);
   const [loading, setLoading] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [biometricError, setBiometricError] = useState<string | null>(null);
 
   useEffect(() => {
     if (savedIso) return;
@@ -485,11 +483,13 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     } catch (err: any) {
       if (err?.name === "NotAllowedError" || err?.message?.includes("NotAllowedError")) {
-        toast({ title: t("auth.errorTitle"), description: t("auth.biometricCancelled"), variant: "destructive" });
+        setBiometricError(t("auth.biometricCancelled"));
         return;
       }
-      const msg = err.message?.match(/\d+: (.+)/)?.[1] || err.message;
-      toast({ title: t("auth.errorTitle"), description: msg, variant: "destructive" });
+      const raw: string = err.message?.match(/\d+: (.+)/)?.[1] || err.message || "Something went wrong";
+      let msg: string;
+      try { msg = JSON.parse(raw).message || raw; } catch { msg = raw; }
+      setBiometricError(msg);
     } finally {
       setLoading(false);
     }
@@ -555,7 +555,10 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
           <p className="text-cream/50 text-xs leading-relaxed">{t("auth.biometricInfo")}</p>
         </div>
 
-        <SubmitButton loading={loading} loadingText={t("auth.pleaseWait")} data-testid="button-biometric-submit">
+        {biometricError && (
+          <p className="text-xs text-center font-medium" style={{ color: "#d4608a" }}>{biometricError}</p>
+        )}
+        <SubmitButton loading={loading} loadingText={t("auth.pleaseWait")} data-testid="button-biometric-submit" onClick={() => setBiometricError(null)}>
           {t("auth.biometricCta")}
         </SubmitButton>
       </form>

@@ -17,6 +17,7 @@ const LANGUAGES = [
 export default function EditProfilePage({ user }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [form, setForm] = useState({
     fullName: user.fullName ?? user.firstName ?? "",
     city: user.city ?? "",
@@ -40,7 +41,7 @@ export default function EditProfilePage({ user }: Props) {
       setLocation("/profile");
     },
     onError: (e: Error) => {
-      toast({ title: "Save failed", description: e.message, variant: "destructive" });
+      setSaveError(e.message || "Save failed. Please try again.");
     },
   });
 
@@ -77,6 +78,11 @@ export default function EditProfilePage({ user }: Props) {
         </button>
       </div>
 
+      {saveError && (
+        <div className="px-5 pt-3">
+          <p className="text-xs font-medium text-center py-2 px-4 rounded-xl" style={{ color: "#d4608a", background: "rgba(212,96,138,0.1)", border: "1px solid rgba(212,96,138,0.25)" }}>{saveError}</p>
+        </div>
+      )}
       <div className="px-5 py-6 space-y-5 overflow-y-auto">
         <FieldGroup label="Full Name">
           <GoldInput value={form.fullName} onChange={inp("fullName")} placeholder="Your full name" data-testid="input-fullName" />

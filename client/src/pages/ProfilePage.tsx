@@ -216,6 +216,7 @@ export default function ProfilePage({ user }: Props) {
     return arr;
   });
   const [photosEdited, setPhotosEdited] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
   const [cropTarget, setCropTarget] = useState<{ imgSrc: string; slotIdx: number } | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -242,7 +243,7 @@ export default function ProfilePage({ user }: Props) {
       toast({ title: t("profile.photosUpdated") });
     },
     onError: (err: Error) => {
-      toast({ title: t("profile.couldNotSavePhotos"), description: err.message, variant: "destructive" });
+      setPhotoError(err.message || t("profile.couldNotSavePhotos"));
     },
   });
 
@@ -453,7 +454,7 @@ export default function ProfilePage({ user }: Props) {
           <h3 className="text-xs text-cream/40 uppercase tracking-wider font-semibold">{t("profile.photos")}</h3>
           {photosEdited && (
             <button
-              onClick={() => savePhotosMutation.mutate()}
+              onClick={() => { setPhotoError(null); savePhotosMutation.mutate(); }}
               disabled={savePhotosMutation.isPending}
               data-testid="button-save-photos"
               className="px-4 py-1.5 rounded-full text-xs font-bold disabled:opacity-50"
@@ -463,6 +464,9 @@ export default function ProfilePage({ user }: Props) {
             </button>
           )}
         </div>
+        {photoError && (
+          <p className="text-xs mt-2 font-medium" style={{ color: "#d4608a" }}>{photoError}</p>
+        )}
         <div className="grid grid-cols-3 gap-2">
           {Array.from({ length: 6 }).map((_, idx) => {
             const photo = localPhotos[idx];

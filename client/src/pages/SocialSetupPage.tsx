@@ -67,6 +67,7 @@ export default function SocialSetupPage({ user }: Props) {
   const [selfie, setSelfie] = useState<string | null>(null);
   const [cropTarget, setCropTarget] = useState<{ imgSrc: string; index: number | "selfie" } | null>(null);
   const [selfieChecking, setSelfieChecking] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const selfieInputRef = useRef<HTMLInputElement>(null);
   const photoInputRefs = [
@@ -119,7 +120,7 @@ export default function SocialSetupPage({ user }: Props) {
       setLocation("/discover");
     },
     onError: (err: Error) => {
-      toast({ title: t("setup.couldNotSave"), description: err.message, variant: "destructive" });
+      setSaveError(err.message || t("setup.couldNotSave"));
     },
   });
 
@@ -558,8 +559,11 @@ export default function SocialSetupPage({ user }: Props) {
                 >
                   {t("common.back")}
                 </button>
+                {saveError && (
+                  <p className="w-full text-xs text-center font-medium mb-1" style={{ color: "#d4608a" }}>{saveError}</p>
+                )}
                 <button
-                  onClick={() => mutation.mutate()}
+                  onClick={() => { setSaveError(null); mutation.mutate(); }}
                   disabled={!canSubmit || mutation.isPending}
                   data-testid="button-complete-setup"
                   className="flex-1 py-4 rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2"

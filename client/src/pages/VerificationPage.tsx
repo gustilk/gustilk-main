@@ -3,16 +3,16 @@ import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Camera, Upload, CheckCircle, ArrowRight, Shield } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import type { SafeUser } from "@shared/schema";
 
 interface Props { user: SafeUser }
 
 export default function VerificationPage({ user }: Props) {
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
   const [step, setStep] = useState<"intro" | "capture" | "preview" | "done">("intro");
   const [selfieData, setSelfieData] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const submitMutation = useMutation({
@@ -28,7 +28,7 @@ export default function VerificationPage({ user }: Props) {
       setStep("done");
     },
     onError: () => {
-      toast({ title: "Submission failed. Please try again.", variant: "destructive" });
+      setSubmitError("Submission failed. Please try again.");
     },
   });
 
@@ -36,9 +36,10 @@ export default function VerificationPage({ user }: Props) {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      toast({ title: "Please select an image file", variant: "destructive" });
+      setFileError("Please select an image file.");
       return;
     }
+    setFileError(null);
     const reader = new FileReader();
     reader.onload = ev => {
       setSelfieData(ev.target?.result as string);
@@ -87,8 +88,11 @@ export default function VerificationPage({ user }: Props) {
             <img src={selfieData} alt="Selfie preview" className="w-full h-full object-cover" />
           </div>
           <div className="w-full space-y-3">
+            {submitError && (
+              <p className="text-xs text-center font-medium" style={{ color: "#d4608a" }}>{submitError}</p>
+            )}
             <button
-              onClick={() => submitMutation.mutate()}
+              onClick={() => { setSubmitError(null); submitMutation.mutate(); }}
               disabled={submitMutation.isPending}
               data-testid="button-submit-selfie"
               className="w-full py-4 rounded-xl font-bold text-sm disabled:opacity-60"

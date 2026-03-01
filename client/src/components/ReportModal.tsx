@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { X, Flag } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
 
 interface ReportModalProps {
   reportedUserId: string;
@@ -20,9 +19,9 @@ const REASONS = [
 ];
 
 export default function ReportModal({ reportedUserId, reportedUserName, onClose }: ReportModalProps) {
-  const { toast } = useToast();
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const reportMutation = useMutation({
     mutationFn: async () => {
@@ -34,14 +33,10 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose 
       return res.json();
     },
     onSuccess: () => {
-      toast({
-        title: "Report submitted",
-        description: "Thank you. Our team will review this report within 24 hours.",
-      });
       onClose();
     },
     onError: () => {
-      toast({ title: "Failed to submit report", variant: "destructive" });
+      setSubmitError("Failed to submit report. Please try again.");
     },
   });
 
@@ -97,8 +92,11 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose 
           />
         </div>
 
+        {submitError && (
+          <p className="text-xs mb-3 font-medium text-center" style={{ color: "#d4608a" }}>{submitError}</p>
+        )}
         <button
-          onClick={() => reportMutation.mutate()}
+          onClick={() => { setSubmitError(null); reportMutation.mutate(); }}
           disabled={!reason || reportMutation.isPending}
           data-testid="button-submit-report"
           className="w-full py-3.5 rounded-xl font-bold text-sm disabled:opacity-50 transition-all"
