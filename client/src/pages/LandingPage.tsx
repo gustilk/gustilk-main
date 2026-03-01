@@ -176,6 +176,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [showForgotMsg, setShowForgotMsg] = useState(false);
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const passwordMismatch = mode === "register" && confirmPassword.length > 0 && password !== confirmPassword;
@@ -358,6 +359,44 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
           {mode === "login" ? t("auth.signIn") : t("auth.signUp")}
         </SubmitButton>
       </form>
+
+      {mode === "login" && (
+        <div className="mt-5 text-center">
+          {!showForgotMsg ? (
+            <button
+              onClick={() => setShowForgotMsg(true)}
+              data-testid="button-forgot-password"
+              className="text-xs font-medium"
+              style={{ color: "rgba(201,168,76,0.6)" }}
+            >
+              Forgot password?
+            </button>
+          ) : (
+            <div className="rounded-xl px-4 py-3 text-left" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.2)" }}>
+              <p className="text-xs font-semibold text-gold mb-1">Password reset</p>
+              <p className="text-xs leading-relaxed" style={{ color: "rgba(253,248,240,0.55)" }}>
+                Email us at{" "}
+                <a
+                  href="mailto:support@gustilk.com"
+                  data-testid="link-support-email-password"
+                  className="font-semibold underline"
+                  style={{ color: "#c9a84c" }}
+                >
+                  support@gustilk.com
+                </a>{" "}
+                with the subject line <span className="font-semibold text-cream/70">"Reset my password"</span> and we'll send you a new one within 24 hours.
+              </p>
+              <button
+                onClick={() => setShowForgotMsg(false)}
+                className="text-xs mt-2"
+                style={{ color: "rgba(253,248,240,0.3)" }}
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -446,6 +485,7 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
   const [loading, setLoading] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [biometricError, setBiometricError] = useState<string | null>(null);
+  const [showLostDeviceMsg, setShowLostDeviceMsg] = useState(false);
 
   useEffect(() => {
     if (savedIso) return;
@@ -563,6 +603,42 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
           {t("auth.biometricCta")}
         </SubmitButton>
       </form>
+
+      <div className="mt-5 text-center">
+        {!showLostDeviceMsg ? (
+          <button
+            onClick={() => setShowLostDeviceMsg(true)}
+            data-testid="button-lost-device"
+            className="text-xs font-medium"
+            style={{ color: "rgba(201,168,76,0.6)" }}
+          >
+            Lost access to your device?
+          </button>
+        ) : (
+          <div className="rounded-xl px-4 py-3 text-left" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.2)" }}>
+            <p className="text-xs font-semibold text-gold mb-1">Account recovery</p>
+            <p className="text-xs leading-relaxed" style={{ color: "rgba(253,248,240,0.55)" }}>
+              Email us at{" "}
+              <a
+                href="mailto:support@gustilk.com"
+                data-testid="link-support-email-device"
+                className="font-semibold underline"
+                style={{ color: "#c9a84c" }}
+              >
+                support@gustilk.com
+              </a>{" "}
+              with the subject line <span className="font-semibold text-cream/70">"Recover my account"</span>. We'll verify your identity and help you register a new passkey within 24 hours.
+            </p>
+            <button
+              onClick={() => setShowLostDeviceMsg(false)}
+              className="text-xs mt-2"
+              style={{ color: "rgba(253,248,240,0.3)" }}
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
