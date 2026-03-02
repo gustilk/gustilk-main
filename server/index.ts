@@ -25,12 +25,6 @@ const app = express();
 app.set("trust proxy", 1);
 const httpServer = createServer(app);
 
-app.use((req, res, next) => {
-  if (req.hostname === "www.gustilk.com") {
-    return res.redirect(301, `https://gustilk.com${req.originalUrl}`);
-  }
-  next();
-});
 
 declare module "http" {
   interface IncomingMessage {
