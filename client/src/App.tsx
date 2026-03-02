@@ -129,9 +129,10 @@ function Router() {
 }
 
 export default function App() {
-  const [langChosen, setLangChosen] = useState<boolean>(
-    () => !!localStorage.getItem("gustilk_language")
-  );
+  const [langChosen, setLangChosen] = useState<boolean>(() => {
+    if (Object.keys(PUBLIC_POLICY_ROUTES).includes(window.location.pathname)) return true;
+    return !!localStorage.getItem("gustilk_language");
+  });
 
   useEffect(() => {
     const handler = () => {
