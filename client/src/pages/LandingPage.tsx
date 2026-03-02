@@ -46,7 +46,7 @@ export default function LandingPage() {
 
       <div className="relative z-10 text-center pb-5 px-4 space-y-2">
         <div className="flex items-center justify-center gap-3 flex-wrap">
-          <Link href="/privacy" data-testid="link-footer-privacy" className="text-cream/25 text-xs hover:text-cream/50 transition-colors">Privacy</Link>
+          <Link href="/privacy" data-testid="link-footer-privacy" className="text-cream/25 text-xs hover:text-cream/50 transition-colors">Privacy Policy</Link>
           <span className="text-cream/15 text-xs">·</span>
           <Link href="/terms" data-testid="link-footer-terms" className="text-cream/25 text-xs hover:text-cream/50 transition-colors">Terms</Link>
           <span className="text-cream/15 text-xs">·</span>
