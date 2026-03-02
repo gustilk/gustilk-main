@@ -1,0 +1,53 @@
+Refund Policy
+Last updated: March 2026
+
+This policy explains how refunds work for Gûstîlk subscriptions and purchases.
+
+1. Subscription Cancellation
+You can cancel your subscription at any time through:
+- Your Gûstîlk account settings
+- Your Apple App Store subscription settings (iOS users)
+- Your Google Play subscription settings (Android users)
+
+When you cancel, your subscription will remain active until the end of the current billing period. You will not be charged again after cancellation.
+
+2. Refund Eligibility
+We offer refunds in the following situations:
+- You were charged after cancelling your subscription
+- You were charged twice for the same subscription period
+- A technical error prevented you from accessing premium features you paid for
+- You cancelled within 48 hours of your first subscription purchase and have not used any premium features
+
+We do not offer refunds for:
+- Partial subscription periods
+- Subscriptions that have already been used
+- Change of mind after the 48-hour window
+- Accounts terminated due to violations of our Terms of Service or Community Guidelines
+
+3. App Store Purchases
+If you subscribed through the Apple App Store or Google Play, refund requests must be submitted directly to Apple or Google:
+- Apple: reportaproblem.apple.com
+- Google Play: play.google.com/store/account/subscriptions
+
+Apple and Google handle all billing for in-app purchases and their refund policies apply.
+
+4. How to Request a Refund
+To request a refund directly from Gûstîlk, contact us at:
+support@gustilk.com
+
+Please include:
+- Your registered email address or phone number
+- The date of the charge
+- The reason for your refund request
+
+We will review your request and respond within 5 business days.
+
+5. Processing Time
+Approved refunds are processed within 5-10 business days. The time for the refund to appear in your account depends on your bank or payment provider.
+
+6. Changes to This Policy
+We may update this Refund Policy from time to time. The latest version will always be available at gustilk.com/refund.
+
+7. Contact Us
+For refund questions or requests:
+support@gustilk.com
