@@ -328,8 +328,11 @@ export default {
     couldNotDelete: "لم يمكن حذف الحساب",
     guidelinesPageTitle: "إرشادات المجتمع",
     guidelinesIntro: "من خلال استخدام Gûstîlk، توافق على الالتزام بهذه المبادئ. إنها موجودة لحماية شرف مجتمعنا وسلامته والقيم المقدسة للدين الإيزيدي.",
+    guidelinesLastUpdated: "آخر تحديث: مارس 2026",
     guidelinesSection8Title: "8. تعليق الحساب",
     guidelinesSection8Body: "قد تؤدي انتهاكات هذه الإرشادات إلى تعليق مؤقت أو إزالة دائمة لحسابك. يحتفظ Gûstîlk بحق إزالة أي عضو يعرض سلامة أو نزاهة المجتمع للخطر.",
+    guidelinesContactTitle: "9. اتصل بنا",
+    guidelinesContactBody: "للإبلاغ عن انتهاك أو مخاوف:\nsupport@gustilk.com",
     privacyPageTitle: "سياسة الخصوصية",
     privacyIntro: "آخر تحديث: مارس 2026 · خصوصيتك مهمة لنا. توضح هذه السياسة كيفية جمع Gûstîlk لمعلوماتك الشخصية واستخدامها وحمايتها.",
     privacySections: [

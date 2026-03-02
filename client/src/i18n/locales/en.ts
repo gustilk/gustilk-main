@@ -328,8 +328,11 @@ export default {
     couldNotDelete: "Could not delete account",
     guidelinesPageTitle: "Community Guidelines",
     guidelinesIntro: "By using Gûstîlk, you agree to uphold these principles. They exist to protect our community's honour, safety, and the sacred values of the Yezidi faith.",
+    guidelinesLastUpdated: "Last updated: March 2026",
     guidelinesSection8Title: "8. Account Suspension",
     guidelinesSection8Body: "Violations of these guidelines may result in a temporary suspension or permanent removal of your account. Gûstîlk reserves the right to remove any member who endangers the safety or integrity of the community.",
+    guidelinesContactTitle: "9. Contact Us",
+    guidelinesContactBody: "To report a violation or concern:\nsupport@gustilk.com",
     privacyPageTitle: "Privacy Policy",
     privacyIntro: "Last updated: March 2026 · Your privacy matters to us. This policy explains how Gûstîlk collects, uses, and protects your personal information.",
     privacySections: [

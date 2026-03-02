@@ -328,8 +328,11 @@ export default {
     couldNotDelete: "Konnte das Konto nicht löschen",
     guidelinesPageTitle: "Gemeinschaftsrichtlinien",
     guidelinesIntro: "Durch die Nutzung von Gûstîlk stimmen Sie zu, diese Prinzipien einzuhalten. Sie dienen dem Schutz der Ehre, Sicherheit und heiligen Werte unseres Yezidischen Glaubens.",
+    guidelinesLastUpdated: "Zuletzt aktualisiert: März 2026",
     guidelinesSection8Title: "8. Kontosperrung",
     guidelinesSection8Body: "Verstöße gegen diese Richtlinien können zu einer vorübergehenden Sperrung oder dauerhaften Entfernung Ihres Kontos führen. Gûstîlk behält sich das Recht vor, jedes Mitglied zu entfernen, das die Sicherheit oder Integrität der Gemeinschaft gefährdet.",
+    guidelinesContactTitle: "9. Kontakt",
+    guidelinesContactBody: "Um eine Verletzung oder ein Anliegen zu melden:\nsupport@gustilk.com",
     privacyPageTitle: "Datenschutzrichtlinie",
     privacyIntro: "Zuletzt aktualisiert: März 2026 · Ihre Privatsphäre ist uns wichtig. Diese Richtlinie erklärt, wie Gûstîlk Ihre persönlichen Daten erhebt, verwendet und schützt.",
     privacySections: [
