@@ -176,7 +176,9 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
-  const [showForgotMsg, setShowForgotMsg] = useState(false);
+  const [forgotState, setForgotState] = useState<"hidden" | "form" | "sending" | "sent" | "error">("hidden");
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotError, setForgotError] = useState<string | null>(null);
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const passwordMismatch = mode === "register" && confirmPassword.length > 0 && password !== confirmPassword;
@@ -216,6 +218,34 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
       }
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function sendMagicLink(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = forgotEmail.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setForgotError("Please enter a valid email address.");
+      return;
+    }
+    setForgotState("sending");
+    setForgotError(null);
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmed }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setForgotError(data.error ?? "Something went wrong. Please try again.");
+        setForgotState("error");
+      } else {
+        setForgotState("sent");
+      }
+    } catch {
+      setForgotError("Network error — please check your connection and try again.");
+      setForgotState("error");
     }
   }
 
@@ -362,32 +392,67 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
 
       {mode === "login" && (
         <div className="mt-5 text-center">
-          {!showForgotMsg ? (
+          {forgotState === "hidden" && (
             <button
-              onClick={() => setShowForgotMsg(true)}
+              onClick={() => { setForgotState("form"); setForgotEmail(email.trim()); setForgotError(null); }}
               data-testid="button-forgot-password"
               className="text-xs font-medium"
               style={{ color: "rgba(201,168,76,0.6)" }}
             >
               Forgot password?
             </button>
-          ) : (
+          )}
+          {(forgotState === "form" || forgotState === "sending" || forgotState === "error") && (
             <div className="rounded-xl px-4 py-3 text-left" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.2)" }}>
-              <p className="text-xs font-semibold text-gold mb-1">Password reset</p>
+              <p className="text-xs font-semibold text-gold mb-2">Sign in with a magic link</p>
+              <p className="text-xs mb-3" style={{ color: "rgba(253,248,240,0.5)" }}>
+                We'll email you a one-click sign-in link that expires in 15 minutes.
+              </p>
+              <form onSubmit={sendMagicLink} className="space-y-2">
+                <input
+                  type="email"
+                  placeholder="Your email address"
+                  value={forgotEmail}
+                  onChange={e => setForgotEmail(e.target.value)}
+                  data-testid="input-forgot-email"
+                  className="w-full px-3 py-2 rounded-lg text-sm text-cream placeholder-cream/30 outline-none"
+                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(201,168,76,0.25)" }}
+                  disabled={forgotState === "sending"}
+                  autoFocus
+                />
+                {forgotError && (
+                  <p className="text-xs" style={{ color: "#ef4444" }} data-testid="text-forgot-error">{forgotError}</p>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={forgotState === "sending"}
+                    data-testid="button-send-magic-link"
+                    className="flex-1 py-2 rounded-lg text-xs font-bold disabled:opacity-60"
+                    style={{ background: "linear-gradient(135deg,#c9a84c,#e8c97a)", color: "#1a0a2e" }}
+                  >
+                    {forgotState === "sending" ? "Sending…" : "Send magic link"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForgotState("hidden")}
+                    className="px-3 py-2 rounded-lg text-xs"
+                    style={{ color: "rgba(253,248,240,0.35)" }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+          {forgotState === "sent" && (
+            <div className="rounded-xl px-4 py-3 text-left" style={{ background: "rgba(16,185,129,0.07)", border: "1px solid rgba(16,185,129,0.25)" }}>
+              <p className="text-xs font-semibold mb-1" style={{ color: "#10b981" }} data-testid="text-magic-link-sent">Magic link sent!</p>
               <p className="text-xs leading-relaxed" style={{ color: "rgba(253,248,240,0.55)" }}>
-                Email us at{" "}
-                <a
-                  href="mailto:support@gustilk.com"
-                  data-testid="link-support-email-password"
-                  className="font-semibold underline"
-                  style={{ color: "#c9a84c" }}
-                >
-                  support@gustilk.com
-                </a>{" "}
-                with the subject line <span className="font-semibold text-cream/70">"Reset my password"</span> and we'll send you a new one within 24 hours.
+                Check your inbox at <span className="font-semibold text-cream/80">{forgotEmail}</span>. Click the link in the email to sign in instantly.
               </p>
               <button
-                onClick={() => setShowForgotMsg(false)}
+                onClick={() => setForgotState("hidden")}
                 className="text-xs mt-2"
                 style={{ color: "rgba(253,248,240,0.3)" }}
               >

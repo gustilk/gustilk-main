@@ -2,14 +2,15 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupSession, registerAuthRoutes, isAuthenticated } from "./auth";
-import { profileUpdateSchema, users, matches, messages, events, eventAttendees } from "@shared/schema";
+import { profileUpdateSchema, users, matches, messages, events, eventAttendees, magicLinkTokens } from "@shared/schema";
 import { verifyCountryFromRequest, verifyIraqFromRequest, getClientIp, lookupIpCountry } from "./geo";
 import { setupWs } from "./ws";
 import { z } from "zod";
 import { moderatePhotos, checkFacePresent } from "./moderation";
 import { db } from "./db";
 import { count, sql, eq, asc, desc, or, and, ilike } from "drizzle-orm";
-import { randomUUID } from "crypto";
+import { randomUUID, randomBytes } from "crypto";
+import { sendMagicLinkEmail } from "./email";
 
 function getUserId(req: any): string {
   return req.session?.userId;
@@ -29,6 +30,66 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       res.json({ countryCode: geo?.countryCode ?? null });
     } catch {
       res.json({ countryCode: null });
+    }
+  });
+
+  // ─── MAGIC LINK AUTH ─────────────────────────────────────
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const { email } = z.object({ email: z.string().email() }).parse(req.body);
+      const [user] = await db
+        .select({ id: users.id, email: users.email })
+        .from(users)
+        .where(eq(users.email, email.toLowerCase().trim()));
+      if (!user || !user.email) {
+        return res.json({ ok: true });
+      }
+      await db
+        .update(magicLinkTokens)
+        .set({ used: true })
+        .where(eq(magicLinkTokens.userId, user.id));
+      const token = randomBytes(32).toString("hex");
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+      await db.insert(magicLinkTokens).values({
+        id: randomUUID(),
+        userId: user.id,
+        token,
+        expiresAt,
+        used: false,
+      });
+      const proto = (req.get("x-forwarded-proto") as string) || req.protocol;
+      const host = req.get("x-forwarded-host") || req.get("host");
+      const baseUrl = `${proto}://${host}`;
+      const magicLink = `${baseUrl}/api/auth/magic-link?token=${token}`;
+      await sendMagicLinkEmail(user.email, magicLink);
+      return res.json({ ok: true });
+    } catch (err: any) {
+      if (err instanceof z.ZodError) return res.status(400).json({ error: "Invalid email address" });
+      console.error("[forgot-password]", err?.message ?? err);
+      return res.status(500).json({ error: "Failed to send email. Please try again." });
+    }
+  });
+
+  app.get("/api/auth/magic-link", async (req, res) => {
+    try {
+      const token = String(req.query.token ?? "");
+      if (!token) return res.redirect("/?magic=invalid");
+      const [row] = await db
+        .select()
+        .from(magicLinkTokens)
+        .where(eq(magicLinkTokens.token, token));
+      if (!row || row.used || !row.expiresAt || row.expiresAt < new Date()) {
+        return res.redirect("/?magic=invalid");
+      }
+      await db
+        .update(magicLinkTokens)
+        .set({ used: true })
+        .where(eq(magicLinkTokens.id, row.id));
+      (req.session as any).userId = row.userId;
+      req.session.save(() => res.redirect("/"));
+    } catch (err: any) {
+      console.error("[magic-link]", err?.message ?? err);
+      return res.redirect("/?magic=invalid");
     }
   });
 

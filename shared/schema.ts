@@ -27,6 +27,15 @@ export const otpCodes = pgTable("otp_codes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const magicLinkTokens = pgTable("magic_link_tokens", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const likes = pgTable("likes", {
   id: varchar("id", { length: 36 }).primaryKey(),
   fromUserId: varchar("from_user_id").notNull().references(() => users.id),
