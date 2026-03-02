@@ -328,8 +328,11 @@ export default {
     couldNotDelete: "Could not delete account",
     guidelinesPageTitle: "Community Guidelines",
     guidelinesIntro: "By using Gûstîlk, you agree to uphold these principles. They exist to protect our community's honour, safety, and the sacred values of the Yezidi faith.",
+    guidelinesLastUpdated: "Last updated: March 2026",
     guidelinesSection8Title: "8. Account Suspension",
     guidelinesSection8Body: "Violations of these guidelines may result in a temporary suspension or permanent removal of your account. Gûstîlk reserves the right to remove any member who endangers the safety or integrity of the community.",
+    guidelinesContactTitle: "9. Contact Us",
+    guidelinesContactBody: "To report a violation or concern:\nsupport@gustilk.com",
     privacyPageTitle: "Privacy Policy",
     privacyIntro: "Last updated: March 2026 · Your privacy matters to us. This policy explains how Gûstîlk collects, uses, and protects your personal information.",
     privacySections: [
@@ -404,13 +407,15 @@ export default {
   },
   refund: {
     pageTitle: "Refund Policy",
-    intro: "Gûstîlk offers premium subscriptions to unlock additional features. This policy explains how cancellations and refunds are handled.",
+    intro: "Last updated: March 2026 · This policy explains how refunds work for Gûstîlk subscriptions and purchases.",
     sections: [
-      { title: "Subscription Cancellation", body: "You may cancel your premium subscription at any time. Cancellation takes effect at the end of your current billing period. You retain access to premium features until the period ends." },
-      { title: "Refund Eligibility", body: "We offer a 7-day refund window for first-time premium purchases. If you are not satisfied, contact us within 7 days of your initial purchase. Renewal charges are generally non-refundable." },
-      { title: "How to Request a Refund", body: "Email us at support@gustilk.com with the subject line 'Refund Request', including your registered email address. We aim to process refund requests within 5 business days." },
-      { title: "Exceptions", body: "Refunds will not be issued for accounts suspended or terminated due to violations of our Terms of Service or Community Guidelines." },
-      { title: "Contact", body: "For billing or refund questions, email support@gustilk.com." },
+      { title: "1. Subscription Cancellation", body: "You can cancel your subscription at any time through your Gûstîlk account settings, your Apple App Store subscription settings (iOS users), or your Google Play subscription settings (Android users). When you cancel, your subscription will remain active until the end of the current billing period. You will not be charged again after cancellation." },
+      { title: "2. Refund Eligibility", body: "We offer refunds if you were charged after cancelling your subscription, charged twice for the same subscription period, experienced a technical error preventing access to premium features you paid for, or cancelled within 48 hours of your first subscription purchase and have not used any premium features. We do not offer refunds for partial subscription periods, subscriptions that have already been used, change of mind after the 48-hour window, or accounts terminated due to violations of our Terms of Service or Community Guidelines." },
+      { title: "3. App Store Purchases", body: "If you subscribed through the Apple App Store or Google Play, refund requests must be submitted directly to Apple or Google. Apple: reportaproblem.apple.com. Google Play: play.google.com/store/account/subscriptions. Apple and Google handle all billing for in-app purchases and their refund policies apply." },
+      { title: "4. How to Request a Refund", body: "To request a refund directly from Gûstîlk, contact us at support@gustilk.com. Please include your registered email address or phone number, the date of the charge, and the reason for your refund request. We will review your request and respond within 5 business days." },
+      { title: "5. Processing Time", body: "Approved refunds are processed within 5–10 business days. The time for the refund to appear in your account depends on your bank or payment provider." },
+      { title: "6. Changes to This Policy", body: "We may update this Refund Policy from time to time. The latest version will always be available at gustilk.com/refund." },
+      { title: "7. Contact Us", body: "For refund questions or requests, contact us at support@gustilk.com." },
     ],
   },
 };

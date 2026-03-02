@@ -328,8 +328,11 @@ export default {
     couldNotDelete: "Konnte das Konto nicht löschen",
     guidelinesPageTitle: "Gemeinschaftsrichtlinien",
     guidelinesIntro: "Durch die Nutzung von Gûstîlk stimmen Sie zu, diese Prinzipien einzuhalten. Sie dienen dem Schutz der Ehre, Sicherheit und heiligen Werte unseres Yezidischen Glaubens.",
+    guidelinesLastUpdated: "Zuletzt aktualisiert: März 2026",
     guidelinesSection8Title: "8. Kontosperrung",
     guidelinesSection8Body: "Verstöße gegen diese Richtlinien können zu einer vorübergehenden Sperrung oder dauerhaften Entfernung Ihres Kontos führen. Gûstîlk behält sich das Recht vor, jedes Mitglied zu entfernen, das die Sicherheit oder Integrität der Gemeinschaft gefährdet.",
+    guidelinesContactTitle: "9. Kontakt",
+    guidelinesContactBody: "Um eine Verletzung oder ein Anliegen zu melden:\nsupport@gustilk.com",
     privacyPageTitle: "Datenschutzrichtlinie",
     privacyIntro: "Zuletzt aktualisiert: März 2026 · Ihre Privatsphäre ist uns wichtig. Diese Richtlinie erklärt, wie Gûstîlk Ihre persönlichen Daten erhebt, verwendet und schützt.",
     privacySections: [
@@ -404,13 +407,15 @@ export default {
   },
   refund: {
     pageTitle: "Rückerstattungsrichtlinie",
-    intro: "Gûstîlk bietet Premium-Abonnements an. Diese Richtlinie erklärt, wie Kündigungen und Rückerstattungen gehandhabt werden.",
+    intro: "Zuletzt aktualisiert: März 2026 · Diese Richtlinie erklärt, wie Rückerstattungen für Gûstîlk-Abonnements und -Käufe funktionieren.",
     sections: [
-      { title: "Abonnementkündigung", body: "Sie können Ihr Abonnement jederzeit kündigen. Die Kündigung tritt am Ende der Abrechnungsperiode in Kraft." },
-      { title: "Rückerstattungsberechtigung", body: "Für Erstkäufe bieten wir ein 7-tägiges Rückerstattungsfenster. Erneuerte Abonnements sind in der Regel nicht erstattungsfähig." },
-      { title: "Rückerstattung beantragen", body: "Senden Sie eine E-Mail an support@gustilk.com mit dem Betreff 'Rückerstattungsanfrage'. Wir bearbeiten Anfragen innerhalb von 5 Werktagen." },
-      { title: "Ausnahmen", body: "Rückerstattungen werden nicht für gesperrte Konten gewährt, die gegen unsere Bedingungen verstoßen haben." },
-      { title: "Kontakt", body: "Bei Fragen: support@gustilk.com." },
+      { title: "1. Abonnementkündigung", body: "Sie können Ihr Abonnement jederzeit kündigen: über Ihre Gûstîlk-Kontoeinstellungen, Ihre Apple App Store-Abonnementeinstellungen (iOS-Nutzer) oder Ihre Google Play-Abonnementeinstellungen (Android-Nutzer). Nach der Kündigung bleibt Ihr Abonnement bis zum Ende der aktuellen Abrechnungsperiode aktiv. Nach der Kündigung werden Ihnen keine weiteren Gebühren berechnet." },
+      { title: "2. Rückerstattungsberechtigung", body: "Wir bieten Rückerstattungen in folgenden Fällen: Sie wurden nach der Kündigung belastet, Sie wurden zweimal für denselben Abrechnungszeitraum belastet, ein technischer Fehler verhinderte den Zugang zu bezahlten Premium-Funktionen, oder Sie haben innerhalb von 48 Stunden nach Ihrem ersten Abonnementabschluss gekündigt und keine Premium-Funktionen genutzt. Keine Rückerstattung für: anteilige Zeiträume, bereits genutzte Abonnements, Meinungsänderung nach dem 48-Stunden-Fenster oder Konten, die wegen Verstößen gegen unsere Nutzungsbedingungen oder Gemeinschaftsrichtlinien gekündigt wurden." },
+      { title: "3. App-Store-Käufe", body: "Wenn Sie über den Apple App Store oder Google Play abonniert haben, müssen Rückerstattungsanfragen direkt bei Apple oder Google eingereicht werden. Apple: reportaproblem.apple.com. Google Play: play.google.com/store/account/subscriptions. Apple und Google verwalten alle Abrechnungen für In-App-Käufe und deren Rückerstattungsrichtlinien gelten." },
+      { title: "4. Rückerstattung beantragen", body: "Um eine Rückerstattung direkt bei Gûstîlk zu beantragen, kontaktieren Sie uns unter support@gustilk.com. Bitte geben Sie an: Ihre registrierte E-Mail-Adresse oder Telefonnummer, das Datum der Belastung und den Grund für Ihren Antrag. Wir prüfen Ihren Antrag und antworten innerhalb von 5 Werktagen." },
+      { title: "5. Bearbeitungszeit", body: "Genehmigte Rückerstattungen werden innerhalb von 5–10 Werktagen bearbeitet. Die Zeit bis zur Gutschrift auf Ihrem Konto hängt von Ihrer Bank oder Ihrem Zahlungsanbieter ab." },
+      { title: "6. Änderungen dieser Richtlinie", body: "Wir können diese Rückerstattungsrichtlinie von Zeit zu Zeit aktualisieren. Die neueste Version ist stets unter gustilk.com/refund verfügbar." },
+      { title: "7. Kontakt", body: "Für Rückerstattungsfragen oder -anträge erreichen Sie uns unter support@gustilk.com." },
     ],
   },
 };
