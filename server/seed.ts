@@ -156,9 +156,9 @@ const seedEvents = [
 
 export async function seedDatabase() {
   try {
-    const [existingAdmin] = await db.select({ id: users.id }).from(users).where(eq(users.email, "admin@gustilk.com"));
+    const [existingAdmin] = await db.select({ id: users.id, passwordHash: users.passwordHash }).from(users).where(eq(users.email, "admin@gustilk.com"));
+    const adminHash = await bcrypt.hash("admin1234", 10);
     if (!existingAdmin) {
-      const adminHash = await bcrypt.hash("admin1234", 10);
       await db.insert(users).values({
         id: randomUUID(),
         email: "admin@gustilk.com",
@@ -177,6 +177,9 @@ export async function seedDatabase() {
         isVerified: true,
       });
       console.log("Seeded admin user.");
+    } else {
+      await db.update(users).set({ passwordHash: adminHash, isAdmin: true }).where(eq(users.email, "admin@gustilk.com"));
+      console.log("Admin credentials refreshed.");
     }
 
     const [{ value: userCount }] = await db.select({ value: count() }).from(users);
