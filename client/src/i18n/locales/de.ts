@@ -367,4 +367,36 @@ export default {
     permNotGrantedDesc: "Aktivieren Sie Benachrichtigungen in Ihren Browsereinstellungen, um Benachrichtigungen zu erhalten.",
     footer: "Gûstîlk · Jesidische Gemeinschaft",
   },
+  ageGate: {
+    title: "Altersverifizierung",
+    body: "Sie müssen 18 Jahre oder älter sein, um ein Konto bei Gûstîlk zu erstellen.",
+    confirmYes: "Ja, ich bin 18 oder älter",
+    confirmNo: "Nein, ich bin unter 18",
+    blockedTitle: "Zugang gesperrt",
+    blockedBody: "Gûstîlk steht nur Nutzern ab 18 Jahren zur Verfügung. Wir können derzeit kein Konto für Sie anlegen.",
+    blockedBack: "Zurück",
+  },
+  terms: {
+    pageTitle: "Nutzungsbedingungen",
+    intro: "Durch die Nutzung von Gûstîlk stimmen Sie den folgenden Bedingungen zu. Bitte lesen Sie diese sorgfältig.",
+    sections: [
+      { title: "1. Nutzerverantwortung", body: "Sie sind für alle Inhalte und Aktivitäten in Ihrem Konto verantwortlich. Sie verpflichten sich, Gûstîlk nur für rechtmäßige Zwecke zu nutzen." },
+      { title: "2. Akzeptable Nutzung", body: "Es ist nicht gestattet, andere Mitglieder zu belästigen, zu bedrohen oder zu täuschen, anstößige Inhalte zu posten oder gefälschte Profile zu erstellen." },
+      { title: "3. Kontokündigung", body: "Wir behalten uns das Recht vor, jedes Konto, das gegen diese Bedingungen oder unsere Richtlinien verstößt, nach eigenem Ermessen zu sperren oder zu kündigen." },
+      { title: "4. Haftungsbeschränkung", body: "Gûstîlk wird ohne jegliche Garantien bereitgestellt. Wir haften nicht für Schäden, die aus der Nutzung der App entstehen." },
+      { title: "5. Änderungen der Bedingungen", body: "Wir können diese Bedingungen jederzeit aktualisieren. Die weitere Nutzung gilt als Zustimmung." },
+      { title: "6. Kontakt", body: "Fragen? Schreiben Sie uns an support@gustilk.com." },
+    ],
+  },
+  refund: {
+    pageTitle: "Rückerstattungsrichtlinie",
+    intro: "Gûstîlk bietet Premium-Abonnements an. Diese Richtlinie erklärt, wie Kündigungen und Rückerstattungen gehandhabt werden.",
+    sections: [
+      { title: "Abonnementkündigung", body: "Sie können Ihr Abonnement jederzeit kündigen. Die Kündigung tritt am Ende der Abrechnungsperiode in Kraft." },
+      { title: "Rückerstattungsberechtigung", body: "Für Erstkäufe bieten wir ein 7-tägiges Rückerstattungsfenster. Erneuerte Abonnements sind in der Regel nicht erstattungsfähig." },
+      { title: "Rückerstattung beantragen", body: "Senden Sie eine E-Mail an support@gustilk.com mit dem Betreff 'Rückerstattungsanfrage'. Wir bearbeiten Anfragen innerhalb von 5 Werktagen." },
+      { title: "Ausnahmen", body: "Rückerstattungen werden nicht für gesperrte Konten gewährt, die gegen unsere Bedingungen verstoßen haben." },
+      { title: "Kontakt", body: "Bei Fragen: support@gustilk.com." },
+    ],
+  },
 };

@@ -22,7 +22,18 @@ import LanguageSelectPage from "@/pages/LanguageSelectPage";
 import BottomNav from "@/components/BottomNav";
 import VideoCallPage, { IncomingCallBanner } from "@/pages/VideoCallPage";
 import { VideoCallContext, useVideoCallProvider } from "@/hooks/useVideoCall";
+import TermsPage from "@/pages/TermsPage";
+import RefundPage from "@/pages/RefundPage";
+import PrivacyPage from "@/pages/PrivacyPage";
+import GuidelinesPage from "@/pages/GuidelinesPage";
 import type { User } from "@shared/schema";
+
+const PUBLIC_POLICY_ROUTES: Record<string, React.ComponentType> = {
+  "/terms": TermsPage,
+  "/refund": RefundPage,
+  "/privacy": PrivacyPage,
+  "/guidelines": GuidelinesPage,
+};
 
 function useGustilkUser() {
   return useQuery<{ user: User } | null>({
@@ -93,7 +104,11 @@ function AppShell({ user }: { user: User }) {
 }
 
 function Router() {
+  const [location] = useLocation();
   const { data, isLoading } = useGustilkUser();
+
+  const PolicyComponent = PUBLIC_POLICY_ROUTES[location];
+  if (PolicyComponent) return <PolicyComponent />;
 
   if (isLoading) {
     return (

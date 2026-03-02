@@ -367,4 +367,36 @@ export default {
     permNotGrantedDesc: "Enable notifications in your browser settings to receive alerts.",
     footer: "Gûstîlk · Yezidi Community",
   },
+  ageGate: {
+    title: "Age Verification",
+    body: "You must be 18 years or older to create an account on Gûstîlk.",
+    confirmYes: "Yes, I am 18 or older",
+    confirmNo: "No, I am under 18",
+    blockedTitle: "Access Restricted",
+    blockedBody: "Gûstîlk is only available to users who are 18 years of age or older. We are unable to create an account for you at this time.",
+    blockedBack: "Go back",
+  },
+  terms: {
+    pageTitle: "Terms of Service",
+    intro: "By using Gûstîlk, you agree to the following terms and conditions. Please read them carefully.",
+    sections: [
+      { title: "1. User Responsibilities", body: "You are responsible for all content you post and all activity under your account. You agree to use Gûstîlk only for lawful purposes and in a way that does not infringe the rights of others." },
+      { title: "2. Acceptable Use", body: "You may not use Gûstîlk to harass, threaten, or deceive other members; post offensive or explicit content; create fake profiles or impersonate others; or engage in commercial solicitation." },
+      { title: "3. Account Termination", body: "We reserve the right to suspend or permanently terminate any account that violates these Terms or our Community Guidelines, at our sole discretion and without prior notice." },
+      { title: "4. Limitation of Liability", body: "Gûstîlk is provided 'as is' without warranties of any kind. We are not liable for damages arising from your use of the app, including loss of data or interactions with other members." },
+      { title: "5. Changes to Terms", body: "We may update these Terms at any time. Continued use of the app after changes constitutes acceptance of the updated Terms. Significant changes will be communicated via the app." },
+      { title: "6. Contact", body: "Questions about these Terms? Email us at support@gustilk.com." },
+    ],
+  },
+  refund: {
+    pageTitle: "Refund Policy",
+    intro: "Gûstîlk offers premium subscriptions to unlock additional features. This policy explains how cancellations and refunds are handled.",
+    sections: [
+      { title: "Subscription Cancellation", body: "You may cancel your premium subscription at any time. Cancellation takes effect at the end of your current billing period. You retain access to premium features until the period ends." },
+      { title: "Refund Eligibility", body: "We offer a 7-day refund window for first-time premium purchases. If you are not satisfied, contact us within 7 days of your initial purchase. Renewal charges are generally non-refundable." },
+      { title: "How to Request a Refund", body: "Email us at support@gustilk.com with the subject line 'Refund Request', including your registered email address. We aim to process refund requests within 5 business days." },
+      { title: "Exceptions", body: "Refunds will not be issued for accounts suspended or terminated due to violations of our Terms of Service or Community Guidelines." },
+      { title: "Contact", body: "For billing or refund questions, email support@gustilk.com." },
+    ],
+  },
 };

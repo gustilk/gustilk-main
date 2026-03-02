@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Link } from "wouter";
 import { Heart, Shield, Users, Eye, EyeOff, Phone, Mail, ArrowLeft, Globe, ChevronDown, Search, X, Fingerprint } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useTranslation } from "react-i18next";
@@ -43,8 +44,17 @@ export default function LandingPage() {
         {screen === "phone" && <PhoneScreen onBack={() => setScreen("home")} />}
       </div>
 
-      <div className="relative z-10 text-center pb-5">
-        <p className="text-cream/20 text-xs">© 2026 Gûstîlk · Built with love for the Yezidi community</p>
+      <div className="relative z-10 text-center pb-5 px-4 space-y-2">
+        <div className="flex items-center justify-center gap-3 flex-wrap">
+          <Link href="/privacy" data-testid="link-footer-privacy" className="text-cream/25 text-xs hover:text-cream/50 transition-colors">Privacy</Link>
+          <span className="text-cream/15 text-xs">·</span>
+          <Link href="/terms" data-testid="link-footer-terms" className="text-cream/25 text-xs hover:text-cream/50 transition-colors">Terms</Link>
+          <span className="text-cream/15 text-xs">·</span>
+          <Link href="/refund" data-testid="link-footer-refund" className="text-cream/25 text-xs hover:text-cream/50 transition-colors">Refunds</Link>
+          <span className="text-cream/15 text-xs">·</span>
+          <Link href="/guidelines" data-testid="link-footer-guidelines" className="text-cream/25 text-xs hover:text-cream/50 transition-colors">Guidelines</Link>
+        </div>
+        <p className="text-cream/15 text-xs">© 2026 Gûstîlk · Built with love for the Yezidi community</p>
       </div>
     </div>
   );
@@ -179,6 +189,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
   const [forgotState, setForgotState] = useState<"hidden" | "form" | "sending" | "sent" | "error">("hidden");
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotError, setForgotError] = useState<string | null>(null);
+  const [ageStatus, setAgeStatus] = useState<"unchecked" | "confirmed" | "blocked">("unchecked");
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const passwordMismatch = mode === "register" && confirmPassword.length > 0 && password !== confirmPassword;
@@ -260,7 +271,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
         {(["login", "register"] as const).map(m => (
           <button
             key={m}
-            onClick={() => { setMode(m); setConfirmPassword(""); setFirstName(""); setLastName(""); }}
+            onClick={() => { setMode(m); setConfirmPassword(""); setFirstName(""); setLastName(""); if (m === "register") setAgeStatus("unchecked"); }}
             data-testid={`tab-${m}`}
             className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
             style={mode === m
@@ -273,7 +284,54 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
         ))}
       </div>
 
-      <form onSubmit={submit} className="space-y-4">
+      {mode === "register" && ageStatus === "unchecked" && (
+        <div className="animate-slide-up space-y-5">
+          <div className="rounded-2xl p-5 text-center" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.2)" }}>
+            <div className="text-3xl mb-3">🔞</div>
+            <h2 className="font-serif text-lg text-gold mb-2" data-testid="text-age-gate-title">{t("ageGate.title")}</h2>
+            <p className="text-cream/55 text-sm leading-relaxed">{t("ageGate.body")}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setAgeStatus("confirmed")}
+            data-testid="button-age-yes"
+            className="w-full py-3.5 rounded-2xl font-bold text-base"
+            style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
+          >
+            {t("ageGate.confirmYes")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setAgeStatus("blocked")}
+            data-testid="button-age-no"
+            className="w-full py-3.5 rounded-2xl font-semibold text-sm"
+            style={{ background: "rgba(255,255,255,0.05)", color: "rgba(253,248,240,0.45)", border: "1px solid rgba(255,255,255,0.1)" }}
+          >
+            {t("ageGate.confirmNo")}
+          </button>
+        </div>
+      )}
+
+      {mode === "register" && ageStatus === "blocked" && (
+        <div className="animate-slide-up space-y-4">
+          <div className="rounded-2xl p-5 text-center" style={{ background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.2)" }}>
+            <div className="text-3xl mb-3">🚫</div>
+            <h2 className="font-serif text-lg mb-2" style={{ color: "#ef4444" }} data-testid="text-age-blocked-title">{t("ageGate.blockedTitle")}</h2>
+            <p className="text-cream/50 text-sm leading-relaxed">{t("ageGate.blockedBody")}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => { setAgeStatus("unchecked"); setMode("login"); }}
+            data-testid="button-age-blocked-back"
+            className="w-full py-3 rounded-2xl text-sm font-semibold"
+            style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.5)" }}
+          >
+            {t("ageGate.blockedBack")}
+          </button>
+        </div>
+      )}
+
+      {(mode === "login" || ageStatus === "confirmed") && <form onSubmit={submit} className="space-y-4">
         {mode === "register" && (
           <div className="flex gap-3">
             <div className="flex-1">
@@ -388,7 +446,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
         <SubmitButton loading={loading} loadingText={t("auth.pleaseWait")} disabled={!canSubmit}>
           {mode === "login" ? t("auth.signIn") : t("auth.signUp")}
         </SubmitButton>
-      </form>
+      </form>}
 
       {mode === "login" && (
         <div className="mt-5 text-center">
