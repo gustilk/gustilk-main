@@ -1,0 +1,63 @@
+Privacy Policy
+Last updated: March 2026
+
+Your privacy matters to us. This policy explains how Gûstîlk collects, uses, and protects your personal information.
+
+1. Who We Are
+Gûstîlk is a dating app designed exclusively for the Yezidi community. For privacy questions, contact us at support@gustilk.com.
+
+2. Information We Collect
+We collect information you provide when creating your profile:
+- Name, age, and gender
+- Location (used for nearby matching)
+- Photos and verification selfie
+- Email address or phone number
+- Community background information
+
+We also collect usage data such as app interactions and device information to improve your experience.
+
+3. How We Use Your Information
+- To match you with compatible members
+- To verify your identity and community membership
+- To send important account emails (magic links, recovery)
+- To moderate profile photos for appropriate content
+- To improve app performance and user experience
+
+4. Third Party Services
+We use the following trusted services to operate the app:
+- OpenAI — to automatically moderate profile photos for inappropriate content. Photos are processed and not stored by OpenAI.
+- Resend — to send account emails such as login links and recovery emails.
+- Neon — secure encrypted database hosting for your data.
+
+We do not sell your personal information to any third party.
+
+5. Location Data
+We collect your location to show you nearby members. Your precise location is never shared publicly — only an approximate distance is shown to other users. You can disable location access in your device settings at any time.
+
+6. Photo Storage
+Your profile photos and verification selfie are stored securely on encrypted servers. Your verification selfie is only visible to our admin team and is never shown publicly or shared with other users.
+
+7. Children's Privacy
+Gûstîlk is strictly for users aged 18 and older. We do not knowingly collect information from anyone under 18. If we discover a user is under 18, their account will be immediately deleted.
+
+8. Your Rights
+You have the right to:
+- Access the personal data we hold about you
+- Correct any inaccurate information
+- Delete your account and all associated data
+- Request a copy of your data
+
+To exercise any of these rights, contact us at support@gustilk.com.
+
+9. Account Deletion
+When you delete your account, all your personal data, photos, matches, and messages are permanently removed from our servers within 30 days.
+
+10. Data Security
+We take security seriously. Your data is stored on encrypted servers. In the unlikely event of a data breach that affects your personal information, we will notify you promptly via email.
+
+11. Policy Updates
+We may update this Privacy Policy from time to time. When we do, we will notify you through the app and update the "Last updated" date at the top of this page. Continued use of the app after changes means you accept the updated policy.
+
+12. Contact Us
+For any privacy-related questions, data requests, or concerns:
+support@gustilk.com
