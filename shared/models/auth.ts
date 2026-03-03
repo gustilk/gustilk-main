@@ -56,6 +56,8 @@ export const users = pgTable("users", {
   isPremium: boolean("is_premium").default(false),
   premiumUntil: timestamp("premium_until"),
   isAdmin: boolean("is_admin").default(false),
+  activitySeenAt: timestamp("activity_seen_at"),
+  matchesSeenAt: timestamp("matches_seen_at"),
 });
 
 export type UpsertUser = typeof users.$inferInsert;
