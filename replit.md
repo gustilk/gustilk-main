@@ -3,6 +3,7 @@
 A culturally sensitive dating platform designed exclusively for the Yezidi community, respecting traditional values and the caste system.
 
 ## Recent Changes
+- **Admin routing fixed (UserDetailPage)**: The root cause was wouter v3's wildcard route (`/admin/:rest*`) silently creating a nested routing context that stripped `/admin` from all paths seen by `useLocation`/`useRoute` inside AdminLayout. Fixed by rendering the admin panel **outside** the wouter Switch/Route entirely via a direct `isAdminRoute` location check in AppShell. AdminLayout now uses `useRoute()` hooks (not string parsing) for reliable sub-page matching.
 - **Full Admin Panel (28 sub-pages)**: Lazy-loaded at `/admin/*`. Includes Dashboard, Users (paginated), User Detail, Approvals, Verification Queue, Reports, Moderation, Blacklist, Duplicates, Analytics (with daily bar chart), Payments, Promo Codes, Referrals, Notifications, Announcements, Email Templates, Feedback, Caste Management, Events, Success Stories, Translations, Team, Audit Logs, App Settings, App Store, Export (CSV), System Health, Backups. All backed by `server/admin-routes.ts` with 6 new DB tables.
 - **Block feature complete**: Users can block/unblock others via ReportModal and from Settings → Blocked Users list. Routes: `POST /api/users/:userId/block`, `DELETE /api/users/:userId/block`, `GET /api/blocks`.
 

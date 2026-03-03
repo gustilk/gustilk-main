@@ -81,10 +81,10 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
                     <p className="text-cream/40 text-xs mt-0.5">{u.city}, {u.country} · {u.age} yrs · Registered {timeAgo}</p>
                     {u.occupation && <p className="text-cream/30 text-xs">{u.occupation}</p>}
                   </div>
-                  <button onClick={() => setLocation(`/profile/${u.id}`)} data-testid={`button-view-approval-${u.id}`}
+                  <button onClick={() => setLocation(`/admin/users/${u.id}`)} data-testid={`button-view-approval-${u.id}`}
                     className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold"
                     style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}>
-                    <Eye size={11} /> Profile
+                    <Eye size={11} /> View
                   </button>
                 </div>
 
