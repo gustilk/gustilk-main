@@ -528,16 +528,45 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.post("/api/admin/verify/:userId", isAuthenticated, requireAdmin, async (req, res) => {
-    const { action } = z.object({ action: z.enum(["approve", "reject", "ban"]) }).parse(req.body);
+    const adminId = getUserId(req);
+    const targetId = req.params.userId as string;
+    const { action, reason } = z.object({
+      action: z.enum(["approve", "reject", "ban"]),
+      reason: z.string().optional(),
+    }).parse(req.body);
+
     if (action === "ban") {
-      await storage.banUser(req.params.userId as string);
+      await storage.banUser(targetId);
     } else {
-      await storage.updateVerificationStatus(
-        req.params.userId as string,
-        action === "approve" ? "approved" : "rejected",
-        action === "approve"
-      );
+      await storage.updateVerificationStatus(targetId, action === "approve" ? "approved" : "rejected", action === "approve");
     }
+
+    // Auto-message the user on reject or ban
+    if (action === "reject" || action === "ban") {
+      try {
+        const existing = await db.select().from(matches).where(
+          or(
+            and(eq(matches.user1Id, adminId), eq(matches.user2Id, targetId)),
+            and(eq(matches.user1Id, targetId), eq(matches.user2Id, adminId))
+          )
+        );
+        let matchId: string;
+        if (existing.length > 0) {
+          matchId = existing[0].id;
+        } else {
+          matchId = randomUUID();
+          await db.insert(matches).values({ id: matchId, user1Id: adminId, user2Id: targetId });
+        }
+        const defaultMsg = action === "ban"
+          ? "Your account has been suspended for violating our community guidelines."
+          : "Thank you for registering on Gûstîlk. Unfortunately, we were unable to approve your account at this time.";
+        const msg = reason?.trim() ? `${defaultMsg} ${reason.trim()}` : defaultMsg;
+        await storage.sendMessage(matchId, adminId, msg);
+      } catch (e) {
+        console.error("[verify auto-message error]", e);
+      }
+    }
+
     res.json({ ok: true });
   });
 
