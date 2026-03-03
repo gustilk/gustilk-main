@@ -210,14 +210,14 @@ function EventFormModal({ initial, isEditing, isPending, onClose, onSubmit }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: "rgba(0,0,0,0.75)" }}>
-      <div className="w-full max-w-lg rounded-t-3xl overflow-y-auto" style={{ background: "#130820", border: "1px solid rgba(201,168,76,0.2)", maxHeight: "90vh" }}>
-        <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.1)" }}>
+      <div className="w-full max-w-lg rounded-t-3xl flex flex-col" style={{ background: "#130820", border: "1px solid rgba(201,168,76,0.2)", maxHeight: "92vh" }}>
+        <div className="flex items-center justify-between px-5 py-4 flex-shrink-0" style={{ borderBottom: "1px solid rgba(201,168,76,0.1)" }}>
           <h2 className="font-serif text-lg text-gold">{isEditing ? "Edit Event" : "Create Event"}</h2>
           <button onClick={onClose} data-testid="button-close-event-form" className="text-cream/40 hover:text-cream/70">
             <X size={20} />
           </button>
         </div>
-        <div className="px-5 py-4 space-y-4">
+        <div className="px-5 py-4 space-y-4 overflow-y-auto" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 24px)" }}>
           <div>
             <label className={labelCls}>Title</label>
             <input className={inputCls} style={inputStyle} placeholder="Event title" value={form.title} onChange={e => set("title", e.target.value)} data-testid="input-event-title" />
