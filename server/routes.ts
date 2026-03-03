@@ -360,6 +360,27 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   // ─── REPORTS ──────────────────────────────────────────────
+  app.get("/api/blocks", isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const blocked = await storage.getBlockedUsers(userId);
+    res.json({ users: blocked });
+  });
+
+  app.post("/api/users/:userId/block", isAuthenticated, async (req, res) => {
+    const blockerId = getUserId(req);
+    const blockedId = String(req.params.userId);
+    if (blockerId === blockedId) return res.status(400).json({ error: "Cannot block yourself" });
+    await storage.blockUser(blockerId, blockedId);
+    res.json({ ok: true });
+  });
+
+  app.delete("/api/users/:userId/block", isAuthenticated, async (req, res) => {
+    const blockerId = getUserId(req);
+    const blockedId = String(req.params.userId);
+    await storage.unblockUser(blockerId, blockedId);
+    res.json({ ok: true });
+  });
+
   app.post("/api/reports", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const { reportedUserId, reason, description } = z.object({

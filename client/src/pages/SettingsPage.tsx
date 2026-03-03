@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -8,7 +8,7 @@ import { LANGUAGE_LIST, LangCode, setLanguage } from "@/i18n";
 import {
   ChevronLeft, ChevronRight, Globe, Bell, FileText, Shield,
   LogOut, Trash2, AlertTriangle, Lock, Heart, MessageCircle,
-  Star, CalendarDays, Smartphone, Mail, KeyRound, Phone, Eye, EyeOff, CheckCircle2,
+  Star, CalendarDays, Smartphone, Mail, KeyRound, Phone, Eye, EyeOff, CheckCircle2, ShieldX, UserX,
 } from "lucide-react";
 import type { SafeUser } from "@shared/schema";
 
@@ -40,7 +40,7 @@ function saveNotifPrefs(prefs: NotifPrefs) {
 
 interface Props { user: SafeUser }
 
-type SubScreen = null | "guidelines" | "privacy" | "language" | "notifications" | "account";
+type SubScreen = null | "guidelines" | "privacy" | "language" | "notifications" | "account" | "blocked-users";
 
 interface TranslatedSection { title: string; body: string; }
 
@@ -323,6 +323,10 @@ export default function SettingsPage({ user }: Props) {
     return <AccountSecurityScreen user={user} onBack={() => setSubScreen(null)} />;
   }
 
+  if (subScreen === "blocked-users") {
+    return <BlockedUsersScreen onBack={() => setSubScreen(null)} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col pb-24" style={{ background: "#0d0618" }}>
       <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
@@ -358,6 +362,8 @@ export default function SettingsPage({ user }: Props) {
           <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Account Security</p>
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
             <Row icon={KeyRound} label="Email, Password & Phone" sub="Change your login credentials" onClick={() => setSubScreen("account")} testId="button-settings-account" />
+            <Divider />
+            <Row icon={ShieldX} label="Blocked Users" sub="Manage who you've blocked" onClick={() => setSubScreen("blocked-users")} testId="button-settings-blocked" />
           </div>
         </div>
 
@@ -683,6 +689,98 @@ function NotifToggleRow({ icon: Icon, label, sub, checked, onChange, testId, dis
           }}
         />
       </button>
+    </div>
+  );
+}
+
+function BlockedUsersScreen({ onBack }: { onBack: () => void }) {
+  const { data, isLoading } = useQuery<{ users: SafeUser[] }>({
+    queryKey: ["/api/blocks"],
+  });
+
+  const unblockMutation = useMutation({
+    mutationFn: (userId: string) => apiRequest("DELETE", `/api/users/${userId}/block`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/blocks"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
+    },
+  });
+
+  const blockedUsers = data?.users ?? [];
+
+  return (
+    <div className="min-h-screen flex flex-col pb-24" style={{ background: "#0d0618" }}>
+      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
+        <button
+          onClick={onBack}
+          data-testid="button-back-blocked"
+          className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ background: "rgba(255,255,255,0.06)" }}
+        >
+          <ChevronLeft size={18} color="rgba(253,248,240,0.7)" />
+        </button>
+        <div>
+          <h1 className="font-serif text-2xl text-gold">Blocked Users</h1>
+          <p className="text-cream/40 text-xs mt-0.5">
+            {isLoading ? "Loading…" : `${blockedUsers.length} ${blockedUsers.length === 1 ? "person" : "people"} blocked`}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-5 pt-5">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : blockedUsers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <div
+              className="w-16 h-16 rounded-full flex items-center justify-center"
+              style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.2)" }}
+            >
+              <ShieldX size={24} color="rgba(201,168,76,0.4)" />
+            </div>
+            <p className="text-cream/40 text-sm text-center">You haven't blocked anyone</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {blockedUsers.map(u => (
+              <div
+                key={u.id}
+                data-testid={`blocked-user-${u.id}`}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl"
+                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(201,168,76,0.08)" }}
+              >
+                <div className="relative flex-shrink-0">
+                  <div
+                    className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center"
+                    style={{ background: "rgba(255,255,255,0.08)" }}
+                  >
+                    {u.mainPhotoUrl ? (
+                      <img src={u.mainPhotoUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <UserX size={20} color="rgba(253,248,240,0.3)" />
+                    )}
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-cream font-medium text-sm truncate">{u.firstName ?? u.fullName?.split(" ")[0] ?? "Member"}</p>
+                  {u.age && <p className="text-cream/40 text-xs">{u.age} years old</p>}
+                </div>
+                <button
+                  onClick={() => unblockMutation.mutate(u.id)}
+                  disabled={unblockMutation.isPending}
+                  data-testid={`button-unblock-${u.id}`}
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-50"
+                  style={{ background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}
+                >
+                  Unblock
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
