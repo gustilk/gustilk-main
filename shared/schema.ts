@@ -85,6 +85,15 @@ export const events = pgTable("events", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const blocks = pgTable("blocks", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  blockerId: varchar("blocker_id").notNull().references(() => users.id),
+  blockedId: varchar("blocked_id").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqueBlock: uniqueIndex("blocks_blocker_blocked_unique").on(table.blockerId, table.blockedId),
+}));
+
 export const reports = pgTable("reports", {
   id: varchar("id", { length: 36 }).primaryKey(),
   reporterId: varchar("reporter_id").notNull().references(() => users.id),
@@ -126,6 +135,7 @@ export const profileUpdateSchema = z.object({
 export type OtpCode = typeof otpCodes.$inferSelect;
 export type Like = typeof likes.$inferSelect;
 export type Dislike = typeof dislikes.$inferSelect;
+export type Block = typeof blocks.$inferSelect;
 export type Match = typeof matches.$inferSelect;
 export type Message = typeof messages.$inferSelect;
 export type Event = typeof events.$inferSelect;

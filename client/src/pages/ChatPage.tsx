@@ -268,6 +268,7 @@ export default function ChatPage({ user, matchId }: Props) {
           reportedUserId={otherUser.id}
           reportedUserName={otherUser.firstName ?? otherUser.fullName?.split(" ")[0] ?? "Member"}
           onClose={() => setShowReport(false)}
+          onBlocked={() => { setShowReport(false); setLocation("/matches"); }}
         />
       )}
     </div>

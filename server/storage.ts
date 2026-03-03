@@ -1,6 +1,6 @@
 import { db } from "./db";
-import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys } from "@shared/schema";
-import type { User, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report, InsertUser, PhotoSlot } from "@shared/schema";
+import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys, blocks } from "@shared/schema";
+import type { User, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report, InsertUser, PhotoSlot, Block } from "@shared/schema";
 import { eq, and, or, ne, notInArray, desc, sql, isNotNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -34,6 +34,10 @@ export interface IStorage {
   approvePhotoSlot(userId: string, slotIdx: number): Promise<{ user: SafeUser }>;
   rejectPhotoSlot(userId: string, slotIdx: number, reason: string): Promise<{ user: SafeUser }>;
   setMainPhoto(userId: string, slotIdx: number): Promise<void>;
+
+  blockUser(blockerId: string, blockedId: string): Promise<void>;
+  unblockUser(blockerId: string, blockedId: string): Promise<void>;
+  getBlockedUsers(blockerId: string): Promise<SafeUser[]>;
 
   createReport(reporterId: string, reportedUserId: string, reason: string, description: string): Promise<Report>;
   listReports(): Promise<Report[]>;
@@ -77,6 +81,8 @@ export class DatabaseStorage implements IStorage {
   async getDiscoverProfiles(userId: string, caste: string, gender: string, minAge: number, maxAge: number): Promise<SafeUser[]> {
     const likedIds = db.select({ id: likes.toUserId }).from(likes).where(eq(likes.fromUserId, userId));
     const dislikedIds = db.select({ id: dislikes.toUserId }).from(dislikes).where(eq(dislikes.fromUserId, userId));
+    const blockedByMe = db.select({ id: blocks.blockedId }).from(blocks).where(eq(blocks.blockerId, userId));
+    const blockedMe = db.select({ id: blocks.blockerId }).from(blocks).where(eq(blocks.blockedId, userId));
     const oppositeGender = gender === "male" ? "female" : "male";
 
     return db.select().from(users).where(
@@ -88,6 +94,8 @@ export class DatabaseStorage implements IStorage {
         sql`${users.age} <= ${maxAge}`,
         notInArray(users.id, likedIds),
         notInArray(users.id, dislikedIds),
+        notInArray(users.id, blockedByMe),
+        notInArray(users.id, blockedMe),
         sql`${users.verificationStatus} != 'banned'`,
         eq(users.profileVisible, true),
         isNotNull(users.mainPhotoUrl),
@@ -127,9 +135,14 @@ export class DatabaseStorage implements IStorage {
       or(eq(matches.user1Id, userId), eq(matches.user2Id, userId))
     ).orderBy(desc(matches.createdAt));
 
+    const blockedByMeRows = await db.select({ id: blocks.blockedId }).from(blocks).where(eq(blocks.blockerId, userId));
+    const blockedMeRows = await db.select({ id: blocks.blockerId }).from(blocks).where(eq(blocks.blockedId, userId));
+    const hiddenIds = new Set([...blockedByMeRows.map(r => r.id), ...blockedMeRows.map(r => r.id)]);
+
     const result: MatchWithUser[] = [];
     for (const match of userMatches) {
       const otherId = match.user1Id === userId ? match.user2Id : match.user1Id;
+      if (hiddenIds.has(otherId)) continue;
       const [otherUser] = await db.select().from(users).where(eq(users.id, otherId));
       if (!otherUser) continue;
 
@@ -286,6 +299,25 @@ export class DatabaseStorage implements IStorage {
       mainPhotoUrl: newMain,
       updatedAt: new Date(),
     }).where(eq(users.id, userId));
+  }
+
+  async blockUser(blockerId: string, blockedId: string): Promise<void> {
+    await db.insert(blocks).values({ id: randomUUID(), blockerId, blockedId }).onConflictDoNothing();
+  }
+
+  async unblockUser(blockerId: string, blockedId: string): Promise<void> {
+    await db.delete(blocks).where(and(eq(blocks.blockerId, blockerId), eq(blocks.blockedId, blockedId)));
+  }
+
+  async getBlockedUsers(blockerId: string): Promise<SafeUser[]> {
+    const blockedRows = await db.select({ blockedId: blocks.blockedId }).from(blocks).where(eq(blocks.blockerId, blockerId));
+    if (blockedRows.length === 0) return [];
+    const result: SafeUser[] = [];
+    for (const { blockedId } of blockedRows) {
+      const [u] = await db.select().from(users).where(eq(users.id, blockedId));
+      if (u) result.push(u);
+    }
+    return result;
   }
 
   async createReport(reporterId: string, reportedUserId: string, reason: string, description: string): Promise<Report> {

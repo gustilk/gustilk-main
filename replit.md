@@ -2,6 +2,9 @@
 
 A culturally sensitive dating platform designed exclusively for the Yezidi community, respecting traditional values and the caste system.
 
+## Recent Changes
+- **Block feature complete**: Users can block/unblock others via ReportModal (redesigned with menu → report/block flows) and from Settings → Blocked Users list. Blocked users are filtered from discover feed and match list. Routes: `POST /api/users/:userId/block`, `DELETE /api/users/:userId/block`, `GET /api/blocks`.
+
 ## Overview
 
 **App Name**: Gûstîlk (means "Ring" in Kurdish — symbolizing commitment)
