@@ -3,7 +3,8 @@
 A culturally sensitive dating platform designed exclusively for the Yezidi community, respecting traditional values and the caste system.
 
 ## Recent Changes
-- **Block feature complete**: Users can block/unblock others via ReportModal (redesigned with menu → report/block flows) and from Settings → Blocked Users list. Blocked users are filtered from discover feed and match list. Routes: `POST /api/users/:userId/block`, `DELETE /api/users/:userId/block`, `GET /api/blocks`.
+- **Full Admin Panel (28 sub-pages)**: Lazy-loaded at `/admin/*`. Includes Dashboard, Users (paginated), User Detail, Approvals, Verification Queue, Reports, Moderation, Blacklist, Duplicates, Analytics (with daily bar chart), Payments, Promo Codes, Referrals, Notifications, Announcements, Email Templates, Feedback, Caste Management, Events, Success Stories, Translations, Team, Audit Logs, App Settings, App Store, Export (CSV), System Health, Backups. All backed by `server/admin-routes.ts` with 6 new DB tables.
+- **Block feature complete**: Users can block/unblock others via ReportModal and from Settings → Blocked Users list. Routes: `POST /api/users/:userId/block`, `DELETE /api/users/:userId/block`, `GET /api/blocks`.
 
 ## Overview
 

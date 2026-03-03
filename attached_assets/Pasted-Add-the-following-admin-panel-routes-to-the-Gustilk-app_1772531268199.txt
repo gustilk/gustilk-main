@@ -1,0 +1,74 @@
+Add the following admin panel routes to the Gustilk app. These should be protected so only users with admin roles can access them. Use lazy loading so regular users don’t download admin code. All lists should be paginated (20 items per page).
+
+ROUTES TO ADD:
+
+DASHBOARD
+
+- /admin — Dashboard overview showing key stats: total users, new signups today, pending approvals, open reports, active subscribers, gender ratio, daily/weekly/monthly active users
+
+USER MANAGEMENT
+
+- /admin/users — User list with search and filters (by city, caste, age, status, signup date). Paginated.
+- /admin/users/:id — View individual user’s full profile, activity history, messages sent, matches made. Ability to suspend/ban/warn with reason notes.
+- /admin/approvals — Queue of new signups pending approval. Show profile preview with approve/reject buttons and rejection reason dropdown templates (inappropriate photos, fake profile, underage, etc). One-click approve/reject. Show newest signups first.
+
+REPORTS AND SAFETY
+
+- /admin/reports — List of flagged content and user reports with status (new, in review, resolved). Filter by category (harassment, fake profile, inappropriate content, underage, scam).
+- /admin/reports/:id — Individual report detail with conversation viewer, user history, and action buttons (warn, suspend, ban). Repeat offender tracking.
+- /admin/moderation — Photo and bio content review queue. Flag inappropriate images and spam text.
+- /admin/verification — ID/selfie verification queue for verifying user identities.
+- /admin/blacklist — Manage blocked emails, phone numbers, and IP addresses to prevent banned users from returning.
+- /admin/duplicate-detection — Flag accounts that look like duplicates (same photos, similar bios, same device).
+
+ANALYTICS
+
+- /admin/analytics — Charts and stats for: daily/weekly/monthly signups, active users (DAU/WAU/MAU), match rate and message rate, user retention (7 day, 30 day), geographic breakdown (where users are located), gender ratio, conversion funnel (signup to profile complete to first match to first message), churn tracking. Cache stats hourly so it doesn’t slow down the app.
+
+PAYMENTS AND SUBSCRIPTIONS
+
+- /admin/payments — Revenue dashboard (daily, monthly, total), active subscribers count and plan breakdown, failed payment alerts, refund management.
+- /admin/promo-codes — Create and manage promotional codes for free premium access.
+- /admin/referrals — Track referral program (who invited who, rewards given).
+
+COMMUNICATION
+
+- /admin/notifications — Send push notifications to all users or specific segments. Schedule notifications for later. Notification history with open rates. Templates for common announcements.
+- /admin/announcements — In-app announcements and banners for maintenance notices, new features, community events.
+- /admin/email-templates — Manage email templates for welcome emails, match notifications, password resets, etc.
+- /admin/feedback — User feedback and app reviews collection.
+
+COMMUNITY-SPECIFIC (YEZIDI)
+
+- /admin/caste-management — Manage caste/lineage options (Murid, Sheikh, Pir) and marriage compatibility rules.
+- /admin/events — Community events listing for Yezidi festivals and diaspora meetups.
+- /admin/success-stories — Manage and showcase couples who met through the app.
+- /admin/translations — Manage app text in Kurmanji, German, Arabic, and English.
+
+TEAM MANAGEMENT
+
+- /admin/team — Manage team members with role-based access control. Roles: Admin (full access), Moderator (can approve users, handle reports, moderate content, but no payment access), Viewer (analytics only, read-only).
+- /admin/logs — Audit log of all admin actions. Track who on the team did what and when.
+
+APP SETTINGS
+
+- /admin/settings — App configuration including: minimum age setting, community guidelines text editor, caste options management, city/location list management, premium plan pricing controls, maintenance mode toggle.
+
+BUSINESS AND GROWTH
+
+- /admin/app-store — App Store and Google Play review monitoring and ratings tracker.
+- /admin/export — Export data for reporting (CSV exports of users, revenue, analytics).
+
+SYSTEM HEALTH
+
+- /admin/system — Server status, uptime, error rates, API response times.
+- /admin/backups — Database backup status and ability to trigger manual backups.
+
+IMPORTANT NOTES:
+
+- All admin routes must be protected with role-based authentication. Only admin users can access these pages.
+- Use lazy loading for all admin routes so regular dating app users never download admin code.
+- Paginate all lists at 20 items per page.
+- Cache analytics data hourly to prevent performance issues.
+- Index database fields used for common searches (email, city, status, signup date).
+- Keep all existing features untouched: user management, content moderation, analytics, payments, push notifications, reports, and the user approval system. Build on top of what already exists.

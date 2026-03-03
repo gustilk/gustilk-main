@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Switch, Route, useLocation, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
@@ -13,7 +13,6 @@ import EditProfilePage from "@/pages/EditProfilePage";
 import PremiumPage from "@/pages/PremiumPage";
 import EventsPage from "@/pages/EventsPage";
 import EventDetailPage from "@/pages/EventDetailPage";
-import AdminPage from "@/pages/AdminPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ActivityPage from "@/pages/ActivityPage";
 import ViewUserProfilePage from "@/pages/ViewUserProfilePage";
@@ -31,6 +30,17 @@ import PrivacyPage from "@/pages/PrivacyPage";
 import GuidelinesPage from "@/pages/GuidelinesPage";
 import type { User } from "@shared/schema";
 import type { PhotoSlot } from "@shared/schema";
+
+// Lazy-load admin panel so regular users never download admin code
+const AdminLayout = lazy(() => import("@/pages/admin/AdminLayout"));
+
+function AdminSpinner() {
+  return (
+    <div className="flex items-center justify-center min-h-screen" style={{ background: "#0d0618" }}>
+      <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "rgba(201,168,76,0.6) transparent transparent transparent" }} />
+    </div>
+  );
+}
 
 const PUBLIC_POLICY_ROUTES: Record<string, React.ComponentType> = {
   "/terms": TermsPage,
@@ -68,6 +78,7 @@ function AppShell({ user }: { user: User }) {
   const isVerifyPage = location === "/verify" || location === "/pending-verification";
   const isSettings = location === "/settings";
   const isProfileView = /^\/profile\/[^/]+$/.test(location);
+  const isAdminRoute = location.startsWith("/admin");
 
   const callCtx = useVideoCallProvider(user.id, !!user.isPremium);
   const isInCall = callCtx.callState === "active" || callCtx.callState === "calling" || callCtx.callState === "ringing";
@@ -96,17 +107,33 @@ function AppShell({ user }: { user: User }) {
             <Route path="/premium" component={() => <PremiumPage user={user} />} />
             <Route path="/events/:eventId" component={({ params }) => <EventDetailPage user={user} eventId={params.eventId} />} />
             <Route path="/events" component={() => <EventsPage user={user} />} />
-            <Route path="/admin" component={() => <AdminPage user={user} />} />
             <Route path="/activity" component={() => user.isAdmin ? <Redirect to="/admin" /> : <ActivityPage user={user} />} />
             <Route path="/profile/:userId" component={({ params }) => <ViewUserProfilePage viewer={user} userId={params.userId} />} />
             <Route path="/settings" component={() => <SettingsPage user={user} />} />
             <Route path="/verify" component={() => <VerificationPage user={user} />} />
             <Route path="/pending-verification" component={() => <PendingVerificationPage user={user} />} />
             <Route path="/complete-profile" component={() => <SocialSetupPage user={user} />} />
+
+            {/* Admin routes — lazy loaded, admin-only */}
+            <Route path="/admin/:rest*" component={() =>
+              user.isAdmin ? (
+                <Suspense fallback={<AdminSpinner />}>
+                  <AdminLayout user={user} />
+                </Suspense>
+              ) : <Redirect to="/matches" />
+            } />
+            <Route path="/admin" component={() =>
+              user.isAdmin ? (
+                <Suspense fallback={<AdminSpinner />}>
+                  <AdminLayout user={user} />
+                </Suspense>
+              ) : <Redirect to="/matches" />
+            } />
+
             <Route path="/" component={() => <Redirect to={user.isAdmin ? "/admin" : "/matches"} />} />
           </Switch>
         </main>
-        {!isChat && !isEventDetail && !isVerifyPage && !isInCall && !isSettings && !isProfileView && <BottomNav />}
+        {!isChat && !isEventDetail && !isVerifyPage && !isInCall && !isSettings && !isProfileView && !isAdminRoute && <BottomNav />}
       </div>
     </VideoCallContext.Provider>
   );
