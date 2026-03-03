@@ -10,6 +10,7 @@ import {
 import { formatDistanceToNow, format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import type { SafeUser, Report, Event } from "@shared/schema";
+import type { PhotoSlot } from "@shared/schema";
 
 interface Props { user: SafeUser }
 type AdminTab = "overview" | "users" | "verifications" | "photos" | "reports" | "events";
@@ -59,8 +60,8 @@ export default function AdminPage({ user }: Props) {
   });
 
   const photoActionMutation = useMutation({
-    mutationFn: async ({ userId, photoIndex, action }: { userId: string; photoIndex: number; action: "approve" | "reject" }) => {
-      const res = await apiRequest("POST", `/api/admin/photos/${userId}/${action}/${photoIndex}`);
+    mutationFn: async ({ userId, slotIdx, action, reason }: { userId: string; slotIdx: number; action: "approve" | "reject"; reason?: string }) => {
+      const res = await apiRequest("POST", `/api/admin/photos/${userId}/${action}/${slotIdx}`, reason ? { reason } : undefined);
       return res.json();
     },
     onSuccess: (_, { action }) => {
@@ -154,7 +155,10 @@ export default function AdminPage({ user }: Props) {
   const pending = verifyData?.users ?? [];
   const reports = (reportsData?.reports ?? []).filter(r => r.status === "pending");
 
-  const pendingPhotoCount = (pendingPhotosData?.users ?? []).reduce((sum, u) => sum + (u.pendingPhotos?.length ?? 0), 0);
+  const pendingPhotoCount = (pendingPhotosData?.users ?? []).reduce((sum, u) => {
+    const slots = ((u as any).photoSlots ?? []) as PhotoSlot[];
+    return sum + slots.filter(s => s.status === "pending").length;
+  }, 0);
 
   const TABS: { id: AdminTab; label: string; Icon: any; badge?: number }[] = [
     { id: "overview", label: "Overview", Icon: BarChart2 },
@@ -226,7 +230,7 @@ export default function AdminPage({ user }: Props) {
           <PhotosTab
             users={pendingPhotosData?.users ?? []}
             isLoading={pendingPhotosLoading}
-            onAction={(userId, photoIndex, action) => photoActionMutation.mutate({ userId, photoIndex, action })}
+            onAction={(userId, slotIdx, action, reason) => photoActionMutation.mutate({ userId, slotIdx, action, reason })}
             isPending={photoActionMutation.isPending}
           />
         )}
@@ -452,9 +456,11 @@ function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBa
 
 function PhotosTab({ users, isLoading, onAction, isPending }: {
   users: SafeUser[]; isLoading: boolean;
-  onAction: (userId: string, photoIndex: number, action: "approve" | "reject") => void;
+  onAction: (userId: string, slotIdx: number, action: "approve" | "reject", reason?: string) => void;
   isPending: boolean;
 }) {
+  const [rejectReasons, setRejectReasons] = useState<Record<string, string>>({});
+
   if (isLoading) return <Spinner />;
   if (users.length === 0) return (
     <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
@@ -463,54 +469,92 @@ function PhotosTab({ users, isLoading, onAction, isPending }: {
       <p className="text-cream/40 text-sm">No photos pending review.</p>
     </div>
   );
+
+  const totalPending = users.reduce((sum, u) => {
+    const slots = ((u as any).photoSlots ?? []) as PhotoSlot[];
+    return sum + slots.filter(s => s.status === "pending").length;
+  }, 0);
+
   return (
     <div className="space-y-4 pt-1">
       <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold px-1">
-        Pending Photos · {users.reduce((sum, u) => sum + (u.pendingPhotos?.length ?? 0), 0)} total
+        Pending Photos · {totalPending} total
       </p>
-      {users.map(u => (
-        <div key={u.id} className="rounded-2xl p-4 space-y-3"
-          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center font-serif font-bold text-gold flex-shrink-0"
-              style={{ background: "linear-gradient(135deg,#2d0f4a,#7b3fa0)", border: "2px solid rgba(201,168,76,0.25)" }}>
-              {u.photos && u.photos.length > 0
-                ? <img src={u.photos[0]} alt={u.fullName ?? ""} className="w-full h-full object-cover" />
-                : (u.fullName ?? u.firstName ?? "?").charAt(0)}
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-cream">{u.fullName ?? u.firstName ?? "—"}</p>
-              <p className="text-cream/35 text-xs">{u.email} · {u.city}, {u.country}</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            {(u.pendingPhotos ?? []).map((photo, idx) => (
-              <div key={idx} className="rounded-xl overflow-hidden" style={{ aspectRatio: "1/1", position: "relative" }}
-                data-testid={`pending-photo-${u.id}-${idx}`}>
-                <img src={photo} alt={`Pending photo ${idx + 1}`} className="w-full h-full object-cover" />
-                <div className="absolute bottom-0 left-0 right-0 flex gap-1 p-1.5" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85), transparent)" }}>
-                  <button
-                    onClick={() => onAction(u.id, idx, "approve")}
-                    disabled={isPending}
-                    data-testid={`button-approve-photo-${u.id}-${idx}`}
-                    className="flex-1 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50"
-                    style={{ background: "rgba(16,185,129,0.85)", color: "white" }}>
-                    <CheckCircle size={11} /> Approve
-                  </button>
-                  <button
-                    onClick={() => onAction(u.id, idx, "reject")}
-                    disabled={isPending}
-                    data-testid={`button-reject-photo-${u.id}-${idx}`}
-                    className="flex-1 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50"
-                    style={{ background: "rgba(239,68,68,0.85)", color: "white" }}>
-                    <XCircle size={11} /> Reject
-                  </button>
-                </div>
+      {users.map(u => {
+        const slots = ((u as any).photoSlots ?? []) as PhotoSlot[];
+        const pendingSlots = slots.map((s, i) => ({ slot: s, idx: i })).filter(({ slot }) => slot.status === "pending");
+        if (pendingSlots.length === 0) return null;
+        const mainPhoto = (u as any).mainPhotoUrl ?? u.photos?.[0] ?? null;
+
+        return (
+          <div key={u.id} className="rounded-2xl p-4 space-y-3"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center font-serif font-bold text-gold flex-shrink-0"
+                style={{ background: "linear-gradient(135deg,#2d0f4a,#7b3fa0)", border: "2px solid rgba(201,168,76,0.25)" }}>
+                {mainPhoto
+                  ? <img src={mainPhoto} alt={u.fullName ?? ""} className="w-full h-full object-cover" />
+                  : (u.fullName ?? u.firstName ?? "?").charAt(0)}
               </div>
-            ))}
+              <div>
+                <p className="text-sm font-semibold text-cream">{u.fullName ?? u.firstName ?? "—"}</p>
+                <p className="text-cream/35 text-xs">{u.email} · {u.city}, {u.country}</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {pendingSlots.map(({ slot, idx }) => {
+                const key = `${u.id}-${idx}`;
+                const reason = rejectReasons[key] ?? "";
+                return (
+                  <div key={idx} className="rounded-xl overflow-hidden"
+                    style={{ border: "1px solid rgba(201,168,76,0.12)" }}
+                    data-testid={`pending-photo-${u.id}-${idx}`}>
+                    <div className="relative" style={{ aspectRatio: "4/3" }}>
+                      <img src={slot.url} alt={`Pending photo ${idx + 1}`} className="w-full h-full object-cover" />
+                      <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[9px] font-bold"
+                        style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}>
+                        Slot {idx + 1}
+                      </div>
+                    </div>
+                    <div className="p-2 space-y-2" style={{ background: "rgba(0,0,0,0.3)" }}>
+                      <input
+                        type="text"
+                        placeholder="Rejection reason (optional)..."
+                        value={reason}
+                        onChange={e => setRejectReasons(prev => ({ ...prev, [key]: e.target.value }))}
+                        data-testid={`input-reject-reason-${u.id}-${idx}`}
+                        className="w-full rounded-lg px-2 py-1.5 text-xs outline-none"
+                        style={{ background: "rgba(255,255,255,0.07)", color: "#fdf8f0", border: "1px solid rgba(255,255,255,0.1)" }}
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => onAction(u.id, idx, "approve")}
+                          disabled={isPending}
+                          data-testid={`button-approve-photo-${u.id}-${idx}`}
+                          className="flex-1 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50"
+                          style={{ background: "rgba(16,185,129,0.85)", color: "white" }}>
+                          <CheckCircle size={11} /> Approve
+                        </button>
+                        <button
+                          onClick={() => {
+                            onAction(u.id, idx, "reject", reason);
+                            setRejectReasons(prev => { const n = { ...prev }; delete n[key]; return n; });
+                          }}
+                          disabled={isPending}
+                          data-testid={`button-reject-photo-${u.id}-${idx}`}
+                          className="flex-1 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50"
+                          style={{ background: "rgba(239,68,68,0.85)", color: "white" }}>
+                          <XCircle size={11} /> Reject
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

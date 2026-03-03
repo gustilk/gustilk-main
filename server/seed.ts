@@ -1,8 +1,13 @@
 import { db } from "./db";
 import { users, events } from "@shared/schema";
-import { count, eq } from "drizzle-orm";
+import type { PhotoSlot } from "@shared/schema";
+import { count, eq, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
+
+function makeSlots(photoUrls: string[]): PhotoSlot[] {
+  return photoUrls.map((url, i) => ({ url, status: "approved" as const, isMain: i === 0 }));
+}
 
 const seedProfiles = [
   {
@@ -17,6 +22,9 @@ const seedProfiles = [
     occupation: "Teacher",
     languages: ["German", "English"],
     photos: ["/images/profile1.svg"],
+    photoSlots: makeSlots(["/images/profile1.svg"]),
+    mainPhotoUrl: "/images/profile1.svg",
+    profileVisible: true,
   },
   {
     fullName: "Dilan Hasan",
@@ -30,6 +38,9 @@ const seedProfiles = [
     occupation: "Medical Student",
     languages: ["English", "Arabic"],
     photos: ["/images/profile2.svg"],
+    photoSlots: makeSlots(["/images/profile2.svg"]),
+    mainPhotoUrl: "/images/profile2.svg",
+    profileVisible: true,
   },
   {
     fullName: "Azar Khalaf",
@@ -43,6 +54,9 @@ const seedProfiles = [
     occupation: "Software Engineer",
     languages: ["English"],
     photos: ["/images/profile3.svg"],
+    photoSlots: makeSlots(["/images/profile3.svg"]),
+    mainPhotoUrl: "/images/profile3.svg",
+    profileVisible: true,
   },
   {
     fullName: "Shirin Dawud",
@@ -56,6 +70,9 @@ const seedProfiles = [
     occupation: "Graphic Designer",
     languages: ["English"],
     photos: ["/images/profile4.svg"],
+    photoSlots: makeSlots(["/images/profile4.svg"]),
+    mainPhotoUrl: "/images/profile4.svg",
+    profileVisible: true,
   },
   {
     fullName: "Farhad Mirza",
@@ -69,6 +86,9 @@ const seedProfiles = [
     occupation: "Entrepreneur",
     languages: ["German", "English", "Arabic"],
     photos: ["/images/profile5.svg"],
+    photoSlots: makeSlots(["/images/profile5.svg"]),
+    mainPhotoUrl: "/images/profile5.svg",
+    profileVisible: true,
   },
   {
     fullName: "Narin Barakat",
@@ -82,6 +102,9 @@ const seedProfiles = [
     occupation: "Language Teacher",
     languages: ["French", "English"],
     photos: [],
+    photoSlots: [],
+    mainPhotoUrl: null,
+    profileVisible: false,
   },
 ];
 
@@ -154,6 +177,38 @@ const seedEvents = [
   },
 ];
 
+async function migratePhotoSlots() {
+  const allUsers = await db.select().from(users);
+  let migrated = 0;
+  for (const user of allUsers) {
+    const existingSlots = (user.photoSlots as PhotoSlot[] | null) ?? [];
+    if (existingSlots.length > 0) continue;
+
+    const approvedPhotos = user.photos ?? [];
+    const pendingPhotos = user.pendingPhotos ?? [];
+
+    if (approvedPhotos.length === 0 && pendingPhotos.length === 0) continue;
+
+    const approvedSlots: PhotoSlot[] = approvedPhotos.map((url, i) => ({
+      url, status: "approved", isMain: i === 0,
+    }));
+    const pendingSlots: PhotoSlot[] = pendingPhotos.map(url => ({
+      url, status: "pending",
+    }));
+    const allSlots = [...approvedSlots, ...pendingSlots];
+    const mainUrl = approvedSlots[0]?.url ?? null;
+    const visible = approvedSlots.length > 0;
+
+    await db.update(users).set({
+      photoSlots: allSlots,
+      mainPhotoUrl: mainUrl,
+      profileVisible: visible,
+    }).where(eq(users.id, user.id));
+    migrated++;
+  }
+  if (migrated > 0) console.log(`Migrated ${migrated} users to photoSlots.`);
+}
+
 export async function seedDatabase() {
   try {
     const [existingAdmin] = await db.select({ id: users.id, passwordHash: users.passwordHash }).from(users).where(eq(users.email, "admin@gustilk.com"));
@@ -175,6 +230,7 @@ export async function seedDatabase() {
         age: 42,
         verificationStatus: "approved",
         isVerified: true,
+        profileVisible: true,
       });
       console.log("Seeded admin user.");
     } else {
@@ -188,14 +244,14 @@ export async function seedDatabase() {
         await db.insert(users).values({
           id: randomUUID(),
           ...p,
-          photos: p.photos,
-          languages: p.languages,
         });
       }
       console.log(`Seeded ${seedProfiles.length} users.`);
     } else {
       console.log("Users already seeded, skipping.");
     }
+
+    await migratePhotoSlots();
 
     const [{ value: eventCount }] = await db.select({ value: count() }).from(events);
     if (Number(eventCount) === 0) {

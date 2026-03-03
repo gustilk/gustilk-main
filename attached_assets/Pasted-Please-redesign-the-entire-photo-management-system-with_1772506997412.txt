@@ -1,0 +1,36 @@
+Please redesign the entire photo management system with these rules:
+
+SIGNUP FLOW:
+1. Basic info (name, age, gender, phone/email)
+2. Community info (caste, location)
+3. Photo upload — minimum 1 photo required, maximum 6 slots available
+4. After uploading, show a clear pending screen: "Your profile is under review. This usually takes up to 24 hours."
+5. User can edit their bio and other info while waiting for approval
+
+PHOTO APPROVAL/REJECTION:
+- Approved → user enters the app normally
+- Rejected → show clear message: "Your photo was rejected. Please upload a new photo." with a button to upload immediately
+- If user signed up with email → also send rejection email via Resend
+- If user signed up with phone only → show in-app notification only
+
+PHOTO MANAGEMENT INSIDE THE APP (profile page):
+- User has 6 photo slots
+- They can delete any existing photo and upload a new one at any time
+- Any newly uploaded photo goes back to "pending" status and must be approved by admin before showing to other users
+- While a new photo is pending, the old slot shows "Pending Review" to the user
+- Approved photos remain visible to other users normally
+- If a photo is rejected, show "Rejected — tap to upload a new photo" on that slot
+- User is notified of approval or rejection via email (if they have email) or in-app notification
+
+MAIN PROFILE PHOTO:
+- The user can set any of their approved photos as their main profile photo at any time
+- The main profile photo is the one shown to other users in the matching/discovery feed
+- If a user deletes their main profile photo, prompt them to select a new main photo from their remaining approved photos
+- If they have no approved photos left, their profile is hidden from the discovery feed until at least one photo is approved
+
+ADMIN PANEL:
+- Admin can see all pending photos clearly
+- Admin can approve or reject each photo individually
+- Admin can add a rejection reason that gets shown to the user
+
+After building, run npm run build to confirm no errors, push to GitHub, and run db:push against Neon if any schema changes are needed.

@@ -10,7 +10,7 @@ import { checkFacePresent } from "./moderation";
 import { db } from "./db";
 import { count, sql, eq, asc, desc, or, and, ilike } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
-import { sendMagicLinkEmail } from "./email";
+import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail } from "./email";
 
 function getUserId(req: any): string {
   return req.session?.userId;
@@ -129,8 +129,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
       // Enforce at least 1 profile photo on initial profile setup
       const isInitialSetup = !user?.caste;
+      const submittedPhotos: string[] = (parsed as any).photos ?? [];
       if (isInitialSetup) {
-        const submittedPhotos: string[] = (parsed as any).photos ?? [];
         if (submittedPhotos.length < 1) {
           return res.status(400).json({ error: "You must upload at least one profile photo to complete your profile." });
         }
@@ -139,29 +139,44 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         }
       }
 
-      // Separate submitted photos into approved (already in DB) and new uploads
-      const allPhotos: string[] = (parsed as any).photos ?? [];
+      // Build updated photoSlots from existing + new uploads
+      const existingSlots: any[] = (user?.photoSlots as any[] | null) ?? [];
       const existingApproved: string[] = user?.photos ?? [];
-      const existingPending: string[] = user?.pendingPhotos ?? [];
 
-      // Approved photos the user is keeping
-      const keepApproved = allPhotos.filter(p => existingApproved.includes(p));
-      // New base64 uploads go to pending
-      const newUploads = allPhotos.filter(p => p.startsWith("data:image"));
-      // Pending photos: existing pending the user still has + new uploads
-      const updatedPending = [...existingPending, ...newUploads];
+      // Approved slots user is keeping (submitted by URL, not base64)
+      const keptApprovedUrls = submittedPhotos.filter(p => !p.startsWith("data:image") && existingApproved.includes(p));
 
-      if (keepApproved.length + updatedPending.length > 6) {
+      // New base64 uploads → pending slots
+      const newUploads = submittedPhotos.filter(p => p.startsWith("data:image"));
+
+      const removedRejectedUrls: string[] = (parsed as any).removedRejectedUrls ?? [];
+
+      // Reconstruct slots: keep existing non-removed approved/pending/rejected slots, add new uploads
+      const keptSlots = existingSlots.filter(s =>
+        (s.status === "approved" && keptApprovedUrls.includes(s.url)) ||
+        s.status === "pending" ||
+        (s.status === "rejected" && !removedRejectedUrls.includes(s.url))
+      );
+      const newPendingSlots = newUploads.map((url: string) => ({ url, status: "pending" as const }));
+      const updatedSlots = [...keptSlots, ...newPendingSlots];
+
+      if (updatedSlots.length > 6) {
         return res.status(400).json({ error: "You can have a maximum of 6 photos." });
       }
 
-      console.log(`[routes] profile update: ${keepApproved.length} approved kept, ${newUploads.length} new pending`);
+      const keptApproved = keptSlots.filter(s => s.status === "approved").map((s: any) => s.url);
+      let mainPhotoUrl = user?.mainPhotoUrl;
+      if (mainPhotoUrl && !keptApproved.includes(mainPhotoUrl)) {
+        mainPhotoUrl = keptApproved[0] ?? null;
+      }
 
       const data = user?.country ? rest : parsed;
       const updated = await storage.updateUser(userId, {
         ...(data as any),
-        photos: keepApproved,
-        pendingPhotos: updatedPending,
+        photoSlots: updatedSlots,
+        photos: keptApproved,
+        pendingPhotos: newUploads,
+        mainPhotoUrl: mainPhotoUrl ?? null,
       });
       res.json({ user: updated });
     } catch (err: any) {
@@ -448,22 +463,37 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.get("/api/admin/pending-photos", isAuthenticated, requireAdmin, async (_req, res) => {
-    const usersWithPending = await storage.getUsersWithPendingPhotos();
+    const usersWithPending = await storage.getUsersWithPendingPhotoSlots();
     res.json({ users: usersWithPending });
   });
 
-  app.post("/api/admin/photos/:userId/approve/:photoIndex", isAuthenticated, requireAdmin, async (req, res) => {
+  app.post("/api/admin/photos/:userId/approve/:slotIdx", isAuthenticated, requireAdmin, async (req, res) => {
     const userId = String(req.params.userId);
-    const photoIndex = parseInt(String(req.params.photoIndex));
-    await storage.approvePendingPhoto(userId, photoIndex);
-    res.json({ ok: true });
+    const slotIdx = parseInt(String(req.params.slotIdx));
+    const { user } = await storage.approvePhotoSlot(userId, slotIdx);
+    if (user.email) {
+      sendPhotoApprovedEmail(user.email, user.fullName ?? user.firstName ?? "Member").catch(() => {});
+    }
+    res.json({ ok: true, user });
   });
 
-  app.post("/api/admin/photos/:userId/reject/:photoIndex", isAuthenticated, requireAdmin, async (req, res) => {
+  app.post("/api/admin/photos/:userId/reject/:slotIdx", isAuthenticated, requireAdmin, async (req, res) => {
     const userId = String(req.params.userId);
-    const photoIndex = parseInt(String(req.params.photoIndex));
-    await storage.rejectPendingPhoto(userId, photoIndex);
-    res.json({ ok: true });
+    const slotIdx = parseInt(String(req.params.slotIdx));
+    const reason = String(req.body?.reason ?? "");
+    const { user } = await storage.rejectPhotoSlot(userId, slotIdx, reason);
+    if (user.email) {
+      sendPhotoRejectedEmail(user.email, user.fullName ?? user.firstName ?? "Member", reason).catch(() => {});
+    }
+    res.json({ ok: true, user });
+  });
+
+  app.post("/api/profile/set-main-photo", isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const { slotIdx } = z.object({ slotIdx: z.number().int().min(0) }).parse(req.body);
+    await storage.setMainPhoto(userId, slotIdx);
+    const updated = await storage.getUserById(userId);
+    res.json({ user: updated });
   });
 
   app.get("/api/admin/stats", isAuthenticated, requireAdmin, async (_req, res) => {

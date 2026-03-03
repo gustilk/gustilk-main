@@ -2,12 +2,15 @@ import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, MapPin, ChevronLeft, Shield } from "lucide-react";
+import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, MapPin, ChevronLeft, Shield, AlertTriangle } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import type { SafeUser } from "@shared/schema";
+import type { PhotoSlot } from "@shared/schema";
 import { PhotoCropModal } from "@/components/PhotoCropModal";
+
+type LocalSlot = { url: string; status: "approved" | "new" } | null;
 
 function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () => void }) {
   const { t } = useTranslation();
@@ -210,14 +213,16 @@ export default function ProfilePage({ user }: Props) {
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const [localPhotos, setLocalPhotos] = useState<(string | null)[]>(() => {
-    const arr: (string | null)[] = Array(6).fill(null);
-    (user.photos ?? []).forEach((p, i) => { arr[i] = p; });
+  const allSlots = ((user as any).photoSlots ?? []) as PhotoSlot[];
+  const [localSlots, setLocalSlots] = useState<LocalSlot[]>(() => {
+    const approved = allSlots.filter(s => s.status === "approved");
+    const arr: LocalSlot[] = Array(6).fill(null);
+    approved.forEach((s, i) => { arr[i] = { url: s.url, status: "approved" }; });
     return arr;
   });
-  const [localPendingPhotos, setLocalPendingPhotos] = useState<string[]>(
-    (user as any).pendingPhotos ?? []
-  );
+  const [pendingSlots] = useState<PhotoSlot[]>(() => allSlots.filter(s => s.status === "pending"));
+  const [rejectedSlots, setRejectedSlots] = useState<PhotoSlot[]>(() => allSlots.filter(s => s.status === "rejected"));
+  const [removedRejectedUrls, setRemovedRejectedUrls] = useState<string[]>([]);
   const [photosEdited, setPhotosEdited] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [cropTarget, setCropTarget] = useState<{ imgSrc: string; slotIdx: number } | null>(null);
@@ -233,15 +238,20 @@ export default function ProfilePage({ user }: Props) {
 
   const savePhotosMutation = useMutation({
     mutationFn: async () => {
-      const photos = localPhotos.filter(Boolean) as string[];
-      const res = await apiRequest("PUT", "/api/profile", { photos });
+      const approved = localSlots.filter(s => s?.status === "approved").map(s => s!.url);
+      const newUploads = localSlots.filter(s => s?.status === "new").map(s => s!.url);
+      const photos = [...approved, ...newUploads];
+      const res = await apiRequest("PUT", "/api/profile", { photos, removedRejectedUrls });
       return res.json();
     },
     onSuccess: (data) => {
-      const arr: (string | null)[] = Array(6).fill(null);
-      ((data.user as SafeUser).photos ?? []).forEach((p: string, i: number) => { arr[i] = p; });
-      setLocalPhotos(arr);
-      setLocalPendingPhotos((data.user as any).pendingPhotos ?? []);
+      const updatedSlots = ((data.user as any).photoSlots ?? []) as PhotoSlot[];
+      const approvedSlots = updatedSlots.filter(s => s.status === "approved");
+      const arr: LocalSlot[] = Array(6).fill(null);
+      approvedSlots.forEach((s, i) => { arr[i] = { url: s.url, status: "approved" }; });
+      setLocalSlots(arr);
+      setRejectedSlots(updatedSlots.filter(s => s.status === "rejected"));
+      setRemovedRejectedUrls([]);
       setPhotosEdited(false);
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       toast({ title: t("profile.photosUpdated") });
@@ -278,25 +288,33 @@ export default function ProfilePage({ user }: Props) {
 
   const handleCropConfirm = (base64: string) => {
     if (!cropTarget) return;
-    setLocalPhotos(prev => { const next = [...prev]; next[cropTarget.slotIdx] = base64; return next; });
+    setLocalSlots(prev => { const next = [...prev]; next[cropTarget.slotIdx] = { url: base64, status: "new" }; return next; });
     setPhotosEdited(true);
     setCropTarget(null);
   };
 
   const removePhoto = (idx: number) => {
-    setLocalPhotos(prev => { const next = [...prev]; next[idx] = null; return next; });
+    setLocalSlots(prev => { const next = [...prev]; next[idx] = null; return next; });
     setPhotosEdited(true);
   };
 
   const setAsMain = (idx: number) => {
     if (idx === 0) return;
-    setLocalPhotos(prev => {
+    setLocalSlots(prev => {
       const next = [...prev];
       const main = next[0];
       next[0] = next[idx];
       next[idx] = main;
       return next;
     });
+    setPhotosEdited(true);
+  };
+
+  const replaceRejected = (rejectedUrl: string, slotIdx: number) => {
+    setRemovedRejectedUrls(prev => [...prev, rejectedUrl]);
+    setRejectedSlots(prev => prev.filter(s => s.url !== rejectedUrl));
+    pendingSlotRef.current = slotIdx;
+    if (fileInputRef.current) { fileInputRef.current.value = ""; fileInputRef.current.click(); }
     setPhotosEdited(true);
   };
 
@@ -481,27 +499,28 @@ export default function ProfilePage({ user }: Props) {
         {photoError && (
           <p className="text-xs mt-2 font-medium" style={{ color: "#d4608a" }}>{photoError}</p>
         )}
+
+        {/* Approved + new upload slots */}
         <div className="grid grid-cols-3 gap-2">
           {Array.from({ length: 6 }).map((_, idx) => {
-            const photo = localPhotos[idx];
+            const slot = localSlots[idx];
             return (
               <div key={idx} className="relative">
-                {photo ? (
+                {slot ? (
                   <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
                     <img
-                      src={photo}
+                      src={slot.url}
                       alt={`Photo ${idx + 1}`}
                       className="w-full h-full object-cover"
                       data-testid={`img-profile-photo-${idx}`}
+                      style={slot.status === "new" ? { filter: "brightness(0.75)" } : {}}
                     />
-                    <button
-                      onClick={() => openPicker(idx)}
-                      data-testid={`button-replace-photo-${idx}`}
-                      className="absolute inset-0 flex items-center justify-center"
-                      style={{ background: "rgba(0,0,0,0.0)" }}
-                    >
-                      <Camera size={20} color="white" style={{ opacity: 0 }} />
-                    </button>
+                    {slot.status === "new" && (
+                      <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold"
+                        style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}>
+                        Pending
+                      </div>
+                    )}
                     <button
                       onClick={() => removePhoto(idx)}
                       data-testid={`button-remove-photo-${idx}`}
@@ -510,24 +529,26 @@ export default function ProfilePage({ user }: Props) {
                     >
                       <X size={10} color="white" />
                     </button>
-                    {idx === 0 ? (
-                      <div
-                        className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded flex items-center gap-1 text-xs font-bold"
-                        style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
-                      >
-                        <Star size={9} fill="#1a0a2e" color="#1a0a2e" />
-                        {t("profile.mainPhoto")}
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setAsMain(idx)}
-                        data-testid={`button-set-main-photo-${idx}`}
-                        className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded flex items-center gap-1 text-xs font-semibold transition-all active:scale-95"
-                        style={{ background: "rgba(0,0,0,0.55)", color: "rgba(201,168,76,0.9)", border: "1px solid rgba(201,168,76,0.35)" }}
-                      >
-                        <Star size={9} color="#c9a84c" />
-                        {t("profile.mainPhoto")}
-                      </button>
+                    {slot.status === "approved" && (
+                      idx === 0 ? (
+                        <div
+                          className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded flex items-center gap-1 text-xs font-bold"
+                          style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
+                        >
+                          <Star size={9} fill="#1a0a2e" color="#1a0a2e" />
+                          {t("profile.mainPhoto")}
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setAsMain(idx)}
+                          data-testid={`button-set-main-photo-${idx}`}
+                          className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded flex items-center gap-1 text-xs font-semibold transition-all active:scale-95"
+                          style={{ background: "rgba(0,0,0,0.55)", color: "rgba(201,168,76,0.9)", border: "1px solid rgba(201,168,76,0.35)" }}
+                        >
+                          <Star size={9} color="#c9a84c" />
+                          {t("profile.mainPhoto")}
+                        </button>
+                      )
                     )}
                   </div>
                 ) : (
@@ -547,7 +568,8 @@ export default function ProfilePage({ user }: Props) {
         </div>
         <p className="text-xs mt-2" style={{ color: "rgba(253,248,240,0.2)" }}>{t("profile.photoInstruction")}</p>
 
-        {localPendingPhotos.length > 0 && (
+        {/* Pending review */}
+        {pendingSlots.length > 0 && (
           <div className="mt-4">
             <div className="flex items-center gap-2 mb-2">
               <Clock size={12} color="rgba(201,168,76,0.6)" />
@@ -556,9 +578,9 @@ export default function ProfilePage({ user }: Props) {
               </span>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              {localPendingPhotos.map((photo, idx) => (
+              {pendingSlots.map((slot, idx) => (
                 <div key={idx} className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
-                  <img src={photo} alt={`Pending ${idx + 1}`} className="w-full h-full object-cover" style={{ filter: "brightness(0.6)" }} />
+                  <img src={slot.url} alt={`Pending ${idx + 1}`} className="w-full h-full object-cover" style={{ filter: "brightness(0.6)" }} />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="px-2 py-1 rounded-full text-center" style={{ background: "rgba(201,168,76,0.85)" }}>
                       <Clock size={10} color="#1a0a2e" />
@@ -569,7 +591,53 @@ export default function ProfilePage({ user }: Props) {
               ))}
             </div>
             <p className="text-xs mt-1.5" style={{ color: "rgba(201,168,76,0.4)" }}>
-              These photos are under review and will be visible after admin approval.
+              These photos are under review and will appear after admin approval.
+            </p>
+          </div>
+        )}
+
+        {/* Rejected photos */}
+        {rejectedSlots.length > 0 && (
+          <div className="mt-4">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle size={12} color="#d4608a" />
+              <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#d4608a" }}>
+                Rejected Photos
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {rejectedSlots.map((slot, idx) => {
+                const nextEmptyIdx = localSlots.findIndex(s => s === null);
+                const canReplace = nextEmptyIdx !== -1;
+                return (
+                  <div key={idx} className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1 / 1" }}
+                    data-testid={`rejected-photo-${idx}`}>
+                    <img src={slot.url} alt={`Rejected ${idx + 1}`} className="w-full h-full object-cover"
+                      style={{ filter: "brightness(0.45) saturate(0.3)" }} />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-2"
+                      style={{ background: "rgba(212,96,138,0.25)" }}>
+                      {slot.reason && (
+                        <p className="text-[8px] text-center font-medium leading-tight" style={{ color: "#fdf8f0cc" }}>
+                          {slot.reason}
+                        </p>
+                      )}
+                      {canReplace && (
+                        <button
+                          onClick={() => replaceRejected(slot.url, nextEmptyIdx)}
+                          data-testid={`button-replace-rejected-${idx}`}
+                          className="px-2 py-1 rounded-lg text-[9px] font-bold"
+                          style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
+                        >
+                          Replace
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-xs mt-1.5" style={{ color: "rgba(212,96,138,0.6)" }}>
+              These photos were rejected. Upload replacements to fill empty slots above.
             </p>
           </div>
         )}

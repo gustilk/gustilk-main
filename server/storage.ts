@@ -1,7 +1,7 @@
 import { db } from "./db";
 import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys } from "@shared/schema";
-import type { User, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report, InsertUser } from "@shared/schema";
-import { eq, and, or, ne, notInArray, desc, sql } from "drizzle-orm";
+import type { User, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report, InsertUser, PhotoSlot } from "@shared/schema";
+import { eq, and, or, ne, notInArray, desc, sql, isNotNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -30,13 +30,18 @@ export interface IStorage {
   updateVerificationStatus(userId: string, status: "approved" | "rejected" | "banned", isVerified?: boolean): Promise<void>;
   banUser(userId: string): Promise<void>;
 
-  getUsersWithPendingPhotos(): Promise<SafeUser[]>;
-  approvePendingPhoto(userId: string, photoIndex: number): Promise<void>;
-  rejectPendingPhoto(userId: string, photoIndex: number): Promise<void>;
+  getUsersWithPendingPhotoSlots(): Promise<SafeUser[]>;
+  approvePhotoSlot(userId: string, slotIdx: number): Promise<{ user: SafeUser }>;
+  rejectPhotoSlot(userId: string, slotIdx: number, reason: string): Promise<{ user: SafeUser }>;
+  setMainPhoto(userId: string, slotIdx: number): Promise<void>;
 
   createReport(reporterId: string, reportedUserId: string, reason: string, description: string): Promise<Report>;
   listReports(): Promise<Report[]>;
   resolveReport(reportId: string): Promise<void>;
+}
+
+function getSlots(user: User): PhotoSlot[] {
+  return (user.photoSlots as PhotoSlot[] | null) ?? [];
 }
 
 export class DatabaseStorage implements IStorage {
@@ -84,6 +89,8 @@ export class DatabaseStorage implements IStorage {
         notInArray(users.id, likedIds),
         notInArray(users.id, dislikedIds),
         sql`${users.verificationStatus} != 'banned'`,
+        eq(users.profileVisible, true),
+        isNotNull(users.mainPhotoUrl),
       )
     ).limit(50);
   }
@@ -200,6 +207,87 @@ export class DatabaseStorage implements IStorage {
     await db.update(users).set({ verificationStatus: "banned", isVerified: false, updatedAt: new Date() }).where(eq(users.id, userId));
   }
 
+  async getUsersWithPendingPhotoSlots(): Promise<SafeUser[]> {
+    const allUsers = await db.select().from(users);
+    return allUsers.filter(u => {
+      const slots = getSlots(u);
+      return slots.some(s => s.status === "pending");
+    });
+  }
+
+  async approvePhotoSlot(userId: string, slotIdx: number): Promise<{ user: SafeUser }> {
+    const user = await this.getUserById(userId);
+    if (!user) throw new Error("User not found");
+    const slots = [...getSlots(user)];
+    if (slotIdx < 0 || slotIdx >= slots.length) throw new Error("Invalid slot index");
+
+    slots[slotIdx] = { ...slots[slotIdx], status: "approved" };
+
+    const approvedSlots = slots.filter(s => s.status === "approved");
+    let mainPhotoUrl = user.mainPhotoUrl;
+    if (!mainPhotoUrl && approvedSlots.length > 0) {
+      mainPhotoUrl = approvedSlots[0].url;
+      slots[slots.findIndex(s => s.url === mainPhotoUrl)] = {
+        ...slots[slots.findIndex(s => s.url === mainPhotoUrl)],
+        isMain: true,
+      };
+    }
+
+    const [updated] = await db.update(users).set({
+      photoSlots: slots,
+      mainPhotoUrl: mainPhotoUrl ?? null,
+      profileVisible: true,
+      photos: approvedSlots.map(s => s.url),
+      updatedAt: new Date(),
+    }).where(eq(users.id, userId)).returning();
+    return { user: updated };
+  }
+
+  async rejectPhotoSlot(userId: string, slotIdx: number, reason: string): Promise<{ user: SafeUser }> {
+    const user = await this.getUserById(userId);
+    if (!user) throw new Error("User not found");
+    const slots = [...getSlots(user)];
+    if (slotIdx < 0 || slotIdx >= slots.length) throw new Error("Invalid slot index");
+
+    const rejectedUrl = slots[slotIdx].url;
+    slots[slotIdx] = { ...slots[slotIdx], status: "rejected", reason, isMain: false };
+
+    const approvedSlots = slots.filter(s => s.status === "approved");
+    let mainPhotoUrl = user.mainPhotoUrl;
+    if (mainPhotoUrl === rejectedUrl) {
+      mainPhotoUrl = approvedSlots[0]?.url ?? null;
+      if (mainPhotoUrl) {
+        const newMainIdx = slots.findIndex(s => s.url === mainPhotoUrl);
+        if (newMainIdx >= 0) slots[newMainIdx] = { ...slots[newMainIdx], isMain: true };
+      }
+    }
+
+    const [updated] = await db.update(users).set({
+      photoSlots: slots,
+      mainPhotoUrl: mainPhotoUrl ?? null,
+      photos: approvedSlots.map(s => s.url),
+      updatedAt: new Date(),
+    }).where(eq(users.id, userId)).returning();
+    return { user: updated };
+  }
+
+  async setMainPhoto(userId: string, slotIdx: number): Promise<void> {
+    const user = await this.getUserById(userId);
+    if (!user) return;
+    const slots = [...getSlots(user)];
+    if (slotIdx < 0 || slotIdx >= slots.length) return;
+    if (slots[slotIdx].status !== "approved") return;
+
+    const newMain = slots[slotIdx].url;
+    const updatedSlots = slots.map((s, i) => ({ ...s, isMain: i === slotIdx }));
+
+    await db.update(users).set({
+      photoSlots: updatedSlots,
+      mainPhotoUrl: newMain,
+      updatedAt: new Date(),
+    }).where(eq(users.id, userId));
+  }
+
   async createReport(reporterId: string, reportedUserId: string, reason: string, description: string): Promise<Report> {
     const [report] = await db.insert(reports).values({
       id: randomUUID(), reporterId, reportedUserId, reason, description
@@ -213,31 +301,6 @@ export class DatabaseStorage implements IStorage {
 
   async resolveReport(reportId: string): Promise<void> {
     await db.update(reports).set({ status: "resolved" }).where(eq(reports.id, reportId));
-  }
-
-  async getUsersWithPendingPhotos(): Promise<SafeUser[]> {
-    const allUsers = await db.select().from(users);
-    return allUsers.filter(u => u.pendingPhotos && u.pendingPhotos.length > 0);
-  }
-
-  async approvePendingPhoto(userId: string, photoIndex: number): Promise<void> {
-    const user = await this.getUserById(userId);
-    if (!user) return;
-    const pending = user.pendingPhotos ?? [];
-    if (photoIndex < 0 || photoIndex >= pending.length) return;
-    const photo = pending[photoIndex];
-    const newPending = pending.filter((_, i) => i !== photoIndex);
-    const newPhotos = [...(user.photos ?? []), photo];
-    await db.update(users).set({ pendingPhotos: newPending, photos: newPhotos, updatedAt: new Date() }).where(eq(users.id, userId));
-  }
-
-  async rejectPendingPhoto(userId: string, photoIndex: number): Promise<void> {
-    const user = await this.getUserById(userId);
-    if (!user) return;
-    const pending = user.pendingPhotos ?? [];
-    if (photoIndex < 0 || photoIndex >= pending.length) return;
-    const newPending = pending.filter((_, i) => i !== photoIndex);
-    await db.update(users).set({ pendingPhotos: newPending, updatedAt: new Date() }).where(eq(users.id, userId));
   }
 }
 

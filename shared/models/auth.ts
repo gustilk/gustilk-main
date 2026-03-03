@@ -1,6 +1,13 @@
 import { sql } from "drizzle-orm";
 import { index, jsonb, pgTable, timestamp, varchar, text, integer, boolean, pgEnum } from "drizzle-orm/pg-core";
 
+export interface PhotoSlot {
+  url: string;
+  status: "pending" | "approved" | "rejected";
+  reason?: string;
+  isMain?: boolean;
+}
+
 export const sessions = pgTable(
   "sessions",
   {
@@ -38,6 +45,9 @@ export const users = pgTable("users", {
   occupation: text("occupation").default(""),
   photos: text("photos").array().default([]),
   pendingPhotos: text("pending_photos").array().default([]),
+  photoSlots: jsonb("photo_slots").$type<PhotoSlot[]>().default([]),
+  mainPhotoUrl: text("main_photo_url"),
+  profileVisible: boolean("profile_visible").default(false),
   languages: text("languages").array().default([]),
 
   isVerified: boolean("is_verified").default(false),

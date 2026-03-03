@@ -17,6 +17,7 @@ import AdminPage from "@/pages/AdminPage";
 import SettingsPage from "@/pages/SettingsPage";
 import VerificationPage from "@/pages/VerificationPage";
 import PendingVerificationPage from "@/pages/PendingVerificationPage";
+import PendingApprovalPage from "@/pages/PendingApprovalPage";
 import SocialSetupPage from "@/pages/SocialSetupPage";
 import LanguageSelectPage from "@/pages/LanguageSelectPage";
 import BottomNav from "@/components/BottomNav";
@@ -27,6 +28,7 @@ import RefundPage from "@/pages/RefundPage";
 import PrivacyPage from "@/pages/PrivacyPage";
 import GuidelinesPage from "@/pages/GuidelinesPage";
 import type { User } from "@shared/schema";
+import type { PhotoSlot } from "@shared/schema";
 
 const PUBLIC_POLICY_ROUTES: Record<string, React.ComponentType> = {
   "/terms": TermsPage,
@@ -45,15 +47,15 @@ function useGustilkUser() {
 
 function profileIsComplete(user: User): boolean {
   if (user.isAdmin) return true;
-  const approvedCount = user.photos?.length ?? 0;
-  const pendingCount = (user as any).pendingPhotos?.length ?? 0;
+  const slots = (user as any).photoSlots as PhotoSlot[] | null ?? [];
+  const hasPhoto = slots.some(s => s.status === "approved" || s.status === "pending");
   return !!(
     user.caste &&
     user.city &&
     user.country &&
     user.age &&
     user.gender &&
-    approvedCount + pendingCount >= 2
+    hasPhoto
   );
 }
 
@@ -71,13 +73,14 @@ function AppShell({ user }: { user: User }) {
     return <SocialSetupPage user={user} />;
   }
 
+  if (profileIsComplete(user) && !user.isAdmin && !user.profileVisible) {
+    return <PendingApprovalPage user={user} />;
+  }
+
   return (
     <VideoCallContext.Provider value={callCtx}>
       <div className="flex flex-col min-h-screen" style={{ background: "#0d0618", fontFamily: "'Open Sans', sans-serif" }}>
-        {/* Incoming call banner — shown on top of everything except an active call */}
         {callCtx.incomingCall && !isInCall && <IncomingCallBanner />}
-
-        {/* Full-screen call overlay */}
         {isInCall && <VideoCallPage />}
 
         <main className="flex-1 overflow-hidden" style={{ background: "#0d0618" }}>
