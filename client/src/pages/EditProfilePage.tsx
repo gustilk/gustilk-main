@@ -11,7 +11,7 @@ interface Props { user: User }
 
 const LANGUAGES = [
   "Arabic", "English", "German",
-  "Armenian", "Russian", "Spanish",
+  "Armenian", "Russian", "Spanish", "Kurdish",
 ];
 
 export default function EditProfilePage({ user }: Props) {
