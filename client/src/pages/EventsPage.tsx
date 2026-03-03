@@ -225,7 +225,7 @@ function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
   ];
 
   return (
-    <div className="fixed inset-0 z-40 flex flex-col" style={{ background: "#0d0618" }}>
+    <div className="fixed inset-0 z-[60] flex flex-col" style={{ background: "#0d0618" }}>
       {/* Native-style nav bar */}
       <div
         className="flex items-center justify-between px-4 flex-shrink-0"
