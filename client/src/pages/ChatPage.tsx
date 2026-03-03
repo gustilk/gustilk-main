@@ -17,22 +17,22 @@ interface Props {
 
 // ─── Gift catalogue ────────────────────────────────────────────────────────
 export const GIFTS = [
-  { id: "rose",        emoji: "🌹", name: "Rose",           color: "#e83e6c" },
-  { id: "bouquet",     emoji: "💐", name: "Bouquet",        color: "#d4608a" },
-  { id: "heart",       emoji: "❤️",  name: "Heart",          color: "#ef4444" },
-  { id: "sparkle",     emoji: "✨", name: "Sparkles",       color: "#c9a84c" },
-  { id: "diamond",     emoji: "💎", name: "Diamond",        color: "#67e8f9" },
-  { id: "chocolate",   emoji: "🍫", name: "Chocolate",      color: "#92400e" },
-  { id: "crown",       emoji: "👑", name: "Crown",          color: "#f59e0b" },
-  { id: "ring",        emoji: "💍", name: "Ring",           color: "#a855f7" },
-  { id: "butterfly",   emoji: "🦋", name: "Butterfly",      color: "#7b3fa0" },
-  { id: "star",        emoji: "⭐", name: "Gold Star",      color: "#eab308" },
-  { id: "moon",        emoji: "🌙", name: "Moon",           color: "#6366f1" },
-  { id: "sun",         emoji: "☀️",  name: "Sunshine",       color: "#f97316" },
+  { id: "rose",        img: "/gifts/rose.png",        name: "Rose",       color: "#e83e6c" },
+  { id: "heart",       img: "/gifts/heart.png",       name: "Heart",      color: "#ef4444" },
+  { id: "bouquet",     img: "/gifts/bouquet.png",     name: "Bouquet",    color: "#d4608a" },
+  { id: "diamond",     img: "/gifts/diamond.png",     name: "Diamond",    color: "#67e8f9" },
+  { id: "ring",        img: "/gifts/ring.png",        name: "Ring",       color: "#a855f7" },
+  { id: "crown",       img: "/gifts/crown.png",       name: "Crown",      color: "#f59e0b" },
+  { id: "balloon",     img: "/gifts/balloon.png",     name: "Balloon",    color: "#f97316" },
+  { id: "sparkle",     img: "/gifts/sparkle.png",     name: "Sparkle",    color: "#c9a84c" },
+  { id: "chocolate",   img: "/gifts/chocolate.png",   name: "Gift Box",   color: "#d4608a" },
+  { id: "bear",        img: "/gifts/bear.png",        name: "Bear",       color: "#c9a84c" },
+  { id: "star",        img: "/gifts/star.png",        name: "Magic Wand", color: "#eab308" },
+  { id: "butterfly",   img: "/gifts/butterfly.png",   name: "Butterfly",  color: "#7b3fa0" },
 ];
 
 function giftById(id: string) {
-  return GIFTS.find(g => g.id === id) ?? { id, emoji: "🎁", name: "Gift", color: "#c9a84c" };
+  return GIFTS.find(g => g.id === id) ?? { id, img: null as string | null, name: "Gift", color: "#c9a84c" };
 }
 
 // ─── Merged timeline item ─────────────────────────────────────────────────
@@ -357,15 +357,20 @@ function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
               borderRadius: "inherit",
             }}
           />
-          {/* Emoji — drop-shadow for 3D pop */}
-          <span
-            className="text-6xl leading-none relative z-10"
-            role="img"
-            aria-label={g.name}
-            style={{ filter: `drop-shadow(0 4px 12px ${g.color}88) drop-shadow(0 2px 4px rgba(0,0,0,0.6))` }}
-          >
-            {g.emoji}
-          </span>
+          {/* Gift image — drop-shadow for 3D pop */}
+          {g.img ? (
+            <img
+              src={g.img}
+              alt={g.name}
+              className="w-16 h-16 object-contain relative z-10"
+              style={{ filter: `drop-shadow(0 4px 12px ${g.color}88) drop-shadow(0 2px 4px rgba(0,0,0,0.6))` }}
+            />
+          ) : (
+            <span className="text-6xl leading-none relative z-10" role="img" aria-label={g.name}
+              style={{ filter: `drop-shadow(0 4px 12px rgba(201,168,76,0.6)) drop-shadow(0 2px 4px rgba(0,0,0,0.6))` }}>
+              🎁
+            </span>
+          )}
           {/* Label */}
           <p className="text-xs font-black uppercase tracking-widest relative z-10"
             style={{ color: g.color, textShadow: `0 0 12px ${g.color}88` }}>
@@ -438,10 +443,19 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                     background: "linear-gradient(160deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 45%, transparent 60%)",
                     borderRadius: "inherit",
                   }} />
-                  <span
-                    className="text-2xl leading-none relative z-10"
-                    style={isSelected ? { filter: `drop-shadow(0 2px 6px ${g.color}99) drop-shadow(0 1px 3px rgba(0,0,0,0.7))` } : { filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.5))" }}
-                  >{g.emoji}</span>
+                  {g.img ? (
+                    <img
+                      src={g.img}
+                      alt={g.name}
+                      className="w-10 h-10 object-contain relative z-10"
+                      style={isSelected ? { filter: `drop-shadow(0 2px 6px ${g.color}99) drop-shadow(0 1px 3px rgba(0,0,0,0.7))` } : { filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.5))" }}
+                    />
+                  ) : (
+                    <span className="text-2xl leading-none relative z-10"
+                      style={isSelected ? { filter: `drop-shadow(0 2px 6px ${g.color}99) drop-shadow(0 1px 3px rgba(0,0,0,0.7))` } : { filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.5))" }}>
+                      🎁
+                    </span>
+                  )}
                   <span className="text-[9px] font-black uppercase tracking-wide relative z-10"
                     style={{ color: isSelected ? g.color : "rgba(253,248,240,0.4)", textShadow: isSelected ? `0 0 8px ${g.color}66` : "none" }}>
                     {g.name}
@@ -489,7 +503,7 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                 style={{ background: "linear-gradient(160deg, rgba(255,255,255,0.2) 0%, transparent 50%)", borderRadius: "inherit" }} />
             )}
             <span className="relative z-10">
-              {isPending ? "Sending…" : selected ? `Send ${giftById(selected).emoji} ${giftById(selected).name}` : "Select a gift"}
+              {isPending ? "Sending…" : selected ? `Send ${giftById(selected).name}` : "Select a gift"}
             </span>
           </button>
         </div>
