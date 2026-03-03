@@ -386,7 +386,7 @@ export function registerAdminRoutes(app: Express, isAuthenticated: any, requireA
       ORDER BY u1.created_at DESC
       LIMIT 50
     `);
-    res.json({ duplicates: dupes });
+    res.json({ duplicates: (dupes as any).rows ?? [] });
   });
 
   // ─── USER DETAIL ───────────────────────────────────────────────────────────
