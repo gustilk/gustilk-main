@@ -133,10 +133,10 @@ function ActivityCard({ item, isPremium, blurred }: { item: ActivityItem; isPrem
 
   return (
     <div
-      className="relative rounded-2xl overflow-hidden cursor-pointer"
+      className="relative rounded-2xl overflow-hidden cursor-pointer active:scale-[0.97] transition-transform"
       style={{ aspectRatio: "3/4", background: "#1a0a2e" }}
       data-testid={`activity-card-${user.id}`}
-      onClick={() => !blurred && setLocation(`/profile/${user.id}`)}
+      onClick={() => setLocation(`/profile/${user.id}`)}
     >
       {/* Photo */}
       {user.mainPhotoUrl ? (
@@ -144,12 +144,12 @@ function ActivityCard({ item, isPremium, blurred }: { item: ActivityItem; isPrem
           src={user.mainPhotoUrl}
           alt={displayName}
           className="w-full h-full object-cover"
-          style={{ filter: blurred ? "blur(18px) brightness(0.7) saturate(0.5)" : "none" }}
+          style={{ filter: blurred ? "blur(18px) brightness(0.65) saturate(0.4)" : "none", transform: blurred ? "scale(1.08)" : "none" }}
         />
       ) : (
         <div
           className="w-full h-full flex items-center justify-center"
-          style={{ background: "linear-gradient(135deg, #1a0a2e, #2d1054)", filter: blurred ? "blur(18px)" : "none" }}
+          style={{ background: "linear-gradient(135deg, #1a0a2e, #2d1054)" }}
         >
           <span className="text-4xl font-serif text-gold/40">{displayName[0]?.toUpperCase()}</span>
         </div>
@@ -158,10 +158,10 @@ function ActivityCard({ item, isPremium, blurred }: { item: ActivityItem; isPrem
       {/* Gradient overlay */}
       <div
         className="absolute inset-0"
-        style={{ background: blurred ? "rgba(13,6,24,0.4)" : "linear-gradient(to top, rgba(13,6,24,0.9) 0%, rgba(13,6,24,0.2) 50%, transparent 100%)" }}
+        style={{ background: blurred ? "rgba(13,6,24,0.35)" : "linear-gradient(to top, rgba(13,6,24,0.9) 0%, rgba(13,6,24,0.2) 50%, transparent 100%)" }}
       />
 
-      {/* Premium lock overlay */}
+      {/* Premium lock overlay — tap to view profile (photos blurred there) */}
       {blurred && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
           <div
@@ -170,17 +170,21 @@ function ActivityCard({ item, isPremium, blurred }: { item: ActivityItem; isPrem
           >
             <Lock size={16} color="#c9a84c" />
           </div>
-          <p className="text-xs font-bold text-center px-3 leading-tight" style={{ color: "#c9a84c" }}>Premium Only</p>
+          <p className="text-[10px] font-bold text-center px-3 leading-tight" style={{ color: "#c9a84c" }}>Tap to view</p>
         </div>
       )}
 
-      {/* Info at bottom */}
-      {!blurred && (
-        <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
-          <p className="text-cream font-semibold text-sm truncate">{displayName}{user.age ? `, ${user.age}` : ""}</p>
-          <p className="text-cream/50 text-[10px]">{timeAgo}</p>
-        </div>
-      )}
+      {/* Info at bottom — always show name for non-blurred */}
+      <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
+        {!blurred ? (
+          <>
+            <p className="text-cream font-semibold text-sm truncate">{displayName}{user.age ? `, ${user.age}` : ""}</p>
+            <p className="text-cream/50 text-[10px]">{timeAgo}</p>
+          </>
+        ) : (
+          <p className="text-cream/40 text-[10px] text-center">{timeAgo}</p>
+        )}
+      </div>
     </div>
   );
 }
