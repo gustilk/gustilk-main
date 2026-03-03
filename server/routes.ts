@@ -301,9 +301,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.patch("/api/events/:id", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
+    const currentUser = await storage.getUserById(userId);
     const [event] = await db.select().from(events).where(eq(events.id, req.params.id as string));
     if (!event) return res.status(404).json({ error: "Event not found" });
-    if (event.creatorId !== userId) return res.status(403).json({ error: "Not your event" });
+    if (event.creatorId !== userId && !currentUser?.isAdmin) return res.status(403).json({ error: "Not your event" });
     const schema = z.object({
       title: z.string().optional(), description: z.string().optional(),
       type: z.enum(["cultural", "meetup", "online"]).optional(),
@@ -320,9 +321,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.delete("/api/events/:id", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
+    const currentUser = await storage.getUserById(userId);
     const [event] = await db.select().from(events).where(eq(events.id, req.params.id as string));
     if (!event) return res.status(404).json({ error: "Event not found" });
-    if (event.creatorId !== userId) return res.status(403).json({ error: "Not your event" });
+    if (event.creatorId !== userId && !currentUser?.isAdmin) return res.status(403).json({ error: "Not your event" });
     await db.delete(eventAttendees).where(eq(eventAttendees.eventId, req.params.id as string));
     await db.delete(events).where(eq(events.id, req.params.id as string));
     res.json({ ok: true });
