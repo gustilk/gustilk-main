@@ -342,6 +342,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
                 onChange={e => setFirstName(e.target.value)}
                 placeholder={t("auth.firstName")}
                 data-testid="input-first-name"
+                autoComplete="given-name"
                 required
               />
             </div>
@@ -353,6 +354,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
                 onChange={e => setLastName(e.target.value)}
                 placeholder={t("auth.lastName")}
                 data-testid="input-last-name"
+                autoComplete="family-name"
               />
             </div>
           </div>
@@ -362,10 +364,12 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
           <GoldInput
             label={t("auth.email")}
             type="email"
+            name="email"
             value={email}
             onChange={e => { setEmail(e.target.value); setEmailError(null); }}
             placeholder="you@example.com"
             data-testid="input-email"
+            autoComplete="email"
             error={!!(emailError || (email.length > 3 && !emailValid))}
             required
           />
@@ -382,10 +386,12 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
           <div className="relative">
             <input
               type={showPw ? "text" : "password"}
+              name="password"
               value={password}
               onChange={e => { setPassword(e.target.value); setPasswordError(null); }}
               placeholder={mode === "register" ? t("auth.pwPlaceholderRegister") : t("auth.pwPlaceholderLogin")}
               data-testid="input-password"
+              autoComplete={mode === "register" ? "new-password" : "current-password"}
               required
               className="w-full px-4 py-3 pr-11 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
               style={{
@@ -419,6 +425,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
                 onChange={e => setConfirmPassword(e.target.value)}
                 placeholder={t("auth.pwPlaceholderConfirm")}
                 data-testid="input-confirm-password"
+                autoComplete="new-password"
                 required
                 className="w-full px-4 py-3 pr-11 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
                 style={{
@@ -469,10 +476,12 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
               <form onSubmit={sendMagicLink} className="space-y-2">
                 <input
                   type="email"
+                  name="email"
                   placeholder="Your email address"
                   value={forgotEmail}
                   onChange={e => setForgotEmail(e.target.value)}
                   data-testid="input-forgot-email"
+                  autoComplete="email"
                   className="w-full px-3 py-2 rounded-lg text-sm text-cream placeholder-cream/30 outline-none"
                   style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(201,168,76,0.25)" }}
                   disabled={forgotState === "sending"}
