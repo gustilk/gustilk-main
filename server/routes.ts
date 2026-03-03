@@ -154,6 +154,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         }
       }
 
+      const photosIncluded = Array.isArray((parsed as any).photos);
+
       // Enforce at least 1 profile photo on initial profile setup
       const isInitialSetup = !user?.caste;
       const submittedPhotos: string[] = (parsed as any).photos ?? [];
@@ -166,44 +168,53 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         }
       }
 
-      // Build updated photoSlots from existing + new uploads
+      // Only rebuild photo slots if the request actually included a photos array
       const existingSlots: any[] = (user?.photoSlots as any[] | null) ?? [];
       const existingApproved: string[] = user?.photos ?? [];
 
-      // Approved slots user is keeping (submitted by URL, not base64)
-      const keptApprovedUrls = submittedPhotos.filter(p => !p.startsWith("data:image") && existingApproved.includes(p));
+      let updatedSlots = existingSlots;
+      let keptApproved = existingApproved;
+      let newUploads: string[] = [];
 
-      // New base64 uploads → pending slots
-      const newUploads = submittedPhotos.filter(p => p.startsWith("data:image"));
+      if (photosIncluded) {
+        // Approved slots user is keeping (submitted by URL, not base64)
+        const keptApprovedUrls = submittedPhotos.filter(p => !p.startsWith("data:image") && existingApproved.includes(p));
 
-      const removedRejectedUrls: string[] = (parsed as any).removedRejectedUrls ?? [];
+        // New base64 uploads → pending slots
+        newUploads = submittedPhotos.filter(p => p.startsWith("data:image"));
 
-      // Reconstruct slots: keep existing non-removed approved/pending/rejected slots, add new uploads
-      const keptSlots = existingSlots.filter(s =>
-        (s.status === "approved" && keptApprovedUrls.includes(s.url)) ||
-        s.status === "pending" ||
-        (s.status === "rejected" && !removedRejectedUrls.includes(s.url))
-      );
-      const newPendingSlots = newUploads.map((url: string) => ({ url, status: "pending" as const }));
-      const updatedSlots = [...keptSlots, ...newPendingSlots];
+        const removedRejectedUrls: string[] = (parsed as any).removedRejectedUrls ?? [];
 
-      if (updatedSlots.length > 6) {
-        return res.status(400).json({ error: "You can have a maximum of 6 photos." });
+        // Reconstruct slots: keep existing non-removed approved/pending/rejected slots, add new uploads
+        const keptSlots = existingSlots.filter(s =>
+          (s.status === "approved" && keptApprovedUrls.includes(s.url)) ||
+          s.status === "pending" ||
+          (s.status === "rejected" && !removedRejectedUrls.includes(s.url))
+        );
+        const newPendingSlots = newUploads.map((url: string) => ({ url, status: "pending" as const }));
+        updatedSlots = [...keptSlots, ...newPendingSlots];
+
+        if (updatedSlots.length > 6) {
+          return res.status(400).json({ error: "You can have a maximum of 6 photos." });
+        }
+
+        keptApproved = keptSlots.filter(s => s.status === "approved").map((s: any) => s.url);
       }
 
-      const keptApproved = keptSlots.filter(s => s.status === "approved").map((s: any) => s.url);
       let mainPhotoUrl = user?.mainPhotoUrl;
-      if (mainPhotoUrl && !keptApproved.includes(mainPhotoUrl)) {
+      if (photosIncluded && mainPhotoUrl && !keptApproved.includes(mainPhotoUrl)) {
         mainPhotoUrl = keptApproved[0] ?? null;
       }
 
       const data = user?.country ? rest : parsed;
       const updated = await storage.updateUser(userId, {
         ...(data as any),
-        photoSlots: updatedSlots,
-        photos: keptApproved,
-        pendingPhotos: newUploads,
-        mainPhotoUrl: mainPhotoUrl ?? null,
+        ...(photosIncluded ? {
+          photoSlots: updatedSlots,
+          photos: keptApproved,
+          pendingPhotos: newUploads,
+          mainPhotoUrl: mainPhotoUrl ?? null,
+        } : {}),
       });
       res.json({ user: updated });
     } catch (err: any) {
