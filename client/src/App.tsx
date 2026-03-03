@@ -15,6 +15,7 @@ import EventsPage from "@/pages/EventsPage";
 import EventDetailPage from "@/pages/EventDetailPage";
 import AdminPage from "@/pages/AdminPage";
 import SettingsPage from "@/pages/SettingsPage";
+import ActivityPage from "@/pages/ActivityPage";
 import VerificationPage from "@/pages/VerificationPage";
 import PendingVerificationPage from "@/pages/PendingVerificationPage";
 import PendingApprovalPage from "@/pages/PendingApprovalPage";
@@ -94,6 +95,7 @@ function AppShell({ user }: { user: User }) {
             <Route path="/events/:eventId" component={({ params }) => <EventDetailPage user={user} eventId={params.eventId} />} />
             <Route path="/events" component={() => <EventsPage user={user} />} />
             <Route path="/admin" component={() => <AdminPage user={user} />} />
+            <Route path="/activity" component={() => <ActivityPage user={user} />} />
             <Route path="/settings" component={() => <SettingsPage user={user} />} />
             <Route path="/verify" component={() => <VerificationPage user={user} />} />
             <Route path="/pending-verification" component={() => <PendingVerificationPage user={user} />} />

@@ -2,6 +2,9 @@
 
 A culturally sensitive dating platform designed exclusively for the Yezidi community, respecting traditional values and the caste system.
 
+## Recent Changes
+- **Block feature complete**: Users can block/unblock others via ReportModal (redesigned with menu → report/block flows) and from Settings → Blocked Users list. Blocked users are filtered from discover feed and match list. Routes: `POST /api/users/:userId/block`, `DELETE /api/users/:userId/block`, `GET /api/blocks`.
+
 ## Overview
 
 **App Name**: Gûstîlk (means "Ring" in Kurdish — symbolizing commitment)
@@ -43,7 +46,7 @@ New social users (empty city) are shown `SocialSetupPage` to fill caste, gender,
 8. **Events** — community event listing with RSVP (Cultural / Meetup / Online filter tabs)
 9. **Reports** — ReportModal in chat; `POST /api/reports`; admin can view/resolve at /admin > Reports tab
 10. **Community guidelines** — checkbox required at registration with collapsible guidelines
-11. **Admin Panel** — verification queue + reports tab with approve/reject/ban/resolve actions
+11. **Admin Panel** — verification queue + reports tab + photo moderation with rejection reason input + approve/reject/ban/resolve actions
 12. **Match Modal** — dual-avatar display when match occurs
 13. **Internationalization (i18n)** — 5 languages fully supported (en, ar, de, hy, ru); first-launch language picker; changeable from Profile settings; Arabic uses RTL layout. All pages use `useTranslation()`. All locale files fully updated with keys for: community guidelines modal (`agreement.sections` as returnObjects array, `agreement.guidelinesTitle/readCarefully/scrollToContinue/agreeButton/readFirst/footerWarning/footerHonour/guidelinesButtonTitle/guidelinesButtonAgreed/guidelinesButtonRequired/truthfulCheckbox`), setup form (`setup.detected/selectCountry/stateProvince/selectState/couldNotSave/minAge18/step2Title/step2Subtitle/profilePhotosLabel/photosRequired/photoBothRequired/selfieAdminNote/takeSelfie/selfieVisible/adminOnly/saving/selfieReady/selfieRequiredStatus`), auth toasts (`auth.errorTitle/codeSentTitle/codeSentDesc`). CommunityGuidelinesModal uses `t()` for all content. All hardcoded English strings replaced with `t()` calls in SocialSetupPage and LandingPage.
 
@@ -53,13 +56,23 @@ New social users (empty city) are shown `SocialSetupPage` to fill caste, gender,
 - `/chat/:matchId` — Chat screen (locked overlay for non-premium)
 - `/events` — Events list with type filter
 - `/events/:eventId` — Event detail with RSVP
-- `/profile` — My profile + settings menu (Language, Notifications, Community Guidelines, Admin)
+- `/profile` — My profile with photoSlots grid (approved/pending/rejected sections), settings menu
 - `/profile/edit` — Edit profile
 - `/premium` — Premium subscription with Iraq detection
-- `/admin` — Admin verification queue (isAdmin users only)
+- `/admin` — Admin verification queue, photo moderation, reports (isAdmin users only)
+- **PendingApprovalPage** — inline page shown when profile is complete but no photos approved yet
+
+## Photo System
+- `photoSlots: PhotoSlot[]` — JSONB column on `users` table
+- `PhotoSlot`: `{ url, status: "pending"|"approved"|"rejected", reason?, isMain? }`
+- `mainPhotoUrl` — approved photo URL shown on discover cards
+- `profileVisible` — set to `true` on first photo approval; gates discover feed
+- Admin Photos tab: shows pending slots per user, optional rejection reason input, approve/reject sends email
+- Profile page: 6-slot grid (approved + new uploads) + separate pending and rejected sections
+- Setup: 3-slot grid, min 1 photo required
 
 ## Database Schema
-- `users` — profiles with caste, gender, country, photos, isPremium, isAdmin, verificationSelfie
+- `users` — profiles with caste, gender, country, photos, photoSlots (JSONB), mainPhotoUrl, profileVisible, isPremium, isAdmin, verificationSelfie
 - `likes` — unique per (fromUserId, toUserId)
 - `dislikes` — unique per (fromUserId, toUserId)
 - `matches` — created when two users mutually like each other
