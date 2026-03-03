@@ -34,6 +34,18 @@ import type { PhotoSlot } from "@shared/schema";
 // Lazy-load admin panel so regular users never download admin code
 const AdminLayout = lazy(() => import("@/pages/admin/AdminLayout"));
 
+// Stable wrapper component — must be defined outside AppShell so its
+// reference never changes between renders, preventing wouter from
+// unmounting/remounting the admin layout on every sub-page navigation.
+function AdminRoute({ user }: { user: User }) {
+  if (!user.isAdmin) return <Redirect to="/matches" />;
+  return (
+    <Suspense fallback={<AdminSpinner />}>
+      <AdminLayout user={user} />
+    </Suspense>
+  );
+}
+
 function AdminSpinner() {
   return (
     <div className="flex items-center justify-center min-h-screen" style={{ background: "#0d0618" }}>
@@ -97,41 +109,30 @@ function AppShell({ user }: { user: User }) {
         {callCtx.incomingCall && !isInCall && <IncomingCallBanner />}
         {isInCall && <VideoCallPage />}
 
+        {/* Admin panel rendered outside Switch so wouter never creates a nested
+            routing context that strips /admin from useLocation/useRoute */}
+        {isAdminRoute && <AdminRoute user={user} />}
+
         <main className="flex-1 overflow-hidden" style={{ background: "#0d0618" }}>
-          <Switch>
-            <Route path="/discover" component={() => user.isAdmin ? <Redirect to="/admin" /> : <DiscoverPage user={user} />} />
-            <Route path="/matches" component={() => <MatchesPage user={user} />} />
-            <Route path="/chat/:matchId" component={({ params }) => <ChatPage user={user} matchId={params.matchId} />} />
-            <Route path="/profile/edit" component={() => <EditProfilePage user={user} />} />
-            <Route path="/profile" component={() => <ProfilePage user={user} />} />
-            <Route path="/premium" component={() => <PremiumPage user={user} />} />
-            <Route path="/events/:eventId" component={({ params }) => <EventDetailPage user={user} eventId={params.eventId} />} />
-            <Route path="/events" component={() => <EventsPage user={user} />} />
-            <Route path="/activity" component={() => user.isAdmin ? <Redirect to="/admin" /> : <ActivityPage user={user} />} />
-            <Route path="/profile/:userId" component={({ params }) => <ViewUserProfilePage viewer={user} userId={params.userId} />} />
-            <Route path="/settings" component={() => <SettingsPage user={user} />} />
-            <Route path="/verify" component={() => <VerificationPage user={user} />} />
-            <Route path="/pending-verification" component={() => <PendingVerificationPage user={user} />} />
-            <Route path="/complete-profile" component={() => <SocialSetupPage user={user} />} />
-
-            {/* Admin routes — lazy loaded, admin-only */}
-            <Route path="/admin/:rest*" component={() =>
-              user.isAdmin ? (
-                <Suspense fallback={<AdminSpinner />}>
-                  <AdminLayout user={user} />
-                </Suspense>
-              ) : <Redirect to="/matches" />
-            } />
-            <Route path="/admin" component={() =>
-              user.isAdmin ? (
-                <Suspense fallback={<AdminSpinner />}>
-                  <AdminLayout user={user} />
-                </Suspense>
-              ) : <Redirect to="/matches" />
-            } />
-
-            <Route path="/" component={() => <Redirect to={user.isAdmin ? "/admin" : "/matches"} />} />
-          </Switch>
+          {!isAdminRoute && (
+            <Switch>
+              <Route path="/discover" component={() => user.isAdmin ? <Redirect to="/admin" /> : <DiscoverPage user={user} />} />
+              <Route path="/matches" component={() => <MatchesPage user={user} />} />
+              <Route path="/chat/:matchId" component={({ params }) => <ChatPage user={user} matchId={params.matchId} />} />
+              <Route path="/profile/edit" component={() => <EditProfilePage user={user} />} />
+              <Route path="/profile" component={() => <ProfilePage user={user} />} />
+              <Route path="/premium" component={() => <PremiumPage user={user} />} />
+              <Route path="/events/:eventId" component={({ params }) => <EventDetailPage user={user} eventId={params.eventId} />} />
+              <Route path="/events" component={() => <EventsPage user={user} />} />
+              <Route path="/activity" component={() => user.isAdmin ? <Redirect to="/admin" /> : <ActivityPage user={user} />} />
+              <Route path="/profile/:userId" component={({ params }) => <ViewUserProfilePage viewer={user} userId={params.userId} />} />
+              <Route path="/settings" component={() => <SettingsPage user={user} />} />
+              <Route path="/verify" component={() => <VerificationPage user={user} />} />
+              <Route path="/pending-verification" component={() => <PendingVerificationPage user={user} />} />
+              <Route path="/complete-profile" component={() => <SocialSetupPage user={user} />} />
+              <Route path="/" component={() => <Redirect to={user.isAdmin ? "/admin" : "/matches"} />} />
+            </Switch>
+          )}
         </main>
         {!isChat && !isEventDetail && !isVerifyPage && !isInCall && !isSettings && !isProfileView && !isAdminRoute && <BottomNav />}
       </div>

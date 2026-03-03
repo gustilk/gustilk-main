@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation, Link } from "wouter";
+import { useLocation, useRoute, Link } from "wouter";
 import {
   LayoutDashboard, Users, UserCheck, Flag, Shield, Ban, Copy,
   BarChart2, CreditCard, Tag, Share2, Bell, Megaphone, Mail, MessageSquare,
@@ -123,44 +123,68 @@ const NAV: NavGroup[] = [
   },
 ];
 
-function resolvePage(location: string, user: User) {
-  const p = location.replace(/^\/admin\/?/, "");
-
-  if (!p || p === "") return <DashboardPage user={user} />;
-  if (p === "users") return <UsersPage user={user} />;
-  if (p.startsWith("users/")) return <UserDetailPage user={user} userId={p.split("/")[1]} />;
-  if (p === "approvals") return <ApprovalsPage user={user} />;
-  if (p === "verification") return <VerificationQueuePage user={user} />;
-  if (p === "reports") return <ReportsPage user={user} />;
-  if (p === "moderation") return <ModerationPage user={user} />;
-  if (p === "blacklist") return <BlacklistPage user={user} />;
-  if (p === "duplicates") return <DuplicatesPage user={user} />;
-  if (p === "analytics") return <AnalyticsPage user={user} />;
-  if (p === "payments") return <PaymentsPage user={user} />;
-  if (p === "promo-codes") return <PromoCodesPage user={user} />;
-  if (p === "referrals") return <ReferralsPage user={user} />;
-  if (p === "notifications") return <NotificationsPage user={user} />;
-  if (p === "announcements") return <AnnouncementsPage user={user} />;
-  if (p === "email-templates") return <EmailTemplatesPage user={user} />;
-  if (p === "feedback") return <FeedbackPage user={user} />;
-  if (p === "caste") return <CastePage user={user} />;
-  if (p === "events") return <EventsManagementPage user={user} />;
-  if (p === "success-stories") return <SuccessStoriesPage user={user} />;
-  if (p === "translations") return <TranslationsPage user={user} />;
-  if (p === "team") return <TeamPage user={user} />;
-  if (p === "logs") return <AuditLogsPage user={user} />;
-  if (p === "settings") return <AppSettingsPage user={user} />;
-  if (p === "app-store") return <AppStorePage user={user} />;
-  if (p === "export") return <ExportPage user={user} />;
-  if (p === "system") return <SystemPage user={user} />;
-  if (p === "backups") return <BackupsPage user={user} />;
-
-  return <DashboardPage user={user} />;
-}
-
 export default function AdminLayout({ user }: { user: User }) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [onUserDetail, userDetailParams] = useRoute("/admin/users/:userId");
+  const [onUsers] = useRoute("/admin/users");
+  const [onApprovals] = useRoute("/admin/approvals");
+  const [onVerification] = useRoute("/admin/verification");
+  const [onReports] = useRoute("/admin/reports");
+  const [onModeration] = useRoute("/admin/moderation");
+  const [onBlacklist] = useRoute("/admin/blacklist");
+  const [onDuplicates] = useRoute("/admin/duplicates");
+  const [onAnalytics] = useRoute("/admin/analytics");
+  const [onPayments] = useRoute("/admin/payments");
+  const [onPromoCodes] = useRoute("/admin/promo-codes");
+  const [onReferrals] = useRoute("/admin/referrals");
+  const [onNotifications] = useRoute("/admin/notifications");
+  const [onAnnouncements] = useRoute("/admin/announcements");
+  const [onEmailTemplates] = useRoute("/admin/email-templates");
+  const [onFeedback] = useRoute("/admin/feedback");
+  const [onCaste] = useRoute("/admin/caste");
+  const [onEvents] = useRoute("/admin/events");
+  const [onSuccessStories] = useRoute("/admin/success-stories");
+  const [onTranslations] = useRoute("/admin/translations");
+  const [onTeam] = useRoute("/admin/team");
+  const [onLogs] = useRoute("/admin/logs");
+  const [onSettings] = useRoute("/admin/settings");
+  const [onAppStore] = useRoute("/admin/app-store");
+  const [onExport] = useRoute("/admin/export");
+  const [onSystem] = useRoute("/admin/system");
+  const [onBackups] = useRoute("/admin/backups");
+
+  function resolvePage() {
+    if (onUserDetail && userDetailParams?.userId) return <UserDetailPage user={user} userId={userDetailParams.userId} />;
+    if (onUsers) return <UsersPage user={user} />;
+    if (onApprovals) return <ApprovalsPage user={user} />;
+    if (onVerification) return <VerificationQueuePage user={user} />;
+    if (onReports) return <ReportsPage user={user} />;
+    if (onModeration) return <ModerationPage user={user} />;
+    if (onBlacklist) return <BlacklistPage user={user} />;
+    if (onDuplicates) return <DuplicatesPage user={user} />;
+    if (onAnalytics) return <AnalyticsPage user={user} />;
+    if (onPayments) return <PaymentsPage user={user} />;
+    if (onPromoCodes) return <PromoCodesPage user={user} />;
+    if (onReferrals) return <ReferralsPage user={user} />;
+    if (onNotifications) return <NotificationsPage user={user} />;
+    if (onAnnouncements) return <AnnouncementsPage user={user} />;
+    if (onEmailTemplates) return <EmailTemplatesPage user={user} />;
+    if (onFeedback) return <FeedbackPage user={user} />;
+    if (onCaste) return <CastePage user={user} />;
+    if (onEvents) return <EventsManagementPage user={user} />;
+    if (onSuccessStories) return <SuccessStoriesPage user={user} />;
+    if (onTranslations) return <TranslationsPage user={user} />;
+    if (onTeam) return <TeamPage user={user} />;
+    if (onLogs) return <AuditLogsPage user={user} />;
+    if (onSettings) return <AppSettingsPage user={user} />;
+    if (onAppStore) return <AppStorePage user={user} />;
+    if (onExport) return <ExportPage user={user} />;
+    if (onSystem) return <SystemPage user={user} />;
+    if (onBackups) return <BackupsPage user={user} />;
+    return <DashboardPage user={user} />;
+  }
 
   const isActive = (path: string) => {
     if (path === "/admin") return location === "/admin";
@@ -255,7 +279,7 @@ export default function AdminLayout({ user }: { user: User }) {
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto">
-          {resolvePage(location, user)}
+          {resolvePage()}
         </main>
       </div>
     </div>
