@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { ArrowLeft, Crown, Ban, Shield, AlertTriangle, MessageSquare, Trash2 } from "lucide-react";
+import { ArrowLeft, Crown, Ban, Shield, AlertTriangle, MessageSquare, Trash2, CheckCircle, XCircle } from "lucide-react";
 import { useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -12,8 +12,10 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
   const { toast } = useToast();
   const [warnReason, setWarnReason] = useState("");
   const [suspendReason, setSuspendReason] = useState("");
+  const [rejectReason, setRejectReason] = useState("");
   const [showWarn, setShowWarn] = useState(false);
   const [showSuspend, setShowSuspend] = useState(false);
+  const [showReject, setShowReject] = useState(false);
 
   const { data, isLoading } = useQuery<{ user: User; stats: { matches: number; messages: number } }>({
     queryKey: ["/api/admin/users", userId],
@@ -24,7 +26,24 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
     mutationFn: async (patch: any) => (await apiRequest("PATCH", `/api/admin/users/${userId}`, patch)).json(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/verifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       toast({ title: "User updated" });
+    },
+  });
+
+  const verifyMutation = useMutation({
+    mutationFn: async ({ action, reason }: { action: "approve" | "reject" | "ban"; reason?: string }) =>
+      (await apiRequest("POST", `/api/admin/verify/${userId}`, { action, reason })).json(),
+    onSuccess: (_, { action }) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users", userId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/verifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      const label = action === "approve" ? "✓ Approved" : action === "reject" ? "Rejected" : "Banned";
+      toast({ title: label });
+      if (action === "approve" || action === "reject") {
+        setLocation("/admin/approvals");
+      }
     },
   });
 
@@ -36,11 +55,6 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
   const suspendMutation = useMutation({
     mutationFn: async (reason: string) => (await apiRequest("POST", `/api/admin/users/${userId}/suspend`, { reason, days: 7 })).json(),
     onSuccess: () => { toast({ title: "User suspended for 7 days" }); setShowSuspend(false); setSuspendReason(""); },
-  });
-
-  const startChatMutation = useMutation({
-    mutationFn: async () => (await apiRequest("POST", `/api/admin/start-chat/${userId}`)).json(),
-    onSuccess: (data: any) => setLocation(`/chat/${data.matchId}`),
   });
 
   const deleteMutation = useMutation({
@@ -57,15 +71,67 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
     return <div className="flex items-center justify-center h-64 text-cream/40 text-sm">User not found</div>;
   }
 
-  const statusColor = u.verificationStatus === "banned" ? "#ef4444" : u.isVerified ? "#10b981" : "#fbbf24";
+  const isPending = u.verificationStatus === "pending";
+  const isBanned = u.verificationStatus === "banned";
+  const statusColor = isBanned ? "#ef4444" : u.isVerified ? "#10b981" : isPending ? "#fbbf24" : "#6b7280";
+  const statusLabel = isBanned ? "Banned" : u.isVerified ? "Verified" : isPending ? "Pending Approval" : "Unverified";
   const casteLabel = ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[u.caste ?? ""] ?? u.caste ?? "—");
+
+  const backPath = isPending ? "/admin/approvals" : "/admin/users";
+  const backLabel = isPending ? "Back to Approvals" : "Back to Users";
 
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto">
-      <button onClick={() => setLocation("/admin/users")} data-testid="button-back-users"
+      <button onClick={() => setLocation(backPath)} data-testid="button-back"
         className="flex items-center gap-2 text-cream/50 text-sm mb-4 hover:text-cream/80 transition-colors">
-        <ArrowLeft size={14} /> Back to Users
+        <ArrowLeft size={14} /> {backLabel}
       </button>
+
+      {/* Pending approval banner */}
+      {isPending && (
+        <div className="mb-4 p-4 rounded-2xl flex items-start gap-3"
+          style={{ background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.3)" }}>
+          <AlertTriangle size={16} color="#fbbf24" className="flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <div className="text-yellow-400 text-sm font-semibold">Awaiting Approval</div>
+            <div className="text-cream/50 text-xs mt-0.5">Review this profile and approve or reject below.</div>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => verifyMutation.mutate({ action: "approve" })}
+              disabled={verifyMutation.isPending}
+              data-testid="button-banner-approve"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold"
+              style={{ background: "rgba(16,185,129,0.2)", color: "#10b981", border: "1px solid rgba(16,185,129,0.35)" }}>
+              <CheckCircle size={12} /> Approve
+            </button>
+            <button onClick={() => setShowReject(!showReject)}
+              disabled={verifyMutation.isPending}
+              data-testid="button-banner-reject"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold"
+              style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }}>
+              <XCircle size={12} /> Reject
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Reject reason input (shown when reject clicked from banner) */}
+      {showReject && isPending && (
+        <div className="mb-4 p-3 rounded-xl flex gap-2" style={{ background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.2)" }}>
+          <input value={rejectReason} onChange={e => setRejectReason(e.target.value)}
+            placeholder="Rejection reason (sent to user)…"
+            data-testid="input-reject-reason"
+            className="flex-1 px-3 py-2 rounded-lg text-xs text-cream placeholder-cream/30 outline-none"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(239,68,68,0.2)" }} />
+          <button onClick={() => verifyMutation.mutate({ action: "reject", reason: rejectReason })}
+            disabled={verifyMutation.isPending}
+            data-testid="button-confirm-reject"
+            className="px-3 py-2 rounded-lg text-xs font-bold"
+            style={{ background: "rgba(239,68,68,0.2)", color: "#ef4444" }}>
+            Confirm
+          </button>
+        </div>
+      )}
 
       {/* Profile header */}
       <div className="rounded-2xl p-5 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}>
@@ -81,7 +147,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
               <h2 className="font-serif text-lg text-gold font-bold">{u.fullName ?? u.firstName ?? "Member"}</h2>
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
                 style={{ background: `${statusColor}22`, color: statusColor }}>
-                {u.verificationStatus === "banned" ? "Banned" : u.isVerified ? "Verified" : "Pending"}
+                {statusLabel}
               </span>
               {u.isPremium && (
                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
@@ -92,6 +158,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
             <div className="text-cream/40 text-xs mt-1">
               {casteLabel} · {u.gender} · {u.age} yrs · {u.city}, {u.country}
             </div>
+            {u.occupation && <div className="text-cream/30 text-xs mt-0.5">{u.occupation}</div>}
             {u.createdAt && (
               <div className="text-cream/30 text-xs mt-1">
                 Joined {format(new Date(u.createdAt), "PPP")} ({formatDistanceToNow(new Date(u.createdAt), { addSuffix: true })})
@@ -107,11 +174,10 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-3 mb-4">
         {[
           { label: "Matches", value: data?.stats?.matches },
           { label: "Messages", value: data?.stats?.messages },
-          { label: "Occupation", value: u.occupation ?? "—" },
         ].map(item => (
           <div key={item.label} className="rounded-xl p-3 text-center" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
             <div className="text-cream text-lg font-bold">{item.value ?? 0}</div>
@@ -132,7 +198,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
         </div>
       )}
 
-      {/* Actions */}
+      {/* Moderation Actions */}
       <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}>
         <h3 className="text-cream text-sm font-semibold mb-3">Actions</h3>
         <div className="grid grid-cols-2 gap-2">
@@ -141,12 +207,6 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
             className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold"
             style={{ background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}>
             <Crown size={13} /> {u.isPremium ? "Remove Premium" : "Grant Premium"}
-          </button>
-          <button onClick={() => startChatMutation.mutate()}
-            data-testid="button-message-user"
-            className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold"
-            style={{ background: "rgba(59,130,246,0.12)", color: "#3b82f6", border: "1px solid rgba(59,130,246,0.2)" }}>
-            <MessageSquare size={13} /> Send Message
           </button>
           <button onClick={() => setShowWarn(!showWarn)}
             data-testid="button-warn-user"
@@ -161,18 +221,18 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
             <Shield size={13} /> Suspend 7 Days
           </button>
           <button onClick={() => {
-            if (confirm(`Ban ${u.fullName ?? u.email}?`))
-              updateMutation.mutate({ isBanned: u.verificationStatus !== "banned" });
+            if (confirm(`${isBanned ? "Unban" : "Ban"} ${u.fullName ?? u.email}?`))
+              updateMutation.mutate({ isBanned: !isBanned });
           }}
             data-testid="button-ban-user"
             className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold"
             style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>
-            <Ban size={13} /> {u.verificationStatus === "banned" ? "Unban" : "Ban"}
+            <Ban size={13} /> {isBanned ? "Unban" : "Ban"}
           </button>
           {!u.isAdmin && (
             <button onClick={() => { if (confirm("Delete this user permanently?")) deleteMutation.mutate(); }}
               data-testid="button-delete-user"
-              className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold"
+              className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold col-span-2"
               style={{ background: "rgba(239,68,68,0.06)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.15)" }}>
               <Trash2 size={13} /> Delete Account
             </button>
@@ -209,6 +269,29 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
           </div>
         )}
       </div>
+
+      {/* Bottom approve/reject for pending users */}
+      {isPending && (
+        <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.12)" }}>
+          <h3 className="text-cream text-sm font-semibold mb-3">Approval Decision</h3>
+          <div className="flex gap-2">
+            <button onClick={() => verifyMutation.mutate({ action: "approve" })}
+              disabled={verifyMutation.isPending}
+              data-testid="button-approve"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold"
+              style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.3)" }}>
+              <CheckCircle size={15} /> Approve Profile
+            </button>
+            <button onClick={() => setShowReject(!showReject)}
+              disabled={verifyMutation.isPending}
+              data-testid="button-reject"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold"
+              style={{ background: "rgba(239,68,68,0.12)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.25)" }}>
+              <XCircle size={15} /> Reject Profile
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
