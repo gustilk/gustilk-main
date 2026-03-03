@@ -335,9 +335,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const userId = getUserId(req);
     const { selfie } = z.object({ selfie: z.string().min(1) }).parse(req.body);
     if (selfie.startsWith("data:image")) {
-      const check = await moderatePhotos([selfie]);
-      if (!check.safe) {
-        return res.status(400).json({ error: "The verification photo contains inappropriate content." });
+      const faceCheck = await checkFacePresent(selfie);
+      if (!faceCheck.faceDetected) {
+        return res.status(400).json({ error: "Please upload a clear selfie showing your face." });
       }
     }
     await storage.updateUser(userId, { verificationSelfie: selfie, verificationStatus: "pending" });
@@ -453,14 +453,16 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.post("/api/admin/photos/:userId/approve/:photoIndex", isAuthenticated, requireAdmin, async (req, res) => {
-    const { userId, photoIndex } = req.params;
-    await storage.approvePendingPhoto(userId, parseInt(photoIndex));
+    const userId = String(req.params.userId);
+    const photoIndex = parseInt(String(req.params.photoIndex));
+    await storage.approvePendingPhoto(userId, photoIndex);
     res.json({ ok: true });
   });
 
   app.post("/api/admin/photos/:userId/reject/:photoIndex", isAuthenticated, requireAdmin, async (req, res) => {
-    const { userId, photoIndex } = req.params;
-    await storage.rejectPendingPhoto(userId, parseInt(photoIndex));
+    const userId = String(req.params.userId);
+    const photoIndex = parseInt(String(req.params.photoIndex));
+    await storage.rejectPendingPhoto(userId, photoIndex);
     res.json({ ok: true });
   });
 

@@ -45,14 +45,15 @@ function useGustilkUser() {
 
 function profileIsComplete(user: User): boolean {
   if (user.isAdmin) return true;
+  const approvedCount = user.photos?.length ?? 0;
+  const pendingCount = (user as any).pendingPhotos?.length ?? 0;
   return !!(
     user.caste &&
     user.city &&
     user.country &&
     user.age &&
     user.gender &&
-    user.photos &&
-    user.photos.length >= 2
+    approvedCount + pendingCount >= 2
   );
 }
 
