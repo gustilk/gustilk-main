@@ -12,6 +12,7 @@ import { count, sql, eq, asc, desc, or, and, ilike } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
 import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail } from "./email";
 import OpenAI from "openai";
+import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
@@ -830,6 +831,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       res.status(500).json({ error: err.message });
     }
   });
+
+  // ─── EXTENDED ADMIN ROUTES ────────────────────────────────────────────────
+  registerAdminRoutes(app, isAuthenticated, requireAdmin);
 
   return httpServer;
 }

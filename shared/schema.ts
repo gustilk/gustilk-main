@@ -132,7 +132,66 @@ export const eventAttendees = pgTable("event_attendees", {
   uniqueAttendee: uniqueIndex("event_attendees_unique").on(table.eventId, table.userId),
 }));
 
-// Profile update validation schema
+// ─── NEW ADMIN TABLES ──────────────────────────────────────────────────────────
+
+export const blacklist = pgTable("blacklist", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  type: text("type").notNull(),
+  value: text("value").notNull(),
+  reason: text("reason").default(""),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const promoCodes = pgTable("promo_codes", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  code: text("code").notNull(),
+  description: text("description").default(""),
+  discountPercent: integer("discount_percent").notNull().default(100),
+  maxUses: integer("max_uses").default(0),
+  usedCount: integer("used_count").default(0),
+  expiresAt: timestamp("expires_at"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const auditLogs = pgTable("audit_logs", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  adminId: varchar("admin_id").references(() => users.id),
+  adminEmail: text("admin_email").default(""),
+  action: text("action").notNull(),
+  targetType: text("target_type").default(""),
+  targetId: text("target_id").default(""),
+  details: text("details").default(""),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const appSettings = pgTable("app_settings", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const announcements = pgTable("announcements", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const successStories = pgTable("success_stories", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  names: text("names").notNull(),
+  story: text("story").notNull(),
+  photoUrl: text("photo_url").default(""),
+  visible: boolean("visible").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ─── VALIDATION SCHEMAS ────────────────────────────────────────────────────────
+
 export const profileUpdateSchema = z.object({
   fullName: z.string().min(2).optional(),
   caste: z.enum(["sheikh", "pir", "murid"]).optional(),
@@ -151,6 +210,8 @@ export const profileUpdateSchema = z.object({
   verificationStatus: z.literal("pending").optional(),
 });
 
+// ─── TYPES ─────────────────────────────────────────────────────────────────────
+
 export type OtpCode = typeof otpCodes.$inferSelect;
 export type Like = typeof likes.$inferSelect;
 export type Gift = typeof gifts.$inferSelect;
@@ -162,6 +223,12 @@ export type Message = typeof messages.$inferSelect;
 export type Event = typeof events.$inferSelect;
 export type EventAttendee = typeof eventAttendees.$inferSelect;
 export type Report = typeof reports.$inferSelect;
+export type Blacklist = typeof blacklist.$inferSelect;
+export type PromoCode = typeof promoCodes.$inferSelect;
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type AppSetting = typeof appSettings.$inferSelect;
+export type Announcement = typeof announcements.$inferSelect;
+export type SuccessStory = typeof successStories.$inferSelect;
 
 export type MatchWithUser = Match & {
   otherUser: User;
