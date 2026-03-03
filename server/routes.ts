@@ -11,20 +11,6 @@ import { db } from "./db";
 import { count, sql, eq, asc, desc, or, and, ilike } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
 import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail } from "./email";
-import twilio from "twilio";
-
-const twilioClient = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN
-  ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
-  : null;
-
-async function sendSmsNotification(toPhone: string, body: string): Promise<void> {
-  if (!twilioClient || !process.env.TWILIO_PHONE_NUMBER) return;
-  try {
-    await twilioClient.messages.create({ from: process.env.TWILIO_PHONE_NUMBER, to: toPhone, body });
-  } catch (e) {
-    console.error("SMS send error:", e);
-  }
-}
 
 function getUserId(req: any): string {
   return req.session?.userId;
@@ -221,20 +207,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const userId = getUserId(req);
     const targetId = req.params.targetId as string;
     const result = await storage.likeUser(userId, targetId);
-
-    // Send SMS to the liked user if they have a phone number
-    const [liker, liked] = await Promise.all([
-      storage.getUserById(userId),
-      storage.getUserById(targetId),
-    ]);
-    if (liked?.phone && liker) {
-      const likerName = liker.firstName ?? liker.fullName?.split(" ")[0] ?? "Someone";
-      if (result.matched) {
-        await sendSmsNotification(liked.phone, `💛 You matched with ${likerName} on Gûstîlk! Open the app to start chatting.`);
-      } else {
-        await sendSmsNotification(liked.phone, `💛 ${likerName} liked your profile on Gûstîlk! Open the app to see who it is.`);
-      }
-    }
     res.json(result);
   });
 
