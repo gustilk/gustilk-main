@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useLocation, Link } from "wouter";
 import { Heart, MessageCircle, User, CalendarDays, Zap } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import type { MatchWithUser } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { MatchWithUser, User as UserType } from "@shared/schema";
 
 interface ActivityItem { user: unknown; createdAt: string; }
 
@@ -18,6 +20,16 @@ export default function BottomNav() {
   const [location] = useLocation();
   const { t } = useTranslation();
 
+  // Local cleared flags — badges vanish instantly on click, server catches up asynchronously
+  const [matchesCleared, setMatchesCleared] = useState(false);
+  const [activityCleared, setActivityCleared] = useState(false);
+
+  const { data: userData } = useQuery<{ user: UserType } | null>({
+    queryKey: ["/api/auth/me"],
+    staleTime: 1000 * 60 * 5,
+    retry: false,
+  });
+
   const { data: matchData } = useQuery<{ matches: MatchWithUser[] }>({
     queryKey: ["/api/matches"],
     refetchInterval: 15000,
@@ -28,8 +40,47 @@ export default function BottomNav() {
     refetchInterval: 30000,
   });
 
-  const unreadCount = matchData?.matches?.reduce((sum, m) => sum + (m.unreadCount || 0), 0) || 0;
-  const likesCount = likesData?.items?.length ?? 0;
+  const seenMatchesMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/seen/matches"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    },
+  });
+
+  const seenActivityMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/seen/activity"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    },
+  });
+
+  // Matches badge — clears immediately on click, then refetch confirms
+  const unreadCount = matchesCleared
+    ? 0
+    : (matchData?.matches?.reduce((sum, m) => sum + (m.unreadCount || 0), 0) ?? 0);
+
+  // Activity badge — new likes since activitySeenAt
+  const activitySeenAt = userData?.user?.activitySeenAt
+    ? new Date(userData.user.activitySeenAt as unknown as string)
+    : null;
+
+  const likesCount = activityCleared
+    ? 0
+    : (likesData?.items?.filter(item =>
+        activitySeenAt ? new Date(item.createdAt) > activitySeenAt : true
+      ).length ?? 0);
+
+  const handleNavClick = (id: string) => {
+    if (id === "matches" && unreadCount > 0) {
+      setMatchesCleared(true);
+      seenMatchesMutation.mutate();
+    }
+    if (id === "activity" && likesCount > 0) {
+      setActivityCleared(true);
+      seenActivityMutation.mutate();
+    }
+  };
 
   return (
     <nav
@@ -38,12 +89,13 @@ export default function BottomNav() {
     >
       {NAV_ITEMS.map(({ href, icon: Icon, tKey, id }) => {
         const isActive = location === href || (href === "/discover" && location === "/");
-        const isMatches = href === "/matches";
-        const isActivity = href === "/activity";
+        const isMatches = id === "matches";
+        const isActivity = id === "activity";
         return (
           <Link
             key={href}
             href={href}
+            onClick={() => handleNavClick(id)}
             className="flex-1 flex flex-col items-center justify-center py-3 gap-0.5 transition-all relative"
             style={{ color: isActive ? "#c9a84c" : "rgba(253,248,240,0.3)" }}
             data-testid={`nav-${id}`}
