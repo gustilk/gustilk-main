@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys, blocks, visitors, gifts } from "@shared/schema";
+import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys, blocks, visitors, gifts, magicLinkTokens } from "@shared/schema";
 import type { User, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report, InsertUser, PhotoSlot, Block, Gift } from "@shared/schema";
 import { eq, and, or, ne, notInArray, desc, sql, isNotNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
@@ -78,10 +78,14 @@ export class DatabaseStorage implements IStorage {
       }
       await db.delete(matches).where(or(eq(matches.user1Id, id), eq(matches.user2Id, id)));
     }
+    await db.delete(gifts).where(or(eq(gifts.senderId, id), eq(gifts.recipientId, id)));
+    await db.delete(visitors).where(or(eq(visitors.fromUserId, id), eq(visitors.toUserId, id)));
+    await db.delete(blocks).where(or(eq(blocks.blockerId, id), eq(blocks.blockedId, id)));
     await db.delete(likes).where(or(eq(likes.fromUserId, id), eq(likes.toUserId, id)));
     await db.delete(dislikes).where(or(eq(dislikes.fromUserId, id), eq(dislikes.toUserId, id)));
     await db.delete(eventAttendees).where(eq(eventAttendees.userId, id));
     await db.delete(reports).where(or(eq(reports.reporterId, id), eq(reports.reportedUserId, id)));
+    await db.delete(magicLinkTokens).where(eq(magicLinkTokens.userId, id));
     await db.delete(otpCodes).where(sql`identifier IN (SELECT email FROM users WHERE id = ${id} UNION SELECT phone FROM users WHERE id = ${id})`);
     await db.delete(passkeys).where(eq(passkeys.userId, id));
     await db.delete(users).where(eq(users.id, id));

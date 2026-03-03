@@ -420,6 +420,15 @@ export default function SettingsPage({ user }: Props) {
                     </p>
                   </div>
                 </div>
+                {user.isPremium && (
+                  <div className="flex items-start gap-2 mb-3 px-3 py-2.5 rounded-lg"
+                    style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.25)" }}>
+                    <Star size={13} color="#c9a84c" className="flex-shrink-0 mt-0.5" />
+                    <p className="text-xs" style={{ color: "rgba(201,168,76,0.85)" }}>
+                      You have an active Premium membership. Deleting your account will permanently cancel it with no refund.
+                    </p>
+                  </div>
+                )}
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShowDeleteConfirm(false)}
