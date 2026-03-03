@@ -199,6 +199,13 @@ export default {
     videoCall: "Video call",
     report: "Report",
     you: "You",
+    matchedWith: "You matched with",
+    breakIcePrompt: "Break the ice — tap a message to send",
+    icebreaker1: "Hi! Nice to meet you 👋",
+    icebreaker2: "Silva! How are you? ☀️",
+    icebreaker3: "Your profile caught my eye ✨",
+    icebreaker4: "Tell me about yourself?",
+    icebreaker5: "What's your favourite tradition?",
   },
   premium: {
     title: "Gûstîlk Premium",

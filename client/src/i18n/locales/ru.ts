@@ -199,6 +199,13 @@ export default {
     videoCall: "Видеозвонок",
     report: "Пожаловаться",
     you: "Вы",
+    matchedWith: "Вы совпали с",
+    breakIcePrompt: "Начните разговор — нажмите на сообщение",
+    icebreaker1: "Привет! Рад познакомиться 👋",
+    icebreaker2: "Силва! Как ты? ☀️",
+    icebreaker3: "Твой профиль привлёк моё внимание ✨",
+    icebreaker4: "Расскажи о себе?",
+    icebreaker5: "Какая твоя любимая традиция?",
   },
   premium: {
     title: "Gûstîlk Premium",

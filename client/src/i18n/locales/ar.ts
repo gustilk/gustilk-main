@@ -199,6 +199,13 @@ export default {
     videoCall: "مكالمة فيديو",
     report: "إبلاغ",
     you: "أنت",
+    matchedWith: "تطابقت مع",
+    breakIcePrompt: "كسر الجمود — اضغط على رسالة لإرسالها",
+    icebreaker1: "مرحبًا! سعيد بلقائك 👋",
+    icebreaker2: "سيلفا! كيف حالك؟ ☀️",
+    icebreaker3: "لفت انتباهي ملفك الشخصي ✨",
+    icebreaker4: "أخبرني عن نفسك؟",
+    icebreaker5: "ما هو تقليدك المفضل؟",
   },
   premium: {
     title: "غوستيلك بريميوم",

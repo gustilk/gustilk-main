@@ -199,6 +199,13 @@ export default {
     videoCall: "Tesazang",
     report: "Baghanel",
     you: "Douk",
+    matchedWith: "Դուք համընկաք",
+    breakIcePrompt: "Սկսեք զրույցը — հպեք հաղորդագրությանը",
+    icebreaker1: "Բարև! Ուրախ եմ ծանոթանալ 👋",
+    icebreaker2: "Սիլվա! Ինչպե՞ս ես? ☀️",
+    icebreaker3: "Ձեր պրոֆիլը ուշադրությունս գրավեց ✨",
+    icebreaker4: "Պատմի՛ ինձ քո մասին:",
+    icebreaker5: "Ո՞րն է ձեր սիրելի ավանդույթը:",
   },
   premium: {
     title: "Gûstîlk Premium",

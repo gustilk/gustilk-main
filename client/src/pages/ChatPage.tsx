@@ -237,18 +237,18 @@ export default function ChatPage({ user, matchId }: Props) {
             </div>
             <div>
               <p className="text-cream/60 text-sm font-medium mb-1">
-                You matched with <strong className="text-gold">{otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0]}</strong>!
+                {t("chat.matchedWith")} <strong className="text-gold">{otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0]}</strong>!
               </p>
-              <p className="text-cream/30 text-xs">Break the ice — tap a message to send</p>
+              <p className="text-cream/30 text-xs">{t("chat.breakIcePrompt")}</p>
             </div>
             <div className="flex flex-wrap justify-center gap-2 max-w-xs">
-              {[
-                "Hi! Nice to meet you 👋",
-                "Silva! How are you? ☀️",
-                "Your profile caught my eye ✨",
-                "Tell me about yourself?",
-                "What's your favourite tradition?",
-              ].map((msg) => (
+              {([
+                t("chat.icebreaker1"),
+                t("chat.icebreaker2"),
+                t("chat.icebreaker3"),
+                t("chat.icebreaker4"),
+                t("chat.icebreaker5"),
+              ] as string[]).map((msg) => (
                 <button
                   key={msg}
                   data-testid={`icebreaker-${msg.slice(0, 10).replace(/\s/g, "-").toLowerCase()}`}
