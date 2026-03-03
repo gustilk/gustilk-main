@@ -1,6 +1,6 @@
 import { db } from "./db";
-import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys, blocks, visitors } from "@shared/schema";
-import type { User, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report, InsertUser, PhotoSlot, Block } from "@shared/schema";
+import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys, blocks, visitors, gifts } from "@shared/schema";
+import type { User, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report, InsertUser, PhotoSlot, Block, Gift } from "@shared/schema";
 import { eq, and, or, ne, notInArray, desc, sql, isNotNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -34,6 +34,10 @@ export interface IStorage {
   approvePhotoSlot(userId: string, slotIdx: number): Promise<{ user: SafeUser }>;
   rejectPhotoSlot(userId: string, slotIdx: number, reason: string): Promise<{ user: SafeUser }>;
   setMainPhoto(userId: string, slotIdx: number): Promise<void>;
+
+  sendGift(senderId: string, recipientId: string, matchId: string, giftType: string, message: string): Promise<Gift>;
+  getGiftsInMatch(matchId: string): Promise<Gift[]>;
+  getGiftsReceived(userId: string): Promise<Gift[]>;
 
   recordVisit(fromUserId: string, toUserId: string): Promise<void>;
   getVisitors(userId: string): Promise<{ user: SafeUser; createdAt: Date }[]>;
@@ -304,6 +308,19 @@ export class DatabaseStorage implements IStorage {
       mainPhotoUrl: newMain,
       updatedAt: new Date(),
     }).where(eq(users.id, userId));
+  }
+
+  async sendGift(senderId: string, recipientId: string, matchId: string, giftType: string, message: string): Promise<Gift> {
+    const [gift] = await db.insert(gifts).values({ id: randomUUID(), senderId, recipientId, matchId, giftType, message }).returning();
+    return gift;
+  }
+
+  async getGiftsInMatch(matchId: string): Promise<Gift[]> {
+    return db.select().from(gifts).where(eq(gifts.matchId, matchId)).orderBy(desc(gifts.createdAt));
+  }
+
+  async getGiftsReceived(userId: string): Promise<Gift[]> {
+    return db.select().from(gifts).where(eq(gifts.recipientId, userId)).orderBy(desc(gifts.createdAt));
   }
 
   async recordVisit(fromUserId: string, toUserId: string): Promise<void> {
