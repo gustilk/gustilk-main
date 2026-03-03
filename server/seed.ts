@@ -98,7 +98,7 @@ const seedProfiles = [
     country: "Belgium",
     city: "Brussels",
     age: 25,
-    bio: "Passionate about Yezidi heritage and language preservation. I teach Kurdish to diaspora children on weekends.",
+    bio: "Passionate about Yezidi heritage and language preservation. I organize cultural activities for diaspora children on weekends.",
     occupation: "Language Teacher",
     languages: ["French", "English"],
     photos: [],
@@ -133,7 +133,7 @@ const seedEvents = [
   },
   {
     title: "Online Yezidi Language Class",
-    description: "Learn or improve your Kurmanji Kurdish in a supportive online environment. Taught by native speakers. Open to all Yezidi diaspora worldwide.",
+    description: "An online class focused on preserving Yezidi cultural heritage and traditions. Open to all Yezidi diaspora worldwide.",
     type: "online",
     date: new Date("2026-03-22T17:00:00Z"),
     location: "Online (Zoom)",

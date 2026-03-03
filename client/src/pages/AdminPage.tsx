@@ -5,7 +5,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
   ArrowLeft, CheckCircle, XCircle, Ban, Shield, Flag, Users, BarChart2,
   Calendar, Search, Star, Trash2, ChevronRight, Plus, Edit2, X, Crown,
-  UserCheck, MessageSquare, Heart, TrendingUp, AlertTriangle, Camera, Image,
+  UserCheck, MessageSquare, Heart, TrendingUp, AlertTriangle, Camera, Image, Eye,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -13,7 +13,7 @@ import type { SafeUser, Report, Event } from "@shared/schema";
 import type { PhotoSlot } from "@shared/schema";
 
 interface Props { user: SafeUser }
-type AdminTab = "overview" | "users" | "verifications" | "photos" | "reports" | "events";
+type AdminTab = "overview" | "users" | "verifications" | "reports" | "events";
 
 interface Stats {
   totalUsers: number; premiumUsers: number; verifiedUsers: number;
@@ -53,26 +53,20 @@ export default function AdminPage({ user }: Props) {
     enabled: activeTab === "events",
   });
 
-  const { data: pendingPhotosData, isLoading: pendingPhotosLoading } = useQuery<{ users: SafeUser[] }>({
-    queryKey: ["/api/admin/pending-photos"],
-    queryFn: async () => (await fetch("/api/admin/pending-photos", { credentials: "include" })).json(),
-    enabled: activeTab === "photos",
-  });
-
   const photoActionMutation = useMutation({
     mutationFn: async ({ userId, slotIdx, action, reason }: { userId: string; slotIdx: number; action: "approve" | "reject"; reason?: string }) => {
       const res = await apiRequest("POST", `/api/admin/photos/${userId}/${action}/${slotIdx}`, reason ? { reason } : undefined);
       return res.json();
     },
     onSuccess: (_, { action }) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-photos"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/verifications"] });
       toast({ title: action === "approve" ? "Photo approved" : "Photo rejected" });
     },
   });
 
   const verifyMutation = useMutation({
-    mutationFn: async ({ userId, action }: { userId: string; action: "approve" | "reject" | "ban" }) => {
-      const res = await apiRequest("POST", `/api/admin/verify/${userId}`, { action });
+    mutationFn: async ({ userId, action, reason }: { userId: string; action: "approve" | "reject" | "ban"; reason?: string }) => {
+      const res = await apiRequest("POST", `/api/admin/verify/${userId}`, { action, reason });
       return res.json();
     },
     onSuccess: (_, { action }) => {
@@ -109,6 +103,14 @@ export default function AdminPage({ user }: Props) {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       toast({ title: "User deleted" });
     },
+  });
+
+  const startChatMutation = useMutation({
+    mutationFn: async (userId: string) => (await apiRequest("POST", `/api/admin/start-chat/${userId}`)).json(),
+    onSuccess: (data: { matchId: string }) => {
+      setLocation(`/chat/${data.matchId}`);
+    },
+    onError: () => toast({ title: "Could not open chat", variant: "destructive" }),
   });
 
   const createEventMutation = useMutation({
@@ -155,16 +157,10 @@ export default function AdminPage({ user }: Props) {
   const pending = verifyData?.users ?? [];
   const reports = (reportsData?.reports ?? []).filter(r => r.status === "pending");
 
-  const pendingPhotoCount = (pendingPhotosData?.users ?? []).reduce((sum, u) => {
-    const slots = ((u as any).photoSlots ?? []) as PhotoSlot[];
-    return sum + slots.filter(s => s.status === "pending").length;
-  }, 0);
-
   const TABS: { id: AdminTab; label: string; Icon: any; badge?: number }[] = [
     { id: "overview", label: "Overview", Icon: BarChart2 },
     { id: "users", label: "Users", Icon: Users },
     { id: "verifications", label: "Verify", Icon: Shield, badge: pending.length },
-    { id: "photos", label: "Photos", Icon: Camera, badge: pendingPhotoCount > 0 ? pendingPhotoCount : undefined },
     { id: "reports", label: "Reports", Icon: Flag, badge: reports.length },
     { id: "events", label: "Events", Icon: Calendar },
   ];
@@ -216,23 +212,17 @@ export default function AdminPage({ user }: Props) {
             onToggleBan={(id, val) => updateUserMutation.mutate({ id, isBanned: val })}
             onToggleApprove={(id, val) => updateUserMutation.mutate({ id, profileVisible: val })}
             onDelete={(id) => deleteUserMutation.mutate(id)}
-            isPending={updateUserMutation.isPending || deleteUserMutation.isPending}
+            onMessage={(id) => startChatMutation.mutate(id)}
+            isPending={updateUserMutation.isPending || deleteUserMutation.isPending || startChatMutation.isPending}
           />
         )}
         {activeTab === "verifications" && (
           <VerificationsTab
             pending={pending}
             isLoading={verifyLoading}
-            onAction={(userId, action) => verifyMutation.mutate({ userId, action })}
-            isPending={verifyMutation.isPending}
-          />
-        )}
-        {activeTab === "photos" && (
-          <PhotosTab
-            users={pendingPhotosData?.users ?? []}
-            isLoading={pendingPhotosLoading}
-            onAction={(userId, slotIdx, action, reason) => photoActionMutation.mutate({ userId, slotIdx, action, reason })}
-            isPending={photoActionMutation.isPending}
+            onAction={(userId, action, reason) => verifyMutation.mutate({ userId, action, reason })}
+            onPhotoAction={(userId, slotIdx, action, reason) => photoActionMutation.mutate({ userId, slotIdx, action, reason })}
+            isPending={verifyMutation.isPending || photoActionMutation.isPending}
           />
         )}
         {activeTab === "reports" && (
@@ -290,12 +280,13 @@ function OverviewTab({ stats }: { stats: Stats | undefined }) {
   );
 }
 
-function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onToggleApprove, onDelete }: {
+function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onToggleApprove, onDelete, onMessage }: {
   u: SafeUser; isMe: boolean; isPending: boolean;
   onTogglePremium: (id: string, val: boolean) => void;
   onToggleBan: (id: string, val: boolean) => void;
   onToggleApprove: (id: string, val: boolean) => void;
   onDelete: (id: string) => void;
+  onMessage: (id: string) => void;
 }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const isBanned = u.verificationStatus === "banned";
@@ -328,6 +319,11 @@ function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onToggleAp
         </div>
         {!isMe && (
           <div className="flex gap-1.5 flex-wrap">
+            <button onClick={() => onMessage(u.id)} disabled={isPending} data-testid={`button-message-${u.id}`}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50 transition-all"
+              style={{ background: "rgba(123,63,160,0.15)", color: "#9b6bd4", border: "1px solid rgba(123,63,160,0.3)" }}>
+              <MessageSquare size={11} />Message
+            </button>
             {!u.isAdmin && (
               <button onClick={() => onToggleApprove(u.id, !isApproved)} disabled={isPending || isBanned} data-testid={`button-approve-${u.id}`}
                 className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50 transition-all"
@@ -371,12 +367,13 @@ function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onToggleAp
   );
 }
 
-function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBan, onToggleApprove, onDelete, isPending }: {
+function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBan, onToggleApprove, onDelete, onMessage, isPending }: {
   users: SafeUser[]; isLoading: boolean; currentUserId: string;
   onTogglePremium: (id: string, val: boolean) => void;
   onToggleBan: (id: string, val: boolean) => void;
   onToggleApprove: (id: string, val: boolean) => void;
   onDelete: (id: string) => void;
+  onMessage: (id: string) => void;
   isPending: boolean;
 }) {
   const [search, setSearch] = useState("");
@@ -399,9 +396,14 @@ function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBa
     return matchSearch && matchCountry && matchCity;
   });
 
+  const premiumMembers = filteredMembers.filter(u => u.isPremium);
+  const standardMembers = filteredMembers.filter(u => !u.isPremium);
+
   if (isLoading) return <Spinner />;
 
   const selectStyle = { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(253,248,240,0.7)" };
+
+  const cardProps = { isPending, onTogglePremium, onToggleBan, onToggleApprove, onDelete, onMessage };
 
   return (
     <div className="space-y-4 pt-1">
@@ -435,29 +437,35 @@ function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBa
       {/* Admins section */}
       {admins.length > 0 && (
         <div>
-          <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold px-1 mb-2">
-            Admins · {admins.length}
-          </p>
+          <SectionHeader icon="🛡️" label="Admins" count={admins.length} color="#c9a84c" />
           <div className="space-y-2">
             {admins.map(u => (
-              <UserCard key={u.id} u={u} isMe={u.id === currentUserId} isPending={isPending}
-                onTogglePremium={onTogglePremium} onToggleBan={onToggleBan} onToggleApprove={onToggleApprove} onDelete={onDelete} />
+              <UserCard key={u.id} u={u} isMe={u.id === currentUserId} {...cardProps} />
             ))}
           </div>
         </div>
       )}
 
-      {/* Members section */}
+      {/* Premium members */}
+      {premiumMembers.length > 0 && (
+        <div>
+          <SectionHeader icon="👑" label="Premium Members" count={premiumMembers.length} color="#7b3fa0" />
+          <div className="space-y-2">
+            {premiumMembers.map(u => (
+              <UserCard key={u.id} u={u} isMe={u.id === currentUserId} {...cardProps} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Standard members */}
       <div>
-        <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold px-1 mb-2">
-          Members · {filteredMembers.length}{(countryFilter || cityFilter) ? ` of ${members.length}` : ""}
-        </p>
+        <SectionHeader icon="👤" label="Standard Members" count={standardMembers.length} color="rgba(253,248,240,0.3)" />
         <div className="space-y-2">
-          {filteredMembers.map(u => (
-            <UserCard key={u.id} u={u} isMe={u.id === currentUserId} isPending={isPending}
-              onTogglePremium={onTogglePremium} onToggleBan={onToggleBan} onToggleApprove={onToggleApprove} onDelete={onDelete} />
+          {standardMembers.map(u => (
+            <UserCard key={u.id} u={u} isMe={u.id === currentUserId} {...cardProps} />
           ))}
-          {filteredMembers.length === 0 && (
+          {standardMembers.length === 0 && filteredMembers.length === 0 && (
             <p className="text-cream/25 text-sm text-center py-6">No members match the selected filters.</p>
           )}
         </div>
@@ -466,116 +474,23 @@ function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBa
   );
 }
 
-function PhotosTab({ users, isLoading, onAction, isPending }: {
-  users: SafeUser[]; isLoading: boolean;
-  onAction: (userId: string, slotIdx: number, action: "approve" | "reject", reason?: string) => void;
-  isPending: boolean;
-}) {
-  const [rejectReasons, setRejectReasons] = useState<Record<string, string>>({});
-
-  if (isLoading) return <Spinner />;
-  if (users.length === 0) return (
-    <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
-      <Image size={48} color="rgba(16,185,129,0.5)" />
-      <h3 className="font-serif text-xl text-gold">All caught up!</h3>
-      <p className="text-cream/40 text-sm">No photos pending review.</p>
-    </div>
-  );
-
-  const totalPending = users.reduce((sum, u) => {
-    const slots = ((u as any).photoSlots ?? []) as PhotoSlot[];
-    return sum + slots.filter(s => s.status === "pending").length;
-  }, 0);
-
+function SectionHeader({ icon, label, count, color }: { icon: string; label: string; count: number; color: string }) {
   return (
-    <div className="space-y-4 pt-1">
-      <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold px-1">
-        Pending Photos · {totalPending} total
-      </p>
-      {users.map(u => {
-        const slots = ((u as any).photoSlots ?? []) as PhotoSlot[];
-        const pendingSlots = slots.map((s, i) => ({ slot: s, idx: i })).filter(({ slot }) => slot.status === "pending");
-        if (pendingSlots.length === 0) return null;
-        const mainPhoto = (u as any).mainPhotoUrl ?? u.photos?.[0] ?? null;
-
-        return (
-          <div key={u.id} className="rounded-2xl p-4 space-y-3"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center font-serif font-bold text-gold flex-shrink-0"
-                style={{ background: "linear-gradient(135deg,#2d0f4a,#7b3fa0)", border: "2px solid rgba(201,168,76,0.25)" }}>
-                {mainPhoto
-                  ? <img src={mainPhoto} alt={u.fullName ?? ""} className="w-full h-full object-cover" />
-                  : (u.fullName ?? u.firstName ?? "?").charAt(0)}
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-cream">{u.fullName ?? u.firstName ?? "—"}</p>
-                <p className="text-cream/35 text-xs">{u.email} · {u.city}, {u.country}</p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              {pendingSlots.map(({ slot, idx }) => {
-                const key = `${u.id}-${idx}`;
-                const reason = rejectReasons[key] ?? "";
-                return (
-                  <div key={idx} className="rounded-xl overflow-hidden"
-                    style={{ border: "1px solid rgba(201,168,76,0.12)" }}
-                    data-testid={`pending-photo-${u.id}-${idx}`}>
-                    <div className="relative" style={{ aspectRatio: "4/3" }}>
-                      <img src={slot.url} alt={`Pending photo ${idx + 1}`} className="w-full h-full object-cover" />
-                      <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[9px] font-bold"
-                        style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}>
-                        Slot {idx + 1}
-                      </div>
-                    </div>
-                    <div className="p-2 space-y-2" style={{ background: "rgba(0,0,0,0.3)" }}>
-                      <input
-                        type="text"
-                        placeholder="Rejection reason (optional)..."
-                        value={reason}
-                        onChange={e => setRejectReasons(prev => ({ ...prev, [key]: e.target.value }))}
-                        data-testid={`input-reject-reason-${u.id}-${idx}`}
-                        className="w-full rounded-lg px-2 py-1.5 text-xs outline-none"
-                        style={{ background: "rgba(255,255,255,0.07)", color: "#fdf8f0", border: "1px solid rgba(255,255,255,0.1)" }}
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => onAction(u.id, idx, "approve")}
-                          disabled={isPending}
-                          data-testid={`button-approve-photo-${u.id}-${idx}`}
-                          className="flex-1 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50"
-                          style={{ background: "rgba(16,185,129,0.85)", color: "white" }}>
-                          <CheckCircle size={11} /> Approve
-                        </button>
-                        <button
-                          onClick={() => {
-                            onAction(u.id, idx, "reject", reason);
-                            setRejectReasons(prev => { const n = { ...prev }; delete n[key]; return n; });
-                          }}
-                          disabled={isPending}
-                          data-testid={`button-reject-photo-${u.id}-${idx}`}
-                          className="flex-1 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50"
-                          style={{ background: "rgba(239,68,68,0.85)", color: "white" }}>
-                          <XCircle size={11} /> Reject
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })}
+    <div className="flex items-center gap-2 px-1 mb-2 mt-1">
+      <span className="text-sm">{icon}</span>
+      <p className="text-xs uppercase tracking-wider font-semibold" style={{ color }}>{label}</p>
+      <span className="text-xs px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.4)" }}>{count}</span>
     </div>
   );
 }
 
-function VerificationsTab({ pending, isLoading, onAction, isPending }: {
+function VerificationsTab({ pending, isLoading, onAction, onPhotoAction, isPending }: {
   pending: SafeUser[]; isLoading: boolean;
-  onAction: (userId: string, action: "approve" | "reject" | "ban") => void;
+  onAction: (userId: string, action: "approve" | "reject" | "ban", reason?: string) => void;
+  onPhotoAction: (userId: string, slotIdx: number, action: "approve" | "reject", reason?: string) => void;
   isPending: boolean;
 }) {
+  const [, setLocation] = useLocation();
   if (isLoading) return <Spinner />;
   if (pending.length === 0) return (
     <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
@@ -585,12 +500,14 @@ function VerificationsTab({ pending, isLoading, onAction, isPending }: {
     </div>
   );
   return (
-    <div className="space-y-3">
+    <div className="space-y-4 pt-1">
       {pending.map(u => (
         <VerificationCard key={u.id} user={u}
           onApprove={() => onAction(u.id, "approve")}
-          onReject={() => onAction(u.id, "reject")}
-          onBan={() => onAction(u.id, "ban")}
+          onReject={(reason) => onAction(u.id, "reject", reason)}
+          onBan={(reason) => onAction(u.id, "ban", reason)}
+          onPhotoAction={(slotIdx, action, reason) => onPhotoAction(u.id, slotIdx, action, reason)}
+          onViewProfile={() => setLocation(`/profile/${u.id}`)}
           isPending={isPending}
         />
       ))}
@@ -862,52 +779,157 @@ function ReportCard({ report, onResolve, isPending, resolved }: {
   );
 }
 
-function VerificationCard({ user, onApprove, onReject, onBan, isPending }: {
-  user: SafeUser; onApprove: () => void; onReject: () => void; onBan: () => void; isPending: boolean;
+function VerificationCard({ user, onApprove, onReject, onBan, onPhotoAction, onViewProfile, isPending }: {
+  user: SafeUser;
+  onApprove: () => void;
+  onReject: (reason: string) => void;
+  onBan: (reason: string) => void;
+  onPhotoAction: (slotIdx: number, action: "approve" | "reject", reason?: string) => void;
+  onViewProfile: () => void;
+  isPending: boolean;
 }) {
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [photoRejectReasons, setPhotoRejectReasons] = useState<Record<number, string>>({});
   const timeLabel = user.createdAt ? formatDistanceToNow(new Date(user.createdAt), { addSuffix: true }) : "";
   const casteLabel = (user.caste ? { sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[user.caste] : null) ?? user.caste ?? "";
+  const slots = ((user as any).photoSlots ?? []) as PhotoSlot[];
+
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.12)" }} data-testid={`verification-card-${user.id}`}>
-      <div className="flex items-center gap-4 p-4">
-        <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center font-serif text-xl font-bold text-gold flex-shrink-0"
+    <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.15)" }} data-testid={`verification-card-${user.id}`}>
+
+      {/* Header */}
+      <div className="flex items-center gap-3 p-4 pb-3">
+        <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center font-serif text-lg font-bold text-gold flex-shrink-0"
           style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "2px solid rgba(201,168,76,0.3)" }}>
           {user.photos && user.photos.length > 0
             ? <img src={user.photos[0]} alt={user.fullName ?? ""} className="w-full h-full object-cover" />
             : (user.fullName ?? user.firstName ?? "M").charAt(0)}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-cream text-sm" data-testid={`text-admin-name-${user.id}`}>{user.fullName ?? user.firstName ?? "Member"}</span>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>{casteLabel}</span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(212,96,138,0.12)", color: "#d4608a" }}>{user.gender}</span>
           </div>
-          <p className="text-cream/40 text-xs">{user.city}{user.state ? `, ${user.state}` : ""}, {user.country} · {user.age} yrs</p>
-          <p className="text-cream/30 text-xs mt-0.5">Requested {timeLabel}</p>
+          <p className="text-cream/40 text-xs mt-0.5">{user.city}{user.state ? `, ${user.state}` : ""}, {user.country} · {user.age} yrs</p>
+          {user.occupation && <p className="text-cream/30 text-xs">{user.occupation}</p>}
+          <p className="text-cream/25 text-xs mt-0.5">Registered {timeLabel}</p>
         </div>
+        <button onClick={onViewProfile} data-testid={`button-view-profile-${user.id}`}
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold flex-shrink-0"
+          style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}>
+          <Eye size={11} /> Profile
+        </button>
       </div>
-      {user.verificationSelfie && (
+
+      {/* Bio */}
+      {user.bio && (
         <div className="px-4 pb-3">
-          <div className="w-full h-32 rounded-xl overflow-hidden flex items-center justify-center" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <img src={user.verificationSelfie} alt="Selfie" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
-          </div>
-          <p className="text-cream/30 text-xs mt-1 text-center">Verification selfie</p>
+          <p className="text-cream/50 text-xs leading-relaxed italic">"{user.bio}"</p>
         </div>
       )}
-      <div className="flex gap-2 px-4 pb-4 pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+
+      {/* Languages */}
+      {user.languages && user.languages.length > 0 && (
+        <div className="px-4 pb-3 flex flex-wrap gap-1">
+          {user.languages.map(l => (
+            <span key={l} className="px-2 py-0.5 rounded-full text-[10px]" style={{ background: "rgba(255,255,255,0.07)", color: "rgba(253,248,240,0.5)" }}>{l}</span>
+          ))}
+        </div>
+      )}
+
+      {/* All photos */}
+      {slots.length > 0 && (
+        <div className="px-4 pb-3">
+          <p className="text-cream/30 text-[10px] uppercase tracking-wider font-semibold mb-2">Profile Photos</p>
+          <div className="grid grid-cols-2 gap-2">
+            {slots.map((slot, idx) => {
+              const photoRejectReason = photoRejectReasons[idx] ?? "";
+              const statusColor = slot.status === "approved" ? "#10b981" : slot.status === "rejected" ? "#ef4444" : "#f59e0b";
+              return (
+                <div key={idx} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${statusColor}30` }} data-testid={`photo-slot-${user.id}-${idx}`}>
+                  <div className="relative" style={{ aspectRatio: "4/5" }}>
+                    <img src={slot.url} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
+                    <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold"
+                      style={{ background: `${statusColor}dd`, color: "white" }}>
+                      {slot.status === "approved" ? "✓ OK" : slot.status === "rejected" ? "✗ Rejected" : "⏳ Pending"}
+                    </div>
+                  </div>
+                  {slot.status === "pending" && (
+                    <div className="p-1.5 space-y-1.5" style={{ background: "rgba(0,0,0,0.4)" }}>
+                      <input
+                        type="text"
+                        placeholder="Rejection note (optional)"
+                        value={photoRejectReason}
+                        onChange={e => setPhotoRejectReasons(prev => ({ ...prev, [idx]: e.target.value }))}
+                        data-testid={`input-photo-reject-reason-${user.id}-${idx}`}
+                        className="w-full rounded px-2 py-1 text-[10px] outline-none"
+                        style={{ background: "rgba(255,255,255,0.07)", color: "#fdf8f0", border: "1px solid rgba(255,255,255,0.1)" }}
+                      />
+                      <div className="flex gap-1">
+                        <button onClick={() => onPhotoAction(idx, "approve")} disabled={isPending}
+                          data-testid={`button-approve-photo-${user.id}-${idx}`}
+                          className="flex-1 py-1 rounded text-[10px] font-bold flex items-center justify-center gap-0.5 disabled:opacity-50"
+                          style={{ background: "rgba(16,185,129,0.8)", color: "white" }}>
+                          <CheckCircle size={10} /> OK
+                        </button>
+                        <button onClick={() => { onPhotoAction(idx, "reject", photoRejectReason); setPhotoRejectReasons(prev => { const n = { ...prev }; delete n[idx]; return n; }); }}
+                          disabled={isPending}
+                          data-testid={`button-reject-photo-${user.id}-${idx}`}
+                          className="flex-1 py-1 rounded text-[10px] font-bold flex items-center justify-center gap-0.5 disabled:opacity-50"
+                          style={{ background: "rgba(239,68,68,0.8)", color: "white" }}>
+                          <XCircle size={10} /> Reject
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Verification selfie */}
+      {user.verificationSelfie && (
+        <div className="px-4 pb-3">
+          <p className="text-cream/30 text-[10px] uppercase tracking-wider font-semibold mb-2">Verification Selfie</p>
+          <div className="w-full rounded-xl overflow-hidden" style={{ border: "1px solid rgba(123,63,160,0.3)", aspectRatio: "16/9" }}>
+            <img src={user.verificationSelfie} alt="Selfie" className="w-full h-full object-cover"
+              onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+          </div>
+        </div>
+      )}
+
+      {/* Rejection reason input */}
+      <div className="px-4 pb-3">
+        <textarea
+          value={rejectionReason}
+          onChange={e => setRejectionReason(e.target.value)}
+          placeholder="Rejection / ban reason (optional) — will be sent to the user automatically"
+          rows={2}
+          data-testid={`input-rejection-reason-${user.id}`}
+          className="w-full rounded-xl px-3 py-2 text-xs outline-none resize-none leading-relaxed"
+          style={{ background: "rgba(255,255,255,0.05)", color: "#fdf8f0", border: "1px solid rgba(255,255,255,0.1)", placeholder: "rgba(253,248,240,0.3)" }}
+        />
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex gap-2 px-4 pb-4" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
         <button onClick={onApprove} disabled={isPending} data-testid={`button-approve-${user.id}`}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50 mt-3"
           style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.3)" }}>
-          <CheckCircle size={14} /> Approve
+          <CheckCircle size={13} /> Approve Account
         </button>
-        <button onClick={onReject} disabled={isPending} data-testid={`button-reject-${user.id}`}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+        <button onClick={() => onReject(rejectionReason)} disabled={isPending} data-testid={`button-reject-${user.id}`}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50 mt-3"
           style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>
-          <XCircle size={14} /> Reject
+          <XCircle size={13} /> Reject
         </button>
-        <button onClick={onBan} disabled={isPending} data-testid={`button-ban-${user.id}`}
-          className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+        <button onClick={() => onBan(rejectionReason)} disabled={isPending} data-testid={`button-ban-${user.id}`}
+          className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50 mt-3"
           style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>
-          <Ban size={14} /> Ban
+          <Ban size={13} /> Ban
         </button>
       </div>
     </div>

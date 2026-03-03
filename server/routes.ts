@@ -11,6 +11,33 @@ import { db } from "./db";
 import { count, sql, eq, asc, desc, or, and, ilike } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
 import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail } from "./email";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+});
+
+async function isAdminMatch(match: { user1Id: string; user2Id: string }): Promise<boolean> {
+  const [u1, u2] = await Promise.all([storage.getUserById(match.user1Id), storage.getUserById(match.user2Id)]);
+  return !!(u1?.isAdmin || u2?.isAdmin);
+}
+
+async function generateAdminAiReply(matchId: string, adminId: string, userMessage: string): Promise<void> {
+  try {
+    const aiReply = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: `You are Gûstîlk Support, a friendly assistant for the Gûstîlk Yezidi community dating app. Help users with questions about matching, profiles, photo verification, premium subscriptions, community events, and app features. The app supports Sheikh, Pir, and Murid castes and focuses on meaningful connections within the Yezidi community. Be warm, helpful, and concise (under 120 words). The app supports these languages: English, Arabic, German, Armenian, Russian, and Kurdish. Respond in the same language the user writes in, but only if it is one of those six languages — otherwise respond in English.` },
+        { role: "user", content: userMessage },
+      ],
+    });
+    const aiText = aiReply.choices[0]?.message?.content;
+    if (aiText) await storage.sendMessage(matchId, adminId, aiText);
+  } catch (e) {
+    console.error("[AI reply error]", e);
+  }
+}
 
 function getUserId(req: any): string {
   return req.session?.userId;
@@ -127,6 +154,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         }
       }
 
+      const photosIncluded = Array.isArray((parsed as any).photos);
+
       // Enforce at least 1 profile photo on initial profile setup
       const isInitialSetup = !user?.caste;
       const submittedPhotos: string[] = (parsed as any).photos ?? [];
@@ -139,44 +168,53 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         }
       }
 
-      // Build updated photoSlots from existing + new uploads
+      // Only rebuild photo slots if the request actually included a photos array
       const existingSlots: any[] = (user?.photoSlots as any[] | null) ?? [];
       const existingApproved: string[] = user?.photos ?? [];
 
-      // Approved slots user is keeping (submitted by URL, not base64)
-      const keptApprovedUrls = submittedPhotos.filter(p => !p.startsWith("data:image") && existingApproved.includes(p));
+      let updatedSlots = existingSlots;
+      let keptApproved = existingApproved;
+      let newUploads: string[] = [];
 
-      // New base64 uploads → pending slots
-      const newUploads = submittedPhotos.filter(p => p.startsWith("data:image"));
+      if (photosIncluded) {
+        // Approved slots user is keeping (submitted by URL, not base64)
+        const keptApprovedUrls = submittedPhotos.filter(p => !p.startsWith("data:image") && existingApproved.includes(p));
 
-      const removedRejectedUrls: string[] = (parsed as any).removedRejectedUrls ?? [];
+        // New base64 uploads → pending slots
+        newUploads = submittedPhotos.filter(p => p.startsWith("data:image"));
 
-      // Reconstruct slots: keep existing non-removed approved/pending/rejected slots, add new uploads
-      const keptSlots = existingSlots.filter(s =>
-        (s.status === "approved" && keptApprovedUrls.includes(s.url)) ||
-        s.status === "pending" ||
-        (s.status === "rejected" && !removedRejectedUrls.includes(s.url))
-      );
-      const newPendingSlots = newUploads.map((url: string) => ({ url, status: "pending" as const }));
-      const updatedSlots = [...keptSlots, ...newPendingSlots];
+        const removedRejectedUrls: string[] = (parsed as any).removedRejectedUrls ?? [];
 
-      if (updatedSlots.length > 6) {
-        return res.status(400).json({ error: "You can have a maximum of 6 photos." });
+        // Reconstruct slots: keep existing non-removed approved/pending/rejected slots, add new uploads
+        const keptSlots = existingSlots.filter(s =>
+          (s.status === "approved" && keptApprovedUrls.includes(s.url)) ||
+          s.status === "pending" ||
+          (s.status === "rejected" && !removedRejectedUrls.includes(s.url))
+        );
+        const newPendingSlots = newUploads.map((url: string) => ({ url, status: "pending" as const }));
+        updatedSlots = [...keptSlots, ...newPendingSlots];
+
+        if (updatedSlots.length > 6) {
+          return res.status(400).json({ error: "You can have a maximum of 6 photos." });
+        }
+
+        keptApproved = keptSlots.filter(s => s.status === "approved").map((s: any) => s.url);
       }
 
-      const keptApproved = keptSlots.filter(s => s.status === "approved").map((s: any) => s.url);
       let mainPhotoUrl = user?.mainPhotoUrl;
-      if (mainPhotoUrl && !keptApproved.includes(mainPhotoUrl)) {
+      if (photosIncluded && mainPhotoUrl && !keptApproved.includes(mainPhotoUrl)) {
         mainPhotoUrl = keptApproved[0] ?? null;
       }
 
       const data = user?.country ? rest : parsed;
       const updated = await storage.updateUser(userId, {
         ...(data as any),
-        photoSlots: updatedSlots,
-        photos: keptApproved,
-        pendingPhotos: newUploads,
-        mainPhotoUrl: mainPhotoUrl ?? null,
+        ...(photosIncluded ? {
+          photoSlots: updatedSlots,
+          photos: keptApproved,
+          pendingPhotos: newUploads,
+          mainPhotoUrl: mainPhotoUrl ?? null,
+        } : {}),
       });
       res.json({ user: updated });
     } catch (err: any) {
@@ -227,11 +265,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.get("/api/messages/:matchId", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
-    if (!user?.isPremium) return res.status(403).json({ error: "Premium required to view messages" });
     const match = await storage.getMatch(req.params.matchId as string);
     if (!match || (match.user1Id !== userId && match.user2Id !== userId)) {
       return res.status(403).json({ error: "Forbidden" });
     }
+    const adminChat = await isAdminMatch(match);
+    if (!user?.isPremium && !adminChat) return res.status(403).json({ error: "Premium required to view messages" });
     const msgs = await storage.getMessages(req.params.matchId as string);
     res.json({ messages: msgs });
   });
@@ -239,13 +278,20 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.post("/api/messages/:matchId", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
-    if (!user?.isPremium) return res.status(403).json({ error: "Premium required to send messages" });
     const match = await storage.getMatch(req.params.matchId as string);
     if (!match || (match.user1Id !== userId && match.user2Id !== userId)) {
       return res.status(403).json({ error: "Forbidden" });
     }
+    const adminChat = await isAdminMatch(match);
+    if (!user?.isPremium && !adminChat) return res.status(403).json({ error: "Premium required to send messages" });
     const { text } = z.object({ text: z.string().min(1).max(2000) }).parse(req.body);
     const msg = await storage.sendMessage(req.params.matchId as string, userId, text);
+    // Auto AI reply when a regular user messages the admin chat
+    const otherUserId = match.user1Id === userId ? match.user2Id : match.user1Id;
+    const otherUser = await storage.getUserById(otherUserId);
+    if (otherUser?.isAdmin && !user?.isAdmin) {
+      generateAdminAiReply(match.id, otherUserId, text);
+    }
     res.json({ message: msg });
   });
 
@@ -482,16 +528,45 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.post("/api/admin/verify/:userId", isAuthenticated, requireAdmin, async (req, res) => {
-    const { action } = z.object({ action: z.enum(["approve", "reject", "ban"]) }).parse(req.body);
+    const adminId = getUserId(req);
+    const targetId = req.params.userId as string;
+    const { action, reason } = z.object({
+      action: z.enum(["approve", "reject", "ban"]),
+      reason: z.string().optional(),
+    }).parse(req.body);
+
     if (action === "ban") {
-      await storage.banUser(req.params.userId as string);
+      await storage.banUser(targetId);
     } else {
-      await storage.updateVerificationStatus(
-        req.params.userId as string,
-        action === "approve" ? "approved" : "rejected",
-        action === "approve"
-      );
+      await storage.updateVerificationStatus(targetId, action === "approve" ? "approved" : "rejected", action === "approve");
     }
+
+    // Auto-message the user on reject or ban
+    if (action === "reject" || action === "ban") {
+      try {
+        const existing = await db.select().from(matches).where(
+          or(
+            and(eq(matches.user1Id, adminId), eq(matches.user2Id, targetId)),
+            and(eq(matches.user1Id, targetId), eq(matches.user2Id, adminId))
+          )
+        );
+        let matchId: string;
+        if (existing.length > 0) {
+          matchId = existing[0].id;
+        } else {
+          matchId = randomUUID();
+          await db.insert(matches).values({ id: matchId, user1Id: adminId, user2Id: targetId });
+        }
+        const defaultMsg = action === "ban"
+          ? "Your account has been suspended for violating our community guidelines."
+          : "Thank you for registering on Gûstîlk. Unfortunately, we were unable to approve your account at this time.";
+        const msg = reason?.trim() ? `${defaultMsg} ${reason.trim()}` : defaultMsg;
+        await storage.sendMessage(matchId, adminId, msg);
+      } catch (e) {
+        console.error("[verify auto-message error]", e);
+      }
+    }
+
     res.json({ ok: true });
   });
 
@@ -653,6 +728,40 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     await db.delete(eventAttendees).where(eq(eventAttendees.eventId, req.params.id as string));
     await db.delete(events).where(eq(events.id, req.params.id as string));
     res.json({ ok: true });
+  });
+
+  // Any user: start or resume a chat with admin (support)
+  app.post("/api/support/start-chat", isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const [adminUser] = await db.select({ id: users.id }).from(users).where(eq(users.isAdmin, true)).limit(1);
+    if (!adminUser) return res.status(404).json({ error: "Support not available" });
+    const adminId = adminUser.id;
+    const existing = await db.select().from(matches).where(
+      or(
+        and(eq(matches.user1Id, userId), eq(matches.user2Id, adminId)),
+        and(eq(matches.user1Id, adminId), eq(matches.user2Id, userId))
+      )
+    );
+    if (existing.length > 0) return res.json({ matchId: existing[0].id });
+    const matchId = randomUUID();
+    await db.insert(matches).values({ id: matchId, user1Id: adminId, user2Id: userId });
+    res.json({ matchId });
+  });
+
+  // Admin: start or resume a direct chat with any user
+  app.post("/api/admin/start-chat/:userId", isAuthenticated, requireAdmin, async (req, res) => {
+    const adminId = getUserId(req);
+    const targetId = req.params.userId as string;
+    const existing = await db.select().from(matches).where(
+      or(
+        and(eq(matches.user1Id, adminId), eq(matches.user2Id, targetId)),
+        and(eq(matches.user1Id, targetId), eq(matches.user2Id, adminId))
+      )
+    );
+    if (existing.length > 0) return res.json({ matchId: existing[0].id });
+    const matchId = randomUUID();
+    await db.insert(matches).values({ id: matchId, user1Id: adminId, user2Id: targetId });
+    res.json({ matchId });
   });
 
   // ─── CHANGE EMAIL ─────────────────────────────────────────

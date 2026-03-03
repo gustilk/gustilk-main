@@ -8,12 +8,12 @@ import type { MatchWithUser, User as UserType } from "@shared/schema";
 
 interface ActivityItem { user: unknown; createdAt: string; }
 
-const NAV_ITEMS = [
-  { href: "/discover", icon: Heart, tKey: "nav.discover", id: "discover" },
-  { href: "/matches", icon: MessageCircle, tKey: "nav.matches", id: "matches" },
-  { href: "/activity", icon: Zap, tKey: "nav.activity", id: "activity" },
-  { href: "/events", icon: CalendarDays, tKey: "nav.events", id: "events" },
-  { href: "/profile", icon: User, tKey: "nav.profile", id: "profile" },
+const ALL_NAV_ITEMS = [
+  { href: "/discover", icon: Heart, tKey: "nav.discover", id: "discover", adminHide: true },
+  { href: "/matches", icon: MessageCircle, tKey: "nav.matches", id: "matches", adminHide: false },
+  { href: "/activity", icon: Zap, tKey: "nav.activity", id: "activity", adminHide: true },
+  { href: "/events", icon: CalendarDays, tKey: "nav.events", id: "events", adminHide: false },
+  { href: "/profile", icon: User, tKey: "nav.profile", id: "profile", adminHide: false },
 ];
 
 export default function BottomNav() {
@@ -29,6 +29,9 @@ export default function BottomNav() {
     staleTime: 1000 * 60 * 5,
     retry: false,
   });
+
+  const isAdmin = !!(userData?.user as any)?.isAdmin;
+  const NAV_ITEMS = ALL_NAV_ITEMS.filter(item => !isAdmin || !item.adminHide);
 
   const { data: matchData } = useQuery<{ matches: MatchWithUser[] }>({
     queryKey: ["/api/matches"],

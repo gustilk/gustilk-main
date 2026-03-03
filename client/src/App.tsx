@@ -88,7 +88,7 @@ function AppShell({ user }: { user: User }) {
 
         <main className="flex-1 overflow-hidden" style={{ background: "#0d0618" }}>
           <Switch>
-            <Route path="/discover" component={() => <DiscoverPage user={user} />} />
+            <Route path="/discover" component={() => user.isAdmin ? <Redirect to="/admin" /> : <DiscoverPage user={user} />} />
             <Route path="/matches" component={() => <MatchesPage user={user} />} />
             <Route path="/chat/:matchId" component={({ params }) => <ChatPage user={user} matchId={params.matchId} />} />
             <Route path="/profile/edit" component={() => <EditProfilePage user={user} />} />
@@ -97,13 +97,13 @@ function AppShell({ user }: { user: User }) {
             <Route path="/events/:eventId" component={({ params }) => <EventDetailPage user={user} eventId={params.eventId} />} />
             <Route path="/events" component={() => <EventsPage user={user} />} />
             <Route path="/admin" component={() => <AdminPage user={user} />} />
-            <Route path="/activity" component={() => <ActivityPage user={user} />} />
+            <Route path="/activity" component={() => user.isAdmin ? <Redirect to="/admin" /> : <ActivityPage user={user} />} />
             <Route path="/profile/:userId" component={({ params }) => <ViewUserProfilePage viewer={user} userId={params.userId} />} />
             <Route path="/settings" component={() => <SettingsPage user={user} />} />
             <Route path="/verify" component={() => <VerificationPage user={user} />} />
             <Route path="/pending-verification" component={() => <PendingVerificationPage user={user} />} />
             <Route path="/complete-profile" component={() => <SocialSetupPage user={user} />} />
-            <Route path="/" component={() => <Redirect to="/matches" />} />
+            <Route path="/" component={() => <Redirect to={user.isAdmin ? "/admin" : "/matches"} />} />
           </Switch>
         </main>
         {!isChat && !isEventDetail && !isVerifyPage && !isInCall && !isSettings && !isProfileView && <BottomNav />}
