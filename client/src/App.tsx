@@ -103,7 +103,7 @@ function AppShell({ user }: { user: User }) {
             <Route path="/verify" component={() => <VerificationPage user={user} />} />
             <Route path="/pending-verification" component={() => <PendingVerificationPage user={user} />} />
             <Route path="/complete-profile" component={() => <SocialSetupPage user={user} />} />
-            <Route path="/" component={() => <Redirect to="/discover" />} />
+            <Route path="/" component={() => <Redirect to="/matches" />} />
           </Switch>
         </main>
         {!isChat && !isEventDetail && !isVerifyPage && !isInCall && !isSettings && !isProfileView && <BottomNav />}
