@@ -2,10 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { ArrowLeft, Send, Lock, Star, Flag, Video } from "lucide-react";
+import { ArrowLeft, Send, Lock, Star, Flag, Video, Gift } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
-import type { SafeUser, Message, MatchWithUser } from "@shared/schema";
+import type { SafeUser, Message, MatchWithUser, Gift as GiftType } from "@shared/schema";
 import ReportModal from "@/components/ReportModal";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
 import { useVideoCallContext } from "@/hooks/useVideoCall";
@@ -15,11 +15,51 @@ interface Props {
   matchId: string;
 }
 
+// ─── Gift catalogue ────────────────────────────────────────────────────────
+export const GIFTS = [
+  { id: "rose",        emoji: "🌹", name: "Rose",           color: "#e83e6c" },
+  { id: "bouquet",     emoji: "💐", name: "Bouquet",        color: "#d4608a" },
+  { id: "heart",       emoji: "❤️",  name: "Heart",          color: "#ef4444" },
+  { id: "sparkle",     emoji: "✨", name: "Sparkles",       color: "#c9a84c" },
+  { id: "diamond",     emoji: "💎", name: "Diamond",        color: "#67e8f9" },
+  { id: "chocolate",   emoji: "🍫", name: "Chocolate",      color: "#92400e" },
+  { id: "crown",       emoji: "👑", name: "Crown",          color: "#f59e0b" },
+  { id: "ring",        emoji: "💍", name: "Ring",           color: "#a855f7" },
+  { id: "butterfly",   emoji: "🦋", name: "Butterfly",      color: "#7b3fa0" },
+  { id: "star",        emoji: "⭐", name: "Gold Star",      color: "#eab308" },
+  { id: "moon",        emoji: "🌙", name: "Moon",           color: "#6366f1" },
+  { id: "sun",         emoji: "☀️",  name: "Sunshine",       color: "#f97316" },
+];
+
+function giftById(id: string) {
+  return GIFTS.find(g => g.id === id) ?? { id, emoji: "🎁", name: "Gift", color: "#c9a84c" };
+}
+
+// ─── Merged timeline item ─────────────────────────────────────────────────
+type TimelineItem =
+  | { kind: "message"; data: Message }
+  | { kind: "gift";    data: GiftType };
+
+function mergeTimeline(messages: Message[], gifts: GiftType[]): TimelineItem[] {
+  const items: TimelineItem[] = [
+    ...messages.map(m => ({ kind: "message" as const, data: m })),
+    ...gifts.map(g => ({ kind: "gift" as const, data: g })),
+  ];
+  items.sort((a, b) => {
+    const ta = new Date(a.data.createdAt!).getTime();
+    const tb = new Date(b.data.createdAt!).getTime();
+    return ta - tb;
+  });
+  return items;
+}
+
+// ─── ChatPage ─────────────────────────────────────────────────────────────
 export default function ChatPage({ user, matchId }: Props) {
   const [, setLocation] = useLocation();
   const { t } = useTranslation();
   const [text, setText] = useState("");
   const [showReport, setShowReport] = useState(false);
+  const [showGiftPicker, setShowGiftPicker] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { startCall, callState } = useVideoCallContext();
 
@@ -36,7 +76,15 @@ export default function ChatPage({ user, matchId }: Props) {
     enabled: !!user.isPremium,
   });
 
+  const { data: giftData } = useQuery<{ gifts: GiftType[] }>({
+    queryKey: ["/api/gifts/match", matchId],
+    refetchInterval: 10000,
+    enabled: !!user.isPremium,
+  });
+
   const messages = msgData?.messages ?? [];
+  const gifts = giftData?.gifts ?? [];
+  const timeline = mergeTimeline(messages, gifts);
 
   const sendMutation = useMutation({
     mutationFn: async (txt: string) => {
@@ -50,9 +98,25 @@ export default function ChatPage({ user, matchId }: Props) {
     },
   });
 
+  const giftMutation = useMutation({
+    mutationFn: async ({ giftType, message }: { giftType: string; message: string }) => {
+      const res = await apiRequest("POST", "/api/gifts", {
+        recipientId: otherUser!.id,
+        matchId,
+        giftType,
+        message,
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/gifts/match", matchId] });
+      setShowGiftPicker(false);
+    },
+  });
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length]);
+  }, [timeline.length]);
 
   const handleSend = () => {
     const trimmed = text.trim();
@@ -70,73 +134,48 @@ export default function ChatPage({ user, matchId }: Props) {
   if (!user.isPremium) {
     return (
       <div className="flex flex-col h-screen" style={{ background: "#0d0618" }}>
-        {/* Header — back button only, no identity revealed */}
         <div className="flex items-center gap-3 px-4 pt-12 pb-3"
           style={{ background: "rgba(13,6,24,0.97)", borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
           <button onClick={() => setLocation("/matches")} data-testid="button-back" className="text-cream/60">
             <ArrowLeft size={22} />
           </button>
-          {/* Blurred avatar — identity hidden */}
           <div className="relative w-10 h-10 flex-shrink-0">
             <div className="w-10 h-10 rounded-full overflow-hidden"
               style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", filter: "blur(4px)", border: "2px solid rgba(201,168,76,0.2)" }}>
-              {otherUser?.photos?.[0] && (
-                <ProtectedPhoto src={otherUser.photos[0]} alt="" className="w-full h-full object-cover" />
-              )}
+              {otherUser?.photos?.[0] && <ProtectedPhoto src={otherUser.photos[0]} alt="" className="w-full h-full object-cover" />}
             </div>
-            <div className="absolute inset-0 rounded-full flex items-center justify-center">
-              <Lock size={13} color="#c9a84c" />
-            </div>
+            <div className="absolute inset-0 rounded-full flex items-center justify-center"><Lock size={13} color="#c9a84c" /></div>
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-cream/30 font-semibold text-sm" data-testid="text-chat-name">
-              {t("chat.hiddenMember")}
-            </h2>
+            <h2 className="text-cream/30 font-semibold text-sm" data-testid="text-chat-name">{t("chat.hiddenMember")}</h2>
             <p className="text-cream/25 text-xs">{t("chat.hiddenSub")}</p>
           </div>
         </div>
-
-        {/* Lock screen body */}
         <div className="flex-1 flex flex-col items-center justify-center px-6 text-center gap-6">
           <div className="w-24 h-24 rounded-full flex items-center justify-center"
             style={{ background: "rgba(201,168,76,0.08)", border: "2px solid rgba(201,168,76,0.25)" }}>
             <Lock size={36} color="#c9a84c" />
           </div>
-
           <div>
             <h3 className="font-serif text-2xl text-gold mb-2">{t("chat.locked")}</h3>
-            <p className="text-cream/50 text-sm leading-relaxed max-w-xs">
-              {t("chat.lockedDesc")}
-            </p>
+            <p className="text-cream/50 text-sm leading-relaxed max-w-xs">{t("chat.lockedDesc")}</p>
           </div>
-
           <div className="w-full max-w-xs space-y-2">
-            {[
-              t("chat.benefitMessages"),
-              t("chat.benefitMatches"),
-              t("chat.benefitCalls"),
-            ].map((benefit, i) => (
+            {[t("chat.benefitMessages"), t("chat.benefitMatches"), t("chat.benefitCalls")].map((b, i) => (
               <div key={i} className="flex items-center gap-3 px-4 py-2.5 rounded-xl"
                 style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.12)" }}>
                 <Star size={13} fill="#c9a84c" color="#c9a84c" className="flex-shrink-0" />
-                <span className="text-cream/60 text-xs">{benefit}</span>
+                <span className="text-cream/60 text-xs">{b}</span>
               </div>
             ))}
           </div>
-
-          <button
-            onClick={() => setLocation("/premium")}
-            data-testid="button-upgrade-chat"
+          <button onClick={() => setLocation("/premium")} data-testid="button-upgrade-chat"
             className="flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-sm"
-            style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 8px 24px rgba(201,168,76,0.3)" }}
-          >
+            style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 8px 24px rgba(201,168,76,0.3)" }}>
             <Star size={17} fill="#1a0a2e" color="#1a0a2e" />
             {t("chat.upgradeButton")}
           </button>
-
-          <button onClick={() => setLocation("/matches")} className="text-cream/35 text-sm">
-            {t("chat.backToMatches")}
-          </button>
+          <button onClick={() => setLocation("/matches")} className="text-cream/35 text-sm">{t("chat.backToMatches")}</button>
         </div>
       </div>
     );
@@ -144,26 +183,18 @@ export default function ChatPage({ user, matchId }: Props) {
 
   return (
     <div className="flex flex-col h-screen" style={{ background: "#0d0618" }}>
-      <div
-        className="flex items-center gap-3 px-4 pt-12 pb-3"
-        style={{ background: "rgba(13,6,24,0.97)", borderBottom: "1px solid rgba(201,168,76,0.15)" }}
-      >
-        <button
-          onClick={() => setLocation("/matches")}
-          data-testid="button-back"
-          className="text-cream/60 transition-colors"
-        >
+      {/* Header */}
+      <div className="flex items-center gap-3 px-4 pt-12 pb-3"
+        style={{ background: "rgba(13,6,24,0.97)", borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
+        <button onClick={() => setLocation("/matches")} data-testid="button-back" className="text-cream/60">
           <ArrowLeft size={22} />
         </button>
-        <div
-          className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-serif text-lg font-bold text-gold overflow-hidden"
-          style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "2px solid rgba(201,168,76,0.3)" }}
-        >
-          {otherUser?.photos && otherUser.photos.length > 0 ? (
-            <ProtectedPhoto src={otherUser.photos[0]} alt={otherUser.firstName ?? ""} className="w-full h-full object-cover" />
-          ) : (
-            (otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "M").charAt(0)
-          )}
+        <div className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-serif text-lg font-bold text-gold overflow-hidden"
+          style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "2px solid rgba(201,168,76,0.3)" }}>
+          {otherUser?.photos && otherUser.photos.length > 0
+            ? <ProtectedPhoto src={otherUser.photos[0]} alt={otherUser.firstName ?? ""} className="w-full h-full object-cover" />
+            : (otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "M").charAt(0)
+          }
         </div>
         <div className="flex-1 min-w-0">
           <h2 className="text-cream font-semibold text-sm" data-testid="text-chat-name">
@@ -175,67 +206,63 @@ export default function ChatPage({ user, matchId }: Props) {
         </div>
         {otherUser && (
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => startCall(
-                matchId,
-                otherUser.id,
-                otherUser.firstName ?? otherUser.fullName?.split(" ")[0] ?? "Member",
-                otherUser.photos?.[0] ?? null,
-                user.firstName ?? user.fullName?.split(" ")[0] ?? "Member",
-                user.photos?.[0] ?? null,
-              )}
-              disabled={callState !== "idle"}
-              data-testid="button-start-video-call"
+            <button onClick={() => startCall(matchId, otherUser.id,
+              otherUser.firstName ?? otherUser.fullName?.split(" ")[0] ?? "Member",
+              otherUser.photos?.[0] ?? null,
+              user.firstName ?? user.fullName?.split(" ")[0] ?? "Member",
+              user.photos?.[0] ?? null,
+            )} disabled={callState !== "idle"} data-testid="button-start-video-call"
               className="p-2 rounded-xl disabled:opacity-40 transition-all"
-              style={{ color: callState !== "idle" ? "rgba(201,168,76,0.4)" : "rgba(201,168,76,0.8)" }}
-              title="Video call"
-            >
+              style={{ color: callState !== "idle" ? "rgba(201,168,76,0.4)" : "rgba(201,168,76,0.8)" }}>
               <Video size={20} />
             </button>
-            <button
-              onClick={() => setShowReport(true)}
-              data-testid="button-report-user-main"
-              className="p-2 rounded-xl"
-              style={{ color: "rgba(253,248,240,0.35)" }}
-              title="Report user"
-            >
+            <button onClick={() => setShowReport(true)} data-testid="button-report-user-main"
+              className="p-2 rounded-xl" style={{ color: "rgba(253,248,240,0.35)" }}>
               <Flag size={18} />
             </button>
           </div>
         )}
       </div>
 
+      {/* Timeline */}
       <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : messages.length === 0 ? (
+        ) : timeline.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center gap-3 py-12">
-            <div
-              className="w-16 h-16 rounded-full flex items-center justify-center"
-              style={{ border: "2px solid rgba(201,168,76,0.3)" }}
-            >
+            <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ border: "2px solid rgba(201,168,76,0.3)" }}>
               <span className="text-2xl text-gold font-serif">✦</span>
             </div>
             <p className="text-cream/40 text-sm">You matched! Say hello to <strong className="text-gold">{otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0]}</strong></p>
           </div>
         ) : (
-          messages.map(msg => (
-            <MessageBubble key={msg.id} msg={msg} isMine={msg.senderId === user.id} />
-          ))
+          timeline.map(item =>
+            item.kind === "message"
+              ? <MessageBubble key={`m-${item.data.id}`} msg={item.data} isMine={item.data.senderId === user.id} />
+              : <GiftBubble key={`g-${item.data.id}`} gift={item.data} isMine={item.data.senderId === user.id} />
+          )
         )}
         <div ref={bottomRef} />
       </div>
 
-      <div
-        className="flex items-end gap-3 px-4 py-3"
-        style={{ background: "rgba(13,6,24,0.97)", borderTop: "1px solid rgba(201,168,76,0.15)" }}
-      >
-        <div
-          className="flex-1 rounded-2xl px-4 py-2.5 flex items-end"
-          style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.2)" }}
+      {/* Input bar */}
+      <div className="flex items-end gap-2 px-4 py-3"
+        style={{ background: "rgba(13,6,24,0.97)", borderTop: "1px solid rgba(201,168,76,0.15)" }}>
+        {/* Gift button */}
+        <button
+          onClick={() => setShowGiftPicker(true)}
+          data-testid="button-open-gift-picker"
+          className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 transition-all"
+          style={{ background: "rgba(201,168,76,0.1)", border: "1.5px solid rgba(201,168,76,0.25)", color: "#c9a84c" }}
+          title="Send a gift"
         >
+          <Gift size={18} />
+        </button>
+
+        <div className="flex-1 rounded-2xl px-4 py-2.5 flex items-end"
+          style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.2)" }}>
           <textarea
             value={text}
             onChange={e => setText(e.target.value)}
@@ -263,6 +290,16 @@ export default function ChatPage({ user, matchId }: Props) {
         </button>
       </div>
 
+      {/* Gift picker */}
+      {showGiftPicker && otherUser && (
+        <GiftPicker
+          recipientName={otherUser.firstName ?? otherUser.fullName?.split(" ")[0] ?? "them"}
+          isPending={giftMutation.isPending}
+          onSend={(giftType, message) => giftMutation.mutate({ giftType, message })}
+          onClose={() => setShowGiftPicker(false)}
+        />
+      )}
+
       {showReport && otherUser && (
         <ReportModal
           reportedUserId={otherUser.id}
@@ -275,23 +312,134 @@ export default function ChatPage({ user, matchId }: Props) {
   );
 }
 
+// ─── Message bubble ────────────────────────────────────────────────────────
 function MessageBubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
   const timeLabel = formatDistanceToNow(new Date(msg.createdAt!), { addSuffix: true });
-
   return (
     <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-      <div
-        className="max-w-[72%] px-4 py-2.5 rounded-2xl"
+      <div className="max-w-[72%] px-4 py-2.5 rounded-2xl"
         style={isMine
           ? { background: "linear-gradient(135deg, #5a2080, #7b3fa0)", borderBottomRightRadius: "4px" }
           : { background: "rgba(255,255,255,0.07)", border: "1px solid rgba(201,168,76,0.15)", borderBottomLeftRadius: "4px" }
         }
-        data-testid={`message-bubble-${msg.id}`}
-      >
+        data-testid={`message-bubble-${msg.id}`}>
         <p className="text-cream text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
-        <span className="block text-[10px] mt-1 text-right opacity-50" style={{ color: isMine ? "rgba(253,248,240,0.6)" : "rgba(253,248,240,0.4)" }}>
+        <span className="block text-[10px] mt-1 text-right opacity-50"
+          style={{ color: isMine ? "rgba(253,248,240,0.6)" : "rgba(253,248,240,0.4)" }}>
           {timeLabel}
         </span>
+      </div>
+    </div>
+  );
+}
+
+// ─── Gift bubble ────────────────────────────────────────────────────────────
+function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
+  const g = giftById(gift.giftType);
+  const timeLabel = formatDistanceToNow(new Date(gift.createdAt!), { addSuffix: true });
+  return (
+    <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+      <div
+        className="flex flex-col items-center gap-2 px-5 py-4 rounded-3xl max-w-[200px]"
+        style={{
+          background: `linear-gradient(135deg, ${g.color}22, ${g.color}11)`,
+          border: `1.5px solid ${g.color}44`,
+        }}
+        data-testid={`gift-bubble-${gift.id}`}
+      >
+        <span className="text-5xl leading-none" role="img" aria-label={g.name}>{g.emoji}</span>
+        <div className="text-center">
+          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: g.color }}>{g.name}</p>
+          {gift.message && (
+            <p className="text-cream/60 text-xs mt-1 leading-snug italic">"{gift.message}"</p>
+          )}
+          <p className="text-cream/30 text-[10px] mt-2">{isMine ? "You sent" : "Sent you"} a {g.name.toLowerCase()} · {timeLabel}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Gift picker ───────────────────────────────────────────────────────────
+function GiftPicker({ recipientName, isPending, onSend, onClose }: {
+  recipientName: string;
+  isPending: boolean;
+  onSend: (giftType: string, message: string) => void;
+  onClose: () => void;
+}) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [message, setMessage] = useState("");
+
+  return (
+    <div
+      className="fixed inset-0 z-[200] flex items-end justify-center"
+      style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" }}
+      onClick={e => e.target === e.currentTarget && onClose()}
+      data-testid="gift-picker"
+    >
+      <div className="w-full max-w-sm flex flex-col rounded-t-3xl" style={{ background: "#130820", border: "1px solid rgba(201,168,76,0.2)", maxHeight: "80vh" }}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 flex-shrink-0" style={{ borderBottom: "1px solid rgba(201,168,76,0.1)" }}>
+          <div>
+            <h3 className="font-serif text-lg text-gold">Send a Gift</h3>
+            <p className="text-cream/40 text-xs mt-0.5">to {recipientName}</p>
+          </div>
+          <button onClick={onClose} className="text-cream/40 text-lg leading-none" data-testid="button-close-gift-picker">✕</button>
+        </div>
+
+        {/* Gift grid */}
+        <div className="overflow-y-auto px-4 py-4 flex-1">
+          <div className="grid grid-cols-4 gap-3 mb-4">
+            {GIFTS.map(g => (
+              <button
+                key={g.id}
+                onClick={() => setSelected(g.id === selected ? null : g.id)}
+                data-testid={`gift-option-${g.id}`}
+                className="flex flex-col items-center gap-1.5 py-3 rounded-2xl transition-all"
+                style={selected === g.id
+                  ? { background: `${g.color}25`, border: `2px solid ${g.color}`, transform: "scale(1.05)" }
+                  : { background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.08)" }
+                }
+              >
+                <span className="text-2xl leading-none">{g.emoji}</span>
+                <span className="text-[9px] font-semibold uppercase tracking-wide" style={{ color: selected === g.id ? g.color : "rgba(253,248,240,0.4)" }}>
+                  {g.name}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Optional message */}
+          {selected && (
+            <div className="mb-4">
+              <p className="text-cream/40 text-xs font-semibold uppercase tracking-wider mb-2">Add a message <span className="normal-case tracking-normal text-cream/25">(optional)</span></p>
+              <input
+                type="text"
+                value={message}
+                onChange={e => setMessage(e.target.value)}
+                placeholder="Write something sweet…"
+                maxLength={200}
+                data-testid="input-gift-message"
+                className="w-full px-4 py-3 rounded-2xl text-sm text-cream placeholder-cream/25 outline-none"
+                style={{ background: "rgba(255,255,255,0.06)", border: "1.5px solid rgba(201,168,76,0.2)" }}
+              />
+            </div>
+          )}
+
+          {/* Send button */}
+          <button
+            onClick={() => selected && onSend(selected, message)}
+            disabled={!selected || isPending}
+            data-testid="button-send-gift"
+            className="w-full py-4 rounded-2xl font-bold text-sm transition-all disabled:opacity-40"
+            style={selected
+              ? { background: `linear-gradient(135deg, ${giftById(selected!).color}cc, ${giftById(selected!).color})`, color: "white" }
+              : { background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.3)" }
+            }
+          >
+            {isPending ? "Sending…" : selected ? `Send ${giftById(selected).emoji} ${giftById(selected).name}` : "Select a gift"}
+          </button>
+        </div>
       </div>
     </div>
   );
