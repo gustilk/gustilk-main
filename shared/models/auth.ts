@@ -37,6 +37,7 @@ export const users = pgTable("users", {
   bio: text("bio").default(""),
   occupation: text("occupation").default(""),
   photos: text("photos").array().default([]),
+  pendingPhotos: text("pending_photos").array().default([]),
   languages: text("languages").array().default([]),
 
   isVerified: boolean("is_verified").default(false),
