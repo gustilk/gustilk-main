@@ -63,7 +63,7 @@ export default function SocialSetupPage({ user }: Props) {
   const [detectedCountryName, setDetectedCountryName] = useState("");
 
   // Step 2 state
-  const [photos, setPhotos] = useState<(string | null)[]>([null, null]);
+  const [photos, setPhotos] = useState<(string | null)[]>([null, null, null]);
   const [selfie, setSelfie] = useState<string | null>(null);
   const [cropTarget, setCropTarget] = useState<{ imgSrc: string; index: number | "selfie" } | null>(null);
   const [selfieChecking, setSelfieChecking] = useState(false);
@@ -71,7 +71,7 @@ export default function SocialSetupPage({ user }: Props) {
 
   const selfieInputRef = useRef<HTMLInputElement>(null);
   const photoInputRefs = [
-    useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null),
   ];
 
   useEffect(() => {
@@ -197,7 +197,7 @@ export default function SocialSetupPage({ user }: Props) {
   const maxDobDate = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().split("T")[0]; })();
   const countryHasStates = !!COUNTRY_STATES[data.country];
   const step1Valid = data.country && (!countryHasStates || data.state) && data.city.trim() && agreedGuidelines && agreedTruthful && isAtLeast18(data.dateOfBirth);
-  const step2Valid = photos.filter(Boolean).length >= 2 && selfie;
+  const step2Valid = photos.filter(Boolean).length >= 1 && selfie;
   const canSubmit = step2Valid && !cropTarget && !selfieChecking;
 
   return (
@@ -436,7 +436,7 @@ export default function SocialSetupPage({ user }: Props) {
               {/* Profile photos */}
               <div>
                 <Label>{t("setup.profilePhotosLabel")} <span className="text-gold normal-case font-normal">{t("setup.photosRequired")}</span></Label>
-                <div className="grid grid-cols-2 gap-3 mt-2">
+                <div className="grid grid-cols-3 gap-2 mt-2">
                   {photos.map((photo, idx) => (
                     <div key={idx} className="relative">
                       <input
@@ -479,7 +479,7 @@ export default function SocialSetupPage({ user }: Props) {
                     </div>
                   ))}
                 </div>
-                <p className="text-cream/30 text-xs mt-2 pl-0.5">{t("setup.photoBothRequired")}</p>
+                <p className="text-cream/30 text-xs mt-2 pl-0.5">At least 1 photo required · up to 3</p>
               </div>
 
               {/* Verification selfie */}

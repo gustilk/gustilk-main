@@ -118,6 +118,7 @@ export const profileUpdateSchema = z.object({
   occupation: z.string().max(100).optional(),
   languages: z.array(z.string()).optional(),
   photos: z.array(z.string()).optional(),
+  removedRejectedUrls: z.array(z.string()).optional(),
   verificationSelfie: z.string().optional(),
   verificationStatus: z.literal("pending").optional(),
 });
