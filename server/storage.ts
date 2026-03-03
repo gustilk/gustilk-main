@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys, blocks } from "@shared/schema";
+import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys, blocks, visitors } from "@shared/schema";
 import type { User, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report, InsertUser, PhotoSlot, Block } from "@shared/schema";
 import { eq, and, or, ne, notInArray, desc, sql, isNotNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
@@ -34,6 +34,11 @@ export interface IStorage {
   approvePhotoSlot(userId: string, slotIdx: number): Promise<{ user: SafeUser }>;
   rejectPhotoSlot(userId: string, slotIdx: number, reason: string): Promise<{ user: SafeUser }>;
   setMainPhoto(userId: string, slotIdx: number): Promise<void>;
+
+  recordVisit(fromUserId: string, toUserId: string): Promise<void>;
+  getVisitors(userId: string): Promise<{ user: SafeUser; createdAt: Date }[]>;
+  getLikesReceived(userId: string): Promise<{ user: SafeUser; createdAt: Date }[]>;
+  getLikesSent(userId: string): Promise<{ user: SafeUser; createdAt: Date }[]>;
 
   blockUser(blockerId: string, blockedId: string): Promise<void>;
   unblockUser(blockerId: string, blockedId: string): Promise<void>;
@@ -299,6 +304,44 @@ export class DatabaseStorage implements IStorage {
       mainPhotoUrl: newMain,
       updatedAt: new Date(),
     }).where(eq(users.id, userId));
+  }
+
+  async recordVisit(fromUserId: string, toUserId: string): Promise<void> {
+    if (fromUserId === toUserId) return;
+    await db.insert(visitors).values({ id: randomUUID(), fromUserId, toUserId }).onConflictDoUpdate({
+      target: [visitors.fromUserId, visitors.toUserId],
+      set: { createdAt: new Date() },
+    });
+  }
+
+  async getVisitors(userId: string): Promise<{ user: SafeUser; createdAt: Date }[]> {
+    const rows = await db.select().from(visitors).where(eq(visitors.toUserId, userId)).orderBy(desc(visitors.createdAt));
+    const result: { user: SafeUser; createdAt: Date }[] = [];
+    for (const row of rows) {
+      const [u] = await db.select().from(users).where(eq(users.id, row.fromUserId));
+      if (u) result.push({ user: u, createdAt: row.createdAt! });
+    }
+    return result;
+  }
+
+  async getLikesReceived(userId: string): Promise<{ user: SafeUser; createdAt: Date }[]> {
+    const rows = await db.select().from(likes).where(eq(likes.toUserId, userId)).orderBy(desc(likes.createdAt));
+    const result: { user: SafeUser; createdAt: Date }[] = [];
+    for (const row of rows) {
+      const [u] = await db.select().from(users).where(eq(users.id, row.fromUserId));
+      if (u) result.push({ user: u, createdAt: row.createdAt! });
+    }
+    return result;
+  }
+
+  async getLikesSent(userId: string): Promise<{ user: SafeUser; createdAt: Date }[]> {
+    const rows = await db.select().from(likes).where(eq(likes.fromUserId, userId)).orderBy(desc(likes.createdAt));
+    const result: { user: SafeUser; createdAt: Date }[] = [];
+    for (const row of rows) {
+      const [u] = await db.select().from(users).where(eq(users.id, row.toUserId));
+      if (u) result.push({ user: u, createdAt: row.createdAt! });
+    }
+    return result;
   }
 
   async blockUser(blockerId: string, blockedId: string): Promise<void> {

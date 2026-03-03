@@ -1,12 +1,15 @@
 import { useLocation, Link } from "wouter";
-import { Heart, MessageCircle, User, CalendarDays } from "lucide-react";
+import { Heart, MessageCircle, User, CalendarDays, Zap } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { MatchWithUser } from "@shared/schema";
 
+interface ActivityItem { user: unknown; createdAt: string; }
+
 const NAV_ITEMS = [
   { href: "/discover", icon: Heart, tKey: "nav.discover", id: "discover" },
   { href: "/matches", icon: MessageCircle, tKey: "nav.matches", id: "matches" },
+  { href: "/activity", icon: Zap, tKey: "nav.activity", id: "activity" },
   { href: "/events", icon: CalendarDays, tKey: "nav.events", id: "events" },
   { href: "/profile", icon: User, tKey: "nav.profile", id: "profile" },
 ];
@@ -20,7 +23,13 @@ export default function BottomNav() {
     refetchInterval: 15000,
   });
 
+  const { data: likesData } = useQuery<{ items: ActivityItem[] }>({
+    queryKey: ["/api/activity/likes-received"],
+    refetchInterval: 30000,
+  });
+
   const unreadCount = matchData?.matches?.reduce((sum, m) => sum + (m.unreadCount || 0), 0) || 0;
+  const likesCount = likesData?.items?.length ?? 0;
 
   return (
     <nav
@@ -30,6 +39,7 @@ export default function BottomNav() {
       {NAV_ITEMS.map(({ href, icon: Icon, tKey, id }) => {
         const isActive = location === href || (href === "/discover" && location === "/");
         const isMatches = href === "/matches";
+        const isActivity = href === "/activity";
         return (
           <Link
             key={href}
@@ -49,8 +59,17 @@ export default function BottomNav() {
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
+              {isActivity && likesCount > 0 && (
+                <span
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
+                  style={{ background: "#c9a84c", color: "#0d0618" }}
+                  data-testid="badge-activity"
+                >
+                  {likesCount > 9 ? "9+" : likesCount}
+                </span>
+              )}
             </div>
-            <span className="text-[10px] font-semibold uppercase tracking-wider truncate max-w-full px-1">{t(tKey)}</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider truncate max-w-full px-1">{t(tKey, { defaultValue: id })}</span>
           </Link>
         );
       })}

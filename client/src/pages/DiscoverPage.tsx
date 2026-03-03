@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { SlidersHorizontal, X, Heart, RefreshCw, MapPin } from "lucide-react";
@@ -21,6 +21,7 @@ export default function DiscoverPage({ user }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [matchData, setMatchData] = useState<{ user: SafeUser; matchId: string } | null>(null);
   const [swipeDir, setSwipeDir] = useState<"left" | "right" | null>(null);
+  const lastVisitedId = useRef<string | null>(null);
 
   const { data, isLoading, refetch } = useQuery<{ profiles: SafeUser[] }>({
     queryKey: ["/api/discover", minAge, maxAge],
@@ -32,6 +33,14 @@ export default function DiscoverPage({ user }: Props) {
 
   const profiles = data?.profiles ?? [];
   const current = profiles[currentIndex];
+
+  // Record a visit when a new profile is shown
+  useEffect(() => {
+    if (current && current.id !== lastVisitedId.current) {
+      lastVisitedId.current = current.id;
+      apiRequest("POST", `/api/users/${current.id}/visit`).catch(() => {});
+    }
+  }, [current?.id]);
 
   const likeMutation = useMutation({
     mutationFn: async (userId: string) => {

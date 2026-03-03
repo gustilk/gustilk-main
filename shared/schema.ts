@@ -85,6 +85,15 @@ export const events = pgTable("events", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const visitors = pgTable("visitors", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  fromUserId: varchar("from_user_id").notNull().references(() => users.id),
+  toUserId: varchar("to_user_id").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqueVisit: uniqueIndex("visitors_from_to_unique").on(table.fromUserId, table.toUserId),
+}));
+
 export const blocks = pgTable("blocks", {
   id: varchar("id", { length: 36 }).primaryKey(),
   blockerId: varchar("blocker_id").notNull().references(() => users.id),
@@ -134,6 +143,7 @@ export const profileUpdateSchema = z.object({
 
 export type OtpCode = typeof otpCodes.$inferSelect;
 export type Like = typeof likes.$inferSelect;
+export type Visitor = typeof visitors.$inferSelect;
 export type Dislike = typeof dislikes.$inferSelect;
 export type Block = typeof blocks.$inferSelect;
 export type Match = typeof matches.$inferSelect;
