@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { CalendarDays, MapPin, Users, ChevronLeft, ChevronRight, Plus, Edit2, Trash2, Check, Image } from "lucide-react";
+import { CalendarDays, MapPin, Users, ChevronLeft, ChevronRight, Plus, Edit2, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import type { SafeUser, EventWithAttendance } from "@shared/schema";
@@ -257,21 +257,6 @@ function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
       {/* Scrollable form body */}
       <div className="flex-1 overflow-y-auto px-4 pt-6" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 40px)" }}>
 
-        {/* Image preview */}
-        {form.imageUrl ? (
-          <div className="mb-4 rounded-2xl overflow-hidden" style={{ aspectRatio: "16/7" }}>
-            <img src={form.imageUrl} alt="" className="w-full h-full object-cover" />
-          </div>
-        ) : (
-          <div
-            className="mb-4 rounded-2xl flex flex-col items-center justify-center gap-2"
-            style={{ aspectRatio: "16/7", background: "rgba(255,255,255,0.03)", border: "1.5px dashed rgba(201,168,76,0.2)" }}
-          >
-            <Image size={22} color="rgba(201,168,76,0.3)" />
-            <p className="text-cream/25 text-xs">Add cover image URL below</p>
-          </div>
-        )}
-
         {/* Event type selector */}
         <p className={labelCls}>Event Type</p>
         <div className="flex gap-2 mb-5">
@@ -373,22 +358,6 @@ function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
               value={form.organizer}
               onChange={e => set("organizer", e.target.value)}
               data-testid="input-event-organizer"
-            />
-          </div>
-        </div>
-
-        {/* Cover image */}
-        <p className={labelCls}>Cover Image <span className="normal-case text-cream/25 tracking-normal font-normal">· optional</span></p>
-        <div className={sectionCls} style={sectionStyle}>
-          <div className={rowCls}>
-            <label className="text-cream/40 text-xs">Image URL</label>
-            <input
-              className={inputCls}
-              style={{ ...inputStyle, border: "none", background: "transparent", padding: "0" }}
-              placeholder="https://…"
-              value={form.imageUrl}
-              onChange={e => set("imageUrl", e.target.value)}
-              data-testid="input-event-image"
             />
           </div>
         </div>
