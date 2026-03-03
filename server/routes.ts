@@ -389,6 +389,24 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ gifts });
   });
 
+  // ─── SEEN ─────────────────────────────────────────────────
+  app.post("/api/seen/matches", isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    // Mark all unread messages sent to this user as read
+    await db.update(messages)
+      .set({ readAt: new Date() })
+      .where(and(eq(messages.readAt, null as any), sql`${messages.senderId} != ${userId}`));
+    // Update matchesSeenAt
+    await db.update(users).set({ matchesSeenAt: new Date() } as any).where(eq(users.id, userId));
+    res.json({ ok: true });
+  });
+
+  app.post("/api/seen/activity", isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    await db.update(users).set({ activitySeenAt: new Date() } as any).where(eq(users.id, userId));
+    res.json({ ok: true });
+  });
+
   // ─── ACTIVITY ─────────────────────────────────────────────
   app.post("/api/users/:userId/visit", isAuthenticated, async (req, res) => {
     const fromUserId = getUserId(req);
