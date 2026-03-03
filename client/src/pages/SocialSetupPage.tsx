@@ -120,7 +120,17 @@ export default function SocialSetupPage({ user }: Props) {
       setLocation("/discover");
     },
     onError: (err: Error) => {
-      setSaveError(err.message || t("setup.couldNotSave"));
+      try {
+        const jsonStart = err.message.indexOf("{");
+        if (jsonStart !== -1) {
+          const parsed = JSON.parse(err.message.slice(jsonStart));
+          setSaveError(parsed.error || t("setup.couldNotSave"));
+        } else {
+          setSaveError(err.message || t("setup.couldNotSave"));
+        }
+      } catch {
+        setSaveError(err.message || t("setup.couldNotSave"));
+      }
     },
   });
 
