@@ -111,6 +111,14 @@ export default function AdminPage({ user }: Props) {
     },
   });
 
+  const startChatMutation = useMutation({
+    mutationFn: async (userId: string) => (await apiRequest("POST", `/api/admin/start-chat/${userId}`)).json(),
+    onSuccess: (data: { matchId: string }) => {
+      setLocation(`/chat/${data.matchId}`);
+    },
+    onError: () => toast({ title: "Could not open chat", variant: "destructive" }),
+  });
+
   const createEventMutation = useMutation({
     mutationFn: async (data: Partial<Event>) => (await apiRequest("POST", "/api/admin/events", data)).json(),
     onSuccess: () => {
@@ -216,7 +224,8 @@ export default function AdminPage({ user }: Props) {
             onToggleBan={(id, val) => updateUserMutation.mutate({ id, isBanned: val })}
             onToggleApprove={(id, val) => updateUserMutation.mutate({ id, profileVisible: val })}
             onDelete={(id) => deleteUserMutation.mutate(id)}
-            isPending={updateUserMutation.isPending || deleteUserMutation.isPending}
+            onMessage={(id) => startChatMutation.mutate(id)}
+            isPending={updateUserMutation.isPending || deleteUserMutation.isPending || startChatMutation.isPending}
           />
         )}
         {activeTab === "verifications" && (
@@ -290,12 +299,13 @@ function OverviewTab({ stats }: { stats: Stats | undefined }) {
   );
 }
 
-function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onToggleApprove, onDelete }: {
+function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onToggleApprove, onDelete, onMessage }: {
   u: SafeUser; isMe: boolean; isPending: boolean;
   onTogglePremium: (id: string, val: boolean) => void;
   onToggleBan: (id: string, val: boolean) => void;
   onToggleApprove: (id: string, val: boolean) => void;
   onDelete: (id: string) => void;
+  onMessage: (id: string) => void;
 }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const isBanned = u.verificationStatus === "banned";
@@ -328,6 +338,11 @@ function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onToggleAp
         </div>
         {!isMe && (
           <div className="flex gap-1.5 flex-wrap">
+            <button onClick={() => onMessage(u.id)} disabled={isPending} data-testid={`button-message-${u.id}`}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50 transition-all"
+              style={{ background: "rgba(123,63,160,0.15)", color: "#9b6bd4", border: "1px solid rgba(123,63,160,0.3)" }}>
+              <MessageSquare size={11} />Message
+            </button>
             {!u.isAdmin && (
               <button onClick={() => onToggleApprove(u.id, !isApproved)} disabled={isPending || isBanned} data-testid={`button-approve-${u.id}`}
                 className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50 transition-all"
@@ -371,12 +386,13 @@ function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onToggleAp
   );
 }
 
-function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBan, onToggleApprove, onDelete, isPending }: {
+function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBan, onToggleApprove, onDelete, onMessage, isPending }: {
   users: SafeUser[]; isLoading: boolean; currentUserId: string;
   onTogglePremium: (id: string, val: boolean) => void;
   onToggleBan: (id: string, val: boolean) => void;
   onToggleApprove: (id: string, val: boolean) => void;
   onDelete: (id: string) => void;
+  onMessage: (id: string) => void;
   isPending: boolean;
 }) {
   const [search, setSearch] = useState("");
@@ -399,9 +415,14 @@ function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBa
     return matchSearch && matchCountry && matchCity;
   });
 
+  const premiumMembers = filteredMembers.filter(u => u.isPremium);
+  const standardMembers = filteredMembers.filter(u => !u.isPremium);
+
   if (isLoading) return <Spinner />;
 
   const selectStyle = { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(253,248,240,0.7)" };
+
+  const cardProps = { isPending, onTogglePremium, onToggleBan, onToggleApprove, onDelete, onMessage };
 
   return (
     <div className="space-y-4 pt-1">
@@ -435,33 +456,49 @@ function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBa
       {/* Admins section */}
       {admins.length > 0 && (
         <div>
-          <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold px-1 mb-2">
-            Admins · {admins.length}
-          </p>
+          <SectionHeader icon="🛡️" label="Admins" count={admins.length} color="#c9a84c" />
           <div className="space-y-2">
             {admins.map(u => (
-              <UserCard key={u.id} u={u} isMe={u.id === currentUserId} isPending={isPending}
-                onTogglePremium={onTogglePremium} onToggleBan={onToggleBan} onToggleApprove={onToggleApprove} onDelete={onDelete} />
+              <UserCard key={u.id} u={u} isMe={u.id === currentUserId} {...cardProps} />
             ))}
           </div>
         </div>
       )}
 
-      {/* Members section */}
+      {/* Premium members */}
+      {premiumMembers.length > 0 && (
+        <div>
+          <SectionHeader icon="👑" label="Premium Members" count={premiumMembers.length} color="#7b3fa0" />
+          <div className="space-y-2">
+            {premiumMembers.map(u => (
+              <UserCard key={u.id} u={u} isMe={u.id === currentUserId} {...cardProps} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Standard members */}
       <div>
-        <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold px-1 mb-2">
-          Members · {filteredMembers.length}{(countryFilter || cityFilter) ? ` of ${members.length}` : ""}
-        </p>
+        <SectionHeader icon="👤" label="Standard Members" count={standardMembers.length} color="rgba(253,248,240,0.3)" />
         <div className="space-y-2">
-          {filteredMembers.map(u => (
-            <UserCard key={u.id} u={u} isMe={u.id === currentUserId} isPending={isPending}
-              onTogglePremium={onTogglePremium} onToggleBan={onToggleBan} onToggleApprove={onToggleApprove} onDelete={onDelete} />
+          {standardMembers.map(u => (
+            <UserCard key={u.id} u={u} isMe={u.id === currentUserId} {...cardProps} />
           ))}
-          {filteredMembers.length === 0 && (
+          {standardMembers.length === 0 && filteredMembers.length === 0 && (
             <p className="text-cream/25 text-sm text-center py-6">No members match the selected filters.</p>
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function SectionHeader({ icon, label, count, color }: { icon: string; label: string; count: number; color: string }) {
+  return (
+    <div className="flex items-center gap-2 px-1 mb-2 mt-1">
+      <span className="text-sm">{icon}</span>
+      <p className="text-xs uppercase tracking-wider font-semibold" style={{ color }}>{label}</p>
+      <span className="text-xs px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.4)" }}>{count}</span>
     </div>
   );
 }

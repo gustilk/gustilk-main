@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, MapPin, ChevronLeft, Shield, AlertTriangle } from "lucide-react";
+import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, MapPin, ChevronLeft, Shield, AlertTriangle, LifeBuoy } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -212,6 +212,12 @@ export default function ProfilePage({ user }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { t } = useTranslation();
+
+  const startSupportChatMutation = useMutation({
+    mutationFn: async () => (await apiRequest("POST", "/api/support/start-chat")).json(),
+    onSuccess: (data: { matchId: string }) => setLocation(`/chat/${data.matchId}`),
+    onError: () => toast({ title: "Could not open support chat", variant: "destructive" }),
+  });
 
   const allSlots = ((user as any).photoSlots ?? []) as PhotoSlot[];
   const [localSlots, setLocalSlots] = useState<LocalSlot[]>(() => {
@@ -698,6 +704,25 @@ export default function ProfilePage({ user }: Props) {
           </div>
           <ChevronRight size={15} color="rgba(253,248,240,0.2)" />
         </button>
+
+        {!user.isAdmin && (
+          <button
+            onClick={() => startSupportChatMutation.mutate()}
+            disabled={startSupportChatMutation.isPending}
+            data-testid="button-contact-support"
+            className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all text-left disabled:opacity-60"
+            style={{ border: "1px solid rgba(123,63,160,0.15)", background: "rgba(123,63,160,0.05)" }}
+          >
+            <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(123,63,160,0.12)" }}>
+              <LifeBuoy size={16} color="#9b6bd4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium" style={{ color: "rgba(253,248,240,0.85)" }}>Contact Support</p>
+              <p className="text-xs mt-0.5" style={{ color: "rgba(253,248,240,0.35)" }}>Chat with the Gûstîlk support team</p>
+            </div>
+            <ChevronRight size={15} color="rgba(253,248,240,0.2)" />
+          </button>
+        )}
       </div>
     </div>
     </>
