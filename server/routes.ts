@@ -517,6 +517,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       isPremium: z.boolean().optional(),
       isBanned: z.boolean().optional(),
       isAdmin: z.boolean().optional(),
+      profileVisible: z.boolean().optional(),
     });
     const data = schema.parse(req.body);
     const updates: Record<string, unknown> = { updatedAt: new Date() };
@@ -527,9 +528,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
     if (data.isBanned !== undefined) {
       updates.verificationStatus = data.isBanned ? "banned" : "none";
-      if (data.isBanned) updates.isVerified = false;
+      if (data.isBanned) { updates.isVerified = false; updates.profileVisible = false; }
     }
     if (data.isAdmin !== undefined) updates.isAdmin = data.isAdmin;
+    if (data.profileVisible !== undefined) updates.profileVisible = data.profileVisible;
     await db.update(users).set(updates).where(eq(users.id, req.params.id as string));
     res.json({ ok: true });
   });

@@ -222,7 +222,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateVerificationStatus(userId: string, status: "approved" | "rejected" | "banned", isVerified = false): Promise<void> {
-    await db.update(users).set({ verificationStatus: status, isVerified, updatedAt: new Date() }).where(eq(users.id, userId));
+    const updates: Record<string, unknown> = { verificationStatus: status, isVerified, updatedAt: new Date() };
+    if (status === "approved") updates.profileVisible = true;
+    if (status === "rejected" || status === "banned") updates.profileVisible = false;
+    await db.update(users).set(updates as any).where(eq(users.id, userId));
   }
 
   async banUser(userId: string): Promise<void> {

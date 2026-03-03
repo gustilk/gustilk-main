@@ -91,7 +91,7 @@ export default function AdminPage({ user }: Props) {
   });
 
   const updateUserMutation = useMutation({
-    mutationFn: async ({ id, ...data }: { id: string; isPremium?: boolean; isBanned?: boolean; isAdmin?: boolean }) => {
+    mutationFn: async ({ id, ...data }: { id: string; isPremium?: boolean; isBanned?: boolean; isAdmin?: boolean; profileVisible?: boolean }) => {
       const res = await apiRequest("PATCH", `/api/admin/users/${id}`, data);
       return res.json();
     },
@@ -214,6 +214,7 @@ export default function AdminPage({ user }: Props) {
             currentUserId={user.id}
             onTogglePremium={(id, val) => updateUserMutation.mutate({ id, isPremium: val })}
             onToggleBan={(id, val) => updateUserMutation.mutate({ id, isBanned: val })}
+            onToggleApprove={(id, val) => updateUserMutation.mutate({ id, profileVisible: val })}
             onDelete={(id) => deleteUserMutation.mutate(id)}
             isPending={updateUserMutation.isPending || deleteUserMutation.isPending}
           />
@@ -289,14 +290,16 @@ function OverviewTab({ stats }: { stats: Stats | undefined }) {
   );
 }
 
-function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onDelete }: {
+function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onToggleApprove, onDelete }: {
   u: SafeUser; isMe: boolean; isPending: boolean;
   onTogglePremium: (id: string, val: boolean) => void;
   onToggleBan: (id: string, val: boolean) => void;
+  onToggleApprove: (id: string, val: boolean) => void;
   onDelete: (id: string) => void;
 }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const isBanned = u.verificationStatus === "banned";
+  const isApproved = !!(u as any).profileVisible;
   return (
     <>
       <div data-testid={`user-card-${u.id}`}
@@ -317,6 +320,7 @@ function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onDelete }
               {u.isVerified && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(59,130,246,0.15)", color: "#3b82f6" }}>Verified</span>}
               {isBanned && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}>Banned</span>}
               {u.isAdmin && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>Admin</span>}
+              {!u.isAdmin && !isApproved && !isBanned && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(251,146,60,0.15)", color: "#fb923c" }}>Pending</span>}
             </div>
             <p className="text-cream/35 text-xs truncate">{u.email}</p>
             <p className="text-cream/25 text-xs">{[u.caste, u.city, u.country].filter(Boolean).join(" · ")}</p>
@@ -324,6 +328,13 @@ function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onDelete }
         </div>
         {!isMe && (
           <div className="flex gap-1.5 flex-wrap">
+            {!u.isAdmin && (
+              <button onClick={() => onToggleApprove(u.id, !isApproved)} disabled={isPending || isBanned} data-testid={`button-approve-${u.id}`}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50 transition-all"
+                style={isApproved ? { background: "rgba(16,185,129,0.12)", color: "#10b981", border: "1px solid rgba(16,185,129,0.25)" } : { background: "rgba(16,185,129,0.07)", color: "rgba(16,185,129,0.7)", border: "1px solid rgba(16,185,129,0.2)" }}>
+                <CheckCircle size={11} />{isApproved ? "Approved" : "Approve"}
+              </button>
+            )}
             <button onClick={() => onTogglePremium(u.id, !u.isPremium)} disabled={isPending} data-testid={`button-premium-${u.id}`}
               className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50 transition-all"
               style={u.isPremium ? { background: "rgba(123,63,160,0.2)", color: "#7b3fa0", border: "1px solid rgba(123,63,160,0.3)" } : { background: "rgba(255,255,255,0.05)", color: "rgba(253,248,240,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}>
@@ -360,10 +371,11 @@ function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onDelete }
   );
 }
 
-function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBan, onDelete, isPending }: {
+function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBan, onToggleApprove, onDelete, isPending }: {
   users: SafeUser[]; isLoading: boolean; currentUserId: string;
   onTogglePremium: (id: string, val: boolean) => void;
   onToggleBan: (id: string, val: boolean) => void;
+  onToggleApprove: (id: string, val: boolean) => void;
   onDelete: (id: string) => void;
   isPending: boolean;
 }) {
@@ -429,7 +441,7 @@ function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBa
           <div className="space-y-2">
             {admins.map(u => (
               <UserCard key={u.id} u={u} isMe={u.id === currentUserId} isPending={isPending}
-                onTogglePremium={onTogglePremium} onToggleBan={onToggleBan} onDelete={onDelete} />
+                onTogglePremium={onTogglePremium} onToggleBan={onToggleBan} onToggleApprove={onToggleApprove} onDelete={onDelete} />
             ))}
           </div>
         </div>
@@ -443,7 +455,7 @@ function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBa
         <div className="space-y-2">
           {filteredMembers.map(u => (
             <UserCard key={u.id} u={u} isMe={u.id === currentUserId} isPending={isPending}
-              onTogglePremium={onTogglePremium} onToggleBan={onToggleBan} onDelete={onDelete} />
+              onTogglePremium={onTogglePremium} onToggleBan={onToggleBan} onToggleApprove={onToggleApprove} onDelete={onDelete} />
           ))}
           {filteredMembers.length === 0 && (
             <p className="text-cream/25 text-sm text-center py-6">No members match the selected filters.</p>
