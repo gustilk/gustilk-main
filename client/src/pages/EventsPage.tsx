@@ -2,10 +2,9 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { CalendarDays, MapPin, Users, ChevronRight, Plus, Edit2, Trash2, X } from "lucide-react";
+import { CalendarDays, MapPin, Users, ChevronLeft, ChevronRight, Plus, Edit2, Trash2, Check, Image } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
-
 import type { SafeUser, EventWithAttendance } from "@shared/schema";
 
 interface Props { user: SafeUser }
@@ -28,13 +27,24 @@ const TYPE_EMOJI: Record<string, string> = {
   online: "💻",
 };
 
-const EMPTY_FORM = { title: "", description: "", type: "meetup" as const, date: "", location: "", country: "", organizer: "", imageUrl: "" };
+const EMPTY_FORM = {
+  title: "",
+  description: "",
+  type: "meetup" as "meetup" | "cultural" | "online",
+  date: "",
+  location: "",
+  country: "",
+  organizer: "",
+  imageUrl: "",
+};
+
+type FormData = typeof EMPTY_FORM;
 
 export default function EventsPage({ user }: Props) {
   const [, setLocation] = useLocation();
   const { t } = useTranslation();
   const [activeType, setActiveType] = useState("all");
-  const [showForm, setShowForm] = useState(false);
+  const [formView, setFormView] = useState<"list" | "create" | "edit">("list");
   const [editingEvent, setEditingEvent] = useState<EventWithAttendance | null>(null);
 
   const TYPES = [
@@ -51,67 +61,84 @@ export default function EventsPage({ user }: Props) {
 
   const attendMutation = useMutation({
     mutationFn: async ({ eventId, isAttending }: { eventId: string; isAttending: boolean }) => {
-      if (isAttending) {
-        const res = await apiRequest("DELETE", `/api/events/${eventId}/attend`);
-        return res.json();
-      } else {
-        const res = await apiRequest("POST", `/api/events/${eventId}/attend`);
-        return res.json();
-      }
+      if (isAttending) return (await apiRequest("DELETE", `/api/events/${eventId}/attend`)).json();
+      return (await apiRequest("POST", `/api/events/${eventId}/attend`)).json();
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/events"] }),
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: typeof EMPTY_FORM) => {
-      const res = await apiRequest("POST", "/api/events", data);
-      return res.json();
-    },
+    mutationFn: async (data: FormData) => (await apiRequest("POST", "/api/events", data)).json(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
-      setShowForm(false);
+      setFormView("list");
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, ...data }: typeof EMPTY_FORM & { id: string }) => {
-      const res = await apiRequest("PATCH", `/api/events/${id}`, data);
-      return res.json();
-    },
+    mutationFn: async ({ id, ...data }: FormData & { id: string }) =>
+      (await apiRequest("PATCH", `/api/events/${id}`, data)).json(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       setEditingEvent(null);
+      setFormView("list");
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await apiRequest("DELETE", `/api/events/${id}`);
-      return res.json();
-    },
+    mutationFn: async (id: string) => (await apiRequest("DELETE", `/api/events/${id}`)).json(),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/events"] }),
   });
 
   const allEvents = data?.events ?? [];
   const filtered = activeType === "all" ? allEvents : allEvents.filter(e => e.type === activeType);
 
+  if (formView === "create" || formView === "edit") {
+    return (
+      <EventFormScreen
+        initial={editingEvent ? {
+          title: editingEvent.title,
+          description: editingEvent.description,
+          type: editingEvent.type as FormData["type"],
+          date: format(new Date(editingEvent.date), "yyyy-MM-dd'T'HH:mm"),
+          location: editingEvent.location,
+          country: editingEvent.country,
+          organizer: editingEvent.organizer,
+          imageUrl: editingEvent.imageUrl ?? "",
+        } : { ...EMPTY_FORM, organizer: user.fullName ?? user.firstName ?? "" }}
+        isEditing={formView === "edit"}
+        isPending={createMutation.isPending || updateMutation.isPending}
+        onBack={() => { setFormView("list"); setEditingEvent(null); }}
+        onSubmit={(data) => {
+          if (formView === "edit" && editingEvent) {
+            updateMutation.mutate({ id: editingEvent.id, ...data });
+          } else {
+            createMutation.mutate(data);
+          }
+        }}
+      />
+    );
+  }
+
   return (
-    <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
+    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
       <div className="pt-12 pb-4 px-5">
         <div className="flex items-center justify-between mb-0.5">
           <div className="flex items-center gap-2.5">
             <img src="/gustilk-logo.svg" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
             <h1 className="font-serif text-2xl text-gold">{t("events.title")}</h1>
           </div>
-          <button
-            onClick={() => setShowForm(true)}
-            data-testid="button-create-event"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all"
-            style={{ background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white" }}
-          >
-            <Plus size={14} />
-            Create
-          </button>
+          {(user.isAdmin || user.isPremium) && (
+            <button
+              onClick={() => setFormView("create")}
+              data-testid="button-create-event"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all"
+              style={{ background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white" }}
+            >
+              <Plus size={14} />
+              Create
+            </button>
+          )}
         </div>
         <p className="text-cream/40 text-sm mt-0.5 pl-0.5">{t("events.subtitle")}</p>
       </div>
@@ -148,133 +175,244 @@ export default function EventsPage({ user }: Props) {
             <EventCard
               key={event.id}
               event={event}
+              user={user}
               onAttend={() => attendMutation.mutate({ eventId: event.id, isAttending: event.isAttending })}
               onOpen={() => setLocation(`/events/${event.id}`)}
-              onEdit={() => setEditingEvent(event)}
+              onEdit={() => { setEditingEvent(event); setFormView("edit"); }}
               onDelete={() => deleteMutation.mutate(event.id)}
               isPending={attendMutation.isPending || deleteMutation.isPending}
             />
           ))}
         </div>
       )}
-
-      {(showForm || editingEvent) && (
-        <EventFormModal
-          initial={editingEvent ? {
-            title: editingEvent.title,
-            description: editingEvent.description,
-            type: editingEvent.type as any,
-            date: format(new Date(editingEvent.date), "yyyy-MM-dd'T'HH:mm"),
-            location: editingEvent.location,
-            country: editingEvent.country,
-            organizer: editingEvent.organizer,
-            imageUrl: editingEvent.imageUrl ?? "",
-          } : { ...EMPTY_FORM, organizer: user.fullName ?? user.firstName ?? "" }}
-          isEditing={!!editingEvent}
-          isPending={createMutation.isPending || updateMutation.isPending}
-          onClose={() => { setShowForm(false); setEditingEvent(null); }}
-          onSubmit={(data) => {
-            if (editingEvent) {
-              updateMutation.mutate({ id: editingEvent.id, ...data });
-            } else {
-              createMutation.mutate(data);
-            }
-          }}
-        />
-      )}
     </div>
   );
 }
 
-function EventFormModal({ initial, isEditing, isPending, onClose, onSubmit }: {
-  initial: typeof EMPTY_FORM;
+// ─── Full-screen form ──────────────────────────────────────────────────────
+
+function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
+  initial: FormData;
   isEditing: boolean;
   isPending: boolean;
-  onClose: () => void;
-  onSubmit: (data: typeof EMPTY_FORM) => void;
+  onBack: () => void;
+  onSubmit: (data: FormData) => void;
 }) {
-  const [form, setForm] = useState(initial);
+  const [form, setForm] = useState<FormData>(initial);
 
-  function set(key: keyof typeof EMPTY_FORM, val: string) {
+  function set(key: keyof FormData, val: string) {
     setForm(f => ({ ...f, [key]: val }));
   }
 
+  const isValid = !!(form.title && form.description && form.date && form.location && form.country && form.organizer);
+
   const inputStyle = {
-    background: "rgba(255,255,255,0.07)",
-    border: "1.5px solid rgba(201,168,76,0.25)",
+    background: "rgba(255,255,255,0.06)",
+    border: "1.5px solid rgba(201,168,76,0.2)",
     color: "#fdf8f0",
   };
+  const inputCls = "w-full px-4 py-3 rounded-2xl text-sm outline-none placeholder-cream/20 transition-all";
+  const labelCls = "block text-cream/50 text-xs font-semibold mb-2 uppercase tracking-widest";
+  const sectionCls = "rounded-2xl overflow-hidden mb-4" as string;
+  const sectionStyle = { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(201,168,76,0.1)" };
+  const rowCls = "px-4 py-3 flex flex-col gap-1";
+  const dividerStyle = { height: "1px", background: "rgba(201,168,76,0.08)", margin: "0 16px" };
 
-  const labelCls = "block text-cream/60 text-xs font-semibold mb-1 uppercase tracking-wider";
-  const inputCls = "w-full px-3 py-2.5 rounded-xl text-sm outline-none placeholder-cream/20";
+  const typeOptions: { value: FormData["type"]; label: string; emoji: string; color: string }[] = [
+    { value: "meetup", label: "Meetup", emoji: "🤝", color: "#d4608a" },
+    { value: "cultural", label: "Cultural", emoji: "🏛", color: "#c9a84c" },
+    { value: "online", label: "Online", emoji: "💻", color: "#9b6bd4" },
+  ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: "rgba(0,0,0,0.75)" }}>
-      <div className="w-full max-w-lg rounded-t-3xl flex flex-col" style={{ background: "#130820", border: "1px solid rgba(201,168,76,0.2)", maxHeight: "92vh" }}>
-        <div className="flex items-center justify-between px-5 py-4 flex-shrink-0" style={{ borderBottom: "1px solid rgba(201,168,76,0.1)" }}>
-          <h2 className="font-serif text-lg text-gold">{isEditing ? "Edit Event" : "Create Event"}</h2>
-          <button onClick={onClose} data-testid="button-close-event-form" className="text-cream/40 hover:text-cream/70">
-            <X size={20} />
-          </button>
-        </div>
-        <div className="px-5 py-4 space-y-4 overflow-y-auto" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 24px)" }}>
-          <div>
-            <label className={labelCls}>Title</label>
-            <input className={inputCls} style={inputStyle} placeholder="Event title" value={form.title} onChange={e => set("title", e.target.value)} data-testid="input-event-title" />
+    <div className="fixed inset-0 z-40 flex flex-col" style={{ background: "#0d0618" }}>
+      {/* Native-style nav bar */}
+      <div
+        className="flex items-center justify-between px-4 flex-shrink-0"
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 48px)", paddingBottom: "12px", borderBottom: "1px solid rgba(201,168,76,0.12)" }}
+      >
+        <button
+          onClick={onBack}
+          data-testid="button-back-event-form"
+          className="flex items-center gap-1 text-sm font-medium"
+          style={{ color: "rgba(253,248,240,0.55)" }}
+        >
+          <ChevronLeft size={20} />
+          Events
+        </button>
+        <h1 className="font-serif text-lg text-gold absolute left-1/2 -translate-x-1/2">
+          {isEditing ? "Edit Event" : "New Event"}
+        </h1>
+        <button
+          onClick={() => isValid && onSubmit(form)}
+          disabled={!isValid || isPending}
+          data-testid="button-submit-event"
+          className="text-sm font-bold transition-all disabled:opacity-30"
+          style={{ color: isValid && !isPending ? "#c9a84c" : "rgba(201,168,76,0.3)" }}
+        >
+          {isPending ? "Saving…" : isEditing ? "Save" : "Create"}
+        </button>
+      </div>
+
+      {/* Scrollable form body */}
+      <div className="flex-1 overflow-y-auto px-4 pt-6" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 40px)" }}>
+
+        {/* Image preview */}
+        {form.imageUrl ? (
+          <div className="mb-4 rounded-2xl overflow-hidden" style={{ aspectRatio: "16/7" }}>
+            <img src={form.imageUrl} alt="" className="w-full h-full object-cover" />
           </div>
-          <div>
-            <label className={labelCls}>Description</label>
-            <textarea className={inputCls} style={{ ...inputStyle, resize: "none" }} rows={3} placeholder="What is this event about?" value={form.description} onChange={e => set("description", e.target.value)} data-testid="input-event-description" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelCls}>Type</label>
-              <select className={inputCls} style={inputStyle} value={form.type} onChange={e => set("type", e.target.value)} data-testid="select-event-type">
-                <option value="meetup">Meetup</option>
-                <option value="cultural">Cultural</option>
-                <option value="online">Online</option>
-              </select>
-            </div>
-            <div>
-              <label className={labelCls}>Date & Time</label>
-              <input type="datetime-local" className={inputCls} style={inputStyle} value={form.date} onChange={e => set("date", e.target.value)} data-testid="input-event-date" />
-            </div>
-          </div>
-          <div>
-            <label className={labelCls}>Location</label>
-            <input className={inputCls} style={inputStyle} placeholder="Address or link" value={form.location} onChange={e => set("location", e.target.value)} data-testid="input-event-location" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelCls}>Country</label>
-              <input className={inputCls} style={inputStyle} placeholder="e.g. Iraq" value={form.country} onChange={e => set("country", e.target.value)} data-testid="input-event-country" />
-            </div>
-            <div>
-              <label className={labelCls}>Organizer</label>
-              <input className={inputCls} style={inputStyle} placeholder="Your name or org" value={form.organizer} onChange={e => set("organizer", e.target.value)} data-testid="input-event-organizer" />
-            </div>
-          </div>
-          <div>
-            <label className={labelCls}>Image URL <span className="normal-case text-cream/30">(optional)</span></label>
-            <input className={inputCls} style={inputStyle} placeholder="https://..." value={form.imageUrl} onChange={e => set("imageUrl", e.target.value)} data-testid="input-event-image" />
-          </div>
-          <button
-            onClick={() => onSubmit(form)}
-            disabled={isPending || !form.title || !form.description || !form.date || !form.location || !form.country || !form.organizer}
-            data-testid="button-submit-event"
-            className="w-full py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
-            style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
+        ) : (
+          <div
+            className="mb-4 rounded-2xl flex flex-col items-center justify-center gap-2"
+            style={{ aspectRatio: "16/7", background: "rgba(255,255,255,0.03)", border: "1.5px dashed rgba(201,168,76,0.2)" }}
           >
-            {isPending ? "Saving…" : isEditing ? "Save Changes" : "Create Event"}
-          </button>
+            <Image size={22} color="rgba(201,168,76,0.3)" />
+            <p className="text-cream/25 text-xs">Add cover image URL below</p>
+          </div>
+        )}
+
+        {/* Event type selector */}
+        <p className={labelCls}>Event Type</p>
+        <div className="flex gap-2 mb-5">
+          {typeOptions.map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => set("type", opt.value)}
+              data-testid={`type-${opt.value}`}
+              className="flex-1 flex flex-col items-center py-3 rounded-2xl gap-1 transition-all"
+              style={form.type === opt.value
+                ? { background: `${opt.color}22`, border: `1.5px solid ${opt.color}66`, color: opt.color }
+                : { background: "rgba(255,255,255,0.04)", border: "1.5px solid rgba(255,255,255,0.08)", color: "rgba(253,248,240,0.3)" }
+              }
+            >
+              <span className="text-xl">{opt.emoji}</span>
+              <span className="text-[11px] font-semibold">{opt.label}</span>
+            </button>
+          ))}
         </div>
+
+        {/* Basic info */}
+        <p className={labelCls}>Basic Info</p>
+        <div className={sectionCls} style={sectionStyle}>
+          <div className={rowCls}>
+            <label className="text-cream/40 text-xs">Title</label>
+            <input
+              className={inputCls}
+              style={{ ...inputStyle, border: "none", background: "transparent", padding: "0" }}
+              placeholder="Give your event a name…"
+              value={form.title}
+              onChange={e => set("title", e.target.value)}
+              data-testid="input-event-title"
+            />
+          </div>
+          <div style={dividerStyle} />
+          <div className={rowCls}>
+            <label className="text-cream/40 text-xs">Description</label>
+            <textarea
+              className={inputCls}
+              style={{ ...inputStyle, border: "none", background: "transparent", padding: "0", resize: "none" }}
+              placeholder="What is this event about?"
+              rows={4}
+              value={form.description}
+              onChange={e => set("description", e.target.value)}
+              data-testid="input-event-description"
+            />
+          </div>
+        </div>
+
+        {/* Date & Location */}
+        <p className={labelCls}>When & Where</p>
+        <div className={sectionCls} style={sectionStyle}>
+          <div className={rowCls}>
+            <label className="text-cream/40 text-xs">Date & Time</label>
+            <input
+              type="datetime-local"
+              className={inputCls}
+              style={{ ...inputStyle, border: "none", background: "transparent", padding: "0" }}
+              value={form.date}
+              onChange={e => set("date", e.target.value)}
+              data-testid="input-event-date"
+            />
+          </div>
+          <div style={dividerStyle} />
+          <div className={rowCls}>
+            <label className="text-cream/40 text-xs">Location / Link</label>
+            <input
+              className={inputCls}
+              style={{ ...inputStyle, border: "none", background: "transparent", padding: "0" }}
+              placeholder="Address or online link…"
+              value={form.location}
+              onChange={e => set("location", e.target.value)}
+              data-testid="input-event-location"
+            />
+          </div>
+          <div style={dividerStyle} />
+          <div className={rowCls}>
+            <label className="text-cream/40 text-xs">Country</label>
+            <input
+              className={inputCls}
+              style={{ ...inputStyle, border: "none", background: "transparent", padding: "0" }}
+              placeholder="e.g. Iraq, Germany…"
+              value={form.country}
+              onChange={e => set("country", e.target.value)}
+              data-testid="input-event-country"
+            />
+          </div>
+        </div>
+
+        {/* Organizer */}
+        <p className={labelCls}>Organizer</p>
+        <div className={sectionCls} style={sectionStyle}>
+          <div className={rowCls}>
+            <label className="text-cream/40 text-xs">Name or Organization</label>
+            <input
+              className={inputCls}
+              style={{ ...inputStyle, border: "none", background: "transparent", padding: "0" }}
+              placeholder="Your name or org"
+              value={form.organizer}
+              onChange={e => set("organizer", e.target.value)}
+              data-testid="input-event-organizer"
+            />
+          </div>
+        </div>
+
+        {/* Cover image */}
+        <p className={labelCls}>Cover Image <span className="normal-case text-cream/25 tracking-normal font-normal">· optional</span></p>
+        <div className={sectionCls} style={sectionStyle}>
+          <div className={rowCls}>
+            <label className="text-cream/40 text-xs">Image URL</label>
+            <input
+              className={inputCls}
+              style={{ ...inputStyle, border: "none", background: "transparent", padding: "0" }}
+              placeholder="https://…"
+              value={form.imageUrl}
+              onChange={e => set("imageUrl", e.target.value)}
+              data-testid="input-event-image"
+            />
+          </div>
+        </div>
+
+        {/* Bottom create button (secondary, for users who scroll to bottom) */}
+        <button
+          onClick={() => isValid && onSubmit(form)}
+          disabled={!isValid || isPending}
+          data-testid="button-submit-event-bottom"
+          className="w-full py-4 rounded-2xl font-bold text-sm transition-all disabled:opacity-40"
+          style={{ background: isValid ? "linear-gradient(135deg, #7b3fa0, #d4608a)" : "rgba(255,255,255,0.06)", color: "white" }}
+        >
+          {isPending ? "Saving…" : isEditing ? "Save Changes" : "Create Event"}
+        </button>
       </div>
     </div>
   );
 }
 
-function EventCard({ event, onAttend, onOpen, onEdit, onDelete, isPending }: {
+// ─── Event card ────────────────────────────────────────────────────────────
+
+function EventCard({ event, user, onAttend, onOpen, onEdit, onDelete, isPending }: {
   event: EventWithAttendance;
+  user: SafeUser;
   onAttend: () => void;
   onOpen: () => void;
   onEdit: () => void;
@@ -291,6 +429,8 @@ function EventCard({ event, onAttend, onOpen, onEdit, onDelete, isPending }: {
     try { return format(new Date(event.date), "EEE, MMM d · HH:mm"); } catch { return ""; }
   })();
 
+  const canManage = user.isAdmin || event.isCreator;
+
   return (
     <div
       className="rounded-2xl overflow-hidden"
@@ -306,32 +446,27 @@ function EventCard({ event, onAttend, onOpen, onEdit, onDelete, isPending }: {
           )}
           <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.8) 0%, transparent 60%)" }} />
           <div className="absolute top-3 left-3">
-            <span className="px-2.5 py-1 rounded-full text-[11px] font-bold capitalize"
-              style={{ background: typeStyle.bg, color: typeStyle.text, border: `1px solid ${typeStyle.border}` }}>
+            <span
+              className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
+              style={{ background: typeStyle.bg, color: typeStyle.text, border: `1px solid ${typeStyle.border}` }}
+            >
               {event.type}
             </span>
           </div>
           <div className="absolute bottom-3 right-3 flex items-center gap-1">
-            <Users size={12} color="rgba(253,248,240,0.6)" />
-            <span className="text-white/60 text-xs">{event.attendeeCount}</span>
+            <Users size={11} color="rgba(253,248,240,0.6)" />
+            <span className="text-[11px] text-cream/60 font-medium">{event.attendeeCount ?? 0}</span>
           </div>
-          {event.isCreator && (
-            <div className="absolute top-3 right-3">
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(201,168,76,0.25)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.4)" }}>
-                Your event
-              </span>
-            </div>
-          )}
         </div>
         <div className="p-4 pb-3">
           <h3 className="font-serif text-base text-cream font-semibold leading-snug mb-2">{event.title}</h3>
           <div className="flex items-center gap-1.5 mb-1">
-            <CalendarDays size={12} color="rgba(201,168,76,0.7)" />
-            <span className="text-xs text-cream/50">{dateLabel}</span>
+            <CalendarDays size={11} color="rgba(201,168,76,0.7)" />
+            <span className="text-cream/50 text-xs">{dateLabel}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <MapPin size={12} color="rgba(201,168,76,0.7)" />
-            <span className="text-xs text-cream/50">{event.location}</span>
+            <MapPin size={11} color="rgba(201,168,76,0.7)" />
+            <span className="text-cream/50 text-xs truncate">{event.location} · {event.country}</span>
           </div>
         </div>
       </button>
@@ -341,66 +476,54 @@ function EventCard({ event, onAttend, onOpen, onEdit, onDelete, isPending }: {
           onClick={onAttend}
           disabled={isPending}
           data-testid={`button-attend-${event.id}`}
-          className="flex-1 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-60"
+          className="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
           style={event.isAttending
-            ? { background: "rgba(201,168,76,0.15)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.3)" }
+            ? { background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.3)" }
             : { background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white" }
           }
         >
-          {event.isAttending ? t("events.attending") : t("events.rsvp")}
+          {event.isAttending ? `✓ ${t("events.attending")}` : t("events.attend")}
         </button>
         <button
           onClick={onOpen}
-          data-testid={`button-details-${event.id}`}
-          className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs text-cream/50"
-          style={{ border: "1px solid rgba(255,255,255,0.1)" }}
+          data-testid={`button-open-${event.id}`}
+          className="p-2.5 rounded-xl transition-all"
+          style={{ background: "rgba(255,255,255,0.05)", color: "rgba(253,248,240,0.4)" }}
         >
-          {t("events.details")}
-          <ChevronRight size={13} />
+          <ChevronRight size={16} />
         </button>
-        {event.isCreator && (
+        {canManage && (
           <>
             <button
               onClick={onEdit}
               data-testid={`button-edit-${event.id}`}
-              className="p-2 rounded-xl text-cream/50 hover:text-gold transition-all"
-              style={{ border: "1px solid rgba(255,255,255,0.1)" }}
+              className="p-2.5 rounded-xl transition-all"
+              style={{ background: "rgba(255,255,255,0.05)", color: "rgba(201,168,76,0.5)" }}
             >
-              <Edit2 size={13} />
+              <Edit2 size={14} />
             </button>
-            <button
-              onClick={() => setConfirmDelete(true)}
-              data-testid={`button-delete-${event.id}`}
-              className="p-2 rounded-xl transition-all"
-              style={{ border: "1px solid rgba(239,68,68,0.2)", color: "rgba(239,68,68,0.6)" }}
-            >
-              <Trash2 size={13} />
-            </button>
+            {confirmDelete ? (
+              <button
+                onClick={() => { onDelete(); setConfirmDelete(false); }}
+                data-testid={`button-confirm-delete-${event.id}`}
+                className="px-3 py-2 rounded-xl text-xs font-bold"
+                style={{ background: "rgba(239,68,68,0.2)", color: "#ef4444" }}
+              >
+                Delete?
+              </button>
+            ) : (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                data-testid={`button-delete-${event.id}`}
+                className="p-2.5 rounded-xl transition-all"
+                style={{ background: "rgba(255,255,255,0.05)", color: "rgba(239,68,68,0.4)" }}
+              >
+                <Trash2 size={14} />
+              </button>
+            )}
           </>
         )}
       </div>
-
-      {confirmDelete && (
-        <div className="fixed inset-0 flex items-end justify-center z-50 pb-8 px-4" style={{ background: "rgba(0,0,0,0.7)" }}>
-          <div className="w-full max-w-sm rounded-2xl p-6 space-y-4" style={{ background: "#1a0a2e", border: "1px solid rgba(239,68,68,0.3)" }}>
-            <h3 className="font-serif text-lg text-cream">Delete event?</h3>
-            <p className="text-cream/50 text-sm">This will permanently delete <span className="text-cream/70 font-semibold">"{event.title}"</span> and remove all RSVPs.</p>
-            <div className="flex gap-2">
-              <button onClick={() => setConfirmDelete(false)}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
-                style={{ background: "rgba(255,255,255,0.07)", color: "rgba(253,248,240,0.6)" }}>
-                Cancel
-              </button>
-              <button onClick={() => { onDelete(); setConfirmDelete(false); }}
-                data-testid={`button-confirm-delete-${event.id}`}
-                className="flex-1 py-2.5 rounded-xl text-sm font-bold"
-                style={{ background: "rgba(239,68,68,0.2)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }}>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
