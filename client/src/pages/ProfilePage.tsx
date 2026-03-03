@@ -215,6 +215,9 @@ export default function ProfilePage({ user }: Props) {
     (user.photos ?? []).forEach((p, i) => { arr[i] = p; });
     return arr;
   });
+  const [localPendingPhotos, setLocalPendingPhotos] = useState<string[]>(
+    (user as any).pendingPhotos ?? []
+  );
   const [photosEdited, setPhotosEdited] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [cropTarget, setCropTarget] = useState<{ imgSrc: string; slotIdx: number } | null>(null);
@@ -238,12 +241,23 @@ export default function ProfilePage({ user }: Props) {
       const arr: (string | null)[] = Array(6).fill(null);
       ((data.user as SafeUser).photos ?? []).forEach((p: string, i: number) => { arr[i] = p; });
       setLocalPhotos(arr);
+      setLocalPendingPhotos((data.user as any).pendingPhotos ?? []);
       setPhotosEdited(false);
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       toast({ title: t("profile.photosUpdated") });
     },
     onError: (err: Error) => {
-      setPhotoError(err.message || t("profile.couldNotSavePhotos"));
+      try {
+        const jsonStart = err.message.indexOf("{");
+        if (jsonStart !== -1) {
+          const parsed = JSON.parse(err.message.slice(jsonStart));
+          setPhotoError(parsed.error || t("profile.couldNotSavePhotos"));
+        } else {
+          setPhotoError(err.message || t("profile.couldNotSavePhotos"));
+        }
+      } catch {
+        setPhotoError(err.message || t("profile.couldNotSavePhotos"));
+      }
     },
   });
 
@@ -532,6 +546,34 @@ export default function ProfilePage({ user }: Props) {
           })}
         </div>
         <p className="text-xs mt-2" style={{ color: "rgba(253,248,240,0.2)" }}>{t("profile.photoInstruction")}</p>
+
+        {localPendingPhotos.length > 0 && (
+          <div className="mt-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Clock size={12} color="rgba(201,168,76,0.6)" />
+              <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(201,168,76,0.6)" }}>
+                Pending Admin Review
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {localPendingPhotos.map((photo, idx) => (
+                <div key={idx} className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
+                  <img src={photo} alt={`Pending ${idx + 1}`} className="w-full h-full object-cover" style={{ filter: "brightness(0.6)" }} />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="px-2 py-1 rounded-full text-center" style={{ background: "rgba(201,168,76,0.85)" }}>
+                      <Clock size={10} color="#1a0a2e" />
+                      <p className="text-[9px] font-bold mt-0.5" style={{ color: "#1a0a2e" }}>Pending</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs mt-1.5" style={{ color: "rgba(201,168,76,0.4)" }}>
+              These photos are under review and will be visible after admin approval.
+            </p>
+          </div>
+        )}
+
         <input
           ref={fileInputRef}
           type="file"

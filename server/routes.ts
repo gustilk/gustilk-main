@@ -6,7 +6,7 @@ import { profileUpdateSchema, users, matches, messages, events, eventAttendees, 
 import { verifyCountryFromRequest, verifyIraqFromRequest, getClientIp, lookupIpCountry } from "./geo";
 import { setupWs } from "./ws";
 import { z } from "zod";
-import { moderatePhotos, checkFacePresent } from "./moderation";
+import { checkFacePresent } from "./moderation";
 import { db } from "./db";
 import { count, sql, eq, asc, desc, or, and, ilike } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
@@ -139,38 +139,30 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         }
       }
 
-      // Enforce max 6 photos at all times
+      // Separate submitted photos into approved (already in DB) and new uploads
       const allPhotos: string[] = (parsed as any).photos ?? [];
-      if (allPhotos.length > 6) {
-        return res.status(400).json({ error: "You can upload a maximum of 6 photos." });
+      const existingApproved: string[] = user?.photos ?? [];
+      const existingPending: string[] = user?.pendingPhotos ?? [];
+
+      // Approved photos the user is keeping
+      const keepApproved = allPhotos.filter(p => existingApproved.includes(p));
+      // New base64 uploads go to pending
+      const newUploads = allPhotos.filter(p => p.startsWith("data:image"));
+      // Pending photos: existing pending the user still has + new uploads
+      const updatedPending = [...existingPending, ...newUploads];
+
+      if (keepApproved.length + updatedPending.length > 6) {
+        return res.status(400).json({ error: "You can have a maximum of 6 photos." });
       }
 
-      // Moderate only newly uploaded photos (base64 data URLs, not already-stored ones)
-      const existingPhotos: string[] = user?.photos ?? [];
-      const newPhotos = allPhotos.filter(p => p.startsWith("data:image") && !existingPhotos.includes(p));
-      console.log(`[routes] profile update: ${allPhotos.length} total photos, ${newPhotos.length} new to scan`);
-      if (newPhotos.length > 0) {
-        for (const newPhoto of newPhotos) {
-          const photoCheck = await moderatePhotos([newPhoto]);
-          const photoNumber = allPhotos.indexOf(newPhoto) + 1;
-          console.log(`[routes] moderation result photo ${photoNumber}: safe=${photoCheck.safe}, reason=${photoCheck.reason ?? "none"}`);
-          if (!photoCheck.safe) {
-            return res.status(400).json({ error: `Photo ${photoNumber} contains inappropriate or explicit content. Please remove it and upload a different photo.` });
-          }
-        }
-      }
-
-      // Moderate verification selfie if newly submitted
-      const selfie: string | undefined = (parsed as any).verificationSelfie;
-      if (selfie && selfie.startsWith("data:image") && selfie !== user?.verificationSelfie) {
-        const selfieCheck = await moderatePhotos([selfie]);
-        if (!selfieCheck.safe) {
-          return res.status(400).json({ error: "The verification photo contains inappropriate content." });
-        }
-      }
+      console.log(`[routes] profile update: ${keepApproved.length} approved kept, ${newUploads.length} new pending`);
 
       const data = user?.country ? rest : parsed;
-      const updated = await storage.updateUser(userId, data as any);
+      const updated = await storage.updateUser(userId, {
+        ...(data as any),
+        photos: keepApproved,
+        pendingPhotos: updatedPending,
+      });
       res.json({ user: updated });
     } catch (err: any) {
       if (err?.name === "ZodError") return res.status(400).json({ error: err.errors[0].message });
@@ -452,6 +444,23 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.delete("/api/admin/users/:id", isAuthenticated, requireAdmin, async (req, res) => {
     await storage.deleteUser(req.params.id as string);
+    res.json({ ok: true });
+  });
+
+  app.get("/api/admin/pending-photos", isAuthenticated, requireAdmin, async (_req, res) => {
+    const usersWithPending = await storage.getUsersWithPendingPhotos();
+    res.json({ users: usersWithPending });
+  });
+
+  app.post("/api/admin/photos/:userId/approve/:photoIndex", isAuthenticated, requireAdmin, async (req, res) => {
+    const { userId, photoIndex } = req.params;
+    await storage.approvePendingPhoto(userId, parseInt(photoIndex));
+    res.json({ ok: true });
+  });
+
+  app.post("/api/admin/photos/:userId/reject/:photoIndex", isAuthenticated, requireAdmin, async (req, res) => {
+    const { userId, photoIndex } = req.params;
+    await storage.rejectPendingPhoto(userId, parseInt(photoIndex));
     res.json({ ok: true });
   });
 

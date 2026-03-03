@@ -30,6 +30,10 @@ export interface IStorage {
   updateVerificationStatus(userId: string, status: "approved" | "rejected" | "banned", isVerified?: boolean): Promise<void>;
   banUser(userId: string): Promise<void>;
 
+  getUsersWithPendingPhotos(): Promise<SafeUser[]>;
+  approvePendingPhoto(userId: string, photoIndex: number): Promise<void>;
+  rejectPendingPhoto(userId: string, photoIndex: number): Promise<void>;
+
   createReport(reporterId: string, reportedUserId: string, reason: string, description: string): Promise<Report>;
   listReports(): Promise<Report[]>;
   resolveReport(reportId: string): Promise<void>;
@@ -209,6 +213,31 @@ export class DatabaseStorage implements IStorage {
 
   async resolveReport(reportId: string): Promise<void> {
     await db.update(reports).set({ status: "resolved" }).where(eq(reports.id, reportId));
+  }
+
+  async getUsersWithPendingPhotos(): Promise<SafeUser[]> {
+    const allUsers = await db.select().from(users);
+    return allUsers.filter(u => u.pendingPhotos && u.pendingPhotos.length > 0);
+  }
+
+  async approvePendingPhoto(userId: string, photoIndex: number): Promise<void> {
+    const user = await this.getUserById(userId);
+    if (!user) return;
+    const pending = user.pendingPhotos ?? [];
+    if (photoIndex < 0 || photoIndex >= pending.length) return;
+    const photo = pending[photoIndex];
+    const newPending = pending.filter((_, i) => i !== photoIndex);
+    const newPhotos = [...(user.photos ?? []), photo];
+    await db.update(users).set({ pendingPhotos: newPending, photos: newPhotos, updatedAt: new Date() }).where(eq(users.id, userId));
+  }
+
+  async rejectPendingPhoto(userId: string, photoIndex: number): Promise<void> {
+    const user = await this.getUserById(userId);
+    if (!user) return;
+    const pending = user.pendingPhotos ?? [];
+    if (photoIndex < 0 || photoIndex >= pending.length) return;
+    const newPending = pending.filter((_, i) => i !== photoIndex);
+    await db.update(users).set({ pendingPhotos: newPending, updatedAt: new Date() }).where(eq(users.id, userId));
   }
 }
 

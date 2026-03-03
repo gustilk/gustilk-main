@@ -5,14 +5,14 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
   ArrowLeft, CheckCircle, XCircle, Ban, Shield, Flag, Users, BarChart2,
   Calendar, Search, Star, Trash2, ChevronRight, Plus, Edit2, X, Crown,
-  UserCheck, MessageSquare, Heart, TrendingUp, AlertTriangle,
+  UserCheck, MessageSquare, Heart, TrendingUp, AlertTriangle, Camera, Image,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import type { SafeUser, Report, Event } from "@shared/schema";
 
 interface Props { user: SafeUser }
-type AdminTab = "overview" | "users" | "verifications" | "reports" | "events";
+type AdminTab = "overview" | "users" | "verifications" | "photos" | "reports" | "events";
 
 interface Stats {
   totalUsers: number; premiumUsers: number; verifiedUsers: number;
@@ -50,6 +50,23 @@ export default function AdminPage({ user }: Props) {
     queryKey: ["/api/admin/events"],
     queryFn: async () => (await fetch("/api/admin/events", { credentials: "include" })).json(),
     enabled: activeTab === "events",
+  });
+
+  const { data: pendingPhotosData, isLoading: pendingPhotosLoading } = useQuery<{ users: SafeUser[] }>({
+    queryKey: ["/api/admin/pending-photos"],
+    queryFn: async () => (await fetch("/api/admin/pending-photos", { credentials: "include" })).json(),
+    enabled: activeTab === "photos",
+  });
+
+  const photoActionMutation = useMutation({
+    mutationFn: async ({ userId, photoIndex, action }: { userId: string; photoIndex: number; action: "approve" | "reject" }) => {
+      const res = await apiRequest("POST", `/api/admin/photos/${userId}/${action}/${photoIndex}`);
+      return res.json();
+    },
+    onSuccess: (_, { action }) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-photos"] });
+      toast({ title: action === "approve" ? "Photo approved" : "Photo rejected" });
+    },
   });
 
   const verifyMutation = useMutation({
@@ -137,10 +154,13 @@ export default function AdminPage({ user }: Props) {
   const pending = verifyData?.users ?? [];
   const reports = (reportsData?.reports ?? []).filter(r => r.status === "pending");
 
+  const pendingPhotoCount = (pendingPhotosData?.users ?? []).reduce((sum, u) => sum + (u.pendingPhotos?.length ?? 0), 0);
+
   const TABS: { id: AdminTab; label: string; Icon: any; badge?: number }[] = [
     { id: "overview", label: "Overview", Icon: BarChart2 },
     { id: "users", label: "Users", Icon: Users },
     { id: "verifications", label: "Verify", Icon: Shield, badge: pending.length },
+    { id: "photos", label: "Photos", Icon: Camera, badge: pendingPhotoCount > 0 ? pendingPhotoCount : undefined },
     { id: "reports", label: "Reports", Icon: Flag, badge: reports.length },
     { id: "events", label: "Events", Icon: Calendar },
   ];
@@ -200,6 +220,14 @@ export default function AdminPage({ user }: Props) {
             isLoading={verifyLoading}
             onAction={(userId, action) => verifyMutation.mutate({ userId, action })}
             isPending={verifyMutation.isPending}
+          />
+        )}
+        {activeTab === "photos" && (
+          <PhotosTab
+            users={pendingPhotosData?.users ?? []}
+            isLoading={pendingPhotosLoading}
+            onAction={(userId, photoIndex, action) => photoActionMutation.mutate({ userId, photoIndex, action })}
+            isPending={photoActionMutation.isPending}
           />
         )}
         {activeTab === "reports" && (
@@ -418,6 +446,71 @@ function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBa
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function PhotosTab({ users, isLoading, onAction, isPending }: {
+  users: SafeUser[]; isLoading: boolean;
+  onAction: (userId: string, photoIndex: number, action: "approve" | "reject") => void;
+  isPending: boolean;
+}) {
+  if (isLoading) return <Spinner />;
+  if (users.length === 0) return (
+    <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
+      <Image size={48} color="rgba(16,185,129,0.5)" />
+      <h3 className="font-serif text-xl text-gold">All caught up!</h3>
+      <p className="text-cream/40 text-sm">No photos pending review.</p>
+    </div>
+  );
+  return (
+    <div className="space-y-4 pt-1">
+      <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold px-1">
+        Pending Photos · {users.reduce((sum, u) => sum + (u.pendingPhotos?.length ?? 0), 0)} total
+      </p>
+      {users.map(u => (
+        <div key={u.id} className="rounded-2xl p-4 space-y-3"
+          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center font-serif font-bold text-gold flex-shrink-0"
+              style={{ background: "linear-gradient(135deg,#2d0f4a,#7b3fa0)", border: "2px solid rgba(201,168,76,0.25)" }}>
+              {u.photos && u.photos.length > 0
+                ? <img src={u.photos[0]} alt={u.fullName ?? ""} className="w-full h-full object-cover" />
+                : (u.fullName ?? u.firstName ?? "?").charAt(0)}
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-cream">{u.fullName ?? u.firstName ?? "—"}</p>
+              <p className="text-cream/35 text-xs">{u.email} · {u.city}, {u.country}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {(u.pendingPhotos ?? []).map((photo, idx) => (
+              <div key={idx} className="rounded-xl overflow-hidden" style={{ aspectRatio: "1/1", position: "relative" }}
+                data-testid={`pending-photo-${u.id}-${idx}`}>
+                <img src={photo} alt={`Pending photo ${idx + 1}`} className="w-full h-full object-cover" />
+                <div className="absolute bottom-0 left-0 right-0 flex gap-1 p-1.5" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85), transparent)" }}>
+                  <button
+                    onClick={() => onAction(u.id, idx, "approve")}
+                    disabled={isPending}
+                    data-testid={`button-approve-photo-${u.id}-${idx}`}
+                    className="flex-1 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50"
+                    style={{ background: "rgba(16,185,129,0.85)", color: "white" }}>
+                    <CheckCircle size={11} /> Approve
+                  </button>
+                  <button
+                    onClick={() => onAction(u.id, idx, "reject")}
+                    disabled={isPending}
+                    data-testid={`button-reject-photo-${u.id}-${idx}`}
+                    className="flex-1 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50"
+                    style={{ background: "rgba(239,68,68,0.85)", color: "white" }}>
+                    <XCircle size={11} /> Reject
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
