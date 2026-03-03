@@ -5,7 +5,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
   ArrowLeft, CheckCircle, XCircle, Ban, Shield, Flag, Users, BarChart2,
   Calendar, Search, Star, Trash2, ChevronRight, Plus, Edit2, X, Crown,
-  UserCheck, MessageSquare, Heart, TrendingUp, AlertTriangle, Camera, Image,
+  UserCheck, MessageSquare, Heart, TrendingUp, AlertTriangle, Camera, Image, Eye,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -490,6 +490,7 @@ function VerificationsTab({ pending, isLoading, onAction, onPhotoAction, isPendi
   onPhotoAction: (userId: string, slotIdx: number, action: "approve" | "reject", reason?: string) => void;
   isPending: boolean;
 }) {
+  const [, setLocation] = useLocation();
   if (isLoading) return <Spinner />;
   if (pending.length === 0) return (
     <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
@@ -506,6 +507,7 @@ function VerificationsTab({ pending, isLoading, onAction, onPhotoAction, isPendi
           onReject={(reason) => onAction(u.id, "reject", reason)}
           onBan={(reason) => onAction(u.id, "ban", reason)}
           onPhotoAction={(slotIdx, action, reason) => onPhotoAction(u.id, slotIdx, action, reason)}
+          onViewProfile={() => setLocation(`/profile/${u.id}`)}
           isPending={isPending}
         />
       ))}
@@ -777,12 +779,13 @@ function ReportCard({ report, onResolve, isPending, resolved }: {
   );
 }
 
-function VerificationCard({ user, onApprove, onReject, onBan, onPhotoAction, isPending }: {
+function VerificationCard({ user, onApprove, onReject, onBan, onPhotoAction, onViewProfile, isPending }: {
   user: SafeUser;
   onApprove: () => void;
   onReject: (reason: string) => void;
   onBan: (reason: string) => void;
   onPhotoAction: (slotIdx: number, action: "approve" | "reject", reason?: string) => void;
+  onViewProfile: () => void;
   isPending: boolean;
 }) {
   const [rejectionReason, setRejectionReason] = useState("");
@@ -812,6 +815,11 @@ function VerificationCard({ user, onApprove, onReject, onBan, onPhotoAction, isP
           {user.occupation && <p className="text-cream/30 text-xs">{user.occupation}</p>}
           <p className="text-cream/25 text-xs mt-0.5">Registered {timeLabel}</p>
         </div>
+        <button onClick={onViewProfile} data-testid={`button-view-profile-${user.id}`}
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold flex-shrink-0"
+          style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}>
+          <Eye size={11} /> Profile
+        </button>
       </div>
 
       {/* Bio */}
