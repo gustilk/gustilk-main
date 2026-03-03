@@ -78,6 +78,42 @@ export default function EditProfilePage({ user }: Props) {
         </button>
       </div>
 
+      {/* Profile Completeness Bar */}
+      {(() => {
+        const checks = [
+          { label: "Name",       done: !!form.fullName.trim(),         pts: 15 },
+          { label: "Photo",      done: (user.photos ?? []).length > 0,  pts: 25 },
+          { label: "Bio",        done: !!form.bio.trim(),               pts: 15 },
+          { label: "Caste",      done: !!user.caste,                    pts: 10 },
+          { label: "City",       done: !!form.city.trim(),              pts: 10 },
+          { label: "Age",        done: Number(form.age) > 0,            pts: 5  },
+          { label: "Occupation", done: !!form.occupation.trim(),        pts: 10 },
+          { label: "Languages",  done: form.languages.length > 0,       pts: 10 },
+        ];
+        const pct = checks.reduce((s, c) => s + (c.done ? c.pts : 0), 0);
+        const missing = checks.filter(c => !c.done);
+        const color = pct < 40 ? "#d4608a" : pct < 75 ? "#c9a84c" : "#34d399";
+        return (
+          <div className="px-5 pt-4 pb-1" data-testid="profile-completeness">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs text-cream/50 font-medium">Profile completeness</span>
+              <span className="text-xs font-bold" style={{ color }}>{pct}%</span>
+            </div>
+            <div className="h-2 w-full rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${color}, ${color}cc)` }}
+              />
+            </div>
+            {missing.length > 0 && pct < 100 && (
+              <p className="text-[11px] text-cream/30 mt-1.5">
+                Add: {missing.map(c => c.label).join(", ")}
+              </p>
+            )}
+          </div>
+        );
+      })()}
+
       {saveError && (
         <div className="px-5 pt-3">
           <p className="text-xs font-medium text-center py-2 px-4 rounded-xl" style={{ color: "#d4608a", background: "rgba(212,96,138,0.1)", border: "1px solid rgba(212,96,138,0.25)" }}>{saveError}</p>

@@ -3,9 +3,16 @@ import { useLocation } from "wouter";
 import { Lock, Star, MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
-
 import type { SafeUser, MatchWithUser } from "@shared/schema";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
+
+function getActiveLabel(ts: Date | string | null | undefined): string | null {
+  if (!ts) return null;
+  const hours = (Date.now() - new Date(ts).getTime()) / 3_600_000;
+  if (hours < 24) return "Active today";
+  if (hours < 72) return "Active recently";
+  return null;
+}
 
 interface Props { user: SafeUser }
 
@@ -158,6 +165,10 @@ function NewMatchBubble({ match, isPremium, onClick }: {
             <Lock size={18} color="#c9a84c" />
           </div>
         )}
+        {isPremium && getActiveLabel(other.activitySeenAt) && (
+          <span className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 bg-emerald-400"
+            style={{ borderColor: "#0d0618", boxShadow: "0 0 5px #34d399" }} />
+        )}
       </div>
       <span className="text-[11px] text-cream/60 font-medium max-w-[60px] truncate">
         {isPremium ? (other.firstName ?? other.fullName?.split(" ")[0] ?? "Member") : "???"}
@@ -217,15 +228,24 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
             {(match.unreadCount || 0) > 9 ? "9+" : match.unreadCount}
           </span>
         )}
+        {isPremium && !hasUnread && getActiveLabel(other.activitySeenAt) && (
+          <span className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 bg-emerald-400"
+            style={{ borderColor: "#0d0618", boxShadow: "0 0 5px #34d399" }} />
+        )}
       </div>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-0.5">
-          <span className="font-semibold text-sm truncate"
-            style={{ color: isPremium ? "rgba(253,248,240,1)" : "rgba(253,248,240,0.25)" }}
-            data-testid={`text-match-name-${match.id}`}>
-            {isPremium ? (other.firstName ?? other.fullName?.split(" ")[0] ?? "Member") : t("matches.lockedName")}
-          </span>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="font-semibold text-sm truncate"
+              style={{ color: isPremium ? "rgba(253,248,240,1)" : "rgba(253,248,240,0.25)" }}
+              data-testid={`text-match-name-${match.id}`}>
+              {isPremium ? (other.firstName ?? other.fullName?.split(" ")[0] ?? "Member") : t("matches.lockedName")}
+            </span>
+            {isPremium && getActiveLabel(other.activitySeenAt) && (
+              <span className="text-[10px] text-emerald-400 flex-shrink-0 font-medium">● {getActiveLabel(other.activitySeenAt)}</span>
+            )}
+          </div>
           {isPremium && (
             <span className="text-cream/30 text-xs flex-shrink-0">{timeLabel}</span>
           )}

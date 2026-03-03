@@ -3,11 +3,18 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { SlidersHorizontal, X, Heart, RefreshCw, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
-
 import MatchModal from "@/components/MatchModal";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
 import { Slider } from "@/components/ui/slider";
 import type { SafeUser } from "@shared/schema";
+
+function getActiveLabel(ts: Date | string | null | undefined): string | null {
+  if (!ts) return null;
+  const hours = (Date.now() - new Date(ts).getTime()) / 3_600_000;
+  if (hours < 24) return "Active today";
+  if (hours < 72) return "Active recently";
+  return null;
+}
 
 interface Props { user: SafeUser }
 
@@ -214,6 +221,12 @@ export default function DiscoverPage({ user }: Props) {
                     <MapPin size={13} color="rgba(201,168,76,0.8)" />
                     <p className="text-white/60 text-sm">{current.city}{current.state ? `, ${current.state}` : ""}, {current.country}</p>
                   </div>
+                  {getActiveLabel(current.activitySeenAt) && (
+                    <div className="flex items-center gap-1.5 mt-1.5" data-testid={`status-active-${current.id}`}>
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" style={{ boxShadow: "0 0 6px #34d399" }} />
+                      <span className="text-emerald-400 text-xs font-medium">{getActiveLabel(current.activitySeenAt)}</span>
+                    </div>
+                  )}
                   {current.bio && (
                     <p className="text-white/50 text-xs mt-2 line-clamp-2 leading-relaxed">{current.bio}</p>
                   )}

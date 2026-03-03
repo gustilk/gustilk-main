@@ -231,11 +231,40 @@ export default function ChatPage({ user, matchId }: Props) {
             <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
           </div>
         ) : timeline.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-center gap-3 py-12">
+          <div className="flex-1 flex flex-col items-center justify-center text-center gap-4 py-12 px-4">
             <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ border: "2px solid rgba(201,168,76,0.3)" }}>
               <span className="text-2xl text-gold font-serif">✦</span>
             </div>
-            <p className="text-cream/40 text-sm">You matched! Say hello to <strong className="text-gold">{otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0]}</strong></p>
+            <div>
+              <p className="text-cream/60 text-sm font-medium mb-1">
+                You matched with <strong className="text-gold">{otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0]}</strong>!
+              </p>
+              <p className="text-cream/30 text-xs">Break the ice — tap a message to send</p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-2 max-w-xs">
+              {[
+                "Hi! Nice to meet you 👋",
+                "Slaw! How are you? 🌙",
+                "Your profile caught my eye ✨",
+                "Tell me about yourself?",
+                "What's your favourite tradition?",
+              ].map((msg) => (
+                <button
+                  key={msg}
+                  data-testid={`icebreaker-${msg.slice(0, 10).replace(/\s/g, "-").toLowerCase()}`}
+                  onClick={() => sendMutation.mutate(msg)}
+                  disabled={sendMutation.isPending}
+                  className="px-3 py-2 rounded-full text-xs font-medium transition-all disabled:opacity-50"
+                  style={{
+                    background: "rgba(201,168,76,0.1)",
+                    border: "1px solid rgba(201,168,76,0.3)",
+                    color: "rgba(253,248,240,0.75)",
+                  }}
+                >
+                  {msg}
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
           timeline.map(item =>
