@@ -339,21 +339,45 @@ function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
   const timeLabel = formatDistanceToNow(new Date(gift.createdAt!), { addSuffix: true });
   return (
     <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-      <div
-        className="flex flex-col items-center gap-2 px-5 py-4 rounded-3xl max-w-[200px]"
-        style={{
-          background: `linear-gradient(135deg, ${g.color}22, ${g.color}11)`,
-          border: `1.5px solid ${g.color}44`,
-        }}
-        data-testid={`gift-bubble-${gift.id}`}
-      >
-        <span className="text-5xl leading-none" role="img" aria-label={g.name}>{g.emoji}</span>
-        <div className="text-center">
-          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: g.color }}>{g.name}</p>
+      <div className="flex flex-col items-center gap-2 max-w-[190px]" data-testid={`gift-bubble-${gift.id}`}>
+        {/* 3-D gem card */}
+        <div
+          className="relative flex flex-col items-center gap-2 px-6 py-5 rounded-3xl w-full overflow-hidden"
+          style={{
+            background: `radial-gradient(ellipse at 30% 20%, ${g.color}55 0%, ${g.color}22 45%, #0d0618cc 100%)`,
+            border: `1.5px solid ${g.color}66`,
+            boxShadow: `0 8px 32px ${g.color}33, 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.35)`,
+          }}
+        >
+          {/* Gloss sheen layer */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: "linear-gradient(160deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 40%, transparent 60%)",
+              borderRadius: "inherit",
+            }}
+          />
+          {/* Emoji — drop-shadow for 3D pop */}
+          <span
+            className="text-6xl leading-none relative z-10"
+            role="img"
+            aria-label={g.name}
+            style={{ filter: `drop-shadow(0 4px 12px ${g.color}88) drop-shadow(0 2px 4px rgba(0,0,0,0.6))` }}
+          >
+            {g.emoji}
+          </span>
+          {/* Label */}
+          <p className="text-xs font-black uppercase tracking-widest relative z-10"
+            style={{ color: g.color, textShadow: `0 0 12px ${g.color}88` }}>
+            {g.name}
+          </p>
+        </div>
+        {/* Message + timestamp outside the card */}
+        <div className="text-center px-1">
           {gift.message && (
-            <p className="text-cream/60 text-xs mt-1 leading-snug italic">"{gift.message}"</p>
+            <p className="text-cream/55 text-xs leading-snug italic mb-1">"{gift.message}"</p>
           )}
-          <p className="text-cream/30 text-[10px] mt-2">{isMine ? "You sent" : "Sent you"} a {g.name.toLowerCase()} · {timeLabel}</p>
+          <p className="text-cream/25 text-[10px]">{isMine ? "You sent" : "Sent you"} a {g.name.toLowerCase()} · {timeLabel}</p>
         </div>
       </div>
     </div>
@@ -390,23 +414,41 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
         {/* Gift grid */}
         <div className="overflow-y-auto px-4 py-4 flex-1">
           <div className="grid grid-cols-4 gap-3 mb-4">
-            {GIFTS.map(g => (
-              <button
-                key={g.id}
-                onClick={() => setSelected(g.id === selected ? null : g.id)}
-                data-testid={`gift-option-${g.id}`}
-                className="flex flex-col items-center gap-1.5 py-3 rounded-2xl transition-all"
-                style={selected === g.id
-                  ? { background: `${g.color}25`, border: `2px solid ${g.color}`, transform: "scale(1.05)" }
-                  : { background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.08)" }
-                }
-              >
-                <span className="text-2xl leading-none">{g.emoji}</span>
-                <span className="text-[9px] font-semibold uppercase tracking-wide" style={{ color: selected === g.id ? g.color : "rgba(253,248,240,0.4)" }}>
-                  {g.name}
-                </span>
-              </button>
-            ))}
+            {GIFTS.map(g => {
+              const isSelected = selected === g.id;
+              return (
+                <button
+                  key={g.id}
+                  onClick={() => setSelected(g.id === selected ? null : g.id)}
+                  data-testid={`gift-option-${g.id}`}
+                  className="relative flex flex-col items-center gap-1.5 py-3 rounded-2xl overflow-hidden transition-all"
+                  style={isSelected ? {
+                    background: `radial-gradient(ellipse at 35% 25%, ${g.color}55 0%, ${g.color}28 50%, #0d061888 100%)`,
+                    border: `2px solid ${g.color}bb`,
+                    transform: "scale(1.08) translateY(-2px)",
+                    boxShadow: `0 8px 24px ${g.color}44, 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.3)`,
+                  } : {
+                    background: "radial-gradient(ellipse at 35% 25%, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 60%, rgba(0,0,0,0.2) 100%)",
+                    border: "1.5px solid rgba(255,255,255,0.1)",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.2)",
+                  }}
+                >
+                  {/* Gloss sheen */}
+                  <div className="absolute inset-0 pointer-events-none" style={{
+                    background: "linear-gradient(160deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 45%, transparent 60%)",
+                    borderRadius: "inherit",
+                  }} />
+                  <span
+                    className="text-2xl leading-none relative z-10"
+                    style={isSelected ? { filter: `drop-shadow(0 2px 6px ${g.color}99) drop-shadow(0 1px 3px rgba(0,0,0,0.7))` } : { filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.5))" }}
+                  >{g.emoji}</span>
+                  <span className="text-[9px] font-black uppercase tracking-wide relative z-10"
+                    style={{ color: isSelected ? g.color : "rgba(253,248,240,0.4)", textShadow: isSelected ? `0 0 8px ${g.color}66` : "none" }}>
+                    {g.name}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Optional message */}
@@ -431,13 +473,24 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
             onClick={() => selected && onSend(selected, message)}
             disabled={!selected || isPending}
             data-testid="button-send-gift"
-            className="w-full py-4 rounded-2xl font-bold text-sm transition-all disabled:opacity-40"
-            style={selected
-              ? { background: `linear-gradient(135deg, ${giftById(selected!).color}cc, ${giftById(selected!).color})`, color: "white" }
-              : { background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.3)" }
-            }
+            className="relative w-full py-4 rounded-2xl font-bold text-sm transition-all disabled:opacity-40 overflow-hidden"
+            style={selected ? {
+              background: `radial-gradient(ellipse at 30% 30%, ${giftById(selected!).color}ee 0%, ${giftById(selected!).color}99 60%, ${giftById(selected!).color}cc 100%)`,
+              color: "white",
+              boxShadow: `0 6px 20px ${giftById(selected!).color}55, 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(0,0,0,0.25)`,
+            } : {
+              background: "rgba(255,255,255,0.06)",
+              color: "rgba(253,248,240,0.3)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
           >
-            {isPending ? "Sending…" : selected ? `Send ${giftById(selected).emoji} ${giftById(selected).name}` : "Select a gift"}
+            {selected && (
+              <div className="absolute inset-0 pointer-events-none"
+                style={{ background: "linear-gradient(160deg, rgba(255,255,255,0.2) 0%, transparent 50%)", borderRadius: "inherit" }} />
+            )}
+            <span className="relative z-10">
+              {isPending ? "Sending…" : selected ? `Send ${giftById(selected).emoji} ${giftById(selected).name}` : "Select a gift"}
+            </span>
           </button>
         </div>
       </div>
