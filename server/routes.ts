@@ -150,10 +150,13 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const newPhotos = allPhotos.filter(p => p.startsWith("data:image") && !existingPhotos.includes(p));
       console.log(`[routes] profile update: ${allPhotos.length} total photos, ${newPhotos.length} new to scan`);
       if (newPhotos.length > 0) {
-        const photoCheck = await moderatePhotos(newPhotos);
-        console.log(`[routes] moderation result: safe=${photoCheck.safe}, reason=${photoCheck.reason ?? "none"}`);
-        if (!photoCheck.safe) {
-          return res.status(400).json({ error: "One or more photos contain inappropriate or explicit content and cannot be uploaded." });
+        for (const newPhoto of newPhotos) {
+          const photoCheck = await moderatePhotos([newPhoto]);
+          const photoNumber = allPhotos.indexOf(newPhoto) + 1;
+          console.log(`[routes] moderation result photo ${photoNumber}: safe=${photoCheck.safe}, reason=${photoCheck.reason ?? "none"}`);
+          if (!photoCheck.safe) {
+            return res.status(400).json({ error: `Photo ${photoNumber} contains inappropriate or explicit content. Please remove it and upload a different photo.` });
+          }
         }
       }
 
