@@ -16,6 +16,7 @@ import EventDetailPage from "@/pages/EventDetailPage";
 import AdminPage from "@/pages/AdminPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ActivityPage from "@/pages/ActivityPage";
+import ViewUserProfilePage from "@/pages/ViewUserProfilePage";
 import VerificationPage from "@/pages/VerificationPage";
 import PendingVerificationPage from "@/pages/PendingVerificationPage";
 import PendingApprovalPage from "@/pages/PendingApprovalPage";
@@ -66,6 +67,7 @@ function AppShell({ user }: { user: User }) {
   const isEventDetail = location.startsWith("/events/") && location !== "/events";
   const isVerifyPage = location === "/verify" || location === "/pending-verification";
   const isSettings = location === "/settings";
+  const isProfileView = /^\/profile\/[^/]+$/.test(location);
 
   const callCtx = useVideoCallProvider(user.id, !!user.isPremium);
   const isInCall = callCtx.callState === "active" || callCtx.callState === "calling" || callCtx.callState === "ringing";
@@ -96,6 +98,7 @@ function AppShell({ user }: { user: User }) {
             <Route path="/events" component={() => <EventsPage user={user} />} />
             <Route path="/admin" component={() => <AdminPage user={user} />} />
             <Route path="/activity" component={() => <ActivityPage user={user} />} />
+            <Route path="/profile/:userId" component={({ params }) => <ViewUserProfilePage viewer={user} userId={params.userId} />} />
             <Route path="/settings" component={() => <SettingsPage user={user} />} />
             <Route path="/verify" component={() => <VerificationPage user={user} />} />
             <Route path="/pending-verification" component={() => <PendingVerificationPage user={user} />} />
@@ -103,7 +106,7 @@ function AppShell({ user }: { user: User }) {
             <Route path="/" component={() => <Redirect to="/discover" />} />
           </Switch>
         </main>
-        {!isChat && !isEventDetail && !isVerifyPage && !isInCall && !isSettings && <BottomNav />}
+        {!isChat && !isEventDetail && !isVerifyPage && !isInCall && !isSettings && !isProfileView && <BottomNav />}
       </div>
     </VideoCallContext.Provider>
   );
