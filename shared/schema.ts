@@ -85,6 +85,16 @@ export const events = pgTable("events", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const gifts = pgTable("gifts", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  senderId: varchar("sender_id").notNull().references(() => users.id),
+  recipientId: varchar("recipient_id").notNull().references(() => users.id),
+  matchId: varchar("match_id", { length: 36 }).notNull().references(() => matches.id),
+  giftType: text("gift_type").notNull(),
+  message: text("message").default(""),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const visitors = pgTable("visitors", {
   id: varchar("id", { length: 36 }).primaryKey(),
   fromUserId: varchar("from_user_id").notNull().references(() => users.id),
@@ -143,6 +153,7 @@ export const profileUpdateSchema = z.object({
 
 export type OtpCode = typeof otpCodes.$inferSelect;
 export type Like = typeof likes.$inferSelect;
+export type Gift = typeof gifts.$inferSelect;
 export type Visitor = typeof visitors.$inferSelect;
 export type Dislike = typeof dislikes.$inferSelect;
 export type Block = typeof blocks.$inferSelect;

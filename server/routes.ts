@@ -361,6 +361,34 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   // ─── REPORTS ──────────────────────────────────────────────
+  // ─── GIFTS ────────────────────────────────────────────────
+  app.post("/api/gifts", isAuthenticated, async (req, res) => {
+    const senderId = getUserId(req);
+    const sender = await storage.getUserById(senderId);
+    if (!sender?.isPremium) return res.status(403).json({ error: "Premium required to send gifts" });
+
+    const { recipientId, matchId, giftType, message } = z.object({
+      recipientId: z.string(),
+      matchId: z.string(),
+      giftType: z.string().min(1),
+      message: z.string().max(200).optional().default(""),
+    }).parse(req.body);
+
+    const gift = await storage.sendGift(senderId, recipientId, matchId, giftType, message);
+    res.json({ gift });
+  });
+
+  app.get("/api/gifts/match/:matchId", isAuthenticated, async (req, res) => {
+    const gifts = await storage.getGiftsInMatch(req.params.matchId);
+    res.json({ gifts });
+  });
+
+  app.get("/api/gifts/received", isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const gifts = await storage.getGiftsReceived(userId);
+    res.json({ gifts });
+  });
+
   // ─── ACTIVITY ─────────────────────────────────────────────
   app.post("/api/users/:userId/visit", isAuthenticated, async (req, res) => {
     const fromUserId = getUserId(req);
