@@ -244,7 +244,7 @@ export default function ChatPage({ user, matchId }: Props) {
             <div className="flex flex-wrap justify-center gap-2 max-w-xs">
               {[
                 "Hi! Nice to meet you 👋",
-                "Slaw! How are you? ☀️",
+                "Silva! How are you? ☀️",
                 "Your profile caught my eye ✨",
                 "Tell me about yourself?",
                 "What's your favourite tradition?",
