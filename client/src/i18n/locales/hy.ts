@@ -103,7 +103,7 @@ export default {
     caste: "Կաստա",
     sheikh: "Շեյխ",
     pir: "Պիր",
-    murid: "Մուրիդ",
+    murid: "Միրիդ",
     age: "Տարիք",
     country: "Երկիր",
     city: "Քաղաք",
