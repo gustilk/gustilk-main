@@ -24,7 +24,6 @@ export const GIFTS = [
   { id: "crown",     lottie: "/lottie/valentines.json",      name: "Valentine",  color: "#c9a84c" },
   { id: "balloon",   lottie: "/lottie/butterfly-hearts.json",name: "Butterfly ♥",color: "#f97316" },
   { id: "sparkle",   lottie: "/lottie/celebration.json",     name: "Celebrate",  color: "#c9a84c" },
-  { id: "bear",      lottie: "/lottie/cat-kiss.json",        name: "Kiss",       color: "#c9a84c" },
   { id: "birds",     lottie: "/lottie/bird-pair.json",       name: "Birds",      color: "#67e8f9" },
   { id: "garden",    lottie: "/lottie/couple-garden.json",   name: "Garden",     color: "#22c55e" },
   { id: "ring",      lottie: "/lottie/rose2.json",           name: "Rose ♥",     color: "#a855f7" },
