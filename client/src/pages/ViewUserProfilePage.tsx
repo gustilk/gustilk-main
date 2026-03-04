@@ -78,7 +78,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-8" style={{ background: "#0d0618" }}>
+    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
 
       {/* ── Photos ─────────────────────────────────────────── */}
       <div className="relative" style={{ height: "65vw", maxHeight: 400, minHeight: 280 }}>
@@ -138,7 +138,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
         )}
 
         {/* Back button */}
-        <button onClick={() => history.back()} data-testid="button-back-profile"
+        <button onClick={() => window.history.length > 1 ? history.back() : setLocation("/matches")} data-testid="button-back-profile"
           className="absolute top-12 left-4 w-9 h-9 rounded-full flex items-center justify-center"
           style={{ background: "rgba(13,6,24,0.7)", border: "1px solid rgba(255,255,255,0.15)" }}>
           <ArrowLeft size={18} color="rgba(253,248,240,0.85)" />

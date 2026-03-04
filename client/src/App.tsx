@@ -134,7 +134,7 @@ function AppShell({ user }: { user: User }) {
             </Switch>
           )}
         </main>
-        {!isChat && !isEventDetail && !isVerifyPage && !isInCall && !isSettings && !isProfileView && !isAdminRoute && <BottomNav />}
+        {!isChat && !isEventDetail && !isVerifyPage && !isInCall && !isSettings && !isAdminRoute && <BottomNav />}
       </div>
     </VideoCallContext.Provider>
   );
