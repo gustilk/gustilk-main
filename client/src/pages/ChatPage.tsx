@@ -538,25 +538,27 @@ function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
           <button
             onClick={() => setShowReveal(true)}
             data-testid={`button-reveal-gift-${gift.id}`}
-            className="flex flex-col items-center gap-1 px-4 py-3 rounded-2xl w-full active:scale-95 transition-transform"
-            style={{
-              background: "#0d0618",
-              cursor: "pointer",
-              border: `1px solid ${g.color}${revealed ? "66" : "44"}`,
-              boxShadow: `0 0 ${revealed ? "20px" : "16px"} ${g.color}${revealed ? "30" : "22"}`,
-            }}
+            className="flex flex-col items-center gap-1 active:scale-95 transition-transform"
+            style={{ background: "none", border: "none", cursor: "pointer" }}
           >
             {revealed ? (
-              /* Revealed — show the Lottie animation */
-              <div style={{ width: 80, height: 80 }}>
+              /* Revealed — bare animation, no card */
+              <div style={{ width: 90, height: 90 }}>
                 {g.lottie
                   ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} placeholderSize={34} />
                   : <span className="text-5xl">🎁</span>
                 }
               </div>
             ) : (
-              /* Unrevealed — mystery icon */
-              <>
+              /* Unrevealed — mystery card */
+              <div
+                className="flex flex-col items-center gap-1 px-4 py-3 rounded-2xl"
+                style={{
+                  background: "#0d0618",
+                  border: `1px solid ${g.color}44`,
+                  boxShadow: `0 0 16px ${g.color}22`,
+                }}
+              >
                 <div
                   className="flex items-center justify-center rounded-full"
                   style={{
@@ -570,7 +572,7 @@ function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
                   <Gift size={34} style={{ color: g.color, opacity: 0.85 }} />
                 </div>
                 <p style={{ color: g.color, opacity: 0.5 }} className="text-[9px] mt-1 tracking-wide">Tap to reveal ✦</p>
-              </>
+              </div>
             )}
           </button>
           <style>{`@keyframes gift-bubble-pulse { 0%,100%{box-shadow:0 0 0 0 transparent} 50%{box-shadow:0 0 10px 3px ${g.color}30} }`}</style>
@@ -626,8 +628,10 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                   data-testid={`gift-option-${g.id}`}
                   className="flex flex-col items-center gap-1 py-2 rounded-xl transition-all"
                   style={{
-                    background: "#0d0618",
-                    transform: isSelected ? "scale(1.1) translateY(-2px)" : "scale(1)",
+                    background: "none",
+                    transform: isSelected ? "scale(1.15) translateY(-3px)" : "scale(1)",
+                    outline: isSelected ? `2px solid ${g.color}88` : "none",
+                    borderRadius: 12,
                   }}
                 >
                   <div style={{ width: 60, height: 60 }}>
