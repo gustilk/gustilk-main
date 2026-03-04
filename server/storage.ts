@@ -222,7 +222,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPendingVerifications(): Promise<SafeUser[]> {
-    return db.select().from(users).where(eq(users.verificationStatus, "pending"));
+    return db.select().from(users).where(
+      sql`${users.verificationStatus} = 'pending'
+        OR (
+          ${users.photoSlots} IS NOT NULL
+          AND EXISTS (
+            SELECT 1 FROM jsonb_array_elements(${users.photoSlots}::jsonb) AS slot
+            WHERE slot->>'status' = 'pending'
+          )
+        )`
+    );
   }
 
   async updateVerificationStatus(userId: string, status: "approved" | "rejected" | "banned", isVerified = false): Promise<void> {

@@ -540,6 +540,16 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       await storage.banUser(targetId);
     } else {
       await storage.updateVerificationStatus(targetId, action === "approve" ? "approved" : "rejected", action === "approve");
+      // Also approve/reject all pending photo slots
+      if (action === "approve") {
+        const targetUser = await storage.getUserById(targetId);
+        const slots = (targetUser?.photoSlots as any[] | null) ?? [];
+        for (let i = 0; i < slots.length; i++) {
+          if (slots[i]?.status === "pending") {
+            await storage.approvePhotoSlot(targetId, i);
+          }
+        }
+      }
     }
 
     // Auto-message the user on reject or ban
