@@ -4,7 +4,7 @@ import {
   blacklist, promoCodes, auditLogs, appSettings, announcements, successStories,
   users, matches, messages, likes, reports, events,
 } from "@shared/schema";
-import { eq, desc, sql, count, and, or } from "drizzle-orm";
+import { eq, desc, sql, count, and, or, gte } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { z } from "zod";
 
