@@ -412,12 +412,14 @@ function injectRevealCSS() {
 
 function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => void }) {
   const g = giftById(gift.giftType);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     injectRevealCSS();
-    const t = setTimeout(onClose, 3200);
+    const t = setTimeout(() => onCloseRef.current(), 3200);
     return () => clearTimeout(t);
-  }, [onClose]);
+  }, []);
 
   const particles = useMemo(() => Array.from({ length: 52 }, (_, i) => ({
     id: i,
@@ -481,7 +483,7 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
         data-testid="gift-reveal-animation"
       >
         {g.lottie
-          ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} />
+          ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} placeholderSize={80} />
           : <span style={{ fontSize: 120 }}>🎁</span>
         }
       </div>
@@ -538,7 +540,7 @@ function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
           >
             <div style={{ width: 80, height: 80 }}>
               {g.lottie
-                ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} />
+                ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} placeholderSize={34} />
                 : <span className="text-5xl">🎁</span>
               }
             </div>
@@ -602,7 +604,7 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                 >
                   <div style={{ width: 60, height: 60 }}>
                     {g.lottie
-                      ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} />
+                      ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} placeholderSize={24} />
                       : <span className="text-3xl">🎁</span>
                     }
                   </div>
