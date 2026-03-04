@@ -2,6 +2,9 @@
 
 A culturally sensitive dating platform designed exclusively for the Yezidi community, respecting traditional values and the caste system.
 
+## User Preferences
+- **Testing**: User tests all changes manually — skip automated e2e testing
+
 ## Recent Changes
 - **Lottie animations**: Installed `lottie-react`. 20 Lottie JSON files placed in `client/public/lottie/`. Created `LottieAnimation` component (`client/src/components/LottieAnimation.tsx`). Replaced static PNG gift images with Lottie animations in the gift picker and gift bubbles (ChatPage). MatchModal now shows `celebration.json` confetti + `valentine-hearts.json` between avatars. DiscoverPage shows `filling-heart.json` / `cute-broken-heart.json` overlay on like/dislike. LandingPage logo now has a floating `valentine-hearts.json` Lottie near the title. Removed `logo-flip` CSS animation from index.css.
 - **Test users created**: layla.test@gustilk.com, sara.test@gustilk.com, dara.test@gustilk.com (all password: test1234). A match between admin and Layla is seeded in the DB.
