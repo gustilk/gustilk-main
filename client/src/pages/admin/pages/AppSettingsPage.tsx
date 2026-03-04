@@ -97,7 +97,7 @@ export default function AppSettingsPage({ user }: { user: User }) {
           fields: [
             { label: "Allow Sheikh", k: "allowSheikh", type: "toggle" },
             { label: "Allow Pir", k: "allowPir", type: "toggle" },
-            { label: "Allow Murid", k: "allowMurid", type: "toggle" },
+            { label: "Allow Mirid", k: "allowMurid", type: "toggle" },
           ],
         },
         {

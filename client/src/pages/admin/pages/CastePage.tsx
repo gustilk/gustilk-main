@@ -4,13 +4,13 @@ import type { User } from "@shared/schema";
 const CASTES = [
   { name: "Sheikh", description: "Religious leaders and their descendants. Highest spiritual authority in the Yezidi hierarchy.", color: "#c9a84c", count: "—" },
   { name: "Pir", description: "Spiritual guides who serve as intermediaries. Middle tier of the religious hierarchy.", color: "#8b5cf6", count: "—" },
-  { name: "Mirid (Murid)", description: "The largest caste, comprising the majority of Yezidi community members.", color: "#10b981", count: "—" },
+  { name: "Mirid", description: "The largest caste, comprising the majority of Yezidi community members.", color: "#10b981", count: "—" },
 ];
 
 const RULES = [
   "Sheikh may only marry within their own caste",
   "Pir may only marry within their own caste",
-  "Murid may marry within their own caste",
+  "Mirid may marry within their own caste",
   "Interfaith marriages are not currently supported",
   "Minimum age: 18 years old",
 ];
