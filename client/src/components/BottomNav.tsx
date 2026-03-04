@@ -9,9 +9,9 @@ import type { MatchWithUser, User as UserType } from "@shared/schema";
 interface ActivityItem { user: unknown; createdAt: string; }
 
 const ALL_NAV_ITEMS = [
-  { href: "/discover", icon: Heart, tKey: "nav.discover", id: "discover", adminHide: true },
+  { href: "/discover", icon: Heart, tKey: "nav.discover", id: "discover", adminHide: false },
   { href: "/matches", icon: MessageCircle, tKey: "nav.matches", id: "matches", adminHide: false },
-  { href: "/activity", icon: Zap, tKey: "nav.activity", id: "activity", adminHide: true },
+  { href: "/activity", icon: Zap, tKey: "nav.activity", id: "activity", adminHide: false },
   { href: "/events", icon: CalendarDays, tKey: "nav.events", id: "events", adminHide: false },
   { href: "/profile", icon: User, tKey: "nav.profile", id: "profile", adminHide: false },
 ];
