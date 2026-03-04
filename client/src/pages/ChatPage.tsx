@@ -19,20 +19,15 @@ interface Props {
 // ─── Gift catalogue ────────────────────────────────────────────────────────
 export const GIFTS = [
   { id: "rose",      lottie: "/lottie/rose.json",            name: "Rose",       color: "#e83e6c" },
-  { id: "heart",     lottie: "/lottie/valentine-hearts.json",name: "Hearts",     color: "#ef4444" },
-  { id: "bouquet",   lottie: "/lottie/flower.json",          name: "Bouquet",    color: "#d4608a" },
   { id: "butterfly", lottie: "/lottie/butterfly.json",       name: "Butterfly",  color: "#7b3fa0" },
   { id: "diamond",   lottie: "/lottie/add-to-favorites.json",name: "Favourite",  color: "#f59e0b" },
   { id: "crown",     lottie: "/lottie/valentines.json",      name: "Valentine",  color: "#c9a84c" },
   { id: "balloon",   lottie: "/lottie/butterfly-hearts.json",name: "Butterfly ♥",color: "#f97316" },
   { id: "sparkle",   lottie: "/lottie/celebration.json",     name: "Celebrate",  color: "#c9a84c" },
-  { id: "chocolate", lottie: "/lottie/chocolate-heart.json", name: "Chocolate",  color: "#d4608a" },
   { id: "bear",      lottie: "/lottie/cat-kiss.json",        name: "Kiss",       color: "#c9a84c" },
-  { id: "star",      lottie: "/lottie/couple-love.json",     name: "Love",       color: "#eab308" },
   { id: "birds",     lottie: "/lottie/bird-pair.json",       name: "Birds",      color: "#67e8f9" },
   { id: "garden",    lottie: "/lottie/couple-garden.json",   name: "Garden",     color: "#22c55e" },
   { id: "ring",      lottie: "/lottie/rose2.json",           name: "Rose ♥",     color: "#a855f7" },
-  { id: "gifts",     lottie: "/lottie/gift-set.json",        name: "Gifts",      color: "#f59e0b" },
   { id: "unbox",     lottie: "/lottie/gift-unbox.json",      name: "Surprise",   color: "#c9a84c" },
 ];
 
@@ -386,11 +381,6 @@ function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
               : <span className="text-5xl">🎁</span>
             }
           </div>
-          {/* Label */}
-          <p className="text-xs font-black uppercase tracking-widest"
-            style={{ color: g.color, textShadow: `0 0 10px ${g.color}88` }}>
-            {g.name}
-          </p>
         </div>
         {/* Message + timestamp outside the card */}
         <div className="text-center px-1">
@@ -447,16 +437,12 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                     transform: isSelected ? "scale(1.1) translateY(-2px)" : "scale(1)",
                   }}
                 >
-                  <div style={{ width: 52, height: 52 }}>
+                  <div style={{ width: 60, height: 60 }}>
                     {g.lottie
                       ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} />
                       : <span className="text-3xl">🎁</span>
                     }
                   </div>
-                  <span className="text-[9px] font-black uppercase tracking-wide"
-                    style={{ color: isSelected ? g.color : "rgba(253,248,240,0.5)" }}>
-                    {g.name}
-                  </span>
                 </button>
               );
             })}
