@@ -9,7 +9,7 @@ import type { SafeUser, Message, MatchWithUser, Gift as GiftType } from "@shared
 import ReportModal from "@/components/ReportModal";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
 import { useVideoCallContext } from "@/hooks/useVideoCall";
-import Gift3D from "@/components/Gift3D";
+import LottieAnimation from "@/components/LottieAnimation";
 
 interface Props {
   user: SafeUser;
@@ -18,22 +18,26 @@ interface Props {
 
 // ─── Gift catalogue ────────────────────────────────────────────────────────
 export const GIFTS = [
-  { id: "rose",      name: "Rose",       color: "#e83e6c" },
-  { id: "heart",     name: "Heart",      color: "#ef4444" },
-  { id: "bouquet",   name: "Bouquet",    color: "#d4608a" },
-  { id: "diamond",   name: "Diamond",    color: "#67e8f9" },
-  { id: "ring",      name: "Ring",       color: "#a855f7" },
-  { id: "crown",     name: "Crown",      color: "#f59e0b" },
-  { id: "balloon",   name: "Balloon",    color: "#f97316" },
-  { id: "sparkle",   name: "Sparkle",    color: "#c9a84c" },
-  { id: "chocolate", name: "Chocolate",  color: "#d4608a" },
-  { id: "bear",      name: "Kiss",       color: "#c9a84c" },
-  { id: "star",      name: "Love",       color: "#eab308" },
-  { id: "butterfly", name: "Energy",     color: "#7b3fa0" },
+  { id: "rose",      lottie: "/lottie/rose.json",            name: "Rose",       color: "#e83e6c" },
+  { id: "heart",     lottie: "/lottie/valentine-hearts.json",name: "Hearts",     color: "#ef4444" },
+  { id: "bouquet",   lottie: "/lottie/flower.json",          name: "Bouquet",    color: "#d4608a" },
+  { id: "butterfly", lottie: "/lottie/butterfly.json",       name: "Butterfly",  color: "#7b3fa0" },
+  { id: "diamond",   lottie: "/lottie/add-to-favorites.json",name: "Favourite",  color: "#f59e0b" },
+  { id: "crown",     lottie: "/lottie/valentines.json",      name: "Valentine",  color: "#c9a84c" },
+  { id: "balloon",   lottie: "/lottie/butterfly-hearts.json",name: "Butterfly ♥",color: "#f97316" },
+  { id: "sparkle",   lottie: "/lottie/celebration.json",     name: "Celebrate",  color: "#c9a84c" },
+  { id: "chocolate", lottie: "/lottie/chocolate-heart.json", name: "Chocolate",  color: "#d4608a" },
+  { id: "bear",      lottie: "/lottie/cat-kiss.json",        name: "Kiss",       color: "#c9a84c" },
+  { id: "star",      lottie: "/lottie/couple-love.json",     name: "Love",       color: "#eab308" },
+  { id: "birds",     lottie: "/lottie/bird-pair.json",       name: "Birds",      color: "#67e8f9" },
+  { id: "garden",    lottie: "/lottie/couple-garden.json",   name: "Garden",     color: "#22c55e" },
+  { id: "ring",      lottie: "/lottie/rose2.json",           name: "Rose ♥",     color: "#a855f7" },
+  { id: "gifts",     lottie: "/lottie/gift-set.json",        name: "Gifts",      color: "#f59e0b" },
+  { id: "unbox",     lottie: "/lottie/gift-unbox.json",      name: "Surprise",   color: "#c9a84c" },
 ];
 
 function giftById(id: string) {
-  return GIFTS.find(g => g.id === id) ?? { id, name: "Gift", color: "#c9a84c" };
+  return GIFTS.find(g => g.id === id) ?? { id, lottie: null as string | null, name: "Gift", color: "#c9a84c" };
 }
 
 // ─── Merged timeline item ─────────────────────────────────────────────────
@@ -370,30 +374,21 @@ function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
   return (
     <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
       <div className="flex flex-col items-center gap-2 max-w-[190px]" data-testid={`gift-bubble-${gift.id}`}>
-        {/* 3-D gem card */}
+        {/* Gift card */}
         <div
-          className="relative flex flex-col items-center gap-2 px-6 py-5 rounded-3xl w-full overflow-hidden"
-          style={{
-            background: `radial-gradient(ellipse at 30% 20%, ${g.color}55 0%, ${g.color}22 45%, #0d0618cc 100%)`,
-            border: `1.5px solid ${g.color}66`,
-            boxShadow: `0 8px 32px ${g.color}33, 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.35)`,
-          }}
+          className="flex flex-col items-center gap-1 px-4 py-3 rounded-2xl w-full"
+          style={{ background: "#0d0618" }}
         >
-          {/* Gloss sheen layer */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: "linear-gradient(160deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 40%, transparent 60%)",
-              borderRadius: "inherit",
-            }}
-          />
-          {/* Gift — CSS 3D animation */}
-          <div className="relative z-10">
-            <Gift3D id={gift.giftType} size={60} />
+          {/* Lottie animation */}
+          <div style={{ width: 80, height: 80 }}>
+            {g.lottie
+              ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} />
+              : <span className="text-5xl">🎁</span>
+            }
           </div>
           {/* Label */}
-          <p className="text-xs font-black uppercase tracking-widest relative z-10"
-            style={{ color: g.color, textShadow: `0 0 12px ${g.color}88` }}>
+          <p className="text-xs font-black uppercase tracking-widest"
+            style={{ color: g.color, textShadow: `0 0 10px ${g.color}88` }}>
             {g.name}
           </p>
         </div>
@@ -446,28 +441,20 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                   key={g.id}
                   onClick={() => setSelected(g.id === selected ? null : g.id)}
                   data-testid={`gift-option-${g.id}`}
-                  className="relative flex flex-col items-center gap-1.5 py-3 rounded-2xl transition-all"
-                  style={isSelected ? {
-                    background: `radial-gradient(ellipse at 35% 25%, ${g.color}55 0%, ${g.color}28 50%, #0d061888 100%)`,
-                    border: `2px solid ${g.color}bb`,
-                    transform: "scale(1.08) translateY(-2px)",
-                    boxShadow: `0 8px 24px ${g.color}44, 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.3)`,
-                  } : {
-                    background: "radial-gradient(ellipse at 35% 25%, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 60%, rgba(0,0,0,0.2) 100%)",
-                    border: "1.5px solid rgba(255,255,255,0.1)",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.2)",
+                  className="flex flex-col items-center gap-1 py-2 rounded-xl transition-all"
+                  style={{
+                    background: "#0d0618",
+                    transform: isSelected ? "scale(1.1) translateY(-2px)" : "scale(1)",
                   }}
                 >
-                  {/* Gloss sheen */}
-                  <div className="absolute inset-0 pointer-events-none" style={{
-                    background: "linear-gradient(160deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 45%, transparent 60%)",
-                    borderRadius: "inherit",
-                  }} />
-                  <div className="relative z-10">
-                    <Gift3D id={g.id} size={42} />
+                  <div style={{ width: 52, height: 52 }}>
+                    {g.lottie
+                      ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} />
+                      : <span className="text-3xl">🎁</span>
+                    }
                   </div>
-                  <span className="text-[9px] font-black uppercase tracking-wide relative z-10"
-                    style={{ color: isSelected ? g.color : "rgba(253,248,240,0.4)", textShadow: isSelected ? `0 0 8px ${g.color}66` : "none" }}>
+                  <span className="text-[9px] font-black uppercase tracking-wide"
+                    style={{ color: isSelected ? g.color : "rgba(253,248,240,0.5)" }}>
                     {g.name}
                   </span>
                 </button>
