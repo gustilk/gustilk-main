@@ -409,7 +409,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
-  // ─── REPORTS ──────────────────────────────────────────────
   // ─── GIFTS ────────────────────────────────────────────────
   app.post("/api/gifts", isAuthenticated, async (req, res) => {
     const senderId = getUserId(req);
