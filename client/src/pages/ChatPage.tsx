@@ -488,24 +488,17 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
         }
       </div>
 
-      {/* Gift name + message */}
-      <div
-        className="text-center mt-6 px-8 z-10"
-        style={{ animation: "gr-name-in 0.6s 0.55s ease-out both" }}
-      >
-        <p
-          className="font-serif text-4xl font-bold"
-          style={{ color: g.color, textShadow: `0 0 24px ${g.color}88` }}
-          data-testid="gift-reveal-name"
+      {/* Message only — no name */}
+      {gift.message && (
+        <div
+          className="text-center mt-6 px-8 z-10"
+          style={{ animation: "gr-name-in 0.6s 0.55s ease-out both" }}
         >
-          {g.name}
-        </p>
-        {gift.message && (
-          <p className="text-cream/65 text-sm mt-3 italic leading-relaxed max-w-xs mx-auto">
+          <p className="text-cream/65 text-sm italic leading-relaxed max-w-xs mx-auto">
             "{gift.message}"
           </p>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Tap hint */}
       <p
@@ -563,7 +556,7 @@ function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
             {gift.message && (
               <p className="text-cream/55 text-xs leading-snug italic mb-1">"{gift.message}"</p>
             )}
-            <p className="text-cream/25 text-[10px]">{isMine ? "You sent" : "Sent you"} a {g.name.toLowerCase()} · {timeLabel}</p>
+            <p className="text-cream/25 text-[10px]">{isMine ? "You sent a gift" : "Sent you a gift"} · {timeLabel}</p>
           </div>
         </div>
       </div>
