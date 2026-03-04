@@ -536,16 +536,28 @@ function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
             onClick={() => setShowReveal(true)}
             data-testid={`button-reveal-gift-${gift.id}`}
             className="flex flex-col items-center gap-1 px-4 py-3 rounded-2xl w-full active:scale-95 transition-transform"
-            style={{ background: "#0d0618", cursor: "pointer" }}
+            style={{
+              background: "#0d0618",
+              cursor: "pointer",
+              border: `1px solid ${g.color}44`,
+              boxShadow: `0 0 16px ${g.color}22`,
+            }}
           >
-            <div style={{ width: 80, height: 80 }}>
-              {g.lottie
-                ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} placeholderSize={34} />
-                : <span className="text-5xl">🎁</span>
-              }
+            <div
+              className="flex items-center justify-center rounded-full"
+              style={{
+                width: 72,
+                height: 72,
+                background: `radial-gradient(circle, ${g.color}18 0%, transparent 75%)`,
+                border: `2px solid ${g.color}55`,
+                animation: "gift-bubble-pulse 2s ease-in-out infinite",
+              }}
+            >
+              <Gift size={34} style={{ color: g.color, opacity: 0.85 }} />
             </div>
-            <p className="text-cream/25 text-[9px] mt-0.5">Tap to reveal ✦</p>
+            <p style={{ color: g.color, opacity: 0.5 }} className="text-[9px] mt-1 tracking-wide">Tap to reveal ✦</p>
           </button>
+          <style>{`@keyframes gift-bubble-pulse { 0%,100%{box-shadow:0 0 0 0 transparent} 50%{box-shadow:0 0 10px 3px ${g.color}30} }`}</style>
           {/* Message + timestamp */}
           <div className="text-center px-1">
             {gift.message && (
