@@ -199,6 +199,13 @@ export default {
     videoCall: "Videoanruf",
     report: "Melden",
     you: "Du",
+    matchedWith: "Du hast dich mit",
+    breakIcePrompt: "Brich das Eis — tippe auf eine Nachricht zum Senden",
+    icebreaker1: "Hallo! Schön, dich kennenzulernen 👋",
+    icebreaker2: "Silva! Wie geht's dir? ☀️",
+    icebreaker3: "Dein Profil hat mich angesprochen ✨",
+    icebreaker4: "Erzähl mir von dir?",
+    icebreaker5: "Was ist deine Lieblingstradition?",
   },
   premium: {
     title: "Gûstîlk Premium",
