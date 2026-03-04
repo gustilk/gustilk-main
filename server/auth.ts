@@ -79,6 +79,7 @@ export function registerAuthRoutes(app: Express) {
     try {
       const user = await storage.getUserById(req.session.userId!);
       if (!user) return res.status(404).json({ message: "User not found" });
+      db.update(users).set({ activitySeenAt: new Date() } as any).where(eq(users.id, req.session.userId!)).catch(() => {});
       res.json({ user: safeUser(user as any) });
     } catch (err: any) {
       res.status(500).json({ message: err.message });

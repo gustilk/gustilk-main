@@ -83,7 +83,7 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
                 <button
                   onClick={() => setPhotoIdx(i => Math.max(0, i - 1))}
                   data-testid="button-preview-photo-prev"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center z-10"
                   style={{ background: "rgba(13,6,24,0.6)", border: "1px solid rgba(255,255,255,0.15)" }}
                   disabled={photoIdx === 0}
                 >
@@ -92,13 +92,13 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
                 <button
                   onClick={() => setPhotoIdx(i => Math.min(photos.length - 1, i + 1))}
                   data-testid="button-preview-photo-next"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center z-10"
                   style={{ background: "rgba(13,6,24,0.6)", border: "1px solid rgba(255,255,255,0.15)" }}
                   disabled={photoIdx === photos.length - 1}
                 >
                   <ChevronRight size={18} color={photoIdx === photos.length - 1 ? "rgba(255,255,255,0.2)" : "white"} />
                 </button>
-                <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
                   {photos.map((_, i) => (
                     <button
                       key={i}
@@ -124,7 +124,7 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
               {casteLabel(user.caste ?? "murid")}
             </div>
 
-            <div className="absolute bottom-0 left-0 right-0 h-52" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.98), transparent)" }} />
+            <div className="absolute bottom-0 left-0 right-0 h-52 pointer-events-none" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.98), transparent)" }} />
             <div className="absolute bottom-0 left-0 right-0 p-5">
               <h2 className="font-serif text-2xl text-white font-bold leading-tight" data-testid="preview-text-name">
                 {user.fullName ?? user.firstName ?? "Member"}{age ? `, ${age}` : ""}

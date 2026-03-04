@@ -3,11 +3,19 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { SlidersHorizontal, X, Heart, RefreshCw, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
-
 import MatchModal from "@/components/MatchModal";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
+import LottieAnimation from "@/components/LottieAnimation";
 import { Slider } from "@/components/ui/slider";
 import type { SafeUser } from "@shared/schema";
+
+function getActiveLabel(ts: Date | string | null | undefined): string | null {
+  if (!ts) return null;
+  const hours = (Date.now() - new Date(ts).getTime()) / 3_600_000;
+  if (hours < 24) return "Active today";
+  if (hours < 72) return "Active recently";
+  return null;
+}
 
 interface Props { user: SafeUser }
 
@@ -21,6 +29,7 @@ export default function DiscoverPage({ user }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [matchData, setMatchData] = useState<{ user: SafeUser; matchId: string } | null>(null);
   const [swipeDir, setSwipeDir] = useState<"left" | "right" | null>(null);
+  const [swipeAnim, setSwipeAnim] = useState<"like" | "dislike" | null>(null);
   const lastVisitedId = useRef<string | null>(null);
 
   const { data, isLoading, refetch } = useQuery<{ profiles: SafeUser[] }>({
@@ -66,10 +75,12 @@ export default function DiscoverPage({ user }: Props) {
 
   const advanceCard = (dir: "left" | "right") => {
     setSwipeDir(dir);
+    setSwipeAnim(dir === "right" ? "like" : "dislike");
     setTimeout(() => {
       setSwipeDir(null);
+      setSwipeAnim(null);
       setCurrentIndex(i => i + 1);
-    }, 350);
+    }, 500);
   };
 
   const handleRefresh = () => {
@@ -83,6 +94,18 @@ export default function DiscoverPage({ user }: Props) {
 
   return (
     <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
+      {/* Like / dislike Lottie overlay */}
+      {swipeAnim && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+          <LottieAnimation
+            src={swipeAnim === "like" ? "/lottie/filling-heart.json" : "/lottie/cute-broken-heart.json"}
+            loop={false}
+            autoplay
+            style={{ width: 220, height: 220 }}
+          />
+        </div>
+      )}
+
       <div className="flex items-center justify-between px-5 pt-12 pb-4">
         <div className="flex items-center gap-2.5">
           <img src="/gustilk-logo.svg" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
@@ -214,6 +237,12 @@ export default function DiscoverPage({ user }: Props) {
                     <MapPin size={13} color="rgba(201,168,76,0.8)" />
                     <p className="text-white/60 text-sm">{current.city}{current.state ? `, ${current.state}` : ""}, {current.country}</p>
                   </div>
+                  {getActiveLabel(current.activitySeenAt) && (
+                    <div className="flex items-center gap-1.5 mt-1.5" data-testid={`status-active-${current.id}`}>
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" style={{ boxShadow: "0 0 6px #34d399" }} />
+                      <span className="text-emerald-400 text-xs font-medium">{getActiveLabel(current.activitySeenAt)}</span>
+                    </div>
+                  )}
                   {current.bio && (
                     <p className="text-white/50 text-xs mt-2 line-clamp-2 leading-relaxed">{current.bio}</p>
                   )}

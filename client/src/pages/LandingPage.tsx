@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
+import LottieAnimation from "@/components/LottieAnimation";
 import { Heart, Shield, Users, Eye, EyeOff, Phone, Mail, ArrowLeft, Globe, ChevronDown, Search, X, Fingerprint } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useTranslation } from "react-i18next";
@@ -63,19 +64,19 @@ export default function LandingPage() {
 function Logo() {
   return (
     <div className="text-center mb-5">
-      <div className="relative inline-flex items-center justify-center mb-1" style={{ perspective: "600px" }}>
+      <div className="relative inline-flex items-center justify-center mb-1">
         <img
           src="/gustilk-logo.svg"
           alt="Gûstîlk"
-          className="relative logo-flip"
           style={{
             width: "min(80px, 26vw)",
             height: "auto",
             objectFit: "contain",
-            filter: "none",
-
           }}
         />
+        <div className="absolute -top-6 -right-6" style={{ width: 56, height: 56, pointerEvents: "none" }}>
+          <LottieAnimation src="/lottie/valentine-hearts.json" loop autoplay style={{ width: "100%", height: "100%" }} />
+        </div>
       </div>
       <h1 className="font-serif text-5xl font-bold text-gold tracking-wide">Gûstîlk</h1>
       <p className="text-cream/30 text-xs tracking-[0.3em] uppercase mt-1">Yezidi · Community</p>

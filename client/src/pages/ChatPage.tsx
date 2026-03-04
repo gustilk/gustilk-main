@@ -9,6 +9,7 @@ import type { SafeUser, Message, MatchWithUser, Gift as GiftType } from "@shared
 import ReportModal from "@/components/ReportModal";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
 import { useVideoCallContext } from "@/hooks/useVideoCall";
+import Gift3D from "@/components/Gift3D";
 
 interface Props {
   user: SafeUser;
@@ -17,22 +18,22 @@ interface Props {
 
 // ─── Gift catalogue ────────────────────────────────────────────────────────
 export const GIFTS = [
-  { id: "rose",        img: "/gifts/rose.png",        name: "Rose",       color: "#e83e6c" },
-  { id: "heart",       img: "/gifts/heart.png",       name: "Heart",      color: "#ef4444" },
-  { id: "bouquet",     img: "/gifts/bouquet.png",     name: "Bouquet",    color: "#d4608a" },
-  { id: "diamond",     img: "/gifts/diamond.png",     name: "Diamond",    color: "#67e8f9" },
-  { id: "ring",        img: "/gifts/ring.png",        name: "Ring",       color: "#a855f7" },
-  { id: "crown",       img: "/gifts/crown.png",       name: "Crown",      color: "#f59e0b" },
-  { id: "balloon",     img: "/gifts/balloon.png",     name: "Balloon",    color: "#f97316" },
-  { id: "sparkle",     img: "/gifts/sparkle.png",     name: "Sparkle",    color: "#c9a84c" },
-  { id: "chocolate",   img: "/gifts/chocolate.png",   name: "Gift Box",   color: "#d4608a" },
-  { id: "bear",        img: "/gifts/bear.png",        name: "Bear",       color: "#c9a84c" },
-  { id: "star",        img: "/gifts/star.png",        name: "Magic Wand", color: "#eab308" },
-  { id: "butterfly",   img: "/gifts/butterfly.png",   name: "Butterfly",  color: "#7b3fa0" },
+  { id: "rose",      name: "Rose",       color: "#e83e6c" },
+  { id: "heart",     name: "Heart",      color: "#ef4444" },
+  { id: "bouquet",   name: "Bouquet",    color: "#d4608a" },
+  { id: "diamond",   name: "Diamond",    color: "#67e8f9" },
+  { id: "ring",      name: "Ring",       color: "#a855f7" },
+  { id: "crown",     name: "Crown",      color: "#f59e0b" },
+  { id: "balloon",   name: "Balloon",    color: "#f97316" },
+  { id: "sparkle",   name: "Sparkle",    color: "#c9a84c" },
+  { id: "chocolate", name: "Chocolate",  color: "#d4608a" },
+  { id: "bear",      name: "Kiss",       color: "#c9a84c" },
+  { id: "star",      name: "Love",       color: "#eab308" },
+  { id: "butterfly", name: "Energy",     color: "#7b3fa0" },
 ];
 
 function giftById(id: string) {
-  return GIFTS.find(g => g.id === id) ?? { id, img: null as string | null, name: "Gift", color: "#c9a84c" };
+  return GIFTS.find(g => g.id === id) ?? { id, name: "Gift", color: "#c9a84c" };
 }
 
 // ─── Merged timeline item ─────────────────────────────────────────────────
@@ -231,11 +232,40 @@ export default function ChatPage({ user, matchId }: Props) {
             <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
           </div>
         ) : timeline.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-center gap-3 py-12">
+          <div className="flex-1 flex flex-col items-center justify-center text-center gap-4 py-12 px-4">
             <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ border: "2px solid rgba(201,168,76,0.3)" }}>
               <span className="text-2xl text-gold font-serif">✦</span>
             </div>
-            <p className="text-cream/40 text-sm">You matched! Say hello to <strong className="text-gold">{otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0]}</strong></p>
+            <div>
+              <p className="text-cream/60 text-sm font-medium mb-1">
+                {t("chat.matchedWith")} <strong className="text-gold">{otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0]}</strong>!
+              </p>
+              <p className="text-cream/30 text-xs">{t("chat.breakIcePrompt")}</p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-2 max-w-xs">
+              {([
+                t("chat.icebreaker1"),
+                t("chat.icebreaker2"),
+                t("chat.icebreaker3"),
+                t("chat.icebreaker4"),
+                t("chat.icebreaker5"),
+              ] as string[]).map((msg) => (
+                <button
+                  key={msg}
+                  data-testid={`icebreaker-${msg.slice(0, 10).replace(/\s/g, "-").toLowerCase()}`}
+                  onClick={() => sendMutation.mutate(msg)}
+                  disabled={sendMutation.isPending}
+                  className="px-3 py-2 rounded-full text-xs font-medium transition-all disabled:opacity-50"
+                  style={{
+                    background: "rgba(201,168,76,0.1)",
+                    border: "1px solid rgba(201,168,76,0.3)",
+                    color: "rgba(253,248,240,0.75)",
+                  }}
+                >
+                  {msg}
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
           timeline.map(item =>
@@ -357,20 +387,10 @@ function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
               borderRadius: "inherit",
             }}
           />
-          {/* Gift image — drop-shadow for 3D pop */}
-          {g.img ? (
-            <img
-              src={g.img}
-              alt={g.name}
-              className="w-16 h-16 object-contain relative z-10"
-              style={{ filter: `drop-shadow(0 4px 12px ${g.color}88) drop-shadow(0 2px 4px rgba(0,0,0,0.6))` }}
-            />
-          ) : (
-            <span className="text-6xl leading-none relative z-10" role="img" aria-label={g.name}
-              style={{ filter: `drop-shadow(0 4px 12px rgba(201,168,76,0.6)) drop-shadow(0 2px 4px rgba(0,0,0,0.6))` }}>
-              🎁
-            </span>
-          )}
+          {/* Gift — CSS 3D animation */}
+          <div className="relative z-10">
+            <Gift3D id={gift.giftType} size={60} />
+          </div>
           {/* Label */}
           <p className="text-xs font-black uppercase tracking-widest relative z-10"
             style={{ color: g.color, textShadow: `0 0 12px ${g.color}88` }}>
@@ -426,7 +446,7 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                   key={g.id}
                   onClick={() => setSelected(g.id === selected ? null : g.id)}
                   data-testid={`gift-option-${g.id}`}
-                  className="relative flex flex-col items-center gap-1.5 py-3 rounded-2xl overflow-hidden transition-all"
+                  className="relative flex flex-col items-center gap-1.5 py-3 rounded-2xl transition-all"
                   style={isSelected ? {
                     background: `radial-gradient(ellipse at 35% 25%, ${g.color}55 0%, ${g.color}28 50%, #0d061888 100%)`,
                     border: `2px solid ${g.color}bb`,
@@ -443,19 +463,9 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                     background: "linear-gradient(160deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 45%, transparent 60%)",
                     borderRadius: "inherit",
                   }} />
-                  {g.img ? (
-                    <img
-                      src={g.img}
-                      alt={g.name}
-                      className="w-10 h-10 object-contain relative z-10"
-                      style={isSelected ? { filter: `drop-shadow(0 2px 6px ${g.color}99) drop-shadow(0 1px 3px rgba(0,0,0,0.7))` } : { filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.5))" }}
-                    />
-                  ) : (
-                    <span className="text-2xl leading-none relative z-10"
-                      style={isSelected ? { filter: `drop-shadow(0 2px 6px ${g.color}99) drop-shadow(0 1px 3px rgba(0,0,0,0.7))` } : { filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.5))" }}>
-                      🎁
-                    </span>
-                  )}
+                  <div className="relative z-10">
+                    <Gift3D id={g.id} size={42} />
+                  </div>
                   <span className="text-[9px] font-black uppercase tracking-wide relative z-10"
                     style={{ color: isSelected ? g.color : "rgba(253,248,240,0.4)", textShadow: isSelected ? `0 0 8px ${g.color}66` : "none" }}>
                     {g.name}
