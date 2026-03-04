@@ -25,24 +25,39 @@ def gh(method, path, body=None):
 
 WORKSPACE = "/home/runner/workspace"
 
-# Directories and individual files to include
+# Directories to scan recursively
 INCLUDE_DIRS = [
     "server",
     "shared",
     "client/src",
     "script",
+    "client/public/lottie",
 ]
 
-# Extensions to include
+# Root-level individual files that Railway needs
+ROOT_FILES = [
+    "package.json",
+    "package-lock.json",
+    "Dockerfile",
+    "vite.config.ts",
+    "tailwind.config.ts",
+    "tsconfig.json",
+    "drizzle.config.ts",
+    "components.json",
+    "nixpacks.toml",
+    "client/index.html",
+]
+
+# Extensions to include when scanning directories
 INCLUDE_EXTS = {".ts", ".tsx", ".js", ".json", ".css", ".html", ".md"}
 
 # Paths to skip entirely
 SKIP_PREFIXES = [
-    "client/src/i18n/locales",  # large locale files unchanged
     "node_modules",
     ".git",
     "dist",
     ".local",
+    "attached_assets",
 ]
 
 SKIP_EXACT = {
@@ -59,19 +74,27 @@ def should_include(rel_path):
     return ext in INCLUDE_EXTS
 
 def collect_files():
-    files = []
+    files = set()
+
+    # Add explicit root-level files
+    for f in ROOT_FILES:
+        abs_path = os.path.join(WORKSPACE, f)
+        if os.path.exists(abs_path):
+            files.add(f)
+
+    # Walk include dirs
     for d in INCLUDE_DIRS:
         abs_dir = os.path.join(WORKSPACE, d)
         if not os.path.isdir(abs_dir):
             continue
         for root, dirs, filenames in os.walk(abs_dir):
-            # Skip hidden dirs
             dirs[:] = [x for x in dirs if not x.startswith(".")]
             for fn in filenames:
                 abs_path = os.path.join(root, fn)
                 rel_path = os.path.relpath(abs_path, WORKSPACE)
                 if should_include(rel_path):
-                    files.append(rel_path)
+                    files.add(rel_path)
+
     return sorted(files)
 
 def read_b64(path):
@@ -109,7 +132,7 @@ new_tree = gh("POST", f"/repos/{REPO}/git/trees", {"base_tree": base_tree, "tree
 
 # Create commit
 new_commit = gh("POST", f"/repos/{REPO}/git/commits", {
-    "message": "Sync: full admin panel (28 sub-pages), analytics fix, all new files",
+    "message": "Fix: include package.json, Dockerfile, config files, and Lottie assets in push",
     "tree": new_tree["sha"],
     "parents": [base_sha],
 })
