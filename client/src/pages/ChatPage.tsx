@@ -513,18 +513,28 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
 
 // ─── Gift bubble ────────────────────────────────────────────────────────────
 function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
+  const storageKey = `gift-revealed-${gift.id}`;
+  const [revealed, setRevealed] = useState(() => {
+    try { return localStorage.getItem(storageKey) === "1"; } catch { return false; }
+  });
   const [showReveal, setShowReveal] = useState(false);
   const g = giftById(gift.giftType);
   const timeLabel = formatDistanceToNow(new Date(gift.createdAt!), { addSuffix: true });
 
+  const handleClose = () => {
+    setShowReveal(false);
+    setRevealed(true);
+    try { localStorage.setItem(storageKey, "1"); } catch {}
+  };
+
   return (
     <>
       {showReveal && (
-        <GiftRevealOverlay gift={gift} onClose={() => setShowReveal(false)} />
+        <GiftRevealOverlay gift={gift} onClose={handleClose} />
       )}
       <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
         <div className="flex flex-col items-center gap-2 max-w-[190px]" data-testid={`gift-bubble-${gift.id}`}>
-          {/* Gift card — tappable */}
+          {/* Gift card */}
           <button
             onClick={() => setShowReveal(true)}
             data-testid={`button-reveal-gift-${gift.id}`}
@@ -532,23 +542,36 @@ function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
             style={{
               background: "#0d0618",
               cursor: "pointer",
-              border: `1px solid ${g.color}44`,
-              boxShadow: `0 0 16px ${g.color}22`,
+              border: `1px solid ${g.color}${revealed ? "66" : "44"}`,
+              boxShadow: `0 0 ${revealed ? "20px" : "16px"} ${g.color}${revealed ? "30" : "22"}`,
             }}
           >
-            <div
-              className="flex items-center justify-center rounded-full"
-              style={{
-                width: 72,
-                height: 72,
-                background: `radial-gradient(circle, ${g.color}18 0%, transparent 75%)`,
-                border: `2px solid ${g.color}55`,
-                animation: "gift-bubble-pulse 2s ease-in-out infinite",
-              }}
-            >
-              <Gift size={34} style={{ color: g.color, opacity: 0.85 }} />
-            </div>
-            <p style={{ color: g.color, opacity: 0.5 }} className="text-[9px] mt-1 tracking-wide">Tap to reveal ✦</p>
+            {revealed ? (
+              /* Revealed — show the Lottie animation */
+              <div style={{ width: 80, height: 80 }}>
+                {g.lottie
+                  ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} placeholderSize={34} />
+                  : <span className="text-5xl">🎁</span>
+                }
+              </div>
+            ) : (
+              /* Unrevealed — mystery icon */
+              <>
+                <div
+                  className="flex items-center justify-center rounded-full"
+                  style={{
+                    width: 72,
+                    height: 72,
+                    background: `radial-gradient(circle, ${g.color}18 0%, transparent 75%)`,
+                    border: `2px solid ${g.color}55`,
+                    animation: "gift-bubble-pulse 2s ease-in-out infinite",
+                  }}
+                >
+                  <Gift size={34} style={{ color: g.color, opacity: 0.85 }} />
+                </div>
+                <p style={{ color: g.color, opacity: 0.5 }} className="text-[9px] mt-1 tracking-wide">Tap to reveal ✦</p>
+              </>
+            )}
           </button>
           <style>{`@keyframes gift-bubble-pulse { 0%,100%{box-shadow:0 0 0 0 transparent} 50%{box-shadow:0 0 10px 3px ${g.color}30} }`}</style>
           {/* Message + timestamp */}
