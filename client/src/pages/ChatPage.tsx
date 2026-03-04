@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { ArrowLeft, Send, Lock, Star, Flag, Video, Gift } from "lucide-react";
+import { ArrowLeft, Send, Lock, Star, Flag, Video, Gift, ChevronRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
 import type { SafeUser, Message, MatchWithUser, Gift as GiftType } from "@shared/schema";
@@ -203,21 +203,31 @@ export default function ChatPage({ user, matchId }: Props) {
         <button onClick={() => setLocation("/matches")} data-testid="button-back" className="text-cream/60">
           <ArrowLeft size={22} />
         </button>
-        <div className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-serif text-lg font-bold text-gold overflow-hidden"
-          style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "2px solid rgba(201,168,76,0.3)" }}>
-          {otherUser?.photos && otherUser.photos.length > 0
-            ? <ProtectedPhoto src={otherUser.photos[0]} alt={otherUser.firstName ?? ""} className="w-full h-full object-cover" />
-            : (otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "M").charAt(0)
-          }
-        </div>
-        <div className="flex-1 min-w-0">
-          <h2 className="text-cream font-semibold text-sm" data-testid="text-chat-name">
-            {otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "Loading…"}
-          </h2>
-          <p className="text-cream/40 text-xs">
-            {otherUser ? `${otherUser.city}${otherUser.state ? `, ${otherUser.state}` : ""}, ${otherUser.country}` : ""}
-          </p>
-        </div>
+        <button
+          onClick={() => otherUser && setLocation(`/profile/${otherUser.id}`)}
+          data-testid="button-view-profile"
+          className="flex items-center gap-3 flex-1 min-w-0 active:opacity-70 transition-opacity text-left"
+          disabled={!otherUser}
+        >
+          <div className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-serif text-lg font-bold text-gold overflow-hidden"
+            style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "2px solid rgba(201,168,76,0.3)" }}>
+            {otherUser?.photos && otherUser.photos.length > 0
+              ? <ProtectedPhoto src={otherUser.photos[0]} alt={otherUser.firstName ?? ""} className="w-full h-full object-cover" />
+              : (otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "M").charAt(0)
+            }
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1">
+              <h2 className="text-cream font-semibold text-sm" data-testid="text-chat-name">
+                {otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "Loading…"}
+              </h2>
+              <ChevronRight size={13} className="text-cream/30 flex-shrink-0" />
+            </div>
+            <p className="text-cream/40 text-xs">
+              {otherUser ? `${otherUser.city}${otherUser.state ? `, ${otherUser.state}` : ""}, ${otherUser.country}` : ""}
+            </p>
+          </div>
+        </button>
         {otherUser && (
           <div className="flex items-center gap-1">
             <button onClick={() => startCall(matchId, otherUser.id,
