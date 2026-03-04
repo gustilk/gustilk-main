@@ -434,7 +434,7 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
   return (
     <div
       className="fixed inset-0 z-[300] flex flex-col items-center justify-center select-none"
-      style={{ background: "rgba(8,2,18,0.97)", backdropFilter: "blur(20px)" }}
+      style={{ background: "transparent" }}
       onClick={onClose}
       data-testid="gift-reveal-overlay"
     >
