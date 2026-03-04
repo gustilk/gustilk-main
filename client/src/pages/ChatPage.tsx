@@ -43,14 +43,6 @@ export const GIFTS = [
   { id: "pink-gift",    lottie: "/lottie/pink-gift-box.json",      name: "Gift Box",    color: "#d4608a" },
   { id: "val-kiss",     lottie: "/lottie/valentines-kiss-2.json",  name: "Kiss",        color: "#ef4444" },
   { id: "rose-v3",      lottie: "/lottie/rose-v3.json",            name: "Red Rose",    color: "#e83e6c" },
-  { id: "rose-3",       lottie: "/lottie/rose3.json",              name: "Rose",        color: "#d4608a" },
-  { id: "rose-4",       lottie: "/lottie/rose4.json",              name: "Rose",        color: "#a855f7" },
-  { id: "rose-v2",      lottie: "/lottie/rose-v2.json",            name: "Rose",        color: "#c9a84c" },
-  { id: "gem",          lottie: "/lottie/diamond.json",             name: "Gem",         color: "#67e8f9" },
-  { id: "emoji",        lottie: "/lottie/emoji.json",               name: "Emoji",       color: "#f59e0b" },
-  { id: "energy2",      lottie: "/lottie/love-energy.json",         name: "Energy",      color: "#e83e6c" },
-  { id: "kiss3",        lottie: "/lottie/valentines-kiss.json",     name: "Kiss",        color: "#ef4444" },
-  { id: "break3",       lottie: "/lottie/broken-heart.json",        name: "Broken",      color: "#6366f1" },
 ];
 
 function giftById(id: string) {
