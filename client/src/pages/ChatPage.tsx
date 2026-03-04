@@ -513,42 +513,67 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
 
 // ─── Gift bubble ────────────────────────────────────────────────────────────
 function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
+  const storageKey = `gift-revealed-${gift.id}`;
+  const [revealed, setRevealed] = useState(() => {
+    try { return localStorage.getItem(storageKey) === "1"; } catch { return false; }
+  });
   const [showReveal, setShowReveal] = useState(false);
   const g = giftById(gift.giftType);
   const timeLabel = formatDistanceToNow(new Date(gift.createdAt!), { addSuffix: true });
 
+  const handleClose = () => {
+    setShowReveal(false);
+    setRevealed(true);
+    try { localStorage.setItem(storageKey, "1"); } catch {}
+  };
+
   return (
     <>
       {showReveal && (
-        <GiftRevealOverlay gift={gift} onClose={() => setShowReveal(false)} />
+        <GiftRevealOverlay gift={gift} onClose={handleClose} />
       )}
       <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
         <div className="flex flex-col items-center gap-2 max-w-[190px]" data-testid={`gift-bubble-${gift.id}`}>
-          {/* Gift card — tappable */}
+          {/* Gift card */}
           <button
             onClick={() => setShowReveal(true)}
             data-testid={`button-reveal-gift-${gift.id}`}
-            className="flex flex-col items-center gap-1 px-4 py-3 rounded-2xl w-full active:scale-95 transition-transform"
-            style={{
-              background: "#0d0618",
-              cursor: "pointer",
-              border: `1px solid ${g.color}44`,
-              boxShadow: `0 0 16px ${g.color}22`,
-            }}
+            className="flex flex-col items-center gap-1 active:scale-95 transition-transform"
+            style={{ background: "none", border: "none", cursor: "pointer" }}
           >
-            <div
-              className="flex items-center justify-center rounded-full"
-              style={{
-                width: 72,
-                height: 72,
-                background: `radial-gradient(circle, ${g.color}18 0%, transparent 75%)`,
-                border: `2px solid ${g.color}55`,
-                animation: "gift-bubble-pulse 2s ease-in-out infinite",
-              }}
-            >
-              <Gift size={34} style={{ color: g.color, opacity: 0.85 }} />
-            </div>
-            <p style={{ color: g.color, opacity: 0.5 }} className="text-[9px] mt-1 tracking-wide">Tap to reveal ✦</p>
+            {revealed ? (
+              /* Revealed — bare animation, no card */
+              <div style={{ width: 90, height: 90 }}>
+                {g.lottie
+                  ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} placeholderSize={34} />
+                  : <span className="text-5xl">🎁</span>
+                }
+              </div>
+            ) : (
+              /* Unrevealed — mystery card */
+              <div
+                className="flex flex-col items-center gap-1 px-4 py-3 rounded-2xl"
+                style={{
+                  background: "#0d0618",
+                  border: `1px solid ${g.color}44`,
+                  boxShadow: `0 0 16px ${g.color}22`,
+                }}
+              >
+                <div
+                  className="flex items-center justify-center rounded-full"
+                  style={{
+                    width: 72,
+                    height: 72,
+                    background: `radial-gradient(circle, ${g.color}18 0%, transparent 75%)`,
+                    border: `2px solid ${g.color}55`,
+                    animation: "gift-bubble-pulse 2s ease-in-out infinite",
+                  }}
+                >
+                  <Gift size={34} style={{ color: g.color, opacity: 0.85 }} />
+                </div>
+                <p style={{ color: g.color, opacity: 0.5 }} className="text-[9px] mt-1 tracking-wide">Tap to reveal ✦</p>
+              </div>
+            )}
           </button>
           <style>{`@keyframes gift-bubble-pulse { 0%,100%{box-shadow:0 0 0 0 transparent} 50%{box-shadow:0 0 10px 3px ${g.color}30} }`}</style>
           {/* Message + timestamp */}
@@ -603,8 +628,10 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                   data-testid={`gift-option-${g.id}`}
                   className="flex flex-col items-center gap-1 py-2 rounded-xl transition-all"
                   style={{
-                    background: "#0d0618",
-                    transform: isSelected ? "scale(1.1) translateY(-2px)" : "scale(1)",
+                    background: "none",
+                    transform: isSelected ? "scale(1.15) translateY(-3px)" : "scale(1)",
+                    outline: isSelected ? `2px solid ${g.color}88` : "none",
+                    borderRadius: 12,
                   }}
                 >
                   <div style={{ width: 60, height: 60 }}>
