@@ -56,11 +56,6 @@ function safeUser(user: Record<string, any>) {
   return rest;
 }
 
-const ALLOWED_ORIGINS = [
-  "https://gustilk.com",
-  "https://www.gustilk.com",
-];
-
 function getOriginAndRpId(req: Request): { origin: string; rpID: string } {
   const origin = req.get("origin") || `https://${req.hostname}`;
   const hostname = new URL(origin).hostname;
