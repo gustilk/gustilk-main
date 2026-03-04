@@ -18,16 +18,31 @@ interface Props {
 
 // ─── Gift catalogue ────────────────────────────────────────────────────────
 export const GIFTS = [
-  { id: "rose",      lottie: "/lottie/rose.json",            name: "Rose",       color: "#e83e6c" },
-  { id: "butterfly", lottie: "/lottie/butterfly.json",       name: "Butterfly",  color: "#7b3fa0" },
-  { id: "diamond",   lottie: "/lottie/add-to-favorites.json",name: "Favourite",  color: "#f59e0b" },
-  { id: "crown",     lottie: "/lottie/valentines.json",      name: "Valentine",  color: "#c9a84c" },
-  { id: "balloon",   lottie: "/lottie/butterfly-hearts.json",name: "Butterfly ♥",color: "#f97316" },
-  { id: "sparkle",   lottie: "/lottie/celebration.json",     name: "Celebrate",  color: "#c9a84c" },
-  { id: "birds",     lottie: "/lottie/bird-pair.json",       name: "Birds",      color: "#67e8f9" },
-  { id: "garden",    lottie: "/lottie/couple-garden.json",   name: "Garden",     color: "#22c55e" },
-  { id: "ring",      lottie: "/lottie/rose2.json",           name: "Rose ♥",     color: "#a855f7" },
-  { id: "unbox",     lottie: "/lottie/gift-unbox.json",      name: "Surprise",   color: "#c9a84c" },
+  { id: "rose",         lottie: "/lottie/rose.json",              name: "Rose",         color: "#e83e6c" },
+  { id: "butterfly",    lottie: "/lottie/butterfly.json",          name: "Butterfly",    color: "#7b3fa0" },
+  { id: "diamond",      lottie: "/lottie/add-to-favorites.json",  name: "Favourite",    color: "#f59e0b" },
+  { id: "crown",        lottie: "/lottie/valentines.json",         name: "Valentine",    color: "#c9a84c" },
+  { id: "balloon",      lottie: "/lottie/butterfly-hearts.json",   name: "Butterfly ♥", color: "#f97316" },
+  { id: "sparkle",      lottie: "/lottie/celebration.json",        name: "Celebrate",   color: "#c9a84c" },
+  { id: "birds",        lottie: "/lottie/bird-pair.json",          name: "Birds",       color: "#67e8f9" },
+  { id: "garden",       lottie: "/lottie/couple-garden.json",      name: "Garden",      color: "#22c55e" },
+  { id: "ring",         lottie: "/lottie/rose2.json",              name: "Rose ♥",      color: "#a855f7" },
+  { id: "unbox",        lottie: "/lottie/gift-unbox.json",         name: "Surprise",    color: "#c9a84c" },
+  { id: "heart-pulse",  lottie: "/lottie/heart-pulse.json",        name: "Heart",       color: "#ef4444" },
+  { id: "filling-heart",lottie: "/lottie/filling-heart.json",      name: "Full Heart",  color: "#e83e6c" },
+  { id: "heart-kiss",   lottie: "/lottie/heart-kiss.json",         name: "Flying Kiss", color: "#d4608a" },
+  { id: "heart-cry",    lottie: "/lottie/heart-crying.json",       name: "Heart Cry",   color: "#7b3fa0" },
+  { id: "broken-heart", lottie: "/lottie/broken-heart-2.json",     name: "Broken",      color: "#6366f1" },
+  { id: "cute-broken",  lottie: "/lottie/cute-broken-heart.json",  name: "Oops",        color: "#a855f7" },
+  { id: "diamond-gem",  lottie: "/lottie/diamond-gem.json",        name: "Diamond",     color: "#67e8f9" },
+  { id: "engagement",   lottie: "/lottie/engagement-ring.json",    name: "Ring",        color: "#c9a84c" },
+  { id: "flower-grow",  lottie: "/lottie/flower-growing.json",     name: "Flower",      color: "#22c55e" },
+  { id: "girl-face",    lottie: "/lottie/girl-face.json",          name: "Wink",        color: "#d4608a" },
+  { id: "love-energy",  lottie: "/lottie/love-energy-2.json",      name: "Love",        color: "#c9a84c" },
+  { id: "love-letter",  lottie: "/lottie/love-letter.json",        name: "Letter",      color: "#e83e6c" },
+  { id: "pink-gift",    lottie: "/lottie/pink-gift-box.json",      name: "Gift Box",    color: "#d4608a" },
+  { id: "val-kiss",     lottie: "/lottie/valentines-kiss-2.json",  name: "Kiss",        color: "#ef4444" },
+  { id: "rose-v3",      lottie: "/lottie/rose-v3.json",            name: "Red Rose",    color: "#e83e6c" },
 ];
 
 function giftById(id: string) {
@@ -278,16 +293,20 @@ export default function ChatPage({ user, matchId }: Props) {
       {/* Input bar */}
       <div className="flex items-end gap-2 px-4 py-3"
         style={{ background: "rgba(13,6,24,0.97)", borderTop: "1px solid rgba(201,168,76,0.15)" }}>
-        {/* Gift button */}
-        <button
-          onClick={() => setShowGiftPicker(true)}
-          data-testid="button-open-gift-picker"
-          className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 transition-all"
-          style={{ background: "rgba(201,168,76,0.1)", border: "1.5px solid rgba(201,168,76,0.25)", color: "#c9a84c" }}
-          title="Send a gift"
-        >
-          <Gift size={18} />
-        </button>
+        {/* Gift button — premium only */}
+        <div className="relative flex-shrink-0">
+          <button
+            onClick={() => setShowGiftPicker(true)}
+            data-testid="button-open-gift-picker"
+            className="w-11 h-11 rounded-full flex items-center justify-center transition-all"
+            style={{ background: "rgba(201,168,76,0.1)", border: "1.5px solid rgba(201,168,76,0.25)", color: "#c9a84c" }}
+            title="Send a gift (Premium)"
+          >
+            <Gift size={18} />
+          </button>
+          {/* Crown badge */}
+          <span className="absolute -top-1 -right-1 text-[9px] leading-none select-none pointer-events-none">👑</span>
+        </div>
 
         <div className="flex-1 rounded-2xl px-4 py-2.5 flex items-end"
           style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.2)" }}>
