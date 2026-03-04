@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { ArrowLeft, Send, Lock, Star, Flag, Video, Gift } from "lucide-react";
+import { ArrowLeft, Send, Lock, Star, Flag, Video, Gift, ChevronRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
 import type { SafeUser, Message, MatchWithUser, Gift as GiftType } from "@shared/schema";
@@ -203,21 +203,31 @@ export default function ChatPage({ user, matchId }: Props) {
         <button onClick={() => setLocation("/matches")} data-testid="button-back" className="text-cream/60">
           <ArrowLeft size={22} />
         </button>
-        <div className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-serif text-lg font-bold text-gold overflow-hidden"
-          style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "2px solid rgba(201,168,76,0.3)" }}>
-          {otherUser?.photos && otherUser.photos.length > 0
-            ? <ProtectedPhoto src={otherUser.photos[0]} alt={otherUser.firstName ?? ""} className="w-full h-full object-cover" />
-            : (otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "M").charAt(0)
-          }
-        </div>
-        <div className="flex-1 min-w-0">
-          <h2 className="text-cream font-semibold text-sm" data-testid="text-chat-name">
-            {otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "Loading…"}
-          </h2>
-          <p className="text-cream/40 text-xs">
-            {otherUser ? `${otherUser.city}${otherUser.state ? `, ${otherUser.state}` : ""}, ${otherUser.country}` : ""}
-          </p>
-        </div>
+        <button
+          onClick={() => otherUser && setLocation(`/profile/${otherUser.id}`)}
+          data-testid="button-view-profile"
+          className="flex items-center gap-3 flex-1 min-w-0 active:opacity-70 transition-opacity text-left"
+          disabled={!otherUser}
+        >
+          <div className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-serif text-lg font-bold text-gold overflow-hidden"
+            style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "2px solid rgba(201,168,76,0.3)" }}>
+            {otherUser?.photos && otherUser.photos.length > 0
+              ? <ProtectedPhoto src={otherUser.photos[0]} alt={otherUser.firstName ?? ""} className="w-full h-full object-cover" />
+              : (otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "M").charAt(0)
+            }
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1">
+              <h2 className="text-cream font-semibold text-sm" data-testid="text-chat-name">
+                {otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "Loading…"}
+              </h2>
+              <ChevronRight size={13} className="text-cream/30 flex-shrink-0" />
+            </div>
+            <p className="text-cream/40 text-xs">
+              {otherUser ? `${otherUser.city}${otherUser.state ? `, ${otherUser.state}` : ""}, ${otherUser.country}` : ""}
+            </p>
+          </div>
+        </button>
         {otherUser && (
           <div className="flex items-center gap-1">
             <button onClick={() => startCall(matchId, otherUser.id,
@@ -380,35 +390,172 @@ function MessageBubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
   );
 }
 
+// ─── Gift reveal overlay ─────────────────────────────────────────────────────
+const PARTY_SYMBOLS = ["❤️", "✨", "⭐", "🌸", "💫", "🌺", "💖", "🎀", "✦", "♥", "🌟", "💝"];
+
+let revealCssInjected = false;
+function injectRevealCSS() {
+  if (revealCssInjected || typeof document === "undefined") return;
+  revealCssInjected = true;
+  const s = document.createElement("style");
+  s.id = "gift-reveal-css";
+  s.textContent = `
+    @keyframes gr-float-up   { 0%{opacity:0;transform:translateY(0) rotate(0deg) scale(.5)} 8%{opacity:1} 85%{opacity:.9} 100%{opacity:0;transform:translateY(-105vh) rotate(540deg) scale(1.1)} }
+    @keyframes gr-fall-down  { 0%{opacity:0;transform:translateY(0) rotate(0deg) scale(.5)} 8%{opacity:1} 85%{opacity:.9} 100%{opacity:0;transform:translateY(110vh) rotate(-360deg) scale(1)} }
+    @keyframes gr-pop-in     { 0%{opacity:0;transform:scale(.15) rotate(-20deg)} 55%{transform:scale(1.12) rotate(4deg)} 75%{transform:scale(.94) rotate(-2deg)} 90%{transform:scale(1.03) rotate(1deg)} 100%{opacity:1;transform:scale(1) rotate(0deg)} }
+    @keyframes gr-glow-pulse { 0%,100%{opacity:.55;transform:scale(1)} 50%{opacity:1;transform:scale(1.06)} }
+    @keyframes gr-name-in    { 0%{opacity:0;transform:translateY(24px)} 100%{opacity:1;transform:translateY(0)} }
+    @keyframes gr-hint-fade  { 0%{opacity:0} 100%{opacity:1} }
+  `;
+  document.head.appendChild(s);
+}
+
+function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => void }) {
+  const g = giftById(gift.giftType);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    injectRevealCSS();
+    const t = setTimeout(() => onCloseRef.current(), 3200);
+    return () => clearTimeout(t);
+  }, []);
+
+  const particles = useMemo(() => Array.from({ length: 52 }, (_, i) => ({
+    id: i,
+    symbol: PARTY_SYMBOLS[i % PARTY_SYMBOLS.length],
+    left: Math.random() * 100,
+    delay: Math.random() * 2.2,
+    duration: 2.6 + Math.random() * 2,
+    size: 13 + Math.floor(Math.random() * 20),
+    fromBottom: i % 3 !== 0,
+  })), []);
+
+  return (
+    <div
+      className="fixed inset-0 z-[300] flex flex-col items-center justify-center select-none"
+      style={{ background: "rgba(8,2,18,0.97)", backdropFilter: "blur(20px)" }}
+      onClick={onClose}
+      data-testid="gift-reveal-overlay"
+    >
+      {/* Particles */}
+      {particles.map(p => (
+        <span
+          key={p.id}
+          style={{
+            position: "absolute",
+            [p.fromBottom ? "bottom" : "top"]: "-5%",
+            left: `${p.left}%`,
+            fontSize: p.size,
+            pointerEvents: "none",
+            animation: `${p.fromBottom ? "gr-float-up" : "gr-fall-down"} ${p.duration}s ${p.delay}s ease-out forwards`,
+            opacity: 0,
+          }}
+        >
+          {p.symbol}
+        </span>
+      ))}
+
+      {/* Radial glow behind gift */}
+      <div
+        style={{
+          position: "absolute",
+          width: 340,
+          height: 340,
+          borderRadius: "50%",
+          background: `radial-gradient(circle, ${g.color}30 0%, ${g.color}10 50%, transparent 75%)`,
+          animation: "gr-glow-pulse 1.6s ease-in-out infinite",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Gift animation */}
+      <div
+        style={{
+          width: 230,
+          height: 230,
+          animation: "gr-pop-in 0.72s cubic-bezier(.22,1,.36,1) forwards",
+          opacity: 0,
+          position: "relative",
+          zIndex: 2,
+          filter: `drop-shadow(0 0 32px ${g.color}88)`,
+        }}
+        data-testid="gift-reveal-animation"
+      >
+        {g.lottie
+          ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} placeholderSize={80} />
+          : <span style={{ fontSize: 120 }}>🎁</span>
+        }
+      </div>
+
+      {/* Gift name + message */}
+      <div
+        className="text-center mt-6 px-8 z-10"
+        style={{ animation: "gr-name-in 0.6s 0.55s ease-out both" }}
+      >
+        <p
+          className="font-serif text-4xl font-bold"
+          style={{ color: g.color, textShadow: `0 0 24px ${g.color}88` }}
+          data-testid="gift-reveal-name"
+        >
+          {g.name}
+        </p>
+        {gift.message && (
+          <p className="text-cream/65 text-sm mt-3 italic leading-relaxed max-w-xs mx-auto">
+            "{gift.message}"
+          </p>
+        )}
+      </div>
+
+      {/* Tap hint */}
+      <p
+        className="absolute bottom-12 text-cream/25 text-xs tracking-wide"
+        style={{ animation: "gr-hint-fade 0.5s 1.5s ease both" }}
+      >
+        Tap anywhere to close
+      </p>
+    </div>
+  );
+}
+
 // ─── Gift bubble ────────────────────────────────────────────────────────────
 function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
+  const [showReveal, setShowReveal] = useState(false);
   const g = giftById(gift.giftType);
   const timeLabel = formatDistanceToNow(new Date(gift.createdAt!), { addSuffix: true });
+
   return (
-    <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-      <div className="flex flex-col items-center gap-2 max-w-[190px]" data-testid={`gift-bubble-${gift.id}`}>
-        {/* Gift card */}
-        <div
-          className="flex flex-col items-center gap-1 px-4 py-3 rounded-2xl w-full"
-          style={{ background: "#0d0618" }}
-        >
-          {/* Lottie animation */}
-          <div style={{ width: 80, height: 80 }}>
-            {g.lottie
-              ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} />
-              : <span className="text-5xl">🎁</span>
-            }
+    <>
+      {showReveal && (
+        <GiftRevealOverlay gift={gift} onClose={() => setShowReveal(false)} />
+      )}
+      <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+        <div className="flex flex-col items-center gap-2 max-w-[190px]" data-testid={`gift-bubble-${gift.id}`}>
+          {/* Gift card — tappable */}
+          <button
+            onClick={() => setShowReveal(true)}
+            data-testid={`button-reveal-gift-${gift.id}`}
+            className="flex flex-col items-center gap-1 px-4 py-3 rounded-2xl w-full active:scale-95 transition-transform"
+            style={{ background: "#0d0618", cursor: "pointer" }}
+          >
+            <div style={{ width: 80, height: 80 }}>
+              {g.lottie
+                ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} placeholderSize={34} />
+                : <span className="text-5xl">🎁</span>
+              }
+            </div>
+            <p className="text-cream/25 text-[9px] mt-0.5">Tap to reveal ✦</p>
+          </button>
+          {/* Message + timestamp */}
+          <div className="text-center px-1">
+            {gift.message && (
+              <p className="text-cream/55 text-xs leading-snug italic mb-1">"{gift.message}"</p>
+            )}
+            <p className="text-cream/25 text-[10px]">{isMine ? "You sent" : "Sent you"} a {g.name.toLowerCase()} · {timeLabel}</p>
           </div>
         </div>
-        {/* Message + timestamp outside the card */}
-        <div className="text-center px-1">
-          {gift.message && (
-            <p className="text-cream/55 text-xs leading-snug italic mb-1">"{gift.message}"</p>
-          )}
-          <p className="text-cream/25 text-[10px]">{isMine ? "You sent" : "Sent you"} a {g.name.toLowerCase()} · {timeLabel}</p>
-        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -457,7 +604,7 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                 >
                   <div style={{ width: 60, height: 60 }}>
                     {g.lottie
-                      ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} />
+                      ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} placeholderSize={24} />
                       : <span className="text-3xl">🎁</span>
                     }
                   </div>
