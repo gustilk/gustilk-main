@@ -9,6 +9,7 @@ import type { SafeUser, Message, MatchWithUser, Gift as GiftType } from "@shared
 import ReportModal from "@/components/ReportModal";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
 import { useVideoCallContext } from "@/hooks/useVideoCall";
+import LottieAnimation from "@/components/LottieAnimation";
 
 interface Props {
   user: SafeUser;
@@ -17,22 +18,22 @@ interface Props {
 
 // ─── Gift catalogue ────────────────────────────────────────────────────────
 export const GIFTS = [
-  { id: "rose",        img: "/gifts/rose.png",        name: "Rose",       color: "#e83e6c" },
-  { id: "heart",       img: "/gifts/heart.png",       name: "Heart",      color: "#ef4444" },
-  { id: "bouquet",     img: "/gifts/bouquet.png",     name: "Bouquet",    color: "#d4608a" },
-  { id: "diamond",     img: "/gifts/diamond.png",     name: "Diamond",    color: "#67e8f9" },
-  { id: "ring",        img: "/gifts/ring.png",        name: "Ring",       color: "#a855f7" },
-  { id: "crown",       img: "/gifts/crown.png",       name: "Crown",      color: "#f59e0b" },
-  { id: "balloon",     img: "/gifts/balloon.png",     name: "Balloon",    color: "#f97316" },
-  { id: "sparkle",     img: "/gifts/sparkle.png",     name: "Sparkle",    color: "#c9a84c" },
-  { id: "chocolate",   img: "/gifts/chocolate.png",   name: "Gift Box",   color: "#d4608a" },
-  { id: "bear",        img: "/gifts/bear.png",        name: "Bear",       color: "#c9a84c" },
-  { id: "star",        img: "/gifts/star.png",        name: "Magic Wand", color: "#eab308" },
-  { id: "butterfly",   img: "/gifts/butterfly.png",   name: "Butterfly",  color: "#7b3fa0" },
+  { id: "rose",      lottie: "/lottie/rose.json",           name: "Rose",       color: "#e83e6c" },
+  { id: "heart",     lottie: "/lottie/filling-heart.json",  name: "Heart",      color: "#ef4444" },
+  { id: "bouquet",   lottie: "/lottie/flower.json",         name: "Bouquet",    color: "#d4608a" },
+  { id: "diamond",   lottie: "/lottie/diamond.json",        name: "Diamond",    color: "#67e8f9" },
+  { id: "ring",      lottie: "/lottie/engagement-ring.json",name: "Ring",       color: "#a855f7" },
+  { id: "crown",     lottie: "/lottie/valentines.json",     name: "Crown",      color: "#f59e0b" },
+  { id: "balloon",   lottie: "/lottie/emoji.json",          name: "Balloon",    color: "#f97316" },
+  { id: "sparkle",   lottie: "/lottie/valentine-hearts.json",name: "Sparkle",   color: "#c9a84c" },
+  { id: "chocolate", lottie: "/lottie/chocolate-heart.json",name: "Chocolate",  color: "#d4608a" },
+  { id: "bear",      lottie: "/lottie/cat-kiss.json",       name: "Kiss",       color: "#c9a84c" },
+  { id: "star",      lottie: "/lottie/couple-love.json",    name: "Love",       color: "#eab308" },
+  { id: "butterfly", lottie: "/lottie/love-energy.json",   name: "Energy",     color: "#7b3fa0" },
 ];
 
 function giftById(id: string) {
-  return GIFTS.find(g => g.id === id) ?? { id, img: null as string | null, name: "Gift", color: "#c9a84c" };
+  return GIFTS.find(g => g.id === id) ?? { id, lottie: null as string | null, name: "Gift", color: "#c9a84c" };
 }
 
 // ─── Merged timeline item ─────────────────────────────────────────────────
@@ -386,14 +387,11 @@ function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
               borderRadius: "inherit",
             }}
           />
-          {/* Gift image — drop-shadow for 3D pop */}
-          {g.img ? (
-            <img
-              src={g.img}
-              alt={g.name}
-              className="w-16 h-16 object-contain relative z-10"
-              style={{ filter: `drop-shadow(0 4px 12px ${g.color}88) drop-shadow(0 2px 4px rgba(0,0,0,0.6))` }}
-            />
+          {/* Gift animation — Lottie */}
+          {g.lottie ? (
+            <div className="w-16 h-16 relative z-10">
+              <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} />
+            </div>
           ) : (
             <span className="text-6xl leading-none relative z-10" role="img" aria-label={g.name}
               style={{ filter: `drop-shadow(0 4px 12px rgba(201,168,76,0.6)) drop-shadow(0 2px 4px rgba(0,0,0,0.6))` }}>
@@ -472,13 +470,10 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                     background: "linear-gradient(160deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 45%, transparent 60%)",
                     borderRadius: "inherit",
                   }} />
-                  {g.img ? (
-                    <img
-                      src={g.img}
-                      alt={g.name}
-                      className="w-10 h-10 object-contain relative z-10"
-                      style={isSelected ? { filter: `drop-shadow(0 2px 6px ${g.color}99) drop-shadow(0 1px 3px rgba(0,0,0,0.7))` } : { filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.5))" }}
-                    />
+                  {g.lottie ? (
+                    <div className="w-10 h-10 relative z-10">
+                      <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} />
+                    </div>
                   ) : (
                     <span className="text-2xl leading-none relative z-10"
                       style={isSelected ? { filter: `drop-shadow(0 2px 6px ${g.color}99) drop-shadow(0 1px 3px rgba(0,0,0,0.7))` } : { filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.5))" }}>

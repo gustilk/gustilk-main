@@ -2,6 +2,7 @@ import { MessageCircle, X } from "lucide-react";
 import { useLocation } from "wouter";
 import type { SafeUser } from "@shared/schema";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
+import LottieAnimation from "@/components/LottieAnimation";
 
 interface MatchModalProps {
   matchedUser: SafeUser;
@@ -43,14 +44,24 @@ export default function MatchModal({ matchedUser, currentUser, matchId, onClose 
       style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)" }}
       data-testid="match-modal"
     >
+      {/* Full-screen celebration confetti */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <LottieAnimation
+          src="/lottie/celebration.json"
+          loop
+          autoplay
+          style={{ width: "100%", height: "100%", opacity: 0.7 }}
+        />
+      </div>
+
       <div
-        className="relative w-full max-w-sm rounded-3xl p-8 text-center animate-slide-up"
+        className="relative w-full max-w-sm rounded-3xl p-8 text-center"
         style={{ background: "linear-gradient(160deg, #2d0f4a, #1a0a2e)", border: "1px solid rgba(201,168,76,0.3)" }}
       >
         <button
           onClick={onClose}
           data-testid="button-close-modal"
-          className="absolute top-4 right-4"
+          className="absolute top-4 right-4 z-10"
           style={{ color: "rgba(253,248,240,0.4)" }}
         >
           <X size={20} />
@@ -59,11 +70,8 @@ export default function MatchModal({ matchedUser, currentUser, matchId, onClose 
         <div className="flex justify-center items-center gap-4 mb-6">
           <Avatar user={currentUser} />
           <div className="flex flex-col items-center gap-1">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-xl"
-              style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)" }}
-            >
-              ✦
+            <div className="w-12 h-12">
+              <LottieAnimation src="/lottie/valentine-hearts.json" loop autoplay style={{ width: "100%", height: "100%" }} />
             </div>
           </div>
           <Avatar user={matchedUser} />
