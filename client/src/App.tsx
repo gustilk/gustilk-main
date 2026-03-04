@@ -116,7 +116,7 @@ function AppShell({ user }: { user: User }) {
         <main className="flex-1 overflow-hidden" style={{ background: "#0d0618" }}>
           {!isAdminRoute && (
             <Switch>
-              <Route path="/discover" component={() => user.isAdmin ? <Redirect to="/admin" /> : <DiscoverPage user={user} />} />
+              <Route path="/discover" component={() => <DiscoverPage user={user} />} />
               <Route path="/matches" component={() => <MatchesPage user={user} />} />
               <Route path="/chat/:matchId" component={({ params }) => <ChatPage user={user} matchId={params.matchId} />} />
               <Route path="/profile/edit" component={() => <EditProfilePage user={user} />} />
