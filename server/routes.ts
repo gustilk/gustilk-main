@@ -169,6 +169,17 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         }
       }
 
+      // Face detection gate — run whenever a new verification selfie is being submitted
+      const incomingSelfie: string | undefined = (parsed as any).verificationSelfie;
+      if (incomingSelfie && incomingSelfie.startsWith("data:image")) {
+        const faceCheck = await checkFacePresent(incomingSelfie);
+        if (!faceCheck.faceDetected) {
+          return res.status(400).json({
+            error: faceCheck.reason ?? "No clear face detected in your selfie. Please take a well-lit photo facing the camera directly.",
+          });
+        }
+      }
+
       // Only rebuild photo slots if the request actually included a photos array
       const existingSlots: any[] = (user?.photoSlots as any[] | null) ?? [];
       const existingApproved: string[] = user?.photos ?? [];
