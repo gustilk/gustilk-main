@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { SlidersHorizontal, X, Heart, RefreshCw, MapPin } from "lucide-react";
+import { SlidersHorizontal, X, Heart, RefreshCw, MapPin, Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import MatchModal from "@/components/MatchModal";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
@@ -21,12 +22,17 @@ interface Props { user: SafeUser }
 
 export default function DiscoverPage({ user }: Props) {
   const { t } = useTranslation();
+  const [, setLocation] = useLocation();
   const [showFilters, setShowFilters] = useState(false);
   const [minAge, setMinAge] = useState(18);
   const [maxAge, setMaxAge] = useState(60);
   const [pendingMin, setPendingMin] = useState(18);
   const [pendingMax, setPendingMax] = useState(60);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    const stored = sessionStorage.getItem("discover_return_index");
+    if (stored) { sessionStorage.removeItem("discover_return_index"); return parseInt(stored, 10); }
+    return 0;
+  });
   const [matchData, setMatchData] = useState<{ user: SafeUser; matchId: string } | null>(null);
   const [swipeDir, setSwipeDir] = useState<"left" | "right" | null>(null);
   const [swipeAnim, setSwipeAnim] = useState<"like" | "dislike" | null>(null);
@@ -217,6 +223,21 @@ export default function DiscoverPage({ user }: Props) {
                 >
                   {casteLabel(current.caste ?? "murid")}
                 </div>
+
+                {/* View full profile button */}
+                <button
+                  onClick={() => {
+                    sessionStorage.setItem("profile_back_to", "/discover");
+                    sessionStorage.setItem("discover_return_index", String(currentIndex));
+                    setLocation(`/profile/${current.id}`);
+                  }}
+                  data-testid={`button-view-profile-${current.id}`}
+                  className="absolute top-3 left-3 w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95"
+                  style={{ background: "rgba(13,6,24,0.75)", border: "1.5px solid rgba(201,168,76,0.4)", backdropFilter: "blur(4px)" }}
+                  title="View full profile"
+                >
+                  <Info size={17} color="#c9a84c" />
+                </button>
 
                 <div className="absolute bottom-0 left-0 right-0 h-52" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.98), transparent)" }} />
                 <div className="absolute bottom-0 left-0 right-0 p-5">
