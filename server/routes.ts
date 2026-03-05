@@ -421,7 +421,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       matchId: z.string(),
       giftType: z.string().min(1),
       message: z.string().max(200).optional().default(""),
-      animationStyle: z.enum(["confetti","sparkles","fireworks","hearts","flowers"]).default("confetti"),
+      animationStyle: z.enum(["none","confetti","sparkles","fireworks","hearts","flowers"]).default("none"),
     }).parse(req.body);
 
     const gift = await storage.sendGift(senderId, recipientId, matchId, giftType, message, animationStyle);

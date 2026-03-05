@@ -326,7 +326,7 @@ export class DatabaseStorage implements IStorage {
     }).where(eq(users.id, userId));
   }
 
-  async sendGift(senderId: string, recipientId: string, matchId: string, giftType: string, message: string, animationStyle: string = "confetti"): Promise<Gift> {
+  async sendGift(senderId: string, recipientId: string, matchId: string, giftType: string, message: string, animationStyle: string = "none"): Promise<Gift> {
     const [gift] = await db.insert(gifts).values({ id: randomUUID(), senderId, recipientId, matchId, giftType, message, animationStyle }).returning();
     return gift;
   }
