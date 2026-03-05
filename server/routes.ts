@@ -178,21 +178,28 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       let newUploads: string[] = [];
 
       if (photosIncluded) {
-        // All URLs currently approved (union of user.photos and approved photoSlots)
-        const approvedSlotUrls = existingSlots.filter(s => s.status === "approved").map((s: any) => s.url);
-        const allApprovedUrls = [...new Set([...existingApproved, ...approvedSlotUrls])];
+        // Index all existing slot URLs for O(1) lookup
+        const existingSlotUrlSet = new Set(existingSlots.map((s: any) => s.url));
 
-        // Approved slots user is keeping (submitted by URL, not base64)
-        const keptApprovedUrls = submittedPhotos.filter(p => !p.startsWith("data:image") && allApprovedUrls.includes(p));
+        // A photo is "kept approved" if it already lives in an approved slot.
+        // This works for both HTTP URLs and base64 data URIs — the only thing
+        // that matters is whether the identical string is already stored.
+        const keptApprovedUrlSet = new Set(
+          submittedPhotos.filter(p => existingSlots.some((s: any) => s.status === "approved" && s.url === p))
+        );
 
-        // New base64 uploads → pending slots
-        newUploads = submittedPhotos.filter(p => p.startsWith("data:image"));
+        // A photo is "new" if its exact string does not exist in any slot yet.
+        newUploads = submittedPhotos.filter(p => !existingSlotUrlSet.has(p));
 
         const removedRejectedUrls: string[] = (parsed as any).removedRejectedUrls ?? [];
 
-        // Reconstruct slots: keep existing non-removed approved/pending/rejected slots, add new uploads
-        const keptSlots = existingSlots.filter(s =>
-          (s.status === "approved" && keptApprovedUrls.includes(s.url)) ||
+        // Rebuild slots:
+        //   • Approved slots the user kept → stay approved (never reset)
+        //   • Pending slots → always kept (awaiting admin review)
+        //   • Rejected slots not explicitly removed → kept
+        //   • New photos → appended as pending
+        const keptSlots = existingSlots.filter((s: any) =>
+          (s.status === "approved" && keptApprovedUrlSet.has(s.url)) ||
           s.status === "pending" ||
           (s.status === "rejected" && !removedRejectedUrls.includes(s.url))
         );
@@ -203,16 +210,17 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           return res.status(400).json({ error: "You can have a maximum of 6 photos." });
         }
 
-        keptApproved = keptSlots.filter(s => s.status === "approved").map((s: any) => s.url);
+        keptApproved = keptSlots.filter((s: any) => s.status === "approved").map((s: any) => s.url);
       }
 
       let mainPhotoUrl = user?.mainPhotoUrl;
       if (photosIncluded) {
-        // Respect new ordering: use the first submitted approved URL as main photo
-        const submittedApproved = submittedPhotos.filter(p => keptApproved.includes(p));
-        if (submittedApproved.length > 0) {
-          mainPhotoUrl = submittedApproved[0];
+        // Respect the order the frontend submitted: first approved URL = new main photo
+        const firstSubmittedApproved = submittedPhotos.find(p => keptApproved.includes(p));
+        if (firstSubmittedApproved) {
+          mainPhotoUrl = firstSubmittedApproved;
         } else if (mainPhotoUrl && !keptApproved.includes(mainPhotoUrl)) {
+          // Current main was removed — fall back to first remaining approved photo
           mainPhotoUrl = keptApproved[0] ?? null;
         }
       }
