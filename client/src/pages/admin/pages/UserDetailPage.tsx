@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { ArrowLeft, Crown, Ban, Shield, AlertTriangle, MessageSquare, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Crown, Ban, Shield, AlertTriangle, MessageSquare, Trash2, CheckCircle, XCircle, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +17,8 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
   const [showWarn, setShowWarn] = useState(false);
   const [showSuspend, setShowSuspend] = useState(false);
   const [showReject, setShowReject] = useState(false);
+  const [lightboxUrls, setLightboxUrls] = useState<string[]>([]);
+  const [lightboxIdx, setLightboxIdx] = useState(0);
   const [pending, setPending] = useState<null | {
     title: string; description: string;
     variant: "danger" | "warning" | "success";
@@ -212,14 +214,112 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
       </div>
 
       {/* Photos */}
-      {u.photos && u.photos.length > 0 && (
-        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}>
-          <h3 className="text-cream text-sm font-semibold mb-3">Photos</h3>
-          <div className="flex gap-2 flex-wrap">
-            {u.photos.map((url, i) => (
-              <img key={i} src={url} alt="" className="w-16 h-16 rounded-lg object-cover" />
-            ))}
+      {(() => {
+        const allPhotos = [
+          ...(u.mainPhotoUrl ? [u.mainPhotoUrl] : []),
+          ...(u.photoSlots ?? []).map((s: any) => s.url).filter(Boolean),
+          ...(u.photos ?? []).filter((url: string) => url !== u.mainPhotoUrl),
+        ];
+        const unique = [...new Set(allPhotos)];
+        if (!unique.length) return null;
+        return (
+          <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}>
+            <h3 className="text-cream text-sm font-semibold mb-3">Photos ({unique.length})</h3>
+            <div className="grid grid-cols-3 gap-2">
+              {unique.map((url, i) => (
+                <button
+                  key={i}
+                  onClick={() => { setLightboxUrls(unique); setLightboxIdx(i); }}
+                  data-testid={`photo-thumb-${i}`}
+                  className="relative aspect-[3/4] rounded-xl overflow-hidden group cursor-zoom-in"
+                  style={{ border: "1px solid rgba(201,168,76,0.15)" }}
+                >
+                  <img src={url} alt="" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center">
+                    <span className="opacity-0 group-hover:opacity-100 text-white text-xs font-semibold transition-opacity">View</span>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
+        );
+      })()}
+
+      {/* Identity selfie */}
+      {u.selfieUrl && (
+        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}>
+          <h3 className="text-cream text-sm font-semibold mb-3">Identity Selfie</h3>
+          <button
+            onClick={() => { setLightboxUrls([u.selfieUrl!]); setLightboxIdx(0); }}
+            data-testid="selfie-thumb"
+            className="relative max-w-xs rounded-xl overflow-hidden group cursor-zoom-in"
+            style={{ border: "1px solid rgba(201,168,76,0.2)" }}
+          >
+            <img src={u.selfieUrl} alt="Identity selfie" className="w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center">
+              <span className="opacity-0 group-hover:opacity-100 text-white text-xs font-semibold transition-opacity">View Full</span>
+            </div>
+          </button>
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {lightboxUrls.length > 0 && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ background: "rgba(13,6,24,0.95)" }}
+          onClick={() => setLightboxUrls([])}
+        >
+          <button
+            onClick={e => { e.stopPropagation(); setLightboxUrls([]); }}
+            data-testid="button-lightbox-close"
+            className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+            style={{ border: "1px solid rgba(255,255,255,0.15)" }}
+          >
+            <X size={18} className="text-cream" />
+          </button>
+
+          {lightboxUrls.length > 1 && (
+            <>
+              <button
+                onClick={e => { e.stopPropagation(); setLightboxIdx(i => (i - 1 + lightboxUrls.length) % lightboxUrls.length); }}
+                data-testid="button-lightbox-prev"
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+                style={{ border: "1px solid rgba(255,255,255,0.15)" }}
+              >
+                <ChevronLeft size={22} className="text-cream" />
+              </button>
+              <button
+                onClick={e => { e.stopPropagation(); setLightboxIdx(i => (i + 1) % lightboxUrls.length); }}
+                data-testid="button-lightbox-next"
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+                style={{ border: "1px solid rgba(255,255,255,0.15)" }}
+              >
+                <ChevronRight size={22} className="text-cream" />
+              </button>
+            </>
+          )}
+
+          <img
+            src={lightboxUrls[lightboxIdx]}
+            alt=""
+            onClick={e => e.stopPropagation()}
+            className="max-h-[92vh] max-w-[92vw] rounded-2xl object-contain shadow-2xl"
+            data-testid="lightbox-image"
+          />
+
+          {lightboxUrls.length > 1 && (
+            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-1.5">
+              {lightboxUrls.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={e => { e.stopPropagation(); setLightboxIdx(i); }}
+                  className="w-1.5 h-1.5 rounded-full transition-all"
+                  style={{ background: i === lightboxIdx ? "#c9a84c" : "rgba(255,255,255,0.3)" }}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
