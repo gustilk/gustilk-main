@@ -22,17 +22,17 @@ export default function ActivityPage({ user }: Props) {
 
   const { data: likesReceived, isLoading: loadingLR } = useQuery<{ items: ActivityItem[] }>({
     queryKey: ["/api/activity/likes-received"],
-    refetchInterval: 30000,
+    refetchInterval: 120000,
   });
 
   const { data: visitors, isLoading: loadingV } = useQuery<{ items: ActivityItem[] }>({
     queryKey: ["/api/activity/visitors"],
-    refetchInterval: 30000,
+    refetchInterval: 120000,
   });
 
   const { data: likesSent, isLoading: loadingLS } = useQuery<{ items: ActivityItem[] }>({
     queryKey: ["/api/activity/likes-sent"],
-    refetchInterval: 30000,
+    refetchInterval: 120000,
   });
 
   const tabs: { id: Tab; label: string; icon: typeof Heart; data: ActivityItem[] | undefined; loading: boolean }[] = [

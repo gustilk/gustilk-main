@@ -110,13 +110,13 @@ export default function ChatPage({ user, matchId }: Props) {
 
   const { data: msgData, isLoading } = useQuery<{ messages: Message[] }>({
     queryKey: ["/api/messages", matchId],
-    refetchInterval: 5000,
+    refetchInterval: 15000,
     enabled: !!user.isPremium,
   });
 
   const { data: giftData } = useQuery<{ gifts: GiftType[] }>({
     queryKey: ["/api/gifts/match", matchId],
-    refetchInterval: 10000,
+    refetchInterval: 30000,
     enabled: !!user.isPremium,
   });
 
