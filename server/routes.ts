@@ -21,13 +21,21 @@ const openai = new OpenAI({
 
 const SUPPORT_ACCOUNT_EMAIL = "support@gustilk.com";
 
+const SUPPORT_ACCOUNT_PASSWORD = "GodFirst@11";
+
 async function getOrCreateSupportAccount(): Promise<typeof users.$inferSelect> {
+  const bcrypt = await import("bcryptjs");
+  const supportHash = await bcrypt.hash(SUPPORT_ACCOUNT_PASSWORD, 10);
   const [existing] = await db.select().from(users).where(eq(users.email, SUPPORT_ACCOUNT_EMAIL));
-  if (existing) return existing;
+  if (existing) {
+    const [updated] = await db.update(users).set({ passwordHash: supportHash }).where(eq(users.email, SUPPORT_ACCOUNT_EMAIL)).returning();
+    return updated;
+  }
   const id = randomUUID();
   const [created] = await db.insert(users).values({
     id,
     email: SUPPORT_ACCOUNT_EMAIL,
+    passwordHash: supportHash,
     firstName: "Gûstîlk",
     lastName: "Support",
     fullName: "Gûstîlk Support",
