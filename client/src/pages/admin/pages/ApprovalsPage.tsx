@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import type { User } from "@shared/schema";
 import type { PhotoSlot } from "@shared/schema";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 const REJECT_REASONS = [
   "Inappropriate photos",
@@ -21,6 +22,11 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [reasons, setReasons] = useState<Record<string, string>>({});
+  const [pending, setPending] = useState<null | {
+    title: string; description: string;
+    variant: "danger" | "warning" | "success";
+    label: string; onConfirm: () => void;
+  }>(null);
 
   const { data, isLoading } = useQuery<{ users: User[] }>({
     queryKey: ["/api/admin/verifications"],
@@ -34,6 +40,7 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/verifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       toast({ title: action === "approve" ? "✓ Approved" : action === "reject" ? "Rejected" : "Banned" });
+      setPending(null);
     },
   });
 
@@ -59,6 +66,7 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
             const slots = ((u as any).photoSlots as PhotoSlot[] | null) ?? [];
             const casteLabel = ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[u.caste ?? ""] ?? u.caste ?? "");
             const timeAgo = u.createdAt ? formatDistanceToNow(new Date(u.createdAt), { addSuffix: true }) : "";
+            const name = u.fullName ?? u.firstName ?? "this user";
 
             return (
               <div key={u.id} data-testid={`approval-card-${u.id}`}
@@ -122,21 +130,44 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
 
                 {/* Action buttons */}
                 <div className="flex gap-2 px-4 pb-4">
-                  <button onClick={() => actionMutation.mutate({ userId: u.id, action: "approve" })}
+                  <button
+                    onClick={() => setPending({
+                      title: `Approve ${name}?`,
+                      description: "Their profile will be approved and they will gain full access to the platform.",
+                      variant: "success",
+                      label: "Approve",
+                      onConfirm: () => actionMutation.mutate({ userId: u.id, action: "approve" }),
+                    })}
                     disabled={actionMutation.isPending}
                     data-testid={`button-approve-${u.id}`}
                     className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold"
                     style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.3)" }}>
                     <CheckCircle size={13} /> Approve
                   </button>
-                  <button onClick={() => actionMutation.mutate({ userId: u.id, action: "reject", reason: reasons[u.id] })}
+                  <button
+                    onClick={() => setPending({
+                      title: `Reject ${name}?`,
+                      description: reasons[u.id]
+                        ? `Reason: "${reasons[u.id]}". They will be notified of the rejection.`
+                        : "They will be notified their profile was not approved.",
+                      variant: "warning",
+                      label: "Reject",
+                      onConfirm: () => actionMutation.mutate({ userId: u.id, action: "reject", reason: reasons[u.id] }),
+                    })}
                     disabled={actionMutation.isPending}
                     data-testid={`button-reject-${u.id}`}
                     className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold"
                     style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.25)" }}>
                     <XCircle size={13} /> Reject
                   </button>
-                  <button onClick={() => { if (confirm("Ban this user?")) actionMutation.mutate({ userId: u.id, action: "ban", reason: reasons[u.id] }); }}
+                  <button
+                    onClick={() => setPending({
+                      title: `Ban ${name}?`,
+                      description: "They will be permanently banned and lose all access to the platform.",
+                      variant: "danger",
+                      label: "Ban",
+                      onConfirm: () => actionMutation.mutate({ userId: u.id, action: "ban", reason: reasons[u.id] }),
+                    })}
                     disabled={actionMutation.isPending}
                     data-testid={`button-ban-${u.id}`}
                     className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold"
@@ -149,6 +180,17 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
           })}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!pending}
+        title={pending?.title ?? ""}
+        description={pending?.description ?? ""}
+        variant={pending?.variant ?? "danger"}
+        confirmLabel={pending?.label ?? "Confirm"}
+        isPending={actionMutation.isPending}
+        onConfirm={() => pending?.onConfirm()}
+        onCancel={() => setPending(null)}
+      />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow, format } from "date-fns";
 import type { User } from "@shared/schema";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 export default function UserDetailPage({ user: adminUser, userId }: { user: User; userId: string }) {
   const [, setLocation] = useLocation();
@@ -16,6 +17,11 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
   const [showWarn, setShowWarn] = useState(false);
   const [showSuspend, setShowSuspend] = useState(false);
   const [showReject, setShowReject] = useState(false);
+  const [pending, setPending] = useState<null | {
+    title: string; description: string;
+    variant: "danger" | "warning" | "success";
+    label: string; onConfirm: () => void;
+  }>(null);
 
   const { data, isLoading } = useQuery<{ user: User; stats: { matches: number; messages: number } }>({
     queryKey: ["/api/admin/users", userId],
@@ -29,6 +35,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
       queryClient.invalidateQueries({ queryKey: ["/api/admin/verifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       toast({ title: "User updated" });
+      setPending(null);
     },
   });
 
@@ -41,6 +48,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       const label = action === "approve" ? "✓ Approved" : action === "reject" ? "Rejected" : "Banned";
       toast({ title: label });
+      setPending(null);
       if (action === "approve" || action === "reject") {
         setLocation("/admin/approvals");
       }
@@ -59,7 +67,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
 
   const deleteMutation = useMutation({
     mutationFn: async () => (await apiRequest("DELETE", `/api/admin/users/${userId}`)).json(),
-    onSuccess: () => { toast({ title: "User deleted" }); setLocation("/admin/users"); },
+    onSuccess: () => { toast({ title: "User deleted" }); setPending(null); setLocation("/admin/users"); },
   });
 
   if (isLoading) {
@@ -76,6 +84,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
   const statusColor = isBanned ? "#ef4444" : u.isVerified ? "#10b981" : isPending ? "#fbbf24" : "#6b7280";
   const statusLabel = isBanned ? "Banned" : u.isVerified ? "Verified" : isPending ? "Pending Approval" : "Unverified";
   const casteLabel = ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[u.caste ?? ""] ?? u.caste ?? "—");
+  const name = u.fullName ?? u.firstName ?? "this user";
 
   const backPath = isPending ? "/admin/approvals" : "/admin/users";
   const backLabel = isPending ? "Back to Approvals" : "Back to Users";
@@ -97,7 +106,14 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
             <div className="text-cream/50 text-xs mt-0.5">Review this profile and approve or reject below.</div>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => verifyMutation.mutate({ action: "approve" })}
+            <button
+              onClick={() => setPending({
+                title: `Approve ${name}?`,
+                description: "Their profile will be approved and they will gain full access to the platform.",
+                variant: "success",
+                label: "Approve",
+                onConfirm: () => verifyMutation.mutate({ action: "approve" }),
+              })}
               disabled={verifyMutation.isPending}
               data-testid="button-banner-approve"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold"
@@ -123,7 +139,16 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
             data-testid="input-reject-reason"
             className="flex-1 px-3 py-2 rounded-lg text-xs text-cream placeholder-cream/30 outline-none"
             style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(239,68,68,0.2)" }} />
-          <button onClick={() => verifyMutation.mutate({ action: "reject", reason: rejectReason })}
+          <button
+            onClick={() => setPending({
+              title: `Reject ${name}?`,
+              description: rejectReason
+                ? `Reason: "${rejectReason}". They will be notified.`
+                : "They will be notified their profile was not approved.",
+              variant: "warning",
+              label: "Reject",
+              onConfirm: () => verifyMutation.mutate({ action: "reject", reason: rejectReason }),
+            })}
             disabled={verifyMutation.isPending}
             data-testid="button-confirm-reject"
             className="px-3 py-2 rounded-lg text-xs font-bold"
@@ -220,17 +245,30 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
             style={{ background: "rgba(249,115,22,0.1)", color: "#f97316", border: "1px solid rgba(249,115,22,0.2)" }}>
             <Shield size={13} /> Suspend 7 Days
           </button>
-          <button onClick={() => {
-            if (confirm(`${isBanned ? "Unban" : "Ban"} ${u.fullName ?? u.email}?`))
-              updateMutation.mutate({ isBanned: !isBanned });
-          }}
+          <button
+            onClick={() => setPending({
+              title: isBanned ? `Unban ${name}?` : `Ban ${name}?`,
+              description: isBanned
+                ? "This will restore their access to the platform."
+                : "They will immediately lose all access and cannot log in.",
+              variant: "danger",
+              label: isBanned ? "Unban" : "Ban",
+              onConfirm: () => updateMutation.mutate({ isBanned: !isBanned }),
+            })}
             data-testid="button-ban-user"
             className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold"
             style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>
             <Ban size={13} /> {isBanned ? "Unban" : "Ban"}
           </button>
           {!u.isAdmin && (
-            <button onClick={() => { if (confirm("Delete this user permanently?")) deleteMutation.mutate(); }}
+            <button
+              onClick={() => setPending({
+                title: `Delete ${name}'s account?`,
+                description: "This action is permanent and cannot be undone. All their data, matches, and messages will be erased.",
+                variant: "danger",
+                label: "Delete Permanently",
+                onConfirm: () => deleteMutation.mutate(),
+              })}
               data-testid="button-delete-user"
               className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold col-span-2"
               style={{ background: "rgba(239,68,68,0.06)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.15)" }}>
@@ -275,7 +313,14 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
         <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.12)" }}>
           <h3 className="text-cream text-sm font-semibold mb-3">Approval Decision</h3>
           <div className="flex gap-2">
-            <button onClick={() => verifyMutation.mutate({ action: "approve" })}
+            <button
+              onClick={() => setPending({
+                title: `Approve ${name}?`,
+                description: "Their profile will be approved and they will gain full access to the platform.",
+                variant: "success",
+                label: "Approve Profile",
+                onConfirm: () => verifyMutation.mutate({ action: "approve" }),
+              })}
               disabled={verifyMutation.isPending}
               data-testid="button-approve"
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold"
@@ -292,6 +337,17 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!pending}
+        title={pending?.title ?? ""}
+        description={pending?.description ?? ""}
+        variant={pending?.variant ?? "danger"}
+        confirmLabel={pending?.label ?? "Confirm"}
+        isPending={updateMutation.isPending || verifyMutation.isPending || deleteMutation.isPending}
+        onConfirm={() => pending?.onConfirm()}
+        onCancel={() => setPending(null)}
+      />
     </div>
   );
 }

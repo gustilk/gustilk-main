@@ -1,12 +1,19 @@
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { CheckCircle, X } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@shared/schema";
 import type { PhotoSlot } from "@shared/schema";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 export default function ModerationPage({ user }: { user: User }) {
   const { toast } = useToast();
+  const [pending, setPending] = useState<null | {
+    title: string; description: string;
+    variant: "danger" | "warning" | "success";
+    label: string; onConfirm: () => void;
+  }>(null);
 
   const { data, isLoading } = useQuery<{ users: User[] }>({
     queryKey: ["/api/admin/pending-photos"],
@@ -19,6 +26,7 @@ export default function ModerationPage({ user }: { user: User }) {
     onSuccess: (_, { action }) => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-photos"] });
       toast({ title: action === "approve" ? "Photo approved" : "Photo rejected" });
+      setPending(null);
     },
   });
 
@@ -46,7 +54,8 @@ export default function ModerationPage({ user }: { user: User }) {
         <div className="space-y-4">
           {pendingUsers.map(u => {
             const slots = ((u as any).photoSlots as PhotoSlot[] | null) ?? [];
-            const pending = slots.filter(s => s.status === "pending");
+            const pending_slots = slots.filter(s => s.status === "pending");
+            const name = u.fullName ?? u.firstName ?? "this user";
             return (
               <div key={u.id} data-testid={`moderation-card-${u.id}`}
                 className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.12)" }}>
@@ -57,7 +66,7 @@ export default function ModerationPage({ user }: { user: User }) {
                   </div>
                   <div>
                     <div className="text-cream text-sm font-medium">{u.fullName ?? u.firstName ?? "Member"}</div>
-                    <div className="text-cream/40 text-xs">{u.email} · {pending.length} pending photo{pending.length !== 1 ? "s" : ""}</div>
+                    <div className="text-cream/40 text-xs">{u.email} · {pending_slots.length} pending photo{pending_slots.length !== 1 ? "s" : ""}</div>
                   </div>
                 </div>
                 <div className="flex gap-3 flex-wrap">
@@ -65,13 +74,27 @@ export default function ModerationPage({ user }: { user: User }) {
                     <div key={idx} className="flex flex-col gap-2">
                       <img src={slot.url} alt="" className="w-24 h-24 rounded-xl object-cover" />
                       <div className="flex gap-1">
-                        <button onClick={() => photoMutation.mutate({ userId: u.id, slotIdx: idx, action: "approve" })}
+                        <button
+                          onClick={() => setPending({
+                            title: "Approve this photo?",
+                            description: `This photo from ${name} will be approved and shown on their profile.`,
+                            variant: "success",
+                            label: "Approve",
+                            onConfirm: () => photoMutation.mutate({ userId: u.id, slotIdx: idx, action: "approve" }),
+                          })}
                           data-testid={`button-approve-photo-${u.id}-${idx}`}
                           className="flex-1 py-1 rounded-lg text-[10px] font-semibold"
                           style={{ background: "rgba(16,185,129,0.2)", color: "#10b981" }}>
                           ✓ OK
                         </button>
-                        <button onClick={() => photoMutation.mutate({ userId: u.id, slotIdx: idx, action: "reject", reason: "Inappropriate" })}
+                        <button
+                          onClick={() => setPending({
+                            title: "Reject this photo?",
+                            description: `This photo from ${name} will be removed as it violates community guidelines.`,
+                            variant: "danger",
+                            label: "Reject",
+                            onConfirm: () => photoMutation.mutate({ userId: u.id, slotIdx: idx, action: "reject", reason: "Inappropriate" }),
+                          })}
                           data-testid={`button-reject-photo-${u.id}-${idx}`}
                           className="flex-1 py-1 rounded-lg text-[10px] font-semibold"
                           style={{ background: "rgba(239,68,68,0.2)", color: "#ef4444" }}>
@@ -86,6 +109,17 @@ export default function ModerationPage({ user }: { user: User }) {
           })}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!pending}
+        title={pending?.title ?? ""}
+        description={pending?.description ?? ""}
+        variant={pending?.variant ?? "danger"}
+        confirmLabel={pending?.label ?? "Confirm"}
+        isPending={photoMutation.isPending}
+        onConfirm={() => pending?.onConfirm()}
+        onCancel={() => setPending(null)}
+      />
     </div>
   );
 }
