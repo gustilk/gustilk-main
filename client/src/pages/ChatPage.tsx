@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -391,7 +391,6 @@ function MessageBubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
 }
 
 // ─── Gift reveal overlay ─────────────────────────────────────────────────────
-const PARTY_SYMBOLS = ["❤️", "✨", "⭐", "🌸", "💫", "🌺", "💖", "🎀", "✦", "♥", "🌟", "💝"];
 
 let revealCssInjected = false;
 function injectRevealCSS() {
@@ -421,16 +420,6 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
     return () => clearTimeout(t);
   }, []);
 
-  const particles = useMemo(() => Array.from({ length: 52 }, (_, i) => ({
-    id: i,
-    symbol: PARTY_SYMBOLS[i % PARTY_SYMBOLS.length],
-    left: Math.random() * 100,
-    delay: Math.random() * 2.2,
-    duration: 2.6 + Math.random() * 2,
-    size: 13 + Math.floor(Math.random() * 20),
-    fromBottom: i % 3 !== 0,
-  })), []);
-
   return (
     <div
       className="fixed inset-0 z-[300] flex flex-col items-center justify-center select-none"
@@ -438,23 +427,6 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
       onClick={onClose}
       data-testid="gift-reveal-overlay"
     >
-      {/* Particles */}
-      {particles.map(p => (
-        <span
-          key={p.id}
-          style={{
-            position: "absolute",
-            [p.fromBottom ? "bottom" : "top"]: "-5%",
-            left: `${p.left}%`,
-            fontSize: p.size,
-            pointerEvents: "none",
-            animation: `${p.fromBottom ? "gr-float-up" : "gr-fall-down"} ${p.duration}s ${p.delay}s ease-out forwards`,
-            opacity: 0,
-          }}
-        >
-          {p.symbol}
-        </span>
-      ))}
 
       {/* Radial glow behind gift */}
       <div
