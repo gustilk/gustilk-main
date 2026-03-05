@@ -894,5 +894,17 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // ─── EXTENDED ADMIN ROUTES ────────────────────────────────────────────────
   registerAdminRoutes(app, isAuthenticated, requireAdmin);
 
+  // ─── HOURLY MESSAGE EXPIRY CLEANUP ────────────────────────────────────────
+  const runMsgCleanup = async () => {
+    try {
+      const n = await storage.cleanupExpiredMessages();
+      if (n > 0) console.log(`[msg-cleanup] Expired ${n} message(s)`);
+    } catch (e) {
+      console.error("[msg-cleanup] Error:", e);
+    }
+  };
+  runMsgCleanup();
+  setInterval(runMsgCleanup, 60 * 60 * 1000);
+
   return httpServer;
 }

@@ -37,6 +37,8 @@ export interface IStorage {
   rejectPhotoSlot(userId: string, slotIdx: number, reason: string): Promise<{ user: SafeUser }>;
   setMainPhoto(userId: string, slotIdx: number): Promise<void>;
 
+  cleanupExpiredMessages(): Promise<number>;
+
   sendGift(senderId: string, recipientId: string, matchId: string, giftType: string, message: string, animationStyle: string): Promise<Gift>;
   getGiftsInMatch(matchId: string): Promise<Gift[]>;
   getGiftsReceived(userId: string): Promise<Gift[]>;
@@ -262,10 +264,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async markMessagesRead(matchId: string, userId: string): Promise<void> {
-    await db.update(messages).set({ readAt: new Date() }).where(
-      and(eq(messages.matchId, matchId), ne(messages.senderId, userId), sql`${messages.readAt} IS NULL`)
-    );
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await db.update(messages)
+      .set({ readAt: new Date(), expiresAt })
+      .where(and(
+        eq(messages.matchId, matchId),
+        ne(messages.senderId, userId),
+        sql`${messages.readAt} IS NULL`,
+      ));
     cacheDel(`matches:${userId}`);
+  }
+
+  async cleanupExpiredMessages(): Promise<number> {
+    const now = new Date();
+    const expired = await db.update(messages)
+      .set({ text: "", expired: true })
+      .where(and(
+        sql`${messages.expiresAt} IS NOT NULL`,
+        sql`${messages.expiresAt} <= ${now.toISOString()}`,
+        eq(messages.expired, false),
+      ))
+      .returning({ id: messages.id });
+    return expired.length;
   }
 
   async listEvents(userId: string): Promise<EventWithAttendance[]> {
