@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -113,12 +113,13 @@ export default function ChatPage({ user, matchId }: Props) {
   });
 
   const giftMutation = useMutation({
-    mutationFn: async ({ giftType, message }: { giftType: string; message: string }) => {
+    mutationFn: async ({ giftType, message, animationStyle }: { giftType: string; message: string; animationStyle: string }) => {
       const res = await apiRequest("POST", "/api/gifts", {
         recipientId: otherUser!.id,
         matchId,
         giftType,
         message,
+        animationStyle,
       });
       return res.json();
     },
@@ -352,7 +353,7 @@ export default function ChatPage({ user, matchId }: Props) {
         <GiftPicker
           recipientName={otherUser.firstName ?? otherUser.fullName?.split(" ")[0] ?? "them"}
           isPending={giftMutation.isPending}
-          onSend={(giftType, message) => giftMutation.mutate({ giftType, message })}
+          onSend={(giftType, message, animationStyle) => giftMutation.mutate({ giftType, message, animationStyle })}
           onClose={() => setShowGiftPicker(false)}
         />
       )}
@@ -405,14 +406,97 @@ function injectRevealCSS() {
     @keyframes gr-glow-pulse { 0%,100%{opacity:.55;transform:scale(1)} 50%{opacity:1;transform:scale(1.06)} }
     @keyframes gr-name-in    { 0%{opacity:0;transform:translateY(24px)} 100%{opacity:1;transform:translateY(0)} }
     @keyframes gr-hint-fade  { 0%{opacity:0} 100%{opacity:1} }
+    @keyframes gr-confetti   { 0%{opacity:0;transform:translateY(0) rotate(0deg)} 8%{opacity:1} 88%{opacity:1} 100%{opacity:0;transform:translateY(110vh) rotate(720deg)} }
+    @keyframes gr-sparkle    { 0%{opacity:0;transform:scale(0) rotate(0deg)} 25%{opacity:1;transform:scale(1.6) rotate(25deg)} 60%{opacity:.9;transform:scale(1) rotate(15deg)} 100%{opacity:0;transform:scale(0) rotate(70deg)} }
+    @keyframes gr-fw-dot     { 0%{opacity:0;transform:scale(0)} 20%{opacity:1;transform:scale(1.8)} 70%{opacity:.8;transform:scale(1)} 100%{opacity:0;transform:scale(.2)} }
+    @keyframes gr-heart-rise { 0%{opacity:0;transform:translateY(0) scale(.5)} 12%{opacity:1;transform:translateY(-18px) scale(1)} 100%{opacity:0;transform:translateY(-110vh) scale(1.2)} }
+    @keyframes gr-petal-fall { 0%{opacity:0;transform:translateY(-5%) rotate(0deg) scale(.5)} 10%{opacity:1} 88%{opacity:.85} 100%{opacity:0;transform:translateY(110vh) rotate(300deg) scale(1)} }
   `;
   document.head.appendChild(s);
+}
+
+const CONFETTI_COLORS = ["#ff4444","#ff8800","#ffdd00","#44dd44","#4488ff","#aa44ff","#ff44aa","#c9a84c","#ff6600","#00ccff"];
+const SPARKLE_CHARS = ["✨","⭐","✦","★","💫","✷","✸"];
+const HEART_CHARS = ["❤️","💕","💖","💗","💓","💝","🩷","♥"];
+const FLOWER_CHARS = ["🌸","🌺","🌼","🌷","🌻","💐"];
+const FW_COLORS = ["#ff4444","#ffaa00","#44ff88","#4488ff","#ff44ff","#ffff44","#ff8800","#00ffcc","#ff6699","#aaffaa"];
+
+function genRevealParticles(style: string) {
+  const rnd = Math.random;
+  if (style === "confetti") {
+    return Array.from({ length: 65 }, (_, i) => ({
+      id: i, type: "confetti" as const,
+      color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+      left: rnd() * 100,
+      width: 6 + rnd() * 9,
+      height: 9 + rnd() * 13,
+      delay: rnd() * 2.2,
+      duration: 2.8 + rnd() * 2,
+    }));
+  }
+  if (style === "sparkles") {
+    return Array.from({ length: 38 }, (_, i) => ({
+      id: i, type: "sparkle" as const,
+      char: SPARKLE_CHARS[i % SPARKLE_CHARS.length],
+      left: 8 + rnd() * 84,
+      top: 8 + rnd() * 84,
+      size: 16 + rnd() * 26,
+      delay: rnd() * 3.5,
+      duration: 0.9 + rnd() * 1.6,
+    }));
+  }
+  if (style === "fireworks") {
+    const bursts = [{x:22,y:18},{x:78,y:22},{x:14,y:58},{x:86,y:62},{x:50,y:12},{x:35,y:72}];
+    const particles: any[] = [];
+    let id = 0;
+    bursts.forEach((b, bi) => {
+      const n = 10;
+      for (let j = 0; j < n; j++) {
+        const angle = (j / n) * Math.PI * 2;
+        const r = 7 + rnd() * 8;
+        particles.push({
+          id: id++, type: "fw" as const,
+          left: b.x + Math.cos(angle) * r,
+          top: b.y + Math.sin(angle) * r * 0.65,
+          size: 7 + rnd() * 9,
+          color: FW_COLORS[(bi * 3 + j) % FW_COLORS.length],
+          delay: bi * 0.55 + rnd() * 0.25,
+          duration: 0.65 + rnd() * 0.5,
+        });
+      }
+    });
+    return particles;
+  }
+  if (style === "hearts") {
+    return Array.from({ length: 42 }, (_, i) => ({
+      id: i, type: "heart" as const,
+      char: HEART_CHARS[i % HEART_CHARS.length],
+      left: rnd() * 100,
+      size: 15 + rnd() * 24,
+      delay: rnd() * 2.8,
+      duration: 2.8 + rnd() * 2.5,
+    }));
+  }
+  if (style === "flowers") {
+    return Array.from({ length: 42 }, (_, i) => ({
+      id: i, type: "flower" as const,
+      char: FLOWER_CHARS[i % FLOWER_CHARS.length],
+      left: rnd() * 100,
+      size: 14 + rnd() * 22,
+      delay: rnd() * 2.2,
+      duration: 2.8 + rnd() * 2.2,
+    }));
+  }
+  return [];
 }
 
 function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => void }) {
   const g = giftById(gift.giftType);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+  const animStyle = gift.animationStyle ?? "confetti";
+
+  const particles = useMemo(() => genRevealParticles(animStyle), [animStyle]);
 
   useEffect(() => {
     injectRevealCSS();
@@ -422,11 +506,55 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
 
   return (
     <div
-      className="fixed inset-0 z-[300] flex flex-col items-center justify-center select-none"
+      className="fixed inset-0 z-[300] flex flex-col items-center justify-center select-none overflow-hidden"
       style={{ background: "transparent" }}
       onClick={onClose}
       data-testid="gift-reveal-overlay"
     >
+
+      {/* ── Particles ─────────────────────────────────────────── */}
+      {particles.map((p: any) => {
+        if (p.type === "confetti") return (
+          <div key={p.id} style={{
+            position: "absolute", top: "-3%", left: `${p.left}%`,
+            width: p.width, height: p.height,
+            background: p.color, borderRadius: 2,
+            opacity: 0, pointerEvents: "none",
+            animation: `gr-confetti ${p.duration}s ${p.delay}s ease-in forwards`,
+          }} />
+        );
+        if (p.type === "sparkle") return (
+          <span key={p.id} style={{
+            position: "absolute", left: `${p.left}%`, top: `${p.top}%`,
+            fontSize: p.size, opacity: 0, pointerEvents: "none",
+            animation: `gr-sparkle ${p.duration}s ${p.delay}s ease-in-out forwards`,
+          }}>{p.char}</span>
+        );
+        if (p.type === "fw") return (
+          <div key={p.id} style={{
+            position: "absolute", left: `${p.left}%`, top: `${p.top}%`,
+            width: p.size, height: p.size, borderRadius: "50%",
+            background: p.color, opacity: 0, pointerEvents: "none",
+            boxShadow: `0 0 ${p.size * 1.5}px ${p.color}`,
+            animation: `gr-fw-dot ${p.duration}s ${p.delay}s ease-out forwards`,
+          }} />
+        );
+        if (p.type === "heart") return (
+          <span key={p.id} style={{
+            position: "absolute", bottom: "-3%", left: `${p.left}%`,
+            fontSize: p.size, opacity: 0, pointerEvents: "none",
+            animation: `gr-heart-rise ${p.duration}s ${p.delay}s ease-out forwards`,
+          }}>{p.char}</span>
+        );
+        if (p.type === "flower") return (
+          <span key={p.id} style={{
+            position: "absolute", top: "-3%", left: `${p.left}%`,
+            fontSize: p.size, opacity: 0, pointerEvents: "none",
+            animation: `gr-petal-fall ${p.duration}s ${p.delay}s ease-in forwards`,
+          }}>{p.char}</span>
+        );
+        return null;
+      })}
 
       {/* Radial glow behind gift */}
       <div
@@ -562,14 +690,23 @@ function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
 }
 
 // ─── Gift picker ───────────────────────────────────────────────────────────
+const ANIM_STYLES = [
+  { id: "confetti",  label: "Confetti",  icon: "🎊" },
+  { id: "sparkles",  label: "Sparkles",  icon: "✨" },
+  { id: "fireworks", label: "Fireworks", icon: "🎆" },
+  { id: "hearts",    label: "Hearts",    icon: "❤️" },
+  { id: "flowers",   label: "Flowers",   icon: "🌸" },
+] as const;
+
 function GiftPicker({ recipientName, isPending, onSend, onClose }: {
   recipientName: string;
   isPending: boolean;
-  onSend: (giftType: string, message: string) => void;
+  onSend: (giftType: string, message: string, animationStyle: string) => void;
   onClose: () => void;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [animStyle, setAnimStyle] = useState<string>("confetti");
 
   return (
     <div
@@ -617,6 +754,32 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
             })}
           </div>
 
+          {/* Animation style selector */}
+          {selected && (
+            <div className="mb-4">
+              <p className="text-cream/40 text-xs font-semibold uppercase tracking-wider mb-2">Animation Style</p>
+              <div className="flex gap-2 flex-wrap">
+                {ANIM_STYLES.map(a => (
+                  <button
+                    key={a.id}
+                    onClick={() => setAnimStyle(a.id)}
+                    data-testid={`anim-style-${a.id}`}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs transition-all"
+                    style={{
+                      background: animStyle === a.id ? "rgba(201,168,76,0.18)" : "rgba(255,255,255,0.05)",
+                      border: animStyle === a.id ? "1.5px solid rgba(201,168,76,0.55)" : "1.5px solid rgba(255,255,255,0.08)",
+                      color: animStyle === a.id ? "#c9a84c" : "rgba(253,248,240,0.45)",
+                      fontWeight: animStyle === a.id ? 600 : 400,
+                    }}
+                  >
+                    <span>{a.icon}</span>
+                    <span>{a.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Optional message */}
           {selected && (
             <div className="mb-4">
@@ -636,7 +799,7 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
 
           {/* Send button */}
           <button
-            onClick={() => selected && onSend(selected, message)}
+            onClick={() => selected && onSend(selected, message, animStyle)}
             disabled={!selected || isPending}
             data-testid="button-send-gift"
             className="relative w-full py-4 rounded-2xl font-bold text-sm transition-all disabled:opacity-40 overflow-hidden"

@@ -35,7 +35,7 @@ export interface IStorage {
   rejectPhotoSlot(userId: string, slotIdx: number, reason: string): Promise<{ user: SafeUser }>;
   setMainPhoto(userId: string, slotIdx: number): Promise<void>;
 
-  sendGift(senderId: string, recipientId: string, matchId: string, giftType: string, message: string): Promise<Gift>;
+  sendGift(senderId: string, recipientId: string, matchId: string, giftType: string, message: string, animationStyle: string): Promise<Gift>;
   getGiftsInMatch(matchId: string): Promise<Gift[]>;
   getGiftsReceived(userId: string): Promise<Gift[]>;
 
@@ -326,8 +326,8 @@ export class DatabaseStorage implements IStorage {
     }).where(eq(users.id, userId));
   }
 
-  async sendGift(senderId: string, recipientId: string, matchId: string, giftType: string, message: string): Promise<Gift> {
-    const [gift] = await db.insert(gifts).values({ id: randomUUID(), senderId, recipientId, matchId, giftType, message }).returning();
+  async sendGift(senderId: string, recipientId: string, matchId: string, giftType: string, message: string, animationStyle: string = "confetti"): Promise<Gift> {
+    const [gift] = await db.insert(gifts).values({ id: randomUUID(), senderId, recipientId, matchId, giftType, message, animationStyle }).returning();
     return gift;
   }
 
