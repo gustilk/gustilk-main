@@ -10,7 +10,7 @@ import { checkFacePresent } from "./moderation";
 import { db } from "./db";
 import { count, sql, eq, asc, desc, or, and, ilike } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
-import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail } from "./email";
+import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail } from "./email";
 import OpenAI from "openai";
 import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
 
@@ -797,7 +797,45 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.delete("/api/admin/users/:id", isAuthenticated, requireAdmin, async (req, res) => {
-    await storage.deleteUser(req.params.id as string);
+    const targetId = req.params.id as string;
+    const adminId = (req.user as any)?.id ?? "";
+
+    const targetUser = await storage.getUser(targetId);
+    if (!targetUser) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    const wasPremium = !!targetUser.isPremium;
+
+    if (wasPremium) {
+      const adminUser = await storage.getUser(adminId);
+      await writeAuditLog(
+        adminId,
+        adminUser?.email ?? "",
+        "premium_cancelled_on_deletion",
+        "user",
+        targetId,
+        `Account deleted by admin. Premium subscription cancelled immediately. User: ${targetUser.email ?? targetUser.phone ?? targetId}. FLAG FOR REFUND REVIEW.`,
+      );
+    }
+
+    const displayName = targetUser.fullName ?? targetUser.firstName ?? "Member";
+    if (targetUser.email) {
+      sendAccountDeletedEmail(targetUser.email, displayName, wasPremium).catch(() => {});
+    }
+
+    const adminUser2 = await storage.getUser(adminId);
+    await writeAuditLog(
+      adminId,
+      adminUser2?.email ?? "",
+      "delete_user",
+      "user",
+      targetId,
+      `Deleted user: ${targetUser.email ?? targetUser.phone ?? targetId}${wasPremium ? " (had active premium)" : ""}`,
+    );
+
+    await storage.deleteUser(targetId);
     res.json({ ok: true });
   });
 

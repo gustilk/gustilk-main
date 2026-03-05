@@ -82,6 +82,44 @@ export async function sendPhotoApprovedEmail(to: string, name: string): Promise<
   }
 }
 
+export async function sendAccountDeletedEmail(to: string, name: string, wasPremium: boolean): Promise<void> {
+  try {
+    const resend = getResend();
+    await resend.emails.send({
+      from: "Gûstîlk <noreply@gustilk.com>",
+      to,
+      subject: "Your Gûstîlk account has been removed",
+      html: emailShell(`
+        <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">Account Removed</h2>
+        <p style="margin:0 0 20px;font-size:14px;color:rgba(253,248,240,0.6);line-height:1.7;">
+          Hi ${name}, your Gûstîlk account has been permanently removed by an administrator.
+          All your profile data, photos, matches, and messages have been deleted.
+        </p>
+        ${wasPremium ? `
+        <div style="margin:0 0 24px;padding:16px;background:rgba(201,168,76,0.08);border-radius:12px;border:1px solid rgba(201,168,76,0.2);">
+          <p style="margin:0 0 6px;font-size:12px;color:rgba(201,168,76,0.7);text-transform:uppercase;letter-spacing:1px;">Premium Subscription</p>
+          <p style="margin:0;font-size:14px;color:rgba(253,248,240,0.7);line-height:1.6;">
+            Your active premium subscription has been cancelled immediately.
+            If you believe you are owed a refund, please contact us at
+            <a href="mailto:support@gustilk.com" style="color:#c9a84c;">support@gustilk.com</a>.
+          </p>
+        </div>` : ""}
+        <p style="margin:0 0 12px;font-size:14px;color:rgba(253,248,240,0.4);line-height:1.7;">
+          If you believe this was a mistake, please contact our support team.
+        </p>
+        <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+          <tr><td style="border-radius:12px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);">
+            <a href="mailto:support@gustilk.com" style="display:inline-block;padding:12px 28px;font-size:14px;font-weight:bold;color:#c9a84c;text-decoration:none;border-radius:12px;font-family:sans-serif;">
+              Contact Support
+            </a>
+          </td></tr>
+        </table>
+      `),
+    });
+  } catch {
+  }
+}
+
 export async function sendPhotoRejectedEmail(to: string, name: string, reason: string): Promise<void> {
   try {
     const resend = getResend();
