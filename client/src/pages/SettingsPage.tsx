@@ -9,6 +9,7 @@ import {
   ChevronLeft, ChevronRight, Globe, Bell, FileText, Shield,
   LogOut, Trash2, AlertTriangle, Lock, Heart, MessageCircle,
   Star, CalendarDays, Smartphone, Mail, KeyRound, Phone, Eye, EyeOff, CheckCircle2, ShieldX, UserX,
+  Cookie, ShieldCheck, ShieldAlert,
 } from "lucide-react";
 import type { SafeUser } from "@shared/schema";
 
@@ -368,11 +369,17 @@ export default function SettingsPage({ user }: Props) {
         </div>
 
         <div>
-          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.legalSection")}</p>
+          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Legal & Safety</p>
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
             <Row icon={FileText} label={t("settings.guidelinesMenuItem")} sub={t("settings.guidelinesMenuSub")} onClick={() => setSubScreen("guidelines")} testId="button-settings-guidelines" />
             <Divider />
             <Row icon={Lock} label={t("settings.privacyMenuItem")} sub={t("settings.privacyMenuSub")} onClick={() => setSubScreen("privacy")} testId="button-settings-privacy" />
+            <Divider />
+            <Row icon={Cookie} label="Cookie Policy" sub="How we use cookies and tracking" onClick={() => setLocation("/cookie-policy")} testId="button-settings-cookie-policy" />
+            <Divider />
+            <Row icon={ShieldCheck} label="GDPR Privacy Notice" sub="Your rights under EU & UK data law" onClick={() => setLocation("/gdpr")} testId="button-settings-gdpr" />
+            <Divider />
+            <Row icon={ShieldAlert} label="Safety Tips" sub="Stay safe while using Gûstîlk" onClick={() => setLocation("/safety-tips")} testId="button-settings-safety-tips" />
           </div>
         </div>
 
