@@ -721,6 +721,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.get("/api/admin/stats", isAuthenticated, requireAdmin, async (_req, res) => {
+    const { cacheGet: cGet, cacheSet: cSet, TTL: CT } = await import("./cache");
+    const ck = "admin:stats";
+    const cached = cGet<object>(ck);
+    if (cached) return res.json(cached);
+
     const [[tu], [pu], [vu], [bu], [tm], [tms], [te], [nw]] = await Promise.all([
       db.select({ n: count() }).from(users),
       db.select({ n: count() }).from(users).where(sql`${users.isPremium} = true`),
@@ -731,11 +736,13 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       db.select({ n: count() }).from(events),
       db.select({ n: count() }).from(users).where(sql`${users.createdAt} > now() - interval '7 days'`),
     ]);
-    res.json({
+    const result = {
       totalUsers: Number(tu.n), premiumUsers: Number(pu.n), verifiedUsers: Number(vu.n),
       bannedUsers: Number(bu.n), totalMatches: Number(tm.n), totalMessages: Number(tms.n),
       totalEvents: Number(te.n), newThisWeek: Number(nw.n),
-    });
+    };
+    cSet(ck, result, CT.ADMIN_STATS);
+    res.json(result);
   });
 
   app.get("/api/admin/events", isAuthenticated, requireAdmin, async (_req, res) => {

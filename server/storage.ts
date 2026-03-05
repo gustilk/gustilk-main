@@ -3,6 +3,7 @@ import { users, likes, dislikes, matches, messages, events, eventAttendees, repo
 import type { User, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report, InsertUser, PhotoSlot, Block, Gift } from "@shared/schema";
 import { eq, and, or, ne, notInArray, desc, sql, isNotNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { cacheGet, cacheSet, cacheDel, cacheDelPrefix, TTL } from "./cache";
 
 export interface IStorage {
   getUserById(id: string): Promise<User | undefined>;
@@ -60,16 +61,24 @@ function getSlots(user: User): PhotoSlot[] {
 
 export class DatabaseStorage implements IStorage {
   async getUserById(id: string): Promise<User | undefined> {
+    const ck = `user:${id}`;
+    const cached = cacheGet<User>(ck);
+    if (cached !== undefined) return cached;
     const [user] = await db.select().from(users).where(eq(users.id, id));
+    if (user) cacheSet(ck, user, TTL.USER);
     return user;
   }
 
   async updateUser(id: string, data: Partial<InsertUser>): Promise<SafeUser> {
     const [updated] = await db.update(users).set({ ...data, updatedAt: new Date() }).where(eq(users.id, id)).returning();
+    cacheDel(`user:${id}`);
+    cacheDelPrefix(`discover:`);
     return updated;
   }
 
   async deleteUser(id: string): Promise<void> {
+    cacheDel(`user:${id}`);
+    cacheDelPrefix(`discover:`);
     const userMatches = await db.select({ id: matches.id }).from(matches)
       .where(or(eq(matches.user1Id, id), eq(matches.user2Id, id)));
     if (userMatches.length > 0) {
@@ -93,13 +102,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDiscoverProfiles(userId: string, caste: string, gender: string, minAge: number, maxAge: number): Promise<SafeUser[]> {
+    const ck = `discover:${userId}:${caste}:${gender}:${minAge}:${maxAge}`;
+    const cached = cacheGet<SafeUser[]>(ck);
+    if (cached !== undefined) return cached;
+
     const likedIds = db.select({ id: likes.toUserId }).from(likes).where(eq(likes.fromUserId, userId));
     const dislikedIds = db.select({ id: dislikes.toUserId }).from(dislikes).where(eq(dislikes.fromUserId, userId));
     const blockedByMe = db.select({ id: blocks.blockedId }).from(blocks).where(eq(blocks.blockerId, userId));
     const blockedMe = db.select({ id: blocks.blockerId }).from(blocks).where(eq(blocks.blockedId, userId));
     const oppositeGender = gender === "male" ? "female" : "male";
 
-    return db.select().from(users).where(
+    const result = await db.select().from(users).where(
       and(
         ne(users.id, userId),
         eq(users.caste, caste as any),
@@ -115,10 +128,17 @@ export class DatabaseStorage implements IStorage {
         isNotNull(users.mainPhotoUrl),
       )
     ).limit(50);
+
+    cacheSet(ck, result, TTL.DISCOVER);
+    return result;
   }
 
   async likeUser(fromUserId: string, toUserId: string): Promise<{ matched: boolean; matchId?: string }> {
     await db.insert(likes).values({ id: randomUUID(), fromUserId, toUserId }).onConflictDoNothing();
+    // A like changes what future discover calls return for this user — bust their discover cache.
+    cacheDelPrefix(`discover:${fromUserId}:`);
+    cacheDel(`matches:${fromUserId}`);
+    cacheDel(`matches:${toUserId}`);
 
     const [mutual] = await db.select().from(likes).where(
       and(eq(likes.fromUserId, toUserId), eq(likes.toUserId, fromUserId))
@@ -142,9 +162,14 @@ export class DatabaseStorage implements IStorage {
 
   async dislikeUser(fromUserId: string, toUserId: string): Promise<void> {
     await db.insert(dislikes).values({ id: randomUUID(), fromUserId, toUserId }).onConflictDoNothing();
+    cacheDelPrefix(`discover:${fromUserId}:`);
   }
 
   async getMatches(userId: string): Promise<MatchWithUser[]> {
+    const ck = `matches:${userId}`;
+    const cached = cacheGet<MatchWithUser[]>(ck);
+    if (cached !== undefined) return cached;
+
     const userMatches = await db.select().from(matches).where(
       or(eq(matches.user1Id, userId), eq(matches.user2Id, userId))
     ).orderBy(desc(matches.createdAt));
@@ -157,7 +182,8 @@ export class DatabaseStorage implements IStorage {
     for (const match of userMatches) {
       const otherId = match.user1Id === userId ? match.user2Id : match.user1Id;
       if (hiddenIds.has(otherId)) continue;
-      const [otherUser] = await db.select().from(users).where(eq(users.id, otherId));
+      // Reuse the already-cached user object where possible.
+      const otherUser = await this.getUserById(otherId);
       if (!otherUser) continue;
 
       const [lastMessage] = await db.select().from(messages)
@@ -171,11 +197,17 @@ export class DatabaseStorage implements IStorage {
 
       result.push({ ...match, otherUser, lastMessage: lastMessage || null, unreadCount: unreadRows.length });
     }
+
+    cacheSet(ck, result, TTL.MATCHES);
     return result;
   }
 
   async getMatch(matchId: string): Promise<Match | undefined> {
+    const ck = `match:${matchId}`;
+    const cached = cacheGet<Match>(ck);
+    if (cached !== undefined) return cached;
     const [match] = await db.select().from(matches).where(eq(matches.id, matchId));
+    if (match) cacheSet(ck, match, TTL.MATCH);
     return match;
   }
 
@@ -185,6 +217,12 @@ export class DatabaseStorage implements IStorage {
 
   async sendMessage(matchId: string, senderId: string, text: string): Promise<Message> {
     const [msg] = await db.insert(messages).values({ id: randomUUID(), matchId, senderId, text }).returning();
+    // Bust both parties' match lists so unreadCount + lastMessage are fresh.
+    const match = await this.getMatch(matchId);
+    if (match) {
+      cacheDel(`matches:${match.user1Id}`);
+      cacheDel(`matches:${match.user2Id}`);
+    }
     return msg;
   }
 
@@ -192,10 +230,17 @@ export class DatabaseStorage implements IStorage {
     await db.update(messages).set({ readAt: new Date() }).where(
       and(eq(messages.matchId, matchId), ne(messages.senderId, userId), sql`${messages.readAt} IS NULL`)
     );
+    cacheDel(`matches:${userId}`);
   }
 
   async listEvents(userId: string): Promise<EventWithAttendance[]> {
-    const allEvents = await db.select().from(events).orderBy(events.date);
+    // Cache the raw events list globally (same for all users), then merge per-user attendance cheaply.
+    const evtCk = "events:all";
+    let allEvents = cacheGet<Event[]>(evtCk);
+    if (!allEvents) {
+      allEvents = await db.select().from(events).orderBy(events.date);
+      cacheSet(evtCk, allEvents, TTL.EVENTS);
+    }
     const attendedRows = await db.select().from(eventAttendees).where(eq(eventAttendees.userId, userId));
     const attendedIds = new Set(attendedRows.map(r => r.eventId));
     return allEvents.map(e => ({ ...e, isAttending: attendedIds.has(e.id), isCreator: e.creatorId === userId }));
@@ -213,6 +258,7 @@ export class DatabaseStorage implements IStorage {
   async attendEvent(eventId: string, userId: string): Promise<void> {
     await db.insert(eventAttendees).values({ id: randomUUID(), eventId, userId }).onConflictDoNothing();
     await db.update(events).set({ attendeeCount: sql`${events.attendeeCount} + 1` }).where(eq(events.id, eventId));
+    cacheDel("events:all");
   }
 
   async unattendEvent(eventId: string, userId: string): Promise<void> {
@@ -220,6 +266,7 @@ export class DatabaseStorage implements IStorage {
       and(eq(eventAttendees.eventId, eventId), eq(eventAttendees.userId, userId))
     );
     await db.update(events).set({ attendeeCount: sql`${events.attendeeCount} - 1` }).where(eq(events.id, eventId));
+    cacheDel("events:all");
   }
 
   async getPendingVerifications(): Promise<SafeUser[]> {
@@ -248,6 +295,8 @@ export class DatabaseStorage implements IStorage {
     if (status === "rejected") { updates.profileVisible = false; updates.rejectionReason = reason ?? ""; }
     if (status === "banned") { updates.profileVisible = false; updates.rejectionReason = reason ?? ""; }
     await db.update(users).set(updates as any).where(eq(users.id, userId));
+    cacheDel(`user:${userId}`);
+    cacheDelPrefix("discover:");
   }
 
   async banUser(userId: string, reason?: string): Promise<void> {
@@ -261,6 +310,8 @@ export class DatabaseStorage implements IStorage {
       applicationHistory: [...history, { action: "banned", reason: reason ?? "", date: new Date().toISOString() }] as any,
       updatedAt: new Date(),
     }).where(eq(users.id, userId));
+    cacheDel(`user:${userId}`);
+    cacheDelPrefix("discover:");
   }
 
   async reapplyUser(userId: string, newSelfie?: string): Promise<void> {
@@ -280,6 +331,7 @@ export class DatabaseStorage implements IStorage {
     };
     if (newSelfie) updates.verificationSelfie = newSelfie;
     await db.update(users).set(updates as any).where(eq(users.id, userId));
+    cacheDel(`user:${userId}`);
   }
 
   async getUsersWithPendingPhotoSlots(): Promise<SafeUser[]> {
@@ -315,6 +367,8 @@ export class DatabaseStorage implements IStorage {
       photos: approvedSlots.map(s => s.url),
       updatedAt: new Date(),
     }).where(eq(users.id, userId)).returning();
+    cacheDel(`user:${userId}`);
+    cacheDelPrefix("discover:");
     return { user: updated };
   }
 
@@ -343,6 +397,8 @@ export class DatabaseStorage implements IStorage {
       photos: approvedSlots.map(s => s.url),
       updatedAt: new Date(),
     }).where(eq(users.id, userId)).returning();
+    cacheDel(`user:${userId}`);
+    cacheDelPrefix("discover:");
     return { user: updated };
   }
 
@@ -361,6 +417,8 @@ export class DatabaseStorage implements IStorage {
       mainPhotoUrl: newMain,
       updatedAt: new Date(),
     }).where(eq(users.id, userId));
+    cacheDel(`user:${userId}`);
+    cacheDelPrefix("discover:");
   }
 
   async sendGift(senderId: string, recipientId: string, matchId: string, giftType: string, message: string, animationStyle: string = "none"): Promise<Gift> {
@@ -388,7 +446,7 @@ export class DatabaseStorage implements IStorage {
     const rows = await db.select().from(visitors).where(eq(visitors.toUserId, userId)).orderBy(desc(visitors.createdAt));
     const result: { user: SafeUser; createdAt: Date }[] = [];
     for (const row of rows) {
-      const [u] = await db.select().from(users).where(eq(users.id, row.fromUserId));
+      const u = await this.getUserById(row.fromUserId);
       if (u) result.push({ user: u, createdAt: row.createdAt! });
     }
     return result;
@@ -398,7 +456,7 @@ export class DatabaseStorage implements IStorage {
     const rows = await db.select().from(likes).where(eq(likes.toUserId, userId)).orderBy(desc(likes.createdAt));
     const result: { user: SafeUser; createdAt: Date }[] = [];
     for (const row of rows) {
-      const [u] = await db.select().from(users).where(eq(users.id, row.fromUserId));
+      const u = await this.getUserById(row.fromUserId);
       if (u) result.push({ user: u, createdAt: row.createdAt! });
     }
     return result;
@@ -408,7 +466,7 @@ export class DatabaseStorage implements IStorage {
     const rows = await db.select().from(likes).where(eq(likes.fromUserId, userId)).orderBy(desc(likes.createdAt));
     const result: { user: SafeUser; createdAt: Date }[] = [];
     for (const row of rows) {
-      const [u] = await db.select().from(users).where(eq(users.id, row.toUserId));
+      const u = await this.getUserById(row.toUserId);
       if (u) result.push({ user: u, createdAt: row.createdAt! });
     }
     return result;
@@ -416,10 +474,16 @@ export class DatabaseStorage implements IStorage {
 
   async blockUser(blockerId: string, blockedId: string): Promise<void> {
     await db.insert(blocks).values({ id: randomUUID(), blockerId, blockedId }).onConflictDoNothing();
+    cacheDel(`matches:${blockerId}`);
+    cacheDel(`matches:${blockedId}`);
+    cacheDelPrefix(`discover:${blockerId}:`);
   }
 
   async unblockUser(blockerId: string, blockedId: string): Promise<void> {
     await db.delete(blocks).where(and(eq(blocks.blockerId, blockerId), eq(blocks.blockedId, blockedId)));
+    cacheDel(`matches:${blockerId}`);
+    cacheDel(`matches:${blockedId}`);
+    cacheDelPrefix(`discover:${blockerId}:`);
   }
 
   async getBlockedUsers(blockerId: string): Promise<SafeUser[]> {
