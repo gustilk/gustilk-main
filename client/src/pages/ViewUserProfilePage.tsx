@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { ArrowLeft, MessageCircle, Video, Star, Lock, MapPin, Shield, Flag, Crown } from "lucide-react";
@@ -7,6 +7,8 @@ import type { SafeUser, MatchWithUser } from "@shared/schema";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
 import ReportModal from "@/components/ReportModal";
 import { useVideoCallContext } from "@/hooks/useVideoCall";
+
+const REFERRER_KEY = "profile_back_to";
 
 interface Props {
   viewer: SafeUser;
@@ -19,6 +21,29 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
   const [photoIdx, setPhotoIdx] = useState(0);
   const [showReport, setShowReport] = useState(false);
   const { startCall, callState } = useVideoCallContext();
+
+  // Capture the referrer that was stored by the navigating page.
+  // Read-once on mount, then clear it so it doesn't leak to other navigations.
+  const [referrer] = useState<string | null>(() => {
+    const stored = sessionStorage.getItem(REFERRER_KEY);
+    if (stored) sessionStorage.removeItem(REFERRER_KEY);
+    return stored;
+  });
+
+  // Single source of truth for going back.
+  // • When the user arrived via in-app navigation, history.back() pops the
+  //   pushState entry that setLocation() created — works on all browsers
+  //   including iOS Safari and Android Chrome, and also covers the native
+  //   back button and the iOS swipe-back gesture.
+  // • When the user arrived via a direct URL / external link (no referrer
+  //   stored), fall back to /discover so they stay in the app.
+  const goBack = useCallback(() => {
+    if (referrer) {
+      history.back();
+    } else {
+      setLocation("/discover");
+    }
+  }, [referrer, setLocation]);
 
   const isPremium = !!viewer.isPremium;
 
@@ -47,7 +72,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
     return (
       <div className="flex flex-col items-center justify-center h-screen gap-4" style={{ background: "#0d0618" }}>
         <p className="text-cream/50">Profile not found.</p>
-        <button onClick={() => history.back()} className="text-gold text-sm">Go back</button>
+        <button onClick={goBack} className="text-gold text-sm">Go back</button>
       </div>
     );
   }
@@ -138,7 +163,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
         )}
 
         {/* Back button */}
-        <button onClick={() => window.history.length > 1 ? history.back() : setLocation("/matches")} data-testid="button-back-profile"
+        <button onClick={goBack} data-testid="button-back-profile"
           className="absolute top-12 left-4 w-9 h-9 rounded-full flex items-center justify-center"
           style={{ background: "rgba(13,6,24,0.7)", border: "1px solid rgba(255,255,255,0.15)" }}>
           <ArrowLeft size={18} color="rgba(253,248,240,0.85)" />
@@ -286,7 +311,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
           reportedUserId={profile.id}
           reportedUserName={displayName}
           onClose={() => setShowReport(false)}
-          onBlocked={() => { setShowReport(false); history.back(); }}
+          onBlocked={() => { setShowReport(false); goBack(); }}
         />
       )}
     </div>
