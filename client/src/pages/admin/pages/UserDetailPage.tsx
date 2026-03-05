@@ -215,30 +215,84 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
 
       {/* Photos */}
       {(() => {
-        const allPhotos = [
-          ...(u.mainPhotoUrl ? [u.mainPhotoUrl] : []),
-          ...(u.photoSlots ?? []).map((s: any) => s.url).filter(Boolean),
-          ...(u.photos ?? []).filter((url: string) => url !== u.mainPhotoUrl),
-        ];
-        const unique = [...new Set(allPhotos)];
-        if (!unique.length) return null;
+        const slots: { url: string; status: string }[] = ((u.photoSlots ?? []) as any[]).filter(s => s?.url);
+        // Fall back to photos array if no slots
+        const fallback = (u.photos ?? []).filter(Boolean).map((url: string) => ({ url, status: "approved" }));
+        const displaySlots = slots.length > 0 ? slots : fallback;
+        if (!displaySlots.length) return null;
+
+        const allUrls = displaySlots.map(s => s.url);
+
+        const badgeStyle: Record<string, { bg: string; color: string; border: string; label: string }> = {
+          pending:  { bg: "rgba(251,191,36,0.92)",  color: "#1a0a2e", border: "none", label: "Pending" },
+          approved: { bg: "rgba(16,185,129,0.88)",  color: "#fff",    border: "none", label: "Approved" },
+          rejected: { bg: "rgba(239,68,68,0.9)",    color: "#fff",    border: "none", label: "Rejected" },
+        };
+
         return (
           <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}>
-            <h3 className="text-cream text-sm font-semibold mb-3">Photos ({unique.length})</h3>
+            <h3 className="text-cream text-sm font-semibold mb-3">Photos ({displaySlots.length})</h3>
             <div className="grid grid-cols-3 gap-2">
-              {unique.map((url, i) => (
-                <button
-                  key={i}
-                  onClick={() => { setLightboxUrls(unique); setLightboxIdx(i); }}
-                  data-testid={`photo-thumb-${i}`}
-                  className="relative aspect-[3/4] rounded-xl overflow-hidden group cursor-zoom-in"
-                  style={{ border: "1px solid rgba(201,168,76,0.15)" }}
-                >
-                  <img src={url} alt="" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center">
-                    <span className="opacity-0 group-hover:opacity-100 text-white text-xs font-semibold transition-opacity">View</span>
-                  </div>
-                </button>
+              {displaySlots.map((slot, i) => {
+                const badge = badgeStyle[slot.status];
+                const isMain = slot.url === u.mainPhotoUrl;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => { setLightboxUrls(allUrls); setLightboxIdx(i); }}
+                    data-testid={`photo-thumb-${i}`}
+                    className="relative aspect-[3/4] rounded-xl overflow-hidden group cursor-zoom-in"
+                    style={{
+                      border: slot.status === "pending"
+                        ? "2px solid rgba(251,191,36,0.7)"
+                        : slot.status === "rejected"
+                        ? "2px solid rgba(239,68,68,0.5)"
+                        : "1px solid rgba(16,185,129,0.3)",
+                    }}
+                  >
+                    <img src={slot.url} alt="" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+
+                    {/* Status badge — top-left */}
+                    {badge && (
+                      <div
+                        className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide"
+                        style={{ background: badge.bg, color: badge.color }}
+                        data-testid={`badge-photo-${i}-${slot.status}`}
+                      >
+                        {badge.label}
+                      </div>
+                    )}
+
+                    {/* Main photo star — top-right */}
+                    {isMain && (
+                      <div
+                        className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold"
+                        style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
+                        data-testid={`badge-photo-${i}-main`}
+                      >
+                        ★ Main
+                      </div>
+                    )}
+
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center">
+                      <span className="opacity-0 group-hover:opacity-100 text-white text-xs font-semibold transition-opacity">View</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center gap-3 mt-3 pt-3 flex-wrap" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              {[
+                { color: "#fbbf24", label: "Pending approval" },
+                { color: "#10b981", label: "Approved" },
+                { color: "#ef4444", label: "Rejected" },
+              ].map(({ color, label }) => (
+                <div key={label} className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
+                  <span className="text-cream/40 text-[10px]">{label}</span>
+                </div>
               ))}
             </div>
           </div>
