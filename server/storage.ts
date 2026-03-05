@@ -92,6 +92,7 @@ const CARD_COLUMNS = {
   isPremium: users.isPremium,
   premiumUntil: users.premiumUntil,
   isAdmin: users.isAdmin,
+  isSystemAccount: users.isSystemAccount,
   activitySeenAt: users.activitySeenAt,
   matchesSeenAt: users.matchesSeenAt,
   createdAt: users.createdAt,

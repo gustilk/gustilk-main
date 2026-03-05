@@ -19,24 +19,67 @@ const openai = new OpenAI({
   baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
 });
 
-async function isAdminMatch(match: { user1Id: string; user2Id: string }): Promise<boolean> {
-  const [u1, u2] = await Promise.all([storage.getUserById(match.user1Id), storage.getUserById(match.user2Id)]);
-  return !!(u1?.isAdmin || u2?.isAdmin);
+const SUPPORT_ACCOUNT_EMAIL = "support@gustilk.com";
+
+async function getOrCreateSupportAccount(): Promise<typeof users.$inferSelect> {
+  const [existing] = await db.select().from(users).where(eq(users.email, SUPPORT_ACCOUNT_EMAIL));
+  if (existing) return existing;
+  const id = randomUUID();
+  const [created] = await db.insert(users).values({
+    id,
+    email: SUPPORT_ACCOUNT_EMAIL,
+    firstName: "Gûstîlk",
+    lastName: "Support",
+    fullName: "Gûstîlk Support",
+    isSystemAccount: true,
+    isAdmin: false,
+    isVerified: true,
+    verificationStatus: "approved",
+    profileVisible: false,
+    mainPhotoUrl: "/gustilk-logo.svg",
+    bio: "Official Gûstîlk Support Assistant — here to help you 24/7.",
+  } as any).returning();
+  console.log("[system] Created support account:", created.id);
+  return created;
 }
 
-async function generateAdminAiReply(matchId: string, adminId: string, userMessage: string): Promise<void> {
+async function isAdminMatch(match: { user1Id: string; user2Id: string }): Promise<boolean> {
+  const [u1, u2] = await Promise.all([storage.getUserById(match.user1Id), storage.getUserById(match.user2Id)]);
+  return !!(u1?.isAdmin || u2?.isAdmin || u1?.isSystemAccount || u2?.isSystemAccount);
+}
+
+const SUPPORT_AI_SYSTEM_PROMPT = `You are the Official Gûstîlk Support Assistant — a friendly AI for the Gûstîlk app, a Yezidi community dating platform. You help users with:
+
+• How matching works — members are matched within their caste (Sheikh, Pir, or Mirid) with members of the opposite gender
+• Profile setup — photos (up to 6), verification selfie, bio, caste, age, occupation
+• Photo & identity verification — admins review selfies and photos within 24–48 hours; you'll be notified by email once approved or if changes are needed
+• Premium subscription — required to message matches, see who liked you, make video calls, and send virtual gifts
+• Community events — browse and RSVP to local Yezidi events in the Events tab
+• Account settings — change language (English, Arabic, German, Armenian, Russian, Kurdish), notifications, privacy, blocking/reporting users
+• Technical issues — camera access, login problems, forgotten password (use the magic link option)
+• Virtual gifts — premium users can send animated gifts to their matches in the chat
+
+If the user describes harassment, abuse, impersonation, or a safety threat, respond warmly but tell them you are escalating this to the admin team and ask them to also use the in-app Report button on the offending profile.
+
+Important rules:
+- Always be transparent that you are an AI assistant, not a human
+- If asked for human support, tell users to email support@gustilk.com
+- Be warm, empathetic, and concise (under 150 words per reply)
+- Respond in the user's language if it is one of the six supported languages (English, Arabic, German, Armenian, Russian, Kurdish) — otherwise respond in English`;
+
+async function generateSupportAiReply(matchId: string, supportAccountId: string, userMessage: string): Promise<void> {
   try {
     const aiReply = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: `You are Gûstîlk Support, a friendly assistant for the Gûstîlk Yezidi community dating app. Help users with questions about matching, profiles, photo verification, premium subscriptions, community events, and app features. The app supports Sheikh, Pir, and Mirid castes and focuses on meaningful connections within the Yezidi community. Be warm, helpful, and concise (under 120 words). The app supports these languages: English, Arabic, German, Armenian, Russian, and Kurdish. Respond in the same language the user writes in, but only if it is one of those six languages — otherwise respond in English.` },
+        { role: "system", content: SUPPORT_AI_SYSTEM_PROMPT },
         { role: "user", content: userMessage },
       ],
     });
     const aiText = aiReply.choices[0]?.message?.content;
-    if (aiText) await storage.sendMessage(matchId, adminId, aiText);
+    if (aiText) await storage.sendMessage(matchId, supportAccountId, aiText);
   } catch (e) {
-    console.error("[AI reply error]", e);
+    console.error("[AI support reply error]", e);
   }
 }
 
@@ -48,6 +91,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   setupSession(app);
   registerAuthRoutes(app);
   setupWs(httpServer);
+
+  // Ensure support account exists on startup
+  getOrCreateSupportAccount().catch(e => console.error("[startup] support account error:", e));
 
   // ─── GEO DETECT (public — used on login screen) ───────────
   app.get("/api/geo/detect", async (req, res) => {
@@ -319,11 +365,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (!user?.isPremium && !adminChat) return res.status(403).json({ error: "Premium required to send messages" });
     const { text } = z.object({ text: z.string().min(1).max(2000) }).parse(req.body);
     const msg = await storage.sendMessage(req.params.matchId as string, userId, text);
-    // Auto AI reply when a regular user messages the admin chat
+    // Auto AI reply when a regular user messages the support account or admin chat
     const otherUserId = match.user1Id === userId ? match.user2Id : match.user1Id;
     const otherUser = await storage.getUserById(otherUserId);
-    if (otherUser?.isAdmin && !user?.isAdmin) {
-      generateAdminAiReply(match.id, otherUserId, text);
+    if ((otherUser?.isSystemAccount || otherUser?.isAdmin) && !user?.isAdmin && !user?.isSystemAccount) {
+      generateSupportAiReply(match.id, otherUserId, text);
     }
     res.json({ message: msg });
   });
@@ -454,6 +500,29 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
     await storage.reapplyUser(userId, selfie);
     res.json({ ok: true });
+  });
+
+  // ─── SUPPORT CHAT ─────────────────────────────────────────
+  app.post("/api/support/start", isAuthenticated, async (req, res) => {
+    try {
+      const userId = getUserId(req);
+      const supportAccount = await getOrCreateSupportAccount();
+      const existing = await db.select().from(matches).where(
+        or(
+          and(eq(matches.user1Id, supportAccount.id), eq(matches.user2Id, userId)),
+          and(eq(matches.user1Id, userId), eq(matches.user2Id, supportAccount.id))
+        )
+      );
+      if (existing.length > 0) return res.json({ matchId: existing[0].id });
+      const matchId = randomUUID();
+      await db.insert(matches).values({ id: matchId, user1Id: supportAccount.id, user2Id: userId });
+      const openingMsg = `Hello! I'm the Gûstîlk Support Assistant — an AI available 24/7. How can I help you today?`;
+      await storage.sendMessage(matchId, supportAccount.id, openingMsg);
+      res.json({ matchId });
+    } catch (e: any) {
+      console.error("[support/start]", e);
+      res.status(500).json({ error: "Failed to start support chat" });
+    }
   });
 
   // ─── REPORTS ──────────────────────────────────────────────
@@ -597,6 +666,30 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
             await storage.approvePhotoSlot(targetId, i);
           }
         }
+      }
+    }
+
+    // Welcome message from support account on first approval
+    if (action === "approve") {
+      try {
+        const supportAccount = await getOrCreateSupportAccount();
+        const existing = await db.select().from(matches).where(
+          or(
+            and(eq(matches.user1Id, supportAccount.id), eq(matches.user2Id, targetId)),
+            and(eq(matches.user1Id, targetId), eq(matches.user2Id, supportAccount.id))
+          )
+        );
+        let supportMatchId: string;
+        if (existing.length > 0) {
+          supportMatchId = existing[0].id;
+        } else {
+          supportMatchId = randomUUID();
+          await db.insert(matches).values({ id: supportMatchId, user1Id: supportAccount.id, user2Id: targetId });
+        }
+        const welcomeMsg = `Welcome to Gûstîlk! 🎉 Your account is now verified and you are part of our community. I am the Gûstîlk Support Assistant — an AI here 24/7 to help you. Feel free to ask me anything about matching, your profile, events, premium features, or any issue you run into. We hope you find meaningful connections here!`;
+        await storage.sendMessage(supportMatchId, supportAccount.id, welcomeMsg);
+      } catch (e) {
+        console.error("[welcome-message error]", e);
       }
     }
 

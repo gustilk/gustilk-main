@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { Lock, Star, MessageCircle } from "lucide-react";
+import { Lock, MessageCircle, Bot, BadgeCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
 import type { SafeUser, MatchWithUser } from "@shared/schema";
@@ -26,9 +26,11 @@ export default function MatchesPage({ user }: Props) {
     refetchInterval: 60000,
   });
 
-  const matches = data?.matches ?? [];
-  const newMatches = matches.filter(m => !m.lastMessage);
-  const conversations = matches.filter(m => !!m.lastMessage);
+  const allMatches = data?.matches ?? [];
+  const supportMatch = allMatches.find(m => m.otherUser?.isSystemAccount);
+  const regularMatches = allMatches.filter(m => !m.otherUser?.isSystemAccount);
+  const newMatches = regularMatches.filter(m => !m.lastMessage);
+  const conversations = regularMatches.filter(m => !!m.lastMessage);
 
   return (
     <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
@@ -37,23 +39,31 @@ export default function MatchesPage({ user }: Props) {
         <h1 className="font-serif text-2xl text-gold">{t("matches.title")}</h1>
       </div>
 
+      {/* Pinned Gûstîlk Support chat — always shown */}
+      <div className="px-4 pt-2 pb-1">
+        <SupportChatCard
+          match={supportMatch}
+          onClick={() => supportMatch ? setLocation(`/chat/${supportMatch.id}`) : null}
+        />
+      </div>
+
       {isLoading ? (
         <div className="flex items-center justify-center h-48">
           <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
         </div>
-      ) : matches.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 gap-4 text-center px-8">
-          <div className="w-20 h-20 rounded-full flex items-center justify-center"
+      ) : regularMatches.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-48 gap-4 text-center px-8">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center"
             style={{ border: "2px solid rgba(201,168,76,0.3)" }}>
-            <MessageCircle size={32} color="rgba(201,168,76,0.5)" />
+            <MessageCircle size={28} color="rgba(201,168,76,0.5)" />
           </div>
           <h3 className="font-serif text-xl text-gold">{t("matches.noMatches")}</h3>
           <p className="text-cream/40 text-sm">{t("matches.noMatchesSub")}</p>
         </div>
       ) : (
         <div>
-          {/* Premium upsell banner for non-premium users with matches */}
-          {!isPremium && matches.length > 0 && (
+          {/* Premium upsell banner */}
+          {!isPremium && regularMatches.length > 0 && (
             <div className="mx-4 mb-4 mt-2 rounded-2xl p-4"
               style={{ background: "linear-gradient(135deg, rgba(201,168,76,0.1), rgba(123,63,160,0.1))", border: "1px solid rgba(201,168,76,0.3)" }}>
               <div className="flex items-start gap-3">
@@ -63,7 +73,7 @@ export default function MatchesPage({ user }: Props) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-cream font-semibold text-sm">
-                    {matches.length} {matches.length === 1 ? "person" : "people"} liked you
+                    {regularMatches.length} {regularMatches.length === 1 ? "person" : "people"} liked you
                   </p>
                   <p className="text-cream/45 text-xs mt-0.5">
                     {t("matches.upgradeSub")}
@@ -129,6 +139,56 @@ export default function MatchesPage({ user }: Props) {
   );
 }
 
+function SupportChatCard({ match, onClick }: { match: MatchWithUser | undefined; onClick: () => void }) {
+  const lastMsg = match?.lastMessage;
+  const hasUnread = (match?.unreadCount || 0) > 0;
+
+  return (
+    <button
+      onClick={onClick}
+      data-testid="support-chat-card"
+      className="w-full flex items-center gap-3.5 p-3.5 rounded-2xl text-left transition-all"
+      style={{
+        background: "linear-gradient(135deg, rgba(123,63,160,0.12), rgba(201,168,76,0.08))",
+        border: "1px solid rgba(201,168,76,0.25)",
+      }}
+    >
+      <div className="relative flex-shrink-0">
+        <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden"
+          style={{ background: "linear-gradient(135deg, #1a0a2e, #2d0f4a)", border: "2px solid rgba(201,168,76,0.4)" }}>
+          <img src="/gustilk-logo.svg" alt="Gûstîlk Support" className="w-8 h-8 object-contain" />
+        </div>
+        <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
+          style={{ background: "#10b981", border: "1.5px solid #0d0618" }}>
+          <Bot size={9} color="white" />
+        </span>
+        {hasUnread && (
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
+            style={{ background: "#d4608a", color: "white" }}>
+            {(match?.unreadCount || 0) > 9 ? "9+" : match?.unreadCount}
+          </span>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5 mb-0.5">
+          <span className="font-semibold text-sm text-cream" data-testid="text-support-name">Gûstîlk Support</span>
+          <BadgeCheck size={13} color="#10b981" />
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold ml-0.5"
+            style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.3)" }}>
+            AI
+          </span>
+        </div>
+        <p className="text-xs text-cream/40 truncate">
+          {lastMsg ? lastMsg.text : "Welcome — tap to ask for help 24/7"}
+        </p>
+      </div>
+      <span className="text-cream/25 text-xs flex-shrink-0">
+        {lastMsg?.createdAt ? formatDistanceToNow(new Date(lastMsg.createdAt), { addSuffix: true }) : ""}
+      </span>
+    </button>
+  );
+}
+
 function NewMatchBubble({ match, isPremium, onClick }: {
   match: MatchWithUser;
   isPremium: boolean;
@@ -158,7 +218,6 @@ function NewMatchBubble({ match, isPremium, onClick }: {
             (other.firstName ?? other.fullName?.split(" ")[0] ?? "M").charAt(0)
           )}
         </div>
-        {/* Lock overlay for non-premium */}
         {!isPremium && (
           <div className="absolute inset-0 rounded-full flex items-center justify-center"
             style={{ background: "rgba(13,6,24,0.5)" }}>
@@ -201,7 +260,6 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
       className="w-full flex items-center gap-4 p-4 rounded-2xl transition-all text-left"
       style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}
     >
-      {/* Avatar — blurred for non-premium */}
       <div className="relative flex-shrink-0">
         <div
           className="w-14 h-14 rounded-full flex items-center justify-center font-serif text-xl font-bold text-gold overflow-hidden"
