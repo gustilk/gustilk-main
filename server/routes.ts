@@ -191,18 +191,21 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         // A photo is "new" if its exact string does not exist in any slot yet.
         newUploads = submittedPhotos.filter(p => !existingSlotUrlSet.has(p));
 
-        const removedRejectedUrls: string[] = (parsed as any).removedRejectedUrls ?? [];
-
         // Rebuild slots:
         //   • Approved slots the user kept → stay approved (never reset)
         //   • Pending slots → always kept (awaiting admin review)
-        //   • Rejected slots not explicitly removed → kept
-        //   • New photos → appended as pending
-        const keptSlots = existingSlots.filter((s: any) =>
+        //   • Rejected slots → kept, but auto-retired (FIFO) when new uploads are present
+        //     so that each new upload consumes exactly one "freed" slot without exceeding the limit
+        let slotsToKeep = existingSlots.filter((s: any) =>
           (s.status === "approved" && keptApprovedUrlSet.has(s.url)) ||
           s.status === "pending" ||
-          (s.status === "rejected" && !removedRejectedUrls.includes(s.url))
+          s.status === "rejected"
         );
+        let autoRetire = newUploads.length;
+        const keptSlots = slotsToKeep.filter((s: any) => {
+          if (s.status === "rejected" && autoRetire > 0) { autoRetire--; return false; }
+          return true;
+        });
         const newPendingSlots = newUploads.map((url: string) => ({ url, status: "pending" as const }));
         updatedSlots = [...keptSlots, ...newPendingSlots];
 

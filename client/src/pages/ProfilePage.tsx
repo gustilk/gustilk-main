@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, MapPin, ChevronLeft, Shield, AlertTriangle, LifeBuoy } from "lucide-react";
+import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, MapPin, ChevronLeft, Shield, AlertTriangle, LifeBuoy, XCircle } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -228,7 +228,6 @@ export default function ProfilePage({ user }: Props) {
   });
   const [pendingSlots] = useState<PhotoSlot[]>(() => allSlots.filter(s => s.status === "pending"));
   const [rejectedSlots, setRejectedSlots] = useState<PhotoSlot[]>(() => allSlots.filter(s => s.status === "rejected"));
-  const [removedRejectedUrls, setRemovedRejectedUrls] = useState<string[]>([]);
   const [photosEdited, setPhotosEdited] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [cropTarget, setCropTarget] = useState<{ imgSrc: string; slotIdx: number } | null>(null);
@@ -247,7 +246,7 @@ export default function ProfilePage({ user }: Props) {
       const approved = localSlots.filter(s => s?.status === "approved").map(s => s!.url);
       const newUploads = localSlots.filter(s => s?.status === "new").map(s => s!.url);
       const photos = [...approved, ...newUploads];
-      const res = await apiRequest("PUT", "/api/profile", { photos, removedRejectedUrls });
+      const res = await apiRequest("PUT", "/api/profile", { photos });
       return res.json();
     },
     onSuccess: (data) => {
@@ -257,7 +256,6 @@ export default function ProfilePage({ user }: Props) {
       approvedSlots.forEach((s, i) => { arr[i] = { url: s.url, status: "approved" }; });
       setLocalSlots(arr);
       setRejectedSlots(updatedSlots.filter(s => s.status === "rejected"));
-      setRemovedRejectedUrls([]);
       setPhotosEdited(false);
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       toast({ title: t("profile.photosUpdated") });
@@ -316,13 +314,6 @@ export default function ProfilePage({ user }: Props) {
     setPhotosEdited(true);
   };
 
-  const replaceRejected = (rejectedUrl: string, slotIdx: number) => {
-    setRemovedRejectedUrls(prev => [...prev, rejectedUrl]);
-    setRejectedSlots(prev => prev.filter(s => s.url !== rejectedUrl));
-    pendingSlotRef.current = slotIdx;
-    if (fileInputRef.current) { fileInputRef.current.value = ""; fileInputRef.current.click(); }
-    setPhotosEdited(true);
-  };
 
   const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[c] ?? c);
 
@@ -606,44 +597,40 @@ export default function ProfilePage({ user }: Props) {
         {rejectedSlots.length > 0 && (
           <div className="mt-4">
             <div className="flex items-center gap-2 mb-2">
-              <AlertTriangle size={12} color="#d4608a" />
+              <XCircle size={12} color="#d4608a" />
               <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#d4608a" }}>
                 Rejected Photos
               </span>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              {rejectedSlots.map((slot, idx) => {
-                const nextEmptyIdx = localSlots.findIndex(s => s === null);
-                const canReplace = nextEmptyIdx !== -1;
-                return (
-                  <div key={idx} className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1 / 1" }}
-                    data-testid={`rejected-photo-${idx}`}>
-                    <img src={slot.url} alt={`Rejected ${idx + 1}`} className="w-full h-full object-cover"
-                      style={{ filter: "brightness(0.45) saturate(0.3)" }} />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-2"
-                      style={{ background: "rgba(212,96,138,0.25)" }}>
-                      {slot.reason && (
-                        <p className="text-[8px] text-center font-medium leading-tight" style={{ color: "#fdf8f0cc" }}>
-                          {slot.reason}
-                        </p>
-                      )}
-                      {canReplace && (
-                        <button
-                          onClick={() => replaceRejected(slot.url, nextEmptyIdx)}
-                          data-testid={`button-replace-rejected-${idx}`}
-                          className="px-2 py-1 rounded-lg text-[9px] font-bold"
-                          style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
-                        >
-                          Replace
-                        </button>
-                      )}
+              {rejectedSlots.map((slot, idx) => (
+                <div key={idx} data-testid={`rejected-photo-${idx}`}>
+                  <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1 / 1", border: "1.5px solid rgba(212,96,138,0.4)" }}>
+                    <img
+                      src={slot.url}
+                      alt={`Rejected ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                      style={{ filter: "brightness(0.4) saturate(0.2)" }}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center"
+                      style={{ background: "rgba(212,96,138,0.18)" }}>
+                      <XCircle size={22} color="rgba(212,96,138,0.9)" />
                     </div>
                   </div>
-                );
-              })}
+                  {slot.reason && (
+                    <p
+                      className="text-[9px] text-center mt-1 leading-snug px-0.5 font-medium"
+                      data-testid={`text-rejection-reason-${idx}`}
+                      style={{ color: "rgba(212,96,138,0.8)" }}
+                    >
+                      {slot.reason}
+                    </p>
+                  )}
+                </div>
+              ))}
             </div>
-            <p className="text-xs mt-1.5" style={{ color: "rgba(212,96,138,0.6)" }}>
-              These photos were rejected. Upload replacements to fill empty slots above.
+            <p className="text-xs mt-2" style={{ color: "rgba(212,96,138,0.5)" }}>
+              These photos were removed by our admin. Use the empty slots above to upload replacements.
             </p>
           </div>
         )}
