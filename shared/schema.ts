@@ -1,7 +1,7 @@
 // Re-export Replit Auth tables and types (users, sessions)
 export * from "./models/auth";
 
-import { pgTable, varchar, text, integer, boolean, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, varchar, text, integer, boolean, timestamp, uniqueIndex, jsonb } from "drizzle-orm/pg-core";
 import { users } from "./models/auth";
 import { z } from "zod";
 
@@ -67,6 +67,8 @@ export const messages = pgTable("messages", {
   senderId: varchar("sender_id").notNull().references(() => users.id),
   text: text("text").notNull(),
   readAt: timestamp("read_at"),
+  expiresAt: timestamp("expires_at"),
+  expired: boolean("expired").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { ArrowLeft, Send, Lock, Star, Flag, Video, Gift, ChevronRight } from "lucide-react";
+import { ArrowLeft, Send, Lock, Star, Flag, Video, Gift, ChevronRight, Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
 import type { SafeUser, Message, MatchWithUser, Gift as GiftType } from "@shared/schema";
@@ -394,9 +394,45 @@ export default function ChatPage({ user, matchId }: Props) {
   );
 }
 
+// ─── Countdown helper ──────────────────────────────────────────────────────
+function msgTimeLeft(expiresAt: Date | string | null | undefined): string | null {
+  if (!expiresAt) return null;
+  const ms = new Date(expiresAt).getTime() - Date.now();
+  if (ms <= 0) return null;
+  const hours = Math.floor(ms / (60 * 60 * 1000));
+  const mins = Math.floor((ms % (60 * 60 * 1000)) / 60_000);
+  if (hours > 0) return `${hours}h`;
+  if (mins > 0) return `${mins}m`;
+  return "< 1m";
+}
+
 // ─── Message bubble ────────────────────────────────────────────────────────
 function MessageBubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
+  const [, tick] = useState(0);
+  useEffect(() => {
+    if (!msg.expiresAt || msg.expired) return;
+    const id = setInterval(() => tick(n => n + 1), 60_000);
+    return () => clearInterval(id);
+  }, [msg.expiresAt, msg.expired]);
+
   const timeLabel = formatDistanceToNow(new Date(msg.createdAt!), { addSuffix: true });
+
+  if (msg.expired) {
+    return (
+      <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+        <div
+          className="px-3 py-1.5 rounded-xl text-xs italic"
+          style={{ color: "rgba(253,248,240,0.22)", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+          data-testid={`message-expired-${msg.id}`}
+        >
+          Message expired
+        </div>
+      </div>
+    );
+  }
+
+  const countdown = msgTimeLeft(msg.expiresAt);
+
   return (
     <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
       <div className="max-w-[72%] px-4 py-2.5 rounded-2xl"
@@ -406,10 +442,22 @@ function MessageBubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
         }
         data-testid={`message-bubble-${msg.id}`}>
         <p className="text-cream text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
-        <span className="block text-[10px] mt-1 text-right opacity-50"
-          style={{ color: isMine ? "rgba(253,248,240,0.6)" : "rgba(253,248,240,0.4)" }}>
-          {timeLabel}
-        </span>
+        <div className="flex items-center justify-between mt-1 gap-2">
+          <span className="text-[10px] opacity-50"
+            style={{ color: isMine ? "rgba(253,248,240,0.6)" : "rgba(253,248,240,0.4)" }}>
+            {timeLabel}
+          </span>
+          {countdown && (
+            <span
+              className="flex items-center gap-0.5 text-[9px] font-medium"
+              style={{ color: isMine ? "rgba(253,248,240,0.3)" : "rgba(253,248,240,0.2)" }}
+              data-testid={`message-countdown-${msg.id}`}
+            >
+              <Clock size={7} />
+              {countdown}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
