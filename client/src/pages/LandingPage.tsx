@@ -44,7 +44,7 @@ export default function LandingPage() {
         {screen === "phone" && <PhoneScreen onBack={() => setScreen("home")} />}
       </div>
 
-      <div className="relative z-10 text-center pb-5 px-4 space-y-2">
+      <div className="relative z-10 text-center pb-5 px-4 space-y-1.5">
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <Link href="/privacy" data-testid="link-footer-privacy" className="text-cream/25 text-xs hover:text-cream/50 transition-colors">Privacy Policy</Link>
           <span className="text-cream/15 text-xs">·</span>
@@ -53,6 +53,13 @@ export default function LandingPage() {
           <Link href="/refund" data-testid="link-footer-refund" className="text-cream/25 text-xs hover:text-cream/50 transition-colors">Refunds</Link>
           <span className="text-cream/15 text-xs">·</span>
           <Link href="/guidelines" data-testid="link-footer-guidelines" className="text-cream/25 text-xs hover:text-cream/50 transition-colors">Guidelines</Link>
+        </div>
+        <div className="flex items-center justify-center gap-3 flex-wrap">
+          <Link href="/cookie-policy" data-testid="link-footer-cookie-policy" className="text-cream/20 text-xs hover:text-cream/45 transition-colors">Cookie Policy</Link>
+          <span className="text-cream/12 text-xs">·</span>
+          <Link href="/gdpr" data-testid="link-footer-gdpr" className="text-cream/20 text-xs hover:text-cream/45 transition-colors">GDPR Notice</Link>
+          <span className="text-cream/12 text-xs">·</span>
+          <Link href="/safety-tips" data-testid="link-footer-safety-tips" className="text-cream/20 text-xs hover:text-cream/45 transition-colors">Safety Tips</Link>
         </div>
         <p className="text-cream/15 text-xs">© 2026 Gûstîlk · Built with love for the Yezidi community</p>
       </div>

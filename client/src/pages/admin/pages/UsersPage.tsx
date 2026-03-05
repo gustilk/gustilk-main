@@ -6,6 +6,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import type { User } from "@shared/schema";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 const PAGE_SIZE = 20;
 
@@ -15,6 +16,11 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [pending, setPending] = useState<null | {
+    title: string; description: string;
+    variant: "danger" | "warning" | "success";
+    label: string; onConfirm: () => void;
+  }>(null);
 
   const { data, isLoading } = useQuery<{ users: User[]; total: number }>({
     queryKey: ["/api/admin/users", debouncedSearch, page],
@@ -31,6 +37,7 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       toast({ title: "User updated" });
+      setPending(null);
     },
   });
 
@@ -39,6 +46,7 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       toast({ title: "User deleted" });
+      setPending(null);
     },
   });
 
@@ -171,10 +179,16 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
                               style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>
                               <Crown size={12} />
                             </button>
-                            <button onClick={() => {
-                              if (confirm(`Ban ${u.fullName ?? u.email}?`))
-                                updateMutation.mutate({ id: u.id, isBanned: u.verificationStatus !== "banned" });
-                            }}
+                            <button
+                              onClick={() => setPending({
+                                title: u.verificationStatus === "banned" ? `Unban ${u.fullName ?? u.email}?` : `Ban ${u.fullName ?? u.email}?`,
+                                description: u.verificationStatus === "banned"
+                                  ? "This will restore their access to the platform."
+                                  : "They will immediately lose access and cannot log in.",
+                                variant: "danger",
+                                label: u.verificationStatus === "banned" ? "Unban" : "Ban",
+                                onConfirm: () => updateMutation.mutate({ id: u.id, isBanned: u.verificationStatus !== "banned" }),
+                              })}
                               data-testid={`button-ban-user-${u.id}`}
                               title={u.verificationStatus === "banned" ? "Unban" : "Ban"}
                               className="w-7 h-7 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity"
@@ -213,6 +227,17 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!pending}
+        title={pending?.title ?? ""}
+        description={pending?.description ?? ""}
+        variant={pending?.variant ?? "danger"}
+        confirmLabel={pending?.label ?? "Confirm"}
+        isPending={updateMutation.isPending || deleteMutation.isPending}
+        onConfirm={() => pending?.onConfirm()}
+        onCancel={() => setPending(null)}
+      />
     </div>
   );
 }

@@ -28,6 +28,10 @@ import TermsPage from "@/pages/TermsPage";
 import RefundPage from "@/pages/RefundPage";
 import PrivacyPage from "@/pages/PrivacyPage";
 import GuidelinesPage from "@/pages/GuidelinesPage";
+import CookiePolicyPage from "@/pages/CookiePolicyPage";
+import GdprPage from "@/pages/GdprPage";
+import SafetyTipsPage from "@/pages/SafetyTipsPage";
+import CookieConsentBanner from "@/components/CookieConsentBanner";
 import type { User } from "@shared/schema";
 import type { PhotoSlot } from "@shared/schema";
 
@@ -59,6 +63,9 @@ const PUBLIC_POLICY_ROUTES: Record<string, React.ComponentType> = {
   "/refund": RefundPage,
   "/privacy": PrivacyPage,
   "/guidelines": GuidelinesPage,
+  "/cookie-policy": CookiePolicyPage,
+  "/gdpr": GdprPage,
+  "/safety-tips": SafetyTipsPage,
 };
 
 function useGustilkUser() {
@@ -159,15 +166,27 @@ function Router() {
   }
 
   if (!data?.user) {
-    return <LandingPage />;
+    return (
+      <>
+        <LandingPage />
+        <CookieConsentBanner />
+      </>
+    );
   }
 
-  return <AppShell user={data.user} />;
+  return (
+    <>
+      <AppShell user={data.user} />
+      <CookieConsentBanner />
+    </>
+  );
 }
+
+const ALL_POLICY_PATHS = Object.keys(PUBLIC_POLICY_ROUTES);
 
 export default function App() {
   const [langChosen, setLangChosen] = useState<boolean>(() => {
-    if (Object.keys(PUBLIC_POLICY_ROUTES).includes(window.location.pathname)) return true;
+    if (ALL_POLICY_PATHS.includes(window.location.pathname)) return true;
     return !!localStorage.getItem("gustilk_language");
   });
 
