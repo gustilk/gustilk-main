@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -11,6 +11,19 @@ import type { PhotoSlot } from "@shared/schema";
 import { PhotoCropModal } from "@/components/PhotoCropModal";
 
 type LocalSlot = { url: string; status: "approved" | "new" } | null;
+
+const REJECTION_EXPIRY_MS = 24 * 60 * 60 * 1000;
+
+function formatTimeLeft(rejectedAt: string | undefined): string | null {
+  if (!rejectedAt) return null;
+  const ms = REJECTION_EXPIRY_MS - (Date.now() - new Date(rejectedAt).getTime());
+  if (ms <= 0) return null;
+  const totalMins = Math.floor(ms / 60_000);
+  const hours = Math.floor(totalMins / 60);
+  const mins = totalMins % 60;
+  if (hours > 0) return `Disappears in ${hours}h ${mins}m`;
+  return mins > 0 ? `Disappears in ${mins}m` : "Disappears soon";
+}
 
 function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () => void }) {
   const { t } = useTranslation();
@@ -228,6 +241,26 @@ export default function ProfilePage({ user }: Props) {
   });
   const [pendingSlots] = useState<PhotoSlot[]>(() => allSlots.filter(s => s.status === "pending"));
   const [rejectedSlots, setRejectedSlots] = useState<PhotoSlot[]>(() => allSlots.filter(s => s.status === "rejected"));
+  const [, forceRender] = useState(0);
+
+  useEffect(() => {
+    const tick = () => {
+      const now = Date.now();
+      const stillActive = rejectedSlots.filter(s => {
+        if (!s.rejectedAt) return true;
+        return now - new Date(s.rejectedAt).getTime() < REJECTION_EXPIRY_MS;
+      });
+      if (stillActive.length !== rejectedSlots.length) {
+        setRejectedSlots(stillActive);
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      } else {
+        forceRender(n => n + 1);
+      }
+    };
+    const id = setInterval(tick, 60_000);
+    return () => clearInterval(id);
+  }, [rejectedSlots]);
+
   const [photosEdited, setPhotosEdited] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [cropTarget, setCropTarget] = useState<{ imgSrc: string; slotIdx: number } | null>(null);
@@ -603,31 +636,44 @@ export default function ProfilePage({ user }: Props) {
               </span>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              {rejectedSlots.map((slot, idx) => (
-                <div key={idx} data-testid={`rejected-photo-${idx}`}>
-                  <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1 / 1", border: "1.5px solid rgba(212,96,138,0.4)" }}>
-                    <img
-                      src={slot.url}
-                      alt={`Rejected ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                      style={{ filter: "brightness(0.4) saturate(0.2)" }}
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center"
-                      style={{ background: "rgba(212,96,138,0.18)" }}>
-                      <XCircle size={22} color="rgba(212,96,138,0.9)" />
+              {rejectedSlots.map((slot, idx) => {
+                const timeLeft = formatTimeLeft(slot.rejectedAt);
+                return (
+                  <div key={idx} data-testid={`rejected-photo-${idx}`}>
+                    <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1 / 1", border: "1.5px solid rgba(212,96,138,0.4)" }}>
+                      <img
+                        src={slot.url}
+                        alt={`Rejected ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                        style={{ filter: "brightness(0.4) saturate(0.2)" }}
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center"
+                        style={{ background: "rgba(212,96,138,0.18)" }}>
+                        <XCircle size={22} color="rgba(212,96,138,0.9)" />
+                      </div>
                     </div>
+                    {slot.reason && (
+                      <p
+                        className="text-[9px] text-center mt-1 leading-snug px-0.5 font-medium"
+                        data-testid={`text-rejection-reason-${idx}`}
+                        style={{ color: "rgba(212,96,138,0.8)" }}
+                      >
+                        {slot.reason}
+                      </p>
+                    )}
+                    {timeLeft && (
+                      <p
+                        className="flex items-center justify-center gap-0.5 text-[9px] mt-0.5 font-medium"
+                        data-testid={`text-rejection-timer-${idx}`}
+                        style={{ color: "rgba(212,96,138,0.5)" }}
+                      >
+                        <Clock size={8} />
+                        {timeLeft}
+                      </p>
+                    )}
                   </div>
-                  {slot.reason && (
-                    <p
-                      className="text-[9px] text-center mt-1 leading-snug px-0.5 font-medium"
-                      data-testid={`text-rejection-reason-${idx}`}
-                      style={{ color: "rgba(212,96,138,0.8)" }}
-                    >
-                      {slot.reason}
-                    </p>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
             <p className="text-xs mt-2" style={{ color: "rgba(212,96,138,0.5)" }}>
               These photos were removed by our admin. Use the empty slots above to upload replacements.

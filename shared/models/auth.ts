@@ -5,6 +5,7 @@ export interface PhotoSlot {
   url: string;
   status: "pending" | "approved" | "rejected";
   reason?: string;
+  rejectedAt?: string;
   isMain?: boolean;
 }
 
