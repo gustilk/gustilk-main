@@ -40,7 +40,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run start"
+args = "DATABASE_URL=$NEON_DATABASE_URL npm run start"
 waitForPort = 5000
 
 [agent]
