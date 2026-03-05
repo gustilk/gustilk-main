@@ -195,6 +195,20 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
                               style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}>
                               <Ban size={12} />
                             </button>
+                            <button
+                              onClick={() => setPending({
+                                title: `Delete ${u.fullName ?? u.email}?`,
+                                description: `This is permanent and cannot be undone. All data, matches, messages and photos for ${u.fullName ?? u.email} will be erased forever.`,
+                                variant: "danger",
+                                label: "Delete Permanently",
+                                onConfirm: () => deleteMutation.mutate(u.id),
+                              })}
+                              data-testid={`button-delete-user-${u.id}`}
+                              title="Delete account"
+                              className="w-7 h-7 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity"
+                              style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444" }}>
+                              <Trash2 size={12} />
+                            </button>
                           </>
                         )}
                       </div>
