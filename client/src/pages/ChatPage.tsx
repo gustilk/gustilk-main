@@ -447,6 +447,9 @@ const FW_COLORS = ["#ff4444","#ffaa00","#44ff88","#4488ff","#ff44ff","#ffff44","
 
 function genRevealParticles(style: string) {
   const rnd = Math.random;
+  if (style === "none") {
+    return [];
+  }
   if (style === "confetti") {
     return Array.from({ length: 65 }, (_, i) => ({
       id: i, type: "confetti" as const,
@@ -715,12 +718,13 @@ function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
 
 // ─── Gift picker ───────────────────────────────────────────────────────────
 const ANIM_STYLES = [
-  { id: "confetti",  label: "Confetti",  icon: "🎊" },
-  { id: "sparkles",  label: "Sparkles",  icon: "✨" },
-  { id: "fireworks", label: "Fireworks", icon: "🎆" },
-  { id: "hearts",    label: "Hearts",    icon: "❤️" },
-  { id: "flowers",   label: "Flowers",   icon: "🌸" },
-] as const;
+  { id: "none",      label: "No Animation", icon: "✕" },
+  { id: "confetti",  label: "Confetti",     icon: "🎊" },
+  { id: "sparkles",  label: "Sparkles",     icon: "✨" },
+  { id: "fireworks", label: "Fireworks",    icon: "🎆" },
+  { id: "hearts",    label: "Hearts",       icon: "❤️" },
+  { id: "flowers",   label: "Flowers",      icon: "🌸" },
+];
 
 function GiftPicker({ recipientName, isPending, onSend, onClose }: {
   recipientName: string;
@@ -730,7 +734,7 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
 }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [message, setMessage] = useState("");
-  const [animStyle, setAnimStyle] = useState<string>("confetti");
+  const [animStyle, setAnimStyle] = useState<string>("none");
 
   return (
     <div
