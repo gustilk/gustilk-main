@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { CheckCircle, XCircle, Ban, Eye } from "lucide-react";
+import { CheckCircle, XCircle, Ban, Shield, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -18,10 +18,69 @@ const REJECT_REASONS = [
   "Violates community guidelines",
 ];
 
+function Lightbox({ images, startIndex, onClose }: { images: string[]; startIndex: number; onClose: () => void }) {
+  const [idx, setIdx] = useState(startIndex);
+  return (
+    <div
+      className="fixed inset-0 z-[500] flex items-center justify-center"
+      style={{ background: "rgba(0,0,0,0.95)" }}
+      onClick={onClose}
+    >
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center"
+        style={{ background: "rgba(255,255,255,0.1)" }}
+        data-testid="button-lightbox-close"
+      >
+        <X size={18} color="white" />
+      </button>
+
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={e => { e.stopPropagation(); setIdx(i => (i - 1 + images.length) % images.length); }}
+            className="absolute left-4 w-10 h-10 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(255,255,255,0.1)" }}
+            data-testid="button-lightbox-prev"
+          >
+            <ChevronLeft size={22} color="white" />
+          </button>
+          <button
+            onClick={e => { e.stopPropagation(); setIdx(i => (i + 1) % images.length); }}
+            className="absolute right-4 w-10 h-10 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(255,255,255,0.1)" }}
+            data-testid="button-lightbox-next"
+          >
+            <ChevronRight size={22} color="white" />
+          </button>
+        </>
+      )}
+
+      <img
+        src={images[idx]}
+        alt=""
+        onClick={e => e.stopPropagation()}
+        className="max-w-[90vw] max-h-[88vh] object-contain rounded-2xl"
+        style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.8)" }}
+      />
+
+      {images.length > 1 && (
+        <div className="absolute bottom-5 flex gap-1.5">
+          {images.map((_, i) => (
+            <div key={i} className="w-1.5 h-1.5 rounded-full transition-all"
+              style={{ background: i === idx ? "white" : "rgba(255,255,255,0.3)" }} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ApprovalsPage({ user: adminUser }: { user: User }) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [reasons, setReasons] = useState<Record<string, string>>({});
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
   const [pending, setPending] = useState<null | {
     title: string; description: string;
     variant: "danger" | "warning" | "success";
@@ -49,7 +108,7 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
   if (isLoading) return <div className="flex items-center justify-center h-64 text-cream/40 text-sm">Loading…</div>;
 
   return (
-    <div className="p-4 md:p-6 max-w-4xl mx-auto">
+    <div className="p-4 md:p-6 max-w-3xl mx-auto">
       <div className="mb-5">
         <h1 className="font-serif text-xl text-gold font-bold">Approval Queue</h1>
         <p className="text-cream/40 text-xs mt-0.5">{users.length} pending approval{users.length !== 1 ? "s" : ""}</p>
@@ -61,9 +120,12 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
           <p className="text-cream/40 text-sm">All caught up — no pending approvals</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {users.map(u => {
             const slots = ((u as any).photoSlots as PhotoSlot[] | null) ?? [];
+            const profilePhotos = slots.filter(s => s.url).map(s => s.url as string);
+            const selfieUrl = (u as any).verificationSelfie as string | undefined;
+            const allPhotos = [...profilePhotos, ...(selfieUrl ? [selfieUrl] : [])];
             const casteLabel = ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[u.caste ?? ""] ?? u.caste ?? "");
             const timeAgo = u.createdAt ? formatDistanceToNow(new Date(u.createdAt), { addSuffix: true }) : "";
             const name = u.fullName ?? u.firstName ?? "this user";
@@ -71,65 +133,105 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
             return (
               <div key={u.id} data-testid={`approval-card-${u.id}`}
                 className="rounded-2xl overflow-hidden"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}>
-                {/* Header */}
-                <div className="flex items-center gap-3 p-4 pb-3">
-                  <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-lg font-bold text-gold"
-                    style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)" }}>
-                    {u.photos && u.photos.length > 0
-                      ? <img src={u.photos[0]} alt="" className="w-full h-full object-cover" />
-                      : (u.fullName ?? "M").charAt(0)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-cream text-sm">{u.fullName ?? u.firstName ?? "Member"}</span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>{casteLabel}</span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(212,96,138,0.12)", color: "#d4608a" }}>{u.gender}</span>
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.2)" }}>
+
+                {/* ── Profile Header ── */}
+                <div className="p-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 flex items-center justify-center text-xl font-bold text-gold"
+                      style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)" }}
+                    >
+                      {profilePhotos[0]
+                        ? <img src={profilePhotos[0]} alt="" className="w-full h-full object-cover" />
+                        : (u.fullName ?? "?").charAt(0)}
                     </div>
-                    <p className="text-cream/40 text-xs mt-0.5">{u.city}, {u.country} · {u.age} yrs · Registered {timeAgo}</p>
-                    {u.occupation && <p className="text-cream/30 text-xs">{u.occupation}</p>}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <span className="font-semibold text-cream text-base">{u.fullName ?? u.firstName ?? "Member"}</span>
+                        {casteLabel && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>{casteLabel}</span>
+                        )}
+                        {u.gender && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(212,96,138,0.12)", color: "#d4608a" }}>{u.gender}</span>
+                        )}
+                      </div>
+                      <p className="text-cream/50 text-xs">{[u.age && `${u.age} yrs`, u.city, u.country].filter(Boolean).join(" · ")}</p>
+                      {u.occupation && <p className="text-cream/35 text-xs mt-0.5">{u.occupation}</p>}
+                      <p className="text-cream/25 text-[10px] mt-1">Registered {timeAgo}</p>
+                    </div>
                   </div>
-                  <button onClick={() => setLocation(`/admin/users/${u.id}`)} data-testid={`button-view-approval-${u.id}`}
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold"
-                    style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}>
-                    <Eye size={11} /> View
-                  </button>
+                  {u.bio && (
+                    <p className="text-cream/55 text-sm mt-3 leading-relaxed">{u.bio}</p>
+                  )}
                 </div>
 
-                {/* Bio */}
-                {u.bio && (
-                  <div className="px-4 pb-3 text-cream/50 text-xs">{u.bio}</div>
-                )}
-
-                {/* Photos */}
-                {slots.length > 0 && (
-                  <div className="px-4 pb-3">
-                    <div className="flex gap-2 flex-wrap">
-                      {slots.map((slot, i) => slot.url ? (
-                        <div key={i} className="relative">
-                          <img src={slot.url} alt="" className="w-20 h-20 rounded-xl object-cover" />
-                          {slot.status === "pending" && (
-                            <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-yellow-500 flex items-center justify-center text-[8px] font-bold text-white">!</div>
-                          )}
+                {/* ── Profile Photos ── */}
+                {profilePhotos.length > 0 && (
+                  <div className="p-4 pb-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                    <p className="text-cream/30 text-[10px] font-semibold uppercase tracking-wider mb-2">Profile Photos</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {profilePhotos.map((url, i) => (
+                        <div
+                          key={i}
+                          className="relative rounded-xl overflow-hidden cursor-pointer"
+                          style={{ aspectRatio: "3/4" }}
+                          onClick={() => setLightbox({ images: allPhotos, index: i })}
+                          data-testid={`photo-${u.id}-${i}`}
+                        >
+                          <img src={url} alt="" className="w-full h-full object-cover hover:scale-105 transition-transform duration-200" />
+                          <div className="absolute inset-0 rounded-xl" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }} />
                         </div>
-                      ) : null)}
+                      ))}
                     </div>
                   </div>
                 )}
 
-                {/* Rejection reason */}
-                <div className="px-4 pb-3">
-                  <select value={reasons[u.id] ?? ""} onChange={e => setReasons(r => ({ ...r, [u.id]: e.target.value }))}
+                {/* ── Identity Selfie ── */}
+                {selfieUrl ? (
+                  <div className="p-4 pb-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Shield size={12} color="#c9a84c" />
+                      <p className="text-cream/30 text-[10px] font-semibold uppercase tracking-wider">Identity Selfie</p>
+                    </div>
+                    <div
+                      className="relative rounded-xl overflow-hidden cursor-pointer"
+                      style={{ maxWidth: 220 }}
+                      onClick={() => setLightbox({ images: allPhotos, index: allPhotos.length - 1 })}
+                      data-testid={`selfie-${u.id}`}
+                    >
+                      <img src={selfieUrl} alt="Selfie" className="w-full object-cover rounded-xl hover:scale-105 transition-transform duration-200" style={{ maxHeight: 260 }} />
+                      <div className="absolute bottom-0 left-0 right-0 px-3 py-2 text-[10px] font-bold text-white/80 uppercase tracking-wider"
+                        style={{ background: "linear-gradient(transparent, rgba(0,0,0,0.7))" }}>
+                        Identity Selfie
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="px-4 pt-4">
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "rgba(251,191,36,0.07)", border: "1px solid rgba(251,191,36,0.2)" }}>
+                      <Shield size={12} color="#fbbf24" />
+                      <p className="text-yellow-400/70 text-xs">No identity selfie submitted</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Rejection reason ── */}
+                <div className="px-4 pt-4">
+                  <select
+                    value={reasons[u.id] ?? ""}
+                    onChange={e => setReasons(r => ({ ...r, [u.id]: e.target.value }))}
                     data-testid={`select-reject-reason-${u.id}`}
                     className="w-full px-3 py-2 rounded-xl text-xs text-cream/70 outline-none"
-                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+                  >
                     <option value="">Select rejection reason (optional)…</option>
                     {REJECT_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
                 </div>
 
-                {/* Action buttons */}
-                <div className="flex gap-2 px-4 pb-4">
+                {/* ── Action buttons ── */}
+                <div className="flex gap-2 p-4">
                   <button
                     onClick={() => setPending({
                       title: `Approve ${name}?`,
@@ -140,9 +242,9 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
                     })}
                     disabled={actionMutation.isPending}
                     data-testid={`button-approve-${u.id}`}
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold"
                     style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.3)" }}>
-                    <CheckCircle size={13} /> Approve
+                    <CheckCircle size={14} /> Approve
                   </button>
                   <button
                     onClick={() => setPending({
@@ -156,9 +258,9 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
                     })}
                     disabled={actionMutation.isPending}
                     data-testid={`button-reject-${u.id}`}
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold"
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold"
                     style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.25)" }}>
-                    <XCircle size={13} /> Reject
+                    <XCircle size={14} /> Reject
                   </button>
                   <button
                     onClick={() => setPending({
@@ -170,15 +272,23 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
                     })}
                     disabled={actionMutation.isPending}
                     data-testid={`button-ban-${u.id}`}
-                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold"
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs font-bold"
                     style={{ background: "rgba(239,68,68,0.06)", color: "#dc2626", border: "1px solid rgba(239,68,68,0.2)" }}>
-                    <Ban size={13} /> Ban
+                    <Ban size={14} /> Ban
                   </button>
                 </div>
               </div>
             );
           })}
         </div>
+      )}
+
+      {lightbox && (
+        <Lightbox
+          images={lightbox.images}
+          startIndex={lightbox.index}
+          onClose={() => setLightbox(null)}
+        />
       )}
 
       <ConfirmDialog
