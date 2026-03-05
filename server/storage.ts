@@ -55,18 +55,53 @@ export interface IStorage {
   resolveReport(reportId: string): Promise<void>;
 }
 
+const REJECTION_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+
 function getSlots(user: User): PhotoSlot[] {
   return (user.photoSlots as PhotoSlot[] | null) ?? [];
+}
+
+function pruneExpiredRejections(slots: PhotoSlot[]): { slots: PhotoSlot[]; changed: boolean } {
+  const now = Date.now();
+  let changed = false;
+  const updated = slots.map(s => {
+    if (s.status === "rejected" && s.rejectedAt) {
+      const age = now - new Date(s.rejectedAt).getTime();
+      if (age >= REJECTION_EXPIRY_MS) {
+        changed = true;
+        return { url: "", status: "pending" as const, isMain: false };
+      }
+    }
+    return s;
+  });
+  return { slots: updated, changed };
 }
 
 export class DatabaseStorage implements IStorage {
   async getUserById(id: string): Promise<User | undefined> {
     const ck = `user:${id}`;
     const cached = cacheGet<User>(ck);
-    if (cached !== undefined) return cached;
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    if (user) cacheSet(ck, user, TTL.USER);
-    return user;
+    const base = cached ?? await (async () => {
+      const [row] = await db.select().from(users).where(eq(users.id, id));
+      return row;
+    })();
+    if (!base) return undefined;
+
+    const { slots, changed } = pruneExpiredRejections(getSlots(base));
+    if (changed) {
+      const approvedSlots = slots.filter(s => s.status === "approved");
+      const [updated] = await db.update(users).set({
+        photoSlots: slots as any,
+        photos: approvedSlots.map(s => s.url).filter(Boolean),
+        updatedAt: new Date(),
+      }).where(eq(users.id, id)).returning();
+      cacheSet(ck, updated, TTL.USER);
+      cacheDelPrefix("discover:");
+      return updated;
+    }
+
+    if (!cached) cacheSet(ck, base, TTL.USER);
+    return base;
   }
 
   async updateUser(id: string, data: Partial<InsertUser>): Promise<SafeUser> {
@@ -379,7 +414,7 @@ export class DatabaseStorage implements IStorage {
     if (slotIdx < 0 || slotIdx >= slots.length) throw new Error("Invalid slot index");
 
     const rejectedUrl = slots[slotIdx].url;
-    slots[slotIdx] = { ...slots[slotIdx], status: "rejected", reason, isMain: false };
+    slots[slotIdx] = { ...slots[slotIdx], status: "rejected", reason, rejectedAt: new Date().toISOString(), isMain: false };
 
     const approvedSlots = slots.filter(s => s.status === "approved");
     let mainPhotoUrl = user.mainPhotoUrl;
