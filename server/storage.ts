@@ -27,8 +27,9 @@ export interface IStorage {
   unattendEvent(eventId: string, userId: string): Promise<void>;
 
   getPendingVerifications(): Promise<SafeUser[]>;
-  updateVerificationStatus(userId: string, status: "approved" | "rejected" | "banned", isVerified?: boolean): Promise<void>;
-  banUser(userId: string): Promise<void>;
+  updateVerificationStatus(userId: string, status: "approved" | "rejected" | "banned", isVerified?: boolean, reason?: string): Promise<void>;
+  banUser(userId: string, reason?: string): Promise<void>;
+  reapplyUser(userId: string, newSelfie?: string): Promise<void>;
 
   getUsersWithPendingPhotoSlots(): Promise<SafeUser[]>;
   approvePhotoSlot(userId: string, slotIdx: number): Promise<{ user: SafeUser }>;
@@ -234,15 +235,51 @@ export class DatabaseStorage implements IStorage {
     );
   }
 
-  async updateVerificationStatus(userId: string, status: "approved" | "rejected" | "banned", isVerified = false): Promise<void> {
-    const updates: Record<string, unknown> = { verificationStatus: status, isVerified, updatedAt: new Date() };
-    if (status === "approved") updates.profileVisible = true;
-    if (status === "rejected" || status === "banned") updates.profileVisible = false;
+  async updateVerificationStatus(userId: string, status: "approved" | "rejected" | "banned", isVerified = false, reason?: string): Promise<void> {
+    const user = await this.getUserById(userId);
+    const history = ((user as any)?.applicationHistory as Array<{ action: string; reason?: string; date: string }> | null) ?? [];
+    const updates: Record<string, unknown> = {
+      verificationStatus: status,
+      isVerified,
+      updatedAt: new Date(),
+      applicationHistory: [...history, { action: status, reason: reason ?? "", date: new Date().toISOString() }],
+    };
+    if (status === "approved") { updates.profileVisible = true; updates.rejectionReason = ""; }
+    if (status === "rejected") { updates.profileVisible = false; updates.rejectionReason = reason ?? ""; }
+    if (status === "banned") { updates.profileVisible = false; updates.rejectionReason = reason ?? ""; }
     await db.update(users).set(updates as any).where(eq(users.id, userId));
   }
 
-  async banUser(userId: string): Promise<void> {
-    await db.update(users).set({ verificationStatus: "banned", isVerified: false, updatedAt: new Date() }).where(eq(users.id, userId));
+  async banUser(userId: string, reason?: string): Promise<void> {
+    const user = await this.getUserById(userId);
+    const history = ((user as any)?.applicationHistory as Array<{ action: string; reason?: string; date: string }> | null) ?? [];
+    await db.update(users).set({
+      verificationStatus: "banned",
+      isVerified: false,
+      profileVisible: false,
+      rejectionReason: reason ?? "",
+      applicationHistory: [...history, { action: "banned", reason: reason ?? "", date: new Date().toISOString() }] as any,
+      updatedAt: new Date(),
+    }).where(eq(users.id, userId));
+  }
+
+  async reapplyUser(userId: string, newSelfie?: string): Promise<void> {
+    const user = await this.getUserById(userId);
+    const currentCount = ((user as any)?.applicationCount as number | null) ?? 1;
+    const slots = getSlots(user!).map(s =>
+      s.status === "rejected" ? { ...s, status: "pending" as const, reason: undefined } : s
+    );
+    const updates: Record<string, unknown> = {
+      verificationStatus: "pending",
+      isVerified: false,
+      profileVisible: false,
+      rejectionReason: "",
+      applicationCount: currentCount + 1,
+      photoSlots: slots,
+      updatedAt: new Date(),
+    };
+    if (newSelfie) updates.verificationSelfie = newSelfie;
+    await db.update(users).set(updates as any).where(eq(users.id, userId));
   }
 
   async getUsersWithPendingPhotoSlots(): Promise<SafeUser[]> {

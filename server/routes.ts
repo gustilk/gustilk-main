@@ -409,6 +409,21 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
+  app.post("/api/profile/reapply", isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const user = await storage.getUserById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    if (user.verificationStatus === "banned") return res.status(403).json({ error: "Banned accounts cannot reapply." });
+    if (user.verificationStatus === "pending") return res.status(400).json({ error: "Already pending review." });
+    const { selfie } = z.object({ selfie: z.string().optional() }).parse(req.body);
+    if (selfie && selfie.startsWith("data:image")) {
+      const faceCheck = await checkFacePresent(selfie);
+      if (!faceCheck.faceDetected) return res.status(400).json({ error: "Please upload a clear selfie showing your face." });
+    }
+    await storage.reapplyUser(userId, selfie);
+    res.json({ ok: true });
+  });
+
   // ─── REPORTS ──────────────────────────────────────────────
   // ─── GIFTS ────────────────────────────────────────────────
   app.post("/api/gifts", isAuthenticated, async (req, res) => {
@@ -538,9 +553,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }).parse(req.body);
 
     if (action === "ban") {
-      await storage.banUser(targetId);
+      await storage.banUser(targetId, reason);
     } else {
-      await storage.updateVerificationStatus(targetId, action === "approve" ? "approved" : "rejected", action === "approve");
+      await storage.updateVerificationStatus(targetId, action === "approve" ? "approved" : "rejected", action === "approve", reason);
       // Also approve/reject all pending photo slots
       if (action === "approve") {
         const targetUser = await storage.getUserById(targetId);
