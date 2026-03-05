@@ -256,17 +256,28 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
                 )}
 
                 {/* ── Rejection reason ── */}
-                <div className="px-4 pt-4">
+                <div className="px-4 pt-4 space-y-2">
+                  <p className="text-cream/30 text-[10px] font-semibold uppercase tracking-wider">Rejection Reason (for Reject / Ban)</p>
                   <select
-                    value={reasons[u.id] ?? ""}
-                    onChange={e => setReasons(r => ({ ...r, [u.id]: e.target.value }))}
+                    value=""
+                    onChange={e => { if (e.target.value) setReasons(r => ({ ...r, [u.id]: e.target.value })); }}
                     data-testid={`select-reject-reason-${u.id}`}
                     className="w-full px-3 py-2 rounded-xl text-xs text-cream/70 outline-none"
                     style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
                   >
-                    <option value="">Select rejection reason (optional)…</option>
+                    <option value="">Quick-fill from presets…</option>
                     {REJECT_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
+                  <input
+                    type="text"
+                    value={reasons[u.id] ?? ""}
+                    onChange={e => setReasons(r => ({ ...r, [u.id]: e.target.value }))}
+                    placeholder="Type a custom reason or edit the preset above…"
+                    maxLength={300}
+                    data-testid={`input-custom-reason-${u.id}`}
+                    className="w-full px-3 py-2 rounded-xl text-xs text-cream placeholder-cream/25 outline-none"
+                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+                  />
                 </div>
 
                 {/* ── Action buttons ── */}
