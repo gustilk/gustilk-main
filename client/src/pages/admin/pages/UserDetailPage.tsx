@@ -263,8 +263,19 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
                       </div>
                     )}
 
-                    {/* Main photo star — top-right */}
-                    {isMain && (
+                    {/* NEW badge — top-right (post-approval upload on an already-approved account) */}
+                    {u.verificationStatus === "approved" && slot.status === "pending" && (
+                      <div
+                        className="absolute top-1.5 right-1.5 px-2 py-0.5 rounded-full text-[10px] font-black tracking-widest"
+                        style={{ background: "#ef4444", color: "#fff", boxShadow: "0 1px 6px rgba(0,0,0,0.55)" }}
+                        data-testid={`badge-photo-${i}-new`}
+                      >
+                        NEW
+                      </div>
+                    )}
+
+                    {/* Main photo star — top-right (only when not NEW) */}
+                    {isMain && !(u.verificationStatus === "approved" && slot.status === "pending") && (
                       <div
                         className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold"
                         style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
@@ -288,9 +299,13 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
                 { color: "#fbbf24", label: "Pending approval" },
                 { color: "#10b981", label: "Approved" },
                 { color: "#ef4444", label: "Rejected" },
-              ].map(({ color, label }) => (
+                { color: "#ef4444", label: "NEW = uploaded after account approval", pill: true },
+              ].map(({ color, label, pill }) => (
                 <div key={label} className="flex items-center gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
+                  {pill
+                    ? <span className="px-1.5 py-px rounded text-[8px] font-black" style={{ background: color, color: "#fff" }}>NEW</span>
+                    : <div className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
+                  }
                   <span className="text-cream/40 text-[10px]">{label}</span>
                 </div>
               ))}

@@ -72,7 +72,18 @@ export default function ModerationPage({ user }: { user: User }) {
                 <div className="flex gap-3 flex-wrap">
                   {slots.map((slot, idx) => slot.url && slot.status === "pending" ? (
                     <div key={idx} className="flex flex-col gap-2">
-                      <img src={slot.url} alt="" className="w-24 h-24 rounded-xl object-cover" />
+                      <div className="relative">
+                        <img src={slot.url} alt="" className="w-24 h-24 rounded-xl object-cover" />
+                        {(u as any).verificationStatus === "approved" && (
+                          <div
+                            className="absolute top-1 right-1 px-1.5 py-0.5 rounded-md text-[9px] font-black tracking-widest"
+                            style={{ background: "#ef4444", color: "#fff", boxShadow: "0 1px 5px rgba(0,0,0,0.55)", letterSpacing: "0.08em" }}
+                            data-testid={`badge-new-photo-${u.id}-${idx}`}
+                          >
+                            NEW
+                          </div>
+                        )}
+                      </div>
                       <div className="flex gap-1">
                         <button
                           onClick={() => setPending({
