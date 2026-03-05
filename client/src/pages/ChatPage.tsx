@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { ArrowLeft, Send, Lock, Star, Flag, Video, Gift, ChevronRight, Clock } from "lucide-react";
+import { ArrowLeft, Send, Lock, Star, Flag, Video, Gift, ChevronRight, Clock, Bot, BadgeCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
 import type { SafeUser, Message, MatchWithUser, Gift as GiftType } from "@shared/schema";
@@ -107,17 +107,18 @@ export default function ChatPage({ user, matchId }: Props) {
 
   const match = matchData?.matches?.find(m => m.id === matchId);
   const otherUser = match?.otherUser;
+  const isSupportChat = !!match?.otherUser?.isSystemAccount;
 
   const { data: msgData, isLoading } = useQuery<{ messages: Message[] }>({
     queryKey: ["/api/messages", matchId],
-    refetchInterval: 15000,
-    enabled: !!user.isPremium,
+    refetchInterval: isSupportChat ? 3000 : 15000,
+    enabled: !!user.isPremium || isSupportChat,
   });
 
   const { data: giftData } = useQuery<{ gifts: GiftType[] }>({
     queryKey: ["/api/gifts/match", matchId],
     refetchInterval: 30000,
-    enabled: !!user.isPremium,
+    enabled: !!user.isPremium && !isSupportChat,
   });
 
   const messages = msgData?.messages ?? [];
@@ -170,7 +171,7 @@ export default function ChatPage({ user, matchId }: Props) {
     }
   };
 
-  if (!user.isPremium) {
+  if (!user.isPremium && !isSupportChat) {
     return (
       <div className="flex flex-col h-screen" style={{ background: "#0d0618" }}>
         <div className="flex items-center gap-3 px-4 pt-12 pb-3"
@@ -228,36 +229,62 @@ export default function ChatPage({ user, matchId }: Props) {
         <button onClick={() => setLocation("/matches")} data-testid="button-back" className="text-cream/60">
           <ArrowLeft size={22} />
         </button>
-        <button
-          onClick={() => {
-            if (!otherUser) return;
-            sessionStorage.setItem("profile_back_to", `/chat/${matchId}`);
-            setLocation(`/profile/${otherUser.id}`);
-          }}
-          data-testid="button-view-profile"
-          className="flex items-center gap-3 flex-1 min-w-0 active:opacity-70 transition-opacity text-left"
-          disabled={!otherUser}
-        >
-          <div className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-serif text-lg font-bold text-gold overflow-hidden"
-            style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "2px solid rgba(201,168,76,0.3)" }}>
-            {otherUser?.photos && otherUser.photos.length > 0
-              ? <ProtectedPhoto src={otherUser.photos[0]} alt={otherUser.firstName ?? ""} className="w-full h-full object-cover" />
-              : (otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "M").charAt(0)
-            }
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1">
-              <h2 className="text-cream font-semibold text-sm" data-testid="text-chat-name">
-                {otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "Loading…"}
-              </h2>
-              <ChevronRight size={13} className="text-cream/30 flex-shrink-0" />
+
+        {isSupportChat ? (
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="relative w-10 h-10 flex-shrink-0">
+              <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center"
+                style={{ background: "linear-gradient(135deg, #1a0a2e, #2d0f4a)", border: "2px solid rgba(201,168,76,0.4)" }}>
+                <img src="/gustilk-logo.svg" alt="Support" className="w-7 h-7 object-contain" />
+              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
+                style={{ background: "#10b981", border: "1.5px solid #0d0618" }}>
+                <Bot size={9} color="white" />
+              </span>
             </div>
-            <p className="text-cream/40 text-xs">
-              {otherUser ? `${otherUser.city}${otherUser.state ? `, ${otherUser.state}` : ""}, ${otherUser.country}` : ""}
-            </p>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <h2 className="text-cream font-semibold text-sm" data-testid="text-chat-name">Gûstîlk Support</h2>
+                <BadgeCheck size={13} color="#10b981" />
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
+                  style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.3)" }}>AI</span>
+              </div>
+              <p className="text-cream/35 text-xs">Official Gûstîlk Assistant · Always online</p>
+            </div>
           </div>
-        </button>
-        {otherUser && (
+        ) : (
+          <button
+            onClick={() => {
+              if (!otherUser) return;
+              sessionStorage.setItem("profile_back_to", `/chat/${matchId}`);
+              setLocation(`/profile/${otherUser.id}`);
+            }}
+            data-testid="button-view-profile"
+            className="flex items-center gap-3 flex-1 min-w-0 active:opacity-70 transition-opacity text-left"
+            disabled={!otherUser}
+          >
+            <div className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-serif text-lg font-bold text-gold overflow-hidden"
+              style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)", border: "2px solid rgba(201,168,76,0.3)" }}>
+              {otherUser?.photos && otherUser.photos.length > 0
+                ? <ProtectedPhoto src={otherUser.photos[0]} alt={otherUser.firstName ?? ""} className="w-full h-full object-cover" />
+                : (otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "M").charAt(0)
+              }
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1">
+                <h2 className="text-cream font-semibold text-sm" data-testid="text-chat-name">
+                  {otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "Loading…"}
+                </h2>
+                <ChevronRight size={13} className="text-cream/30 flex-shrink-0" />
+              </div>
+              <p className="text-cream/40 text-xs">
+                {otherUser ? `${otherUser.city}${otherUser.state ? `, ${otherUser.state}` : ""}, ${otherUser.country}` : ""}
+              </p>
+            </div>
+          </button>
+        )}
+
+        {otherUser && !isSupportChat && (
           <div className="flex items-center gap-1">
             <button onClick={() => startCall(matchId, otherUser.id,
               otherUser.firstName ?? otherUser.fullName?.split(" ")[0] ?? "Member",
@@ -285,39 +312,68 @@ export default function ChatPage({ user, matchId }: Props) {
           </div>
         ) : timeline.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center gap-4 py-12 px-4">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ border: "2px solid rgba(201,168,76,0.3)" }}>
-              <span className="text-2xl text-gold font-serif">✦</span>
-            </div>
-            <div>
-              <p className="text-cream/60 text-sm font-medium mb-1">
-                {t("chat.matchedWith")} <strong className="text-gold">{otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0]}</strong>!
-              </p>
-              <p className="text-cream/30 text-xs">{t("chat.breakIcePrompt")}</p>
-            </div>
-            <div className="flex flex-wrap justify-center gap-2 max-w-xs">
-              {([
-                t("chat.icebreaker1"),
-                t("chat.icebreaker2"),
-                t("chat.icebreaker3"),
-                t("chat.icebreaker4"),
-                t("chat.icebreaker5"),
-              ] as string[]).map((msg) => (
-                <button
-                  key={msg}
-                  data-testid={`icebreaker-${msg.slice(0, 10).replace(/\s/g, "-").toLowerCase()}`}
-                  onClick={() => sendMutation.mutate(msg)}
-                  disabled={sendMutation.isPending}
-                  className="px-3 py-2 rounded-full text-xs font-medium transition-all disabled:opacity-50"
-                  style={{
-                    background: "rgba(201,168,76,0.1)",
-                    border: "1px solid rgba(201,168,76,0.3)",
-                    color: "rgba(253,248,240,0.75)",
-                  }}
-                >
-                  {msg}
-                </button>
-              ))}
-            </div>
+            {isSupportChat ? (
+              <>
+                <div className="w-16 h-16 rounded-full flex items-center justify-center"
+                  style={{ background: "linear-gradient(135deg, #1a0a2e, #2d0f4a)", border: "2px solid rgba(201,168,76,0.4)" }}>
+                  <img src="/gustilk-logo.svg" alt="" className="w-10 h-10 object-contain" />
+                </div>
+                <div>
+                  <p className="text-cream/80 text-sm font-semibold mb-1">Hi! I'm your Gûstîlk Assistant</p>
+                  <p className="text-cream/40 text-xs">Ask me anything about the app, your profile, or matching</p>
+                </div>
+                <div className="flex flex-wrap justify-center gap-2 max-w-xs">
+                  {["How does matching work?", "How do I get verified?", "What does Premium include?", "How do I report someone?", "Tell me about events"].map((msg) => (
+                    <button
+                      key={msg}
+                      data-testid={`support-prompt-${msg.slice(0, 10).replace(/\s/g, "-").toLowerCase()}`}
+                      onClick={() => sendMutation.mutate(msg)}
+                      disabled={sendMutation.isPending}
+                      className="px-3 py-2 rounded-full text-xs font-medium transition-all disabled:opacity-50"
+                      style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)", color: "rgba(16,185,129,0.9)" }}
+                    >
+                      {msg}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ border: "2px solid rgba(201,168,76,0.3)" }}>
+                  <span className="text-2xl text-gold font-serif">✦</span>
+                </div>
+                <div>
+                  <p className="text-cream/60 text-sm font-medium mb-1">
+                    {t("chat.matchedWith")} <strong className="text-gold">{otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0]}</strong>!
+                  </p>
+                  <p className="text-cream/30 text-xs">{t("chat.breakIcePrompt")}</p>
+                </div>
+                <div className="flex flex-wrap justify-center gap-2 max-w-xs">
+                  {([
+                    t("chat.icebreaker1"),
+                    t("chat.icebreaker2"),
+                    t("chat.icebreaker3"),
+                    t("chat.icebreaker4"),
+                    t("chat.icebreaker5"),
+                  ] as string[]).map((msg) => (
+                    <button
+                      key={msg}
+                      data-testid={`icebreaker-${msg.slice(0, 10).replace(/\s/g, "-").toLowerCase()}`}
+                      onClick={() => sendMutation.mutate(msg)}
+                      disabled={sendMutation.isPending}
+                      className="px-3 py-2 rounded-full text-xs font-medium transition-all disabled:opacity-50"
+                      style={{
+                        background: "rgba(201,168,76,0.1)",
+                        border: "1px solid rgba(201,168,76,0.3)",
+                        color: "rgba(253,248,240,0.75)",
+                      }}
+                    >
+                      {msg}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         ) : (
           timeline.map(item =>
@@ -332,20 +388,21 @@ export default function ChatPage({ user, matchId }: Props) {
       {/* Input bar */}
       <div className="flex items-end gap-2 px-4 py-3"
         style={{ background: "rgba(13,6,24,0.97)", borderTop: "1px solid rgba(201,168,76,0.15)" }}>
-        {/* Gift button — premium only */}
-        <div className="relative flex-shrink-0">
-          <button
-            onClick={() => setShowGiftPicker(true)}
-            data-testid="button-open-gift-picker"
-            className="w-11 h-11 rounded-full flex items-center justify-center transition-all"
-            style={{ background: "rgba(201,168,76,0.1)", border: "1.5px solid rgba(201,168,76,0.25)", color: "#c9a84c" }}
-            title="Send a gift (Premium)"
-          >
-            <Gift size={18} />
-          </button>
-          {/* Crown badge */}
-          <span className="absolute -top-1 -right-1 text-[9px] leading-none select-none pointer-events-none">👑</span>
-        </div>
+        {/* Gift button — premium only, hidden in support chat */}
+        {!isSupportChat && (
+          <div className="relative flex-shrink-0">
+            <button
+              onClick={() => setShowGiftPicker(true)}
+              data-testid="button-open-gift-picker"
+              className="w-11 h-11 rounded-full flex items-center justify-center transition-all"
+              style={{ background: "rgba(201,168,76,0.1)", border: "1.5px solid rgba(201,168,76,0.25)", color: "#c9a84c" }}
+              title="Send a gift (Premium)"
+            >
+              <Gift size={18} />
+            </button>
+            <span className="absolute -top-1 -right-1 text-[9px] leading-none select-none pointer-events-none">👑</span>
+          </div>
+        )}
 
         <div className="flex-1 rounded-2xl px-4 py-2.5 flex items-end"
           style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.2)" }}>
