@@ -517,17 +517,17 @@ function genRevealParticles(style: string) {
   return [];
 }
 
-function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => void }) {
+function GiftRevealOverlay({ gift, onClose, isPreview = false }: { gift: GiftType; onClose: () => void; isPreview?: boolean }) {
   const g = giftById(gift.giftType);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
-  const animStyle = gift.animationStyle ?? "confetti";
+  const animStyle = gift.animationStyle ?? "none";
 
   const particles = useMemo(() => genRevealParticles(animStyle), [animStyle]);
 
   useEffect(() => {
     injectRevealCSS();
-    const t = setTimeout(() => onCloseRef.current(), 6000);
+    const t = setTimeout(() => onCloseRef.current(), isPreview ? 4000 : 6000);
     return () => clearTimeout(t);
   }, []);
 
@@ -613,12 +613,22 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
         </div>
       )}
 
+      {/* Preview badge */}
+      {isPreview && (
+        <div
+          className="absolute top-12 flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase"
+          style={{ background: "rgba(201,168,76,0.18)", border: "1px solid rgba(201,168,76,0.4)", color: "#c9a84c" }}
+        >
+          <span>✦</span> Preview <span>✦</span>
+        </div>
+      )}
+
       {/* Tap hint */}
       <p
         className="absolute bottom-12 text-cream/25 text-xs tracking-wide"
         style={{ animation: "gr-hint-fade 0.5s 1.5s ease both" }}
       >
-        Tap anywhere to close
+        {isPreview ? "Tap anywhere to close preview" : "Tap anywhere to close"}
       </p>
     </div>
   );
@@ -721,8 +731,24 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
   const [selected, setSelected] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [animStyle, setAnimStyle] = useState<string>("none");
+  const [showPreview, setShowPreview] = useState(false);
+
+  const previewGift = selected ? {
+    id: "preview",
+    senderId: "",
+    recipientId: "",
+    matchId: "",
+    giftType: selected,
+    message,
+    animationStyle: animStyle,
+    createdAt: new Date(),
+  } as GiftType : null;
 
   return (
+    <>
+    {showPreview && previewGift && (
+      <GiftRevealOverlay gift={previewGift} onClose={() => setShowPreview(false)} isPreview />
+    )}
     <div
       className="fixed inset-0 z-[200] flex items-end justify-center"
       style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" }}
@@ -815,6 +841,16 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
               style={{ background: "rgba(255,255,255,0.06)", border: "1.5px solid rgba(201,168,76,0.15)" }}
             />
           )}
+          {selected && animStyle !== "none" && (
+            <button
+              onClick={() => setShowPreview(true)}
+              data-testid="button-preview-gift"
+              className="w-full py-2.5 rounded-2xl text-sm font-semibold mb-2 transition-all flex items-center justify-center gap-2"
+              style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.3)", color: "#c9a84c" }}
+            >
+              <span>▶</span> Preview Animation
+            </button>
+          )}
           <button
             onClick={() => selected && onSend(selected, message, animStyle)}
             disabled={!selected || isPending}
@@ -841,5 +877,6 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
         </div>
       </div>
     </div>
+    </>
   );
 }
