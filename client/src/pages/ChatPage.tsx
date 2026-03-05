@@ -743,8 +743,9 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
       onClick={e => e.target === e.currentTarget && onClose()}
       data-testid="gift-picker"
     >
-      <div className="w-full max-w-sm flex flex-col rounded-t-3xl" style={{ background: "#130820", border: "1px solid rgba(201,168,76,0.2)", maxHeight: "80vh" }}>
-        {/* Header */}
+      <div className="w-full max-w-sm flex flex-col rounded-t-3xl" style={{ background: "#130820", border: "1px solid rgba(201,168,76,0.2)", maxHeight: "82vh" }}>
+
+        {/* ── Header ── */}
         <div className="flex items-center justify-between px-5 py-4 flex-shrink-0" style={{ borderBottom: "1px solid rgba(201,168,76,0.1)" }}>
           <div>
             <h3 className="font-serif text-lg text-gold">Send a Gift</h3>
@@ -753,9 +754,40 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
           <button onClick={onClose} className="text-cream/40 text-lg leading-none" data-testid="button-close-gift-picker">✕</button>
         </div>
 
-        {/* Gift grid */}
-        <div className="overflow-y-auto px-4 py-4 flex-1">
-          <div className="grid grid-cols-4 gap-3 mb-4">
+        {/* ── Animation style strip — always visible ── */}
+        <div className="flex-shrink-0 px-4 pt-3 pb-2" style={{ borderBottom: "1px solid rgba(201,168,76,0.08)" }}>
+          <p className="text-cream/35 text-[10px] font-semibold uppercase tracking-wider mb-2">
+            Animation Style
+            {selected && animStyle !== "none" && (
+              <span className="ml-2 text-gold/70 normal-case tracking-normal font-normal">
+                · {ANIM_STYLES.find(a => a.id === animStyle)?.label}
+              </span>
+            )}
+          </p>
+          <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+            {ANIM_STYLES.map(a => (
+              <button
+                key={a.id}
+                onClick={() => setAnimStyle(a.id)}
+                data-testid={`anim-style-${a.id}`}
+                className="flex items-center gap-1 flex-shrink-0 px-3 py-1.5 rounded-xl text-xs transition-all"
+                style={{
+                  background: animStyle === a.id ? "rgba(201,168,76,0.18)" : "rgba(255,255,255,0.04)",
+                  border: animStyle === a.id ? "1.5px solid rgba(201,168,76,0.6)" : "1.5px solid rgba(255,255,255,0.07)",
+                  color: animStyle === a.id ? "#c9a84c" : "rgba(253,248,240,0.4)",
+                  fontWeight: animStyle === a.id ? 600 : 400,
+                }}
+              >
+                <span>{a.icon}</span>
+                <span>{a.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Gift grid — scrollable ── */}
+        <div className="overflow-y-auto px-4 py-3 flex-1">
+          <div className="grid grid-cols-4 gap-3">
             {GIFTS.map(g => {
               const isSelected = selected === g.id;
               return (
@@ -766,12 +798,12 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                   className="flex flex-col items-center gap-1 py-2 rounded-xl transition-all"
                   style={{
                     background: "none",
-                    transform: isSelected ? "scale(1.15) translateY(-3px)" : "scale(1)",
+                    transform: isSelected ? "scale(1.12) translateY(-3px)" : "scale(1)",
                     outline: isSelected ? `2px solid ${g.color}88` : "none",
                     borderRadius: 12,
                   }}
                 >
-                  <div style={{ width: 60, height: 60 }}>
+                  <div style={{ width: 58, height: 58 }}>
                     {g.lottie
                       ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} placeholderSize={24} />
                       : <span className="text-3xl">🎁</span>
@@ -781,51 +813,22 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
               );
             })}
           </div>
+        </div>
 
-          {/* Animation style selector */}
+        {/* ── Bottom: message + send — always visible ── */}
+        <div className="flex-shrink-0 px-4 py-3" style={{ borderTop: "1px solid rgba(201,168,76,0.08)" }}>
           {selected && (
-            <div className="mb-4">
-              <p className="text-cream/40 text-xs font-semibold uppercase tracking-wider mb-2">Animation Style</p>
-              <div className="flex gap-2 flex-wrap">
-                {ANIM_STYLES.map(a => (
-                  <button
-                    key={a.id}
-                    onClick={() => setAnimStyle(a.id)}
-                    data-testid={`anim-style-${a.id}`}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs transition-all"
-                    style={{
-                      background: animStyle === a.id ? "rgba(201,168,76,0.18)" : "rgba(255,255,255,0.05)",
-                      border: animStyle === a.id ? "1.5px solid rgba(201,168,76,0.55)" : "1.5px solid rgba(255,255,255,0.08)",
-                      color: animStyle === a.id ? "#c9a84c" : "rgba(253,248,240,0.45)",
-                      fontWeight: animStyle === a.id ? 600 : 400,
-                    }}
-                  >
-                    <span>{a.icon}</span>
-                    <span>{a.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+            <input
+              type="text"
+              value={message}
+              onChange={e => setMessage(e.target.value)}
+              placeholder="Add a message (optional)…"
+              maxLength={200}
+              data-testid="input-gift-message"
+              className="w-full px-4 py-2.5 rounded-2xl text-sm text-cream placeholder-cream/25 outline-none mb-3"
+              style={{ background: "rgba(255,255,255,0.06)", border: "1.5px solid rgba(201,168,76,0.15)" }}
+            />
           )}
-
-          {/* Optional message */}
-          {selected && (
-            <div className="mb-4">
-              <p className="text-cream/40 text-xs font-semibold uppercase tracking-wider mb-2">Add a message <span className="normal-case tracking-normal text-cream/25">(optional)</span></p>
-              <input
-                type="text"
-                value={message}
-                onChange={e => setMessage(e.target.value)}
-                placeholder="Write something sweet…"
-                maxLength={200}
-                data-testid="input-gift-message"
-                className="w-full px-4 py-3 rounded-2xl text-sm text-cream placeholder-cream/25 outline-none"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1.5px solid rgba(201,168,76,0.2)" }}
-              />
-            </div>
-          )}
-
-          {/* Send button */}
           <button
             onClick={() => selected && onSend(selected, message, animStyle)}
             disabled={!selected || isPending}
@@ -846,7 +849,7 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                 style={{ background: "linear-gradient(160deg, rgba(255,255,255,0.2) 0%, transparent 50%)", borderRadius: "inherit" }} />
             )}
             <span className="relative z-10">
-              {isPending ? "Sending…" : selected ? `Send ${giftById(selected).name}` : "Select a gift"}
+              {isPending ? "Sending…" : selected ? `Send ${giftById(selected).name}` : "Select a gift above"}
             </span>
           </button>
         </div>
