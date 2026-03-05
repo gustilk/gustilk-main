@@ -319,7 +319,7 @@ export default function ChatPage({ user, matchId }: Props) {
           timeline.map(item =>
             item.kind === "message"
               ? <MessageBubble key={`m-${item.data.id}`} msg={item.data} isMine={item.data.senderId === user.id} />
-              : <GiftBubble key={`g-${item.data.id}`} gift={item.data} isMine={item.data.senderId === user.id} />
+              : <GiftBubble key={`g-${item.data.id}`} gift={item.data} isMine={item.data.senderId === user.id} viewerId={user.id} />
           )
         )}
         <div ref={bottomRef} />
@@ -639,8 +639,8 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
 }
 
 // ─── Gift bubble ────────────────────────────────────────────────────────────
-function GiftBubble({ gift, isMine }: { gift: GiftType; isMine: boolean }) {
-  const storageKey = `gift-revealed-${gift.id}`;
+function GiftBubble({ gift, isMine, viewerId }: { gift: GiftType; isMine: boolean; viewerId: string }) {
+  const storageKey = `gift-revealed-${viewerId}-${gift.id}`;
   const [revealed, setRevealed] = useState(() => {
     try { return localStorage.getItem(storageKey) === "1"; } catch { return false; }
   });
