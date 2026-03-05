@@ -23,7 +23,7 @@ export default function MatchesPage({ user }: Props) {
 
   const { data, isLoading } = useQuery<{ matches: MatchWithUser[] }>({
     queryKey: ["/api/matches"],
-    refetchInterval: 10000,
+    refetchInterval: 60000,
   });
 
   const matches = data?.matches ?? [];

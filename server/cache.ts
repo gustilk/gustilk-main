@@ -47,11 +47,11 @@ export function cacheDelPrefix(prefix: string): void {
 }
 
 export const TTL = {
-  USER:       30_000,   // 30 s  — user objects (short, must stay fresh)
-  DISCOVER:   60_000,   // 60 s  — discover profiles per user
-  MATCHES:    20_000,   // 20 s  — match list
-  MATCH:      30_000,   // 30 s  — individual match record
-  EVENTS:    300_000,   // 5 min — events list (rarely changes)
-  ADMIN_STATS: 60_000,  // 60 s  — dashboard COUNT queries
-  VERIF:      15_000,   // 15 s  — pending verifications list
+  USER:        120_000,  // 2 min  — user objects (busted on every write)
+  DISCOVER:    300_000,  // 5 min  — discover profiles (busted on like/dislike/update)
+  MATCHES:      90_000,  // 90 s   — match list (busted on new message/block/match)
+  MATCH:       120_000,  // 2 min  — individual match record
+  EVENTS:      300_000,  // 5 min  — events list (rarely changes)
+  ADMIN_STATS:  60_000,  // 60 s   — dashboard COUNT queries
+  VERIF:        60_000,  // 60 s   — pending verifications list
 };

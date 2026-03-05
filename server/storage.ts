@@ -1,7 +1,7 @@
 import { db } from "./db";
 import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys, blocks, visitors, gifts, magicLinkTokens } from "@shared/schema";
 import type { User, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report, InsertUser, PhotoSlot, Block, Gift } from "@shared/schema";
-import { eq, and, or, ne, notInArray, desc, sql, isNotNull } from "drizzle-orm";
+import { eq, and, or, ne, notInArray, inArray, isNull, desc, sql, isNotNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { cacheGet, cacheSet, cacheDel, cacheDelPrefix, TTL } from "./cache";
 
@@ -58,6 +58,64 @@ export interface IStorage {
 }
 
 const REJECTION_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+/**
+ * Slim column set for list/card contexts (discover, matches, visitors, activity).
+ * Excludes the large base64 columns (photos[], photoSlots, verificationSelfie,
+ * pendingPhotos) that are only needed when viewing a full profile. This alone
+ * can cut per-row data from ~3 MB to ~1 KB for text-heavy profiles.
+ */
+const CARD_COLUMNS = {
+  id: users.id,
+  email: users.email,
+  phone: users.phone,
+  firstName: users.firstName,
+  lastName: users.lastName,
+  profileImageUrl: users.profileImageUrl,
+  fullName: users.fullName,
+  caste: users.caste,
+  gender: users.gender,
+  country: users.country,
+  state: users.state,
+  city: users.city,
+  age: users.age,
+  dateOfBirth: users.dateOfBirth,
+  bio: users.bio,
+  occupation: users.occupation,
+  languages: users.languages,
+  mainPhotoUrl: users.mainPhotoUrl,
+  profileVisible: users.profileVisible,
+  isVerified: users.isVerified,
+  verificationStatus: users.verificationStatus,
+  rejectionReason: users.rejectionReason,
+  applicationCount: users.applicationCount,
+  isPremium: users.isPremium,
+  premiumUntil: users.premiumUntil,
+  isAdmin: users.isAdmin,
+  activitySeenAt: users.activitySeenAt,
+  matchesSeenAt: users.matchesSeenAt,
+  createdAt: users.createdAt,
+  updatedAt: users.updatedAt,
+} as const;
+
+type CardRow = { [K in keyof typeof CARD_COLUMNS]: any };
+
+/**
+ * Inflates a slim CARD_COLUMNS row into a SafeUser by supplying safe empty
+ * values for the stripped columns. Sets `photos` to `[mainPhotoUrl]` so
+ * existing UI code that reads `photos[0]` continues to work without changes.
+ */
+function enrichCardUser(row: CardRow): SafeUser {
+  return {
+    ...row,
+    passwordHash: null,
+    photos: row.mainPhotoUrl ? [row.mainPhotoUrl] : [],
+    pendingPhotos: [],
+    photoSlots: [],
+    verificationSelfie: "",
+    applicationHistory: [],
+  } as unknown as SafeUser;
+}
 
 function getSlots(user: User): PhotoSlot[] {
   return (user.photoSlots as PhotoSlot[] | null) ?? [];
@@ -149,7 +207,7 @@ export class DatabaseStorage implements IStorage {
     const blockedMe = db.select({ id: blocks.blockerId }).from(blocks).where(eq(blocks.blockedId, userId));
     const oppositeGender = gender === "male" ? "female" : "male";
 
-    const result = await db.select().from(users).where(
+    const rows = await db.select(CARD_COLUMNS).from(users).where(
       and(
         ne(users.id, userId),
         eq(users.caste, caste as any),
@@ -166,6 +224,7 @@ export class DatabaseStorage implements IStorage {
       )
     ).limit(50);
 
+    const result = rows.map(enrichCardUser);
     cacheSet(ck, result, TTL.DISCOVER);
     return result;
   }
@@ -207,32 +266,76 @@ export class DatabaseStorage implements IStorage {
     const cached = cacheGet<MatchWithUser[]>(ck);
     if (cached !== undefined) return cached;
 
-    const userMatches = await db.select().from(matches).where(
-      or(eq(matches.user1Id, userId), eq(matches.user2Id, userId))
-    ).orderBy(desc(matches.createdAt));
+    // 1. Fetch all match rows for this user — ID-only for blocks
+    const [userMatches, blockedByMeRows, blockedMeRows] = await Promise.all([
+      db.select().from(matches)
+        .where(or(eq(matches.user1Id, userId), eq(matches.user2Id, userId)))
+        .orderBy(desc(matches.createdAt)),
+      db.select({ id: blocks.blockedId }).from(blocks).where(eq(blocks.blockerId, userId)),
+      db.select({ id: blocks.blockerId }).from(blocks).where(eq(blocks.blockedId, userId)),
+    ]);
 
-    const blockedByMeRows = await db.select({ id: blocks.blockedId }).from(blocks).where(eq(blocks.blockerId, userId));
-    const blockedMeRows = await db.select({ id: blocks.blockerId }).from(blocks).where(eq(blocks.blockedId, userId));
+    if (userMatches.length === 0) { cacheSet(ck, [], TTL.MATCHES); return []; }
+
     const hiddenIds = new Set([...blockedByMeRows.map(r => r.id), ...blockedMeRows.map(r => r.id)]);
+    const visibleMatches = userMatches.filter(m => {
+      const otherId = m.user1Id === userId ? m.user2Id : m.user1Id;
+      return !hiddenIds.has(otherId);
+    });
+
+    if (visibleMatches.length === 0) { cacheSet(ck, [], TTL.MATCHES); return []; }
+
+    const matchIds = visibleMatches.map(m => m.id);
+    const otherUserIds = [...new Set(
+      visibleMatches.map(m => m.user1Id === userId ? m.user2Id : m.user1Id)
+    )];
+
+    // 2. Three parallel queries instead of N×3 sequential queries:
+    //    a) slim user rows for all other users (no photo blobs)
+    //    b) latest message per match via DISTINCT ON (one DB round-trip)
+    //    c) unread count per match via GROUP BY (one DB round-trip)
+    const [otherUserRows, lastMsgRows, unreadRows] = await Promise.all([
+      db.select(CARD_COLUMNS).from(users).where(inArray(users.id, otherUserIds)),
+      db.selectDistinctOn([messages.matchId], {
+        id: messages.id,
+        matchId: messages.matchId,
+        senderId: messages.senderId,
+        text: messages.text,
+        readAt: messages.readAt,
+        expiresAt: messages.expiresAt,
+        expired: messages.expired,
+        createdAt: messages.createdAt,
+      }).from(messages)
+        .where(inArray(messages.matchId, matchIds))
+        .orderBy(messages.matchId, desc(messages.createdAt)),
+      db.select({
+        matchId: messages.matchId,
+        count: sql<number>`count(*)::int`.as("count"),
+      }).from(messages).where(
+        and(
+          inArray(messages.matchId, matchIds),
+          ne(messages.senderId, userId),
+          isNull(messages.readAt),
+          eq(messages.expired, false),
+        )
+      ).groupBy(messages.matchId),
+    ]);
+
+    const userMap = new Map(otherUserRows.map(u => [u.id, enrichCardUser(u)]));
+    const lastMsgMap = new Map(lastMsgRows.map(m => [m.matchId, m as Message]));
+    const unreadMap = new Map(unreadRows.map(r => [r.matchId, r.count]));
 
     const result: MatchWithUser[] = [];
-    for (const match of userMatches) {
+    for (const match of visibleMatches) {
       const otherId = match.user1Id === userId ? match.user2Id : match.user1Id;
-      if (hiddenIds.has(otherId)) continue;
-      // Reuse the already-cached user object where possible.
-      const otherUser = await this.getUserById(otherId);
+      const otherUser = userMap.get(otherId);
       if (!otherUser) continue;
-
-      const [lastMessage] = await db.select().from(messages)
-        .where(eq(messages.matchId, match.id))
-        .orderBy(desc(messages.createdAt))
-        .limit(1);
-
-      const unreadRows = await db.select().from(messages).where(
-        and(eq(messages.matchId, match.id), ne(messages.senderId, userId), sql`${messages.readAt} IS NULL`)
-      );
-
-      result.push({ ...match, otherUser, lastMessage: lastMessage || null, unreadCount: unreadRows.length });
+      result.push({
+        ...match,
+        otherUser,
+        lastMessage: lastMsgMap.get(match.id) ?? null,
+        unreadCount: unreadMap.get(match.id) ?? 0,
+      });
     }
 
     cacheSet(ck, result, TTL.MATCHES);
@@ -390,11 +493,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUsersWithPendingPhotoSlots(): Promise<SafeUser[]> {
-    const allUsers = await db.select().from(users);
-    return allUsers.filter(u => {
-      const slots = getSlots(u);
-      return slots.some(s => s.status === "pending");
-    });
+    return db.select().from(users).where(
+      sql`${users.photoSlots} IS NOT NULL
+        AND jsonb_array_length(${users.photoSlots}::jsonb) > 0
+        AND EXISTS (
+          SELECT 1 FROM jsonb_array_elements(${users.photoSlots}::jsonb) AS slot
+          WHERE slot->>'status' = 'pending'
+        )`
+    );
   }
 
   async approvePhotoSlot(userId: string, slotIdx: number): Promise<{ user: SafeUser }> {
@@ -499,32 +605,35 @@ export class DatabaseStorage implements IStorage {
 
   async getVisitors(userId: string): Promise<{ user: SafeUser; createdAt: Date }[]> {
     const rows = await db.select().from(visitors).where(eq(visitors.toUserId, userId)).orderBy(desc(visitors.createdAt));
-    const result: { user: SafeUser; createdAt: Date }[] = [];
-    for (const row of rows) {
-      const u = await this.getUserById(row.fromUserId);
-      if (u) result.push({ user: u, createdAt: row.createdAt! });
-    }
-    return result;
+    if (rows.length === 0) return [];
+    const fromIds = [...new Set(rows.map(r => r.fromUserId))];
+    const userRows = await db.select(CARD_COLUMNS).from(users).where(inArray(users.id, fromIds));
+    const userMap = new Map(userRows.map(u => [u.id, enrichCardUser(u)]));
+    return rows
+      .map(r => ({ user: userMap.get(r.fromUserId), createdAt: r.createdAt! }))
+      .filter((r): r is { user: SafeUser; createdAt: Date } => !!r.user);
   }
 
   async getLikesReceived(userId: string): Promise<{ user: SafeUser; createdAt: Date }[]> {
     const rows = await db.select().from(likes).where(eq(likes.toUserId, userId)).orderBy(desc(likes.createdAt));
-    const result: { user: SafeUser; createdAt: Date }[] = [];
-    for (const row of rows) {
-      const u = await this.getUserById(row.fromUserId);
-      if (u) result.push({ user: u, createdAt: row.createdAt! });
-    }
-    return result;
+    if (rows.length === 0) return [];
+    const fromIds = [...new Set(rows.map(r => r.fromUserId))];
+    const userRows = await db.select(CARD_COLUMNS).from(users).where(inArray(users.id, fromIds));
+    const userMap = new Map(userRows.map(u => [u.id, enrichCardUser(u)]));
+    return rows
+      .map(r => ({ user: userMap.get(r.fromUserId), createdAt: r.createdAt! }))
+      .filter((r): r is { user: SafeUser; createdAt: Date } => !!r.user);
   }
 
   async getLikesSent(userId: string): Promise<{ user: SafeUser; createdAt: Date }[]> {
     const rows = await db.select().from(likes).where(eq(likes.fromUserId, userId)).orderBy(desc(likes.createdAt));
-    const result: { user: SafeUser; createdAt: Date }[] = [];
-    for (const row of rows) {
-      const u = await this.getUserById(row.toUserId);
-      if (u) result.push({ user: u, createdAt: row.createdAt! });
-    }
-    return result;
+    if (rows.length === 0) return [];
+    const toIds = [...new Set(rows.map(r => r.toUserId))];
+    const userRows = await db.select(CARD_COLUMNS).from(users).where(inArray(users.id, toIds));
+    const userMap = new Map(userRows.map(u => [u.id, enrichCardUser(u)]));
+    return rows
+      .map(r => ({ user: userMap.get(r.toUserId), createdAt: r.createdAt! }))
+      .filter((r): r is { user: SafeUser; createdAt: Date } => !!r.user);
   }
 
   async blockUser(blockerId: string, blockedId: string): Promise<void> {
