@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useLocation, useRoute, Link } from "wouter";
 import {
-  LayoutDashboard, Users, UserCheck, Flag, Shield, Ban, Copy,
+  LayoutDashboard, Users, UserCheck, Camera, Flag, Shield, Ban, Copy,
   BarChart2, CreditCard, Tag, Share2, Bell, Megaphone, Mail, MessageSquare,
-  Layers, Calendar, Heart, Globe, Settings, Star, Download, Server, Database,
-  FileText, ChevronRight, Menu, X, LogOut, Hash,
+  Calendar, Heart, Globe, Settings, Star, Download, Server, Database,
+  FileText, ChevronRight, Menu, LogOut, Hash,
 } from "lucide-react";
 import type { User } from "@shared/schema";
 
@@ -40,6 +41,7 @@ interface NavItem {
   label: string;
   path: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
+  badgeKey?: "pendingPhotos";
 }
 
 interface NavGroup {
@@ -57,16 +59,16 @@ const NAV: NavGroup[] = [
   {
     title: "Users",
     items: [
-      { label: "All Users", path: "/admin/users", icon: Users },
-      { label: "Approvals", path: "/admin/approvals", icon: UserCheck },
+      { label: "All Users",       path: "/admin/users",      icon: Users },
+      { label: "User Approvals",  path: "/admin/approvals",  icon: UserCheck },
+      { label: "Photo Approvals", path: "/admin/moderation", icon: Camera, badgeKey: "pendingPhotos" },
     ],
   },
   {
     title: "Safety",
     items: [
-      { label: "Reports", path: "/admin/reports", icon: Flag },
-      { label: "Moderation", path: "/admin/moderation", icon: Shield },
-      { label: "Blacklist", path: "/admin/blacklist", icon: Ban },
+      { label: "Reports",    path: "/admin/reports",    icon: Flag },
+      { label: "Blacklist",  path: "/admin/blacklist",  icon: Ban },
       { label: "Duplicates", path: "/admin/duplicates", icon: Copy },
     ],
   },
@@ -79,44 +81,44 @@ const NAV: NavGroup[] = [
   {
     title: "Payments",
     items: [
-      { label: "Revenue", path: "/admin/payments", icon: CreditCard },
+      { label: "Revenue",     path: "/admin/payments",    icon: CreditCard },
       { label: "Promo Codes", path: "/admin/promo-codes", icon: Tag },
-      { label: "Referrals", path: "/admin/referrals", icon: Share2 },
+      { label: "Referrals",   path: "/admin/referrals",   icon: Share2 },
     ],
   },
   {
     title: "Communication",
     items: [
-      { label: "Notifications", path: "/admin/notifications", icon: Bell },
-      { label: "Announcements", path: "/admin/announcements", icon: Megaphone },
-      { label: "Email Templates", path: "/admin/email-templates", icon: Mail },
-      { label: "Feedback", path: "/admin/feedback", icon: MessageSquare },
+      { label: "Notifications",  path: "/admin/notifications",  icon: Bell },
+      { label: "Announcements",  path: "/admin/announcements",  icon: Megaphone },
+      { label: "Email Templates",path: "/admin/email-templates",icon: Mail },
+      { label: "Feedback",       path: "/admin/feedback",       icon: MessageSquare },
     ],
   },
   {
     title: "Community",
     items: [
-      { label: "Caste Management", path: "/admin/caste", icon: Hash },
-      { label: "Events", path: "/admin/events", icon: Calendar },
-      { label: "Success Stories", path: "/admin/success-stories", icon: Heart },
-      { label: "Translations", path: "/admin/translations", icon: Globe },
+      { label: "Caste Management", path: "/admin/caste",           icon: Hash },
+      { label: "Events",           path: "/admin/events",          icon: Calendar },
+      { label: "Success Stories",  path: "/admin/success-stories", icon: Heart },
+      { label: "Translations",     path: "/admin/translations",    icon: Globe },
     ],
   },
   {
     title: "Team",
     items: [
       { label: "Team Members", path: "/admin/team", icon: Users },
-      { label: "Audit Logs", path: "/admin/logs", icon: FileText },
+      { label: "Audit Logs",   path: "/admin/logs", icon: FileText },
     ],
   },
   {
     title: "App",
     items: [
-      { label: "Settings", path: "/admin/settings", icon: Settings },
+      { label: "Settings", path: "/admin/settings",  icon: Settings },
       { label: "App Store", path: "/admin/app-store", icon: Star },
-      { label: "Export", path: "/admin/export", icon: Download },
-      { label: "System", path: "/admin/system", icon: Server },
-      { label: "Backups", path: "/admin/backups", icon: Database },
+      { label: "Export",   path: "/admin/export",    icon: Download },
+      { label: "System",   path: "/admin/system",    icon: Server },
+      { label: "Backups",  path: "/admin/backups",   icon: Database },
     ],
   },
 ];
@@ -126,59 +128,75 @@ export default function AdminLayout({ user }: { user: User }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [onUserDetail, userDetailParams] = useRoute("/admin/users/:userId");
-  const [onUsers] = useRoute("/admin/users");
-  const [onApprovals] = useRoute("/admin/approvals");
-  const [onReports] = useRoute("/admin/reports");
-  const [onModeration] = useRoute("/admin/moderation");
-  const [onBlacklist] = useRoute("/admin/blacklist");
-  const [onDuplicates] = useRoute("/admin/duplicates");
-  const [onAnalytics] = useRoute("/admin/analytics");
-  const [onPayments] = useRoute("/admin/payments");
-  const [onPromoCodes] = useRoute("/admin/promo-codes");
-  const [onReferrals] = useRoute("/admin/referrals");
-  const [onNotifications] = useRoute("/admin/notifications");
-  const [onAnnouncements] = useRoute("/admin/announcements");
+  const [onUsers]          = useRoute("/admin/users");
+  const [onApprovals]      = useRoute("/admin/approvals");
+  const [onReports]        = useRoute("/admin/reports");
+  const [onModeration]     = useRoute("/admin/moderation");
+  const [onBlacklist]      = useRoute("/admin/blacklist");
+  const [onDuplicates]     = useRoute("/admin/duplicates");
+  const [onAnalytics]      = useRoute("/admin/analytics");
+  const [onPayments]       = useRoute("/admin/payments");
+  const [onPromoCodes]     = useRoute("/admin/promo-codes");
+  const [onReferrals]      = useRoute("/admin/referrals");
+  const [onNotifications]  = useRoute("/admin/notifications");
+  const [onAnnouncements]  = useRoute("/admin/announcements");
   const [onEmailTemplates] = useRoute("/admin/email-templates");
-  const [onFeedback] = useRoute("/admin/feedback");
-  const [onCaste] = useRoute("/admin/caste");
-  const [onEvents] = useRoute("/admin/events");
+  const [onFeedback]       = useRoute("/admin/feedback");
+  const [onCaste]          = useRoute("/admin/caste");
+  const [onEvents]         = useRoute("/admin/events");
   const [onSuccessStories] = useRoute("/admin/success-stories");
-  const [onTranslations] = useRoute("/admin/translations");
-  const [onTeam] = useRoute("/admin/team");
-  const [onLogs] = useRoute("/admin/logs");
-  const [onSettings] = useRoute("/admin/settings");
-  const [onAppStore] = useRoute("/admin/app-store");
-  const [onExport] = useRoute("/admin/export");
-  const [onSystem] = useRoute("/admin/system");
-  const [onBackups] = useRoute("/admin/backups");
+  const [onTranslations]   = useRoute("/admin/translations");
+  const [onTeam]           = useRoute("/admin/team");
+  const [onLogs]           = useRoute("/admin/logs");
+  const [onSettings]       = useRoute("/admin/settings");
+  const [onAppStore]       = useRoute("/admin/app-store");
+  const [onExport]         = useRoute("/admin/export");
+  const [onSystem]         = useRoute("/admin/system");
+  const [onBackups]        = useRoute("/admin/backups");
+
+  const { data: pendingPhotosData } = useQuery<{ users: any[] }>({
+    queryKey: ["/api/admin/pending-photos"],
+    queryFn: async () => (await fetch("/api/admin/pending-photos", { credentials: "include" })).json(),
+    refetchInterval: 30_000,
+    staleTime: 20_000,
+  });
+
+  const pendingPhotoCount: number = (pendingPhotosData?.users ?? []).reduce((total: number, u: any) => {
+    const slots: any[] = u.photoSlots ?? [];
+    return total + slots.filter((s: any) => s.status === "pending").length;
+  }, 0);
+
+  const badges: Record<string, number> = {
+    pendingPhotos: pendingPhotoCount,
+  };
 
   function resolvePage() {
     if (onUserDetail && userDetailParams?.userId) return <UserDetailPage user={user} userId={userDetailParams.userId} />;
-    if (onUsers) return <UsersPage user={user} />;
-    if (onApprovals) return <ApprovalsPage user={user} />;
-    if (onReports) return <ReportsPage user={user} />;
-    if (onModeration) return <ModerationPage user={user} />;
-    if (onBlacklist) return <BlacklistPage user={user} />;
-    if (onDuplicates) return <DuplicatesPage user={user} />;
-    if (onAnalytics) return <AnalyticsPage user={user} />;
-    if (onPayments) return <PaymentsPage user={user} />;
-    if (onPromoCodes) return <PromoCodesPage user={user} />;
-    if (onReferrals) return <ReferralsPage user={user} />;
-    if (onNotifications) return <NotificationsPage user={user} />;
-    if (onAnnouncements) return <AnnouncementsPage user={user} />;
+    if (onUsers)          return <UsersPage user={user} />;
+    if (onApprovals)      return <ApprovalsPage user={user} />;
+    if (onReports)        return <ReportsPage user={user} />;
+    if (onModeration)     return <ModerationPage user={user} />;
+    if (onBlacklist)      return <BlacklistPage user={user} />;
+    if (onDuplicates)     return <DuplicatesPage user={user} />;
+    if (onAnalytics)      return <AnalyticsPage user={user} />;
+    if (onPayments)       return <PaymentsPage user={user} />;
+    if (onPromoCodes)     return <PromoCodesPage user={user} />;
+    if (onReferrals)      return <ReferralsPage user={user} />;
+    if (onNotifications)  return <NotificationsPage user={user} />;
+    if (onAnnouncements)  return <AnnouncementsPage user={user} />;
     if (onEmailTemplates) return <EmailTemplatesPage user={user} />;
-    if (onFeedback) return <FeedbackPage user={user} />;
-    if (onCaste) return <CastePage user={user} />;
-    if (onEvents) return <EventsManagementPage user={user} />;
+    if (onFeedback)       return <FeedbackPage user={user} />;
+    if (onCaste)          return <CastePage user={user} />;
+    if (onEvents)         return <EventsManagementPage user={user} />;
     if (onSuccessStories) return <SuccessStoriesPage user={user} />;
-    if (onTranslations) return <TranslationsPage user={user} />;
-    if (onTeam) return <TeamPage user={user} />;
-    if (onLogs) return <AuditLogsPage user={user} />;
-    if (onSettings) return <AppSettingsPage user={user} />;
-    if (onAppStore) return <AppStorePage user={user} />;
-    if (onExport) return <ExportPage user={user} />;
-    if (onSystem) return <SystemPage user={user} />;
-    if (onBackups) return <BackupsPage user={user} />;
+    if (onTranslations)   return <TranslationsPage user={user} />;
+    if (onTeam)           return <TeamPage user={user} />;
+    if (onLogs)           return <AuditLogsPage user={user} />;
+    if (onSettings)       return <AppSettingsPage user={user} />;
+    if (onAppStore)       return <AppStorePage user={user} />;
+    if (onExport)         return <ExportPage user={user} />;
+    if (onSystem)         return <SystemPage user={user} />;
+    if (onBackups)        return <BackupsPage user={user} />;
     return <DashboardPage user={user} />;
   }
 
@@ -208,6 +226,7 @@ export default function AdminLayout({ user }: { user: User }) {
             </div>
             {group.items.map(item => {
               const active = isActive(item.path);
+              const badgeCount = item.badgeKey ? (badges[item.badgeKey] ?? 0) : 0;
               return (
                 <Link key={item.path} href={item.path}
                   onClick={() => setSidebarOpen(false)}
@@ -218,8 +237,17 @@ export default function AdminLayout({ user }: { user: User }) {
                     background: active ? "rgba(201,168,76,0.12)" : "transparent",
                   }}>
                   <item.icon size={14} />
-                  {item.label}
-                  {active && <ChevronRight size={12} className="ml-auto opacity-60" />}
+                  <span className="flex-1 truncate">{item.label}</span>
+                  {badgeCount > 0 && (
+                    <span
+                      className="flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black flex items-center justify-center leading-none"
+                      style={{ background: "#ef4444", color: "#fff", boxShadow: "0 1px 4px rgba(0,0,0,0.4)" }}
+                      data-testid={`badge-pending-photos`}
+                    >
+                      {badgeCount > 99 ? "99+" : badgeCount}
+                    </span>
+                  )}
+                  {active && badgeCount === 0 && <ChevronRight size={12} className="ml-auto opacity-60 flex-shrink-0" />}
                 </Link>
               );
             })}
