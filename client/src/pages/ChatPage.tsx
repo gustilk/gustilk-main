@@ -401,7 +401,7 @@ function injectRevealCSS() {
   s.textContent = `
     @keyframes gr-float-up   { 0%{opacity:0;transform:translateY(0) rotate(0deg) scale(.5)} 8%{opacity:1} 85%{opacity:.9} 100%{opacity:0;transform:translateY(-105vh) rotate(540deg) scale(1.1)} }
     @keyframes gr-fall-down  { 0%{opacity:0;transform:translateY(0) rotate(0deg) scale(.5)} 8%{opacity:1} 85%{opacity:.9} 100%{opacity:0;transform:translateY(110vh) rotate(-360deg) scale(1)} }
-    @keyframes gr-pop-in     { 0%{opacity:0;transform:scale(.15) rotate(-20deg)} 55%{transform:scale(1.12) rotate(4deg)} 75%{transform:scale(.94) rotate(-2deg)} 90%{transform:scale(1.03) rotate(1deg)} 100%{opacity:1;transform:scale(1) rotate(0deg)} }
+    @keyframes gr-zoom-in    { 0%{opacity:0;transform:scale(.3)} 8%{opacity:1} 100%{opacity:1;transform:scale(1)} }
     @keyframes gr-glow-pulse { 0%,100%{opacity:.55;transform:scale(1)} 50%{opacity:1;transform:scale(1.06)} }
     @keyframes gr-name-in    { 0%{opacity:0;transform:translateY(24px)} 100%{opacity:1;transform:translateY(0)} }
     @keyframes gr-hint-fade  { 0%{opacity:0} 100%{opacity:1} }
@@ -416,7 +416,7 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
 
   useEffect(() => {
     injectRevealCSS();
-    const t = setTimeout(() => onCloseRef.current(), 3200);
+    const t = setTimeout(() => onCloseRef.current(), 6000);
     return () => clearTimeout(t);
   }, []);
 
@@ -446,7 +446,7 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
         style={{
           width: 230,
           height: 230,
-          animation: "gr-pop-in 0.72s cubic-bezier(.22,1,.36,1) forwards",
+          animation: "gr-zoom-in 5s ease-out forwards",
           opacity: 0,
           position: "relative",
           zIndex: 2,
