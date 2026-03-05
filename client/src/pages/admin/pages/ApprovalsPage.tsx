@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { CheckCircle, XCircle, Ban, Shield, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckCircle, XCircle, Ban, Shield, X, ChevronLeft, ChevronRight, RotateCcw, Clock } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { formatDistanceToNow } from "date-fns";
 import type { User } from "@shared/schema";
 import type { PhotoSlot } from "@shared/schema";
 import ConfirmDialog from "../components/ConfirmDialog";
@@ -129,11 +129,50 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
             const casteLabel = ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[u.caste ?? ""] ?? u.caste ?? "");
             const timeAgo = u.createdAt ? formatDistanceToNow(new Date(u.createdAt), { addSuffix: true }) : "";
             const name = u.fullName ?? u.firstName ?? "this user";
+            const appCount = ((u as any).applicationCount as number | null) ?? 1;
+            const appHistory = ((u as any).applicationHistory as Array<{ action: string; reason?: string; date: string }> | null) ?? [];
+            const isReapplication = appCount > 1;
 
             return (
               <div key={u.id} data-testid={`approval-card-${u.id}`}
                 className="rounded-2xl overflow-hidden"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.2)" }}>
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: isReapplication ? "1px solid rgba(251,191,36,0.4)" : "1px solid rgba(201,168,76,0.2)",
+                }}>
+
+                {/* ── Reapplication Banner ── */}
+                {isReapplication && (
+                  <div className="px-5 pt-4 pb-3" style={{ borderBottom: "1px solid rgba(251,191,36,0.15)", background: "rgba(251,191,36,0.05)" }}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <RotateCcw size={13} color="#fbbf24" />
+                      <span className="text-yellow-400 text-xs font-bold">Reapplication #{appCount}</span>
+                      <span className="text-cream/30 text-xs">— This user has applied {appCount} times</span>
+                    </div>
+                    {appHistory.length > 0 && (
+                      <div className="space-y-1.5 mt-2">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-cream/30 mb-1">Previous Decisions</p>
+                        {appHistory.map((h, i) => (
+                          <div key={i} className="flex items-start gap-2 text-xs rounded-lg px-2.5 py-1.5"
+                            style={{
+                              background: h.action === "approved" ? "rgba(16,185,129,0.08)" : h.action === "banned" ? "rgba(239,68,68,0.08)" : "rgba(212,96,138,0.08)",
+                              border: h.action === "approved" ? "1px solid rgba(16,185,129,0.2)" : h.action === "banned" ? "1px solid rgba(239,68,68,0.2)" : "1px solid rgba(212,96,138,0.2)",
+                            }}>
+                            <span className="font-bold flex-shrink-0 capitalize"
+                              style={{ color: h.action === "approved" ? "#10b981" : h.action === "banned" ? "#ef4444" : "#d4608a" }}>
+                              {h.action}
+                            </span>
+                            {h.reason && <span className="text-cream/50">— {h.reason}</span>}
+                            <span className="ml-auto text-cream/25 flex-shrink-0 flex items-center gap-1">
+                              <Clock size={9} />
+                              {formatDistanceToNow(new Date(h.date), { addSuffix: true })}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* ── Profile Header ── */}
                 <div className="p-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
