@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -391,7 +391,6 @@ function MessageBubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
 }
 
 // ─── Gift reveal overlay ─────────────────────────────────────────────────────
-const PARTY_SYMBOLS = ["❤️", "✨", "⭐", "🌸", "💫", "🌺", "💖", "🎀", "✦", "♥", "🌟", "💝"];
 
 let revealCssInjected = false;
 function injectRevealCSS() {
@@ -402,7 +401,7 @@ function injectRevealCSS() {
   s.textContent = `
     @keyframes gr-float-up   { 0%{opacity:0;transform:translateY(0) rotate(0deg) scale(.5)} 8%{opacity:1} 85%{opacity:.9} 100%{opacity:0;transform:translateY(-105vh) rotate(540deg) scale(1.1)} }
     @keyframes gr-fall-down  { 0%{opacity:0;transform:translateY(0) rotate(0deg) scale(.5)} 8%{opacity:1} 85%{opacity:.9} 100%{opacity:0;transform:translateY(110vh) rotate(-360deg) scale(1)} }
-    @keyframes gr-pop-in     { 0%{opacity:0;transform:scale(.15) rotate(-20deg)} 55%{transform:scale(1.12) rotate(4deg)} 75%{transform:scale(.94) rotate(-2deg)} 90%{transform:scale(1.03) rotate(1deg)} 100%{opacity:1;transform:scale(1) rotate(0deg)} }
+    @keyframes gr-zoom-in    { 0%{opacity:0;transform:scale(.3)} 8%{opacity:1} 100%{opacity:1;transform:scale(1)} }
     @keyframes gr-glow-pulse { 0%,100%{opacity:.55;transform:scale(1)} 50%{opacity:1;transform:scale(1.06)} }
     @keyframes gr-name-in    { 0%{opacity:0;transform:translateY(24px)} 100%{opacity:1;transform:translateY(0)} }
     @keyframes gr-hint-fade  { 0%{opacity:0} 100%{opacity:1} }
@@ -417,19 +416,9 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
 
   useEffect(() => {
     injectRevealCSS();
-    const t = setTimeout(() => onCloseRef.current(), 3200);
+    const t = setTimeout(() => onCloseRef.current(), 6000);
     return () => clearTimeout(t);
   }, []);
-
-  const particles = useMemo(() => Array.from({ length: 52 }, (_, i) => ({
-    id: i,
-    symbol: PARTY_SYMBOLS[i % PARTY_SYMBOLS.length],
-    left: Math.random() * 100,
-    delay: Math.random() * 2.2,
-    duration: 2.6 + Math.random() * 2,
-    size: 13 + Math.floor(Math.random() * 20),
-    fromBottom: i % 3 !== 0,
-  })), []);
 
   return (
     <div
@@ -438,23 +427,6 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
       onClick={onClose}
       data-testid="gift-reveal-overlay"
     >
-      {/* Particles */}
-      {particles.map(p => (
-        <span
-          key={p.id}
-          style={{
-            position: "absolute",
-            [p.fromBottom ? "bottom" : "top"]: "-5%",
-            left: `${p.left}%`,
-            fontSize: p.size,
-            pointerEvents: "none",
-            animation: `${p.fromBottom ? "gr-float-up" : "gr-fall-down"} ${p.duration}s ${p.delay}s ease-out forwards`,
-            opacity: 0,
-          }}
-        >
-          {p.symbol}
-        </span>
-      ))}
 
       {/* Radial glow behind gift */}
       <div
@@ -474,7 +446,7 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
         style={{
           width: 230,
           height: 230,
-          animation: "gr-pop-in 0.72s cubic-bezier(.22,1,.36,1) forwards",
+          animation: "gr-zoom-in 5s ease-out forwards",
           opacity: 0,
           position: "relative",
           zIndex: 2,
