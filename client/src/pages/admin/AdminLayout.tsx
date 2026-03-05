@@ -14,7 +14,6 @@ import UserDetailPage from "./pages/UserDetailPage";
 import ApprovalsPage from "./pages/ApprovalsPage";
 import ReportsPage from "./pages/ReportsPage";
 import ModerationPage from "./pages/ModerationPage";
-import VerificationQueuePage from "./pages/VerificationQueuePage";
 import BlacklistPage from "./pages/BlacklistPage";
 import DuplicatesPage from "./pages/DuplicatesPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
@@ -60,7 +59,6 @@ const NAV: NavGroup[] = [
     items: [
       { label: "All Users", path: "/admin/users", icon: Users },
       { label: "Approvals", path: "/admin/approvals", icon: UserCheck },
-      { label: "Verification", path: "/admin/verification", icon: Shield },
     ],
   },
   {
@@ -130,7 +128,6 @@ export default function AdminLayout({ user }: { user: User }) {
   const [onUserDetail, userDetailParams] = useRoute("/admin/users/:userId");
   const [onUsers] = useRoute("/admin/users");
   const [onApprovals] = useRoute("/admin/approvals");
-  const [onVerification] = useRoute("/admin/verification");
   const [onReports] = useRoute("/admin/reports");
   const [onModeration] = useRoute("/admin/moderation");
   const [onBlacklist] = useRoute("/admin/blacklist");
@@ -159,7 +156,6 @@ export default function AdminLayout({ user }: { user: User }) {
     if (onUserDetail && userDetailParams?.userId) return <UserDetailPage user={user} userId={userDetailParams.userId} />;
     if (onUsers) return <UsersPage user={user} />;
     if (onApprovals) return <ApprovalsPage user={user} />;
-    if (onVerification) return <VerificationQueuePage user={user} />;
     if (onReports) return <ReportsPage user={user} />;
     if (onModeration) return <ModerationPage user={user} />;
     if (onBlacklist) return <BlacklistPage user={user} />;
