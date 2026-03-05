@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { formatDistanceToNow } from "date-fns";
@@ -17,7 +17,26 @@ interface Props {
 type Tab = "likes-received" | "visitors" | "likes-sent";
 
 export default function ActivityPage({ user }: Props) {
-  const [tab, setTab] = useState<Tab>("likes-received");
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Restore tab from sessionStorage when returning from a profile
+  const [tab, setTab] = useState<Tab>(() => {
+    const stored = sessionStorage.getItem("activity_return_tab") as Tab | null;
+    if (stored) { sessionStorage.removeItem("activity_return_tab"); return stored; }
+    return "likes-received";
+  });
+
+  // Restore scroll position when returning from a profile
+  useEffect(() => {
+    const stored = sessionStorage.getItem("activity_scroll");
+    if (stored && scrollRef.current) {
+      sessionStorage.removeItem("activity_scroll");
+      requestAnimationFrame(() => {
+        if (scrollRef.current) scrollRef.current.scrollTop = parseInt(stored, 10);
+      });
+    }
+  }, []);
+
   const isPremium = user.isPremium;
 
   const { data: likesReceived, isLoading: loadingLR } = useQuery<{ items: ActivityItem[] }>({
@@ -101,7 +120,7 @@ export default function ActivityPage({ user }: Props) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-5 pt-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 pt-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
             <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
@@ -116,6 +135,10 @@ export default function ActivityPage({ user }: Props) {
                 item={item}
                 isPremium={isPremium ?? false}
                 blurred={!isPremium && tab !== "likes-sent"}
+                onBeforeNavigate={() => {
+                  sessionStorage.setItem("activity_return_tab", tab);
+                  sessionStorage.setItem("activity_scroll", String(scrollRef.current?.scrollTop ?? 0));
+                }}
               />
             ))}
           </div>
@@ -125,7 +148,12 @@ export default function ActivityPage({ user }: Props) {
   );
 }
 
-function ActivityCard({ item, isPremium, blurred }: { item: ActivityItem; isPremium: boolean; blurred: boolean }) {
+function ActivityCard({ item, isPremium, blurred, onBeforeNavigate }: {
+  item: ActivityItem;
+  isPremium: boolean;
+  blurred: boolean;
+  onBeforeNavigate: () => void;
+}) {
   const [, setLocation] = useLocation();
   const { user, createdAt } = item;
   const displayName = user.firstName ?? user.fullName?.split(" ")[0] ?? "Member";
@@ -137,6 +165,7 @@ function ActivityCard({ item, isPremium, blurred }: { item: ActivityItem; isPrem
       style={{ aspectRatio: "3/4", background: "#1a0a2e" }}
       data-testid={`activity-card-${user.id}`}
       onClick={() => {
+        onBeforeNavigate();
         sessionStorage.setItem("profile_back_to", "/activity");
         setLocation(`/profile/${user.id}`);
       }}

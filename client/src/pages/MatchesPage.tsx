@@ -105,7 +105,14 @@ export default function MatchesPage({ user }: Props) {
                     key={match.id}
                     match={match}
                     isPremium={isPremium}
-                    onClick={() => isPremium ? setLocation(`/chat/${match.id}`) : setLocation("/premium")}
+                    onClick={() => {
+                      if (isPremium) {
+                        sessionStorage.setItem("profile_back_to", "/matches");
+                        setLocation(`/profile/${match.otherUser.id}`);
+                      } else {
+                        setLocation("/premium");
+                      }
+                    }}
                   />
                 ))}
               </div>
@@ -243,6 +250,7 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
   onClick: () => void;
 }) {
   const { t } = useTranslation();
+  const [, setLocation] = useLocation();
   const other = match.otherUser;
   const lastMsg = match.lastMessage;
   const hasUnread = !isPremium ? false : (match.unreadCount || 0) > 0;
@@ -253,6 +261,13 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
       ? formatDistanceToNow(new Date(match.createdAt), { addSuffix: true })
       : "";
 
+  const goToProfile = (e: React.MouseEvent) => {
+    if (!isPremium) return;
+    e.stopPropagation();
+    sessionStorage.setItem("profile_back_to", "/matches");
+    setLocation(`/profile/${other.id}`);
+  };
+
   return (
     <button
       onClick={onClick}
@@ -260,12 +275,17 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
       className="w-full flex items-center gap-4 p-4 rounded-2xl transition-all text-left"
       style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}
     >
-      <div className="relative flex-shrink-0">
+      <div
+        className="relative flex-shrink-0"
+        onClick={goToProfile}
+        title={isPremium ? "View profile" : undefined}
+        style={{ cursor: isPremium ? "pointer" : "default" }}
+      >
         <div
-          className="w-14 h-14 rounded-full flex items-center justify-center font-serif text-xl font-bold text-gold overflow-hidden"
+          className="w-14 h-14 rounded-full flex items-center justify-center font-serif text-xl font-bold text-gold overflow-hidden transition-opacity"
           style={{
             background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)",
-            border: "2px solid rgba(201,168,76,0.3)",
+            border: isPremium ? "2px solid rgba(201,168,76,0.5)" : "2px solid rgba(201,168,76,0.3)",
             filter: isPremium ? "none" : "blur(6px)",
           }}
         >
