@@ -534,7 +534,7 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
   return (
     <div
       className="fixed inset-0 z-[300] flex flex-col items-center justify-center select-none overflow-hidden"
-      style={{ background: "transparent" }}
+      style={{ background: "rgba(13,6,24,0.94)" }}
       onClick={onClose}
       data-testid="gift-reveal-overlay"
     >
@@ -583,19 +583,6 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
         return null;
       })}
 
-      {/* Radial glow behind gift */}
-      <div
-        style={{
-          position: "absolute",
-          width: 340,
-          height: 340,
-          borderRadius: "50%",
-          background: `radial-gradient(circle, ${g.color}30 0%, ${g.color}10 50%, transparent 75%)`,
-          animation: "gr-glow-pulse 1.6s ease-in-out infinite",
-          pointerEvents: "none",
-        }}
-      />
-
       {/* Gift animation */}
       <div
         style={{
@@ -605,7 +592,6 @@ function GiftRevealOverlay({ gift, onClose }: { gift: GiftType; onClose: () => v
           opacity: 0,
           position: "relative",
           zIndex: 2,
-          filter: `drop-shadow(0 0 32px ${g.color}88)`,
         }}
         data-testid="gift-reveal-animation"
       >
