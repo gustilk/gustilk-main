@@ -616,12 +616,17 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const search = ((req.query.search as string) || "").trim();
     const countryFilter = ((req.query.country as string) || "").trim();
     const cityFilter = ((req.query.city as string) || "").trim();
+    const premiumFilter = (req.query.premium as string) || "";
+    const casteFilter = (req.query.caste as string) || "";
     const limit = Math.min(parseInt(req.query.limit as string) || 500, 1000);
     const offset = parseInt(req.query.offset as string) || 0;
     const conditions: any[] = [];
     if (search) conditions.push(or(ilike(users.fullName, `%${search}%`), ilike(users.email, `%${search}%`), ilike(users.city, `%${search}%`)));
     if (countryFilter) conditions.push(ilike(users.country, `%${countryFilter}%`));
     if (cityFilter) conditions.push(ilike(users.city, `%${cityFilter}%`));
+    if (premiumFilter === "premium") conditions.push(eq(users.isPremium, true));
+    if (premiumFilter === "non_premium") conditions.push(eq(users.isPremium, false));
+    if (casteFilter && ["sheikh", "pir", "murid"].includes(casteFilter)) conditions.push(eq(users.caste, casteFilter as any));
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
     const [allUsers, [countRow]] = await Promise.all([
       whereClause
