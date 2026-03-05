@@ -92,6 +92,7 @@ export const gifts = pgTable("gifts", {
   matchId: varchar("match_id", { length: 36 }).notNull().references(() => matches.id),
   giftType: text("gift_type").notNull(),
   message: text("message").default(""),
+  animationStyle: text("animation_style").default("confetti"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
