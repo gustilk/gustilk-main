@@ -416,14 +416,15 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const sender = await storage.getUserById(senderId);
     if (!sender?.isPremium) return res.status(403).json({ error: "Premium required to send gifts" });
 
-    const { recipientId, matchId, giftType, message } = z.object({
+    const { recipientId, matchId, giftType, message, animationStyle } = z.object({
       recipientId: z.string(),
       matchId: z.string(),
       giftType: z.string().min(1),
       message: z.string().max(200).optional().default(""),
+      animationStyle: z.enum(["none","confetti","sparkles","fireworks","hearts","flowers"]).default("none"),
     }).parse(req.body);
 
-    const gift = await storage.sendGift(senderId, recipientId, matchId, giftType, message);
+    const gift = await storage.sendGift(senderId, recipientId, matchId, giftType, message, animationStyle);
     res.json({ gift });
   });
 
