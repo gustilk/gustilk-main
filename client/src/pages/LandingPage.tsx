@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Heart, Shield, Users, Eye, EyeOff, Phone, Mail, ArrowLeft, Globe, ChevronDown, Search, X, Fingerprint } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useTranslation } from "react-i18next";
@@ -179,6 +179,7 @@ function SubmitButton({ loading, loadingText, disabled, onClick, "data-testid": 
 
 function EmailScreen({ onBack }: { onBack: () => void }) {
   const { t } = useTranslation();
+  const [, setLocation] = useLocation();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -218,7 +219,8 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
         ...(mode === "register" ? { firstName: firstName.trim(), lastName: lastName.trim() } : {}),
       });
       localStorage.setItem("gustilk_email", email.trim());
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      setLocation("/discover");
     } catch (err: any) {
       const raw: string = err.message?.match(/\d+: (.+)/)?.[1] || err.message || "Something went wrong";
       let msg: string;
@@ -612,6 +614,7 @@ function CountryPicker({
 
 function PhoneScreen({ onBack }: { onBack: () => void }) {
   const { t } = useTranslation();
+  const [, setLocation] = useLocation();
   const savedIso = localStorage.getItem("gustilk_country_iso");
   const savedPhone = localStorage.getItem("gustilk_phone") ?? "";
   const [country, setCountry] = useState(
@@ -657,7 +660,8 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
 
       localStorage.setItem("gustilk_phone", localNumber);
       localStorage.setItem("gustilk_country_iso", country.iso);
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      setLocation("/discover");
     } catch (err: any) {
       if (err?.name === "NotAllowedError" || err?.message?.includes("NotAllowedError")) {
         setBiometricError(t("auth.biometricCancelled"));

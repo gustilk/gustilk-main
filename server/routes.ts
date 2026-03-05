@@ -178,8 +178,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       let newUploads: string[] = [];
 
       if (photosIncluded) {
+        // All URLs currently approved (union of user.photos and approved photoSlots)
+        const approvedSlotUrls = existingSlots.filter(s => s.status === "approved").map((s: any) => s.url);
+        const allApprovedUrls = [...new Set([...existingApproved, ...approvedSlotUrls])];
+
         // Approved slots user is keeping (submitted by URL, not base64)
-        const keptApprovedUrls = submittedPhotos.filter(p => !p.startsWith("data:image") && existingApproved.includes(p));
+        const keptApprovedUrls = submittedPhotos.filter(p => !p.startsWith("data:image") && allApprovedUrls.includes(p));
 
         // New base64 uploads → pending slots
         newUploads = submittedPhotos.filter(p => p.startsWith("data:image"));
@@ -203,8 +207,14 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       }
 
       let mainPhotoUrl = user?.mainPhotoUrl;
-      if (photosIncluded && mainPhotoUrl && !keptApproved.includes(mainPhotoUrl)) {
-        mainPhotoUrl = keptApproved[0] ?? null;
+      if (photosIncluded) {
+        // Respect new ordering: use the first submitted approved URL as main photo
+        const submittedApproved = submittedPhotos.filter(p => keptApproved.includes(p));
+        if (submittedApproved.length > 0) {
+          mainPhotoUrl = submittedApproved[0];
+        } else if (mainPhotoUrl && !keptApproved.includes(mainPhotoUrl)) {
+          mainPhotoUrl = keptApproved[0] ?? null;
+        }
       }
 
       const data = user?.country ? rest : parsed;
