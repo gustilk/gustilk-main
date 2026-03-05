@@ -63,6 +63,10 @@ export const GIFTS = [
   { id: "bouquet-hearts", lottie: "/lottie/bouquet-hearts.json",     name: "Heart Bouquet",  color: "#ef4444" },
   { id: "brunette-lady",  lottie: "/lottie/brunette-lady.json",      name: "Lady Wave ♥",   color: "#d4608a" },
   { id: "cat",            lottie: "/lottie/cat.json",                name: "Cat",            color: "#7b3fa0" },
+  { id: "pink-lady",      lottie: "/lottie/pink-lady.json",          name: "Lady Wave 💗",   color: "#d4608a" },
+  { id: "pink-heart",     lottie: "/lottie/pink-heart.json",         name: "Pink Heart",     color: "#e83e6c" },
+  { id: "pink-rose",      lottie: "/lottie/pink-rose.json",          name: "Pink Rose",      color: "#d4608a" },
+  { id: "red-rose-sticker",lottie:"/lottie/red-rose-sticker.json",   name: "Red Rose 🌹",    color: "#e83e6c" },
 ];
 
 function giftById(id: string) {
