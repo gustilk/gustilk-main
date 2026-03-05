@@ -16,6 +16,8 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [filterPremium, setFilterPremium] = useState<"" | "premium" | "non_premium">("");
+  const [filterCaste, setFilterCaste] = useState<"" | "sheikh" | "pir" | "murid">("");
   const [pending, setPending] = useState<null | {
     title: string; description: string;
     variant: "danger" | "warning" | "success";
@@ -23,10 +25,12 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
   }>(null);
 
   const { data, isLoading } = useQuery<{ users: User[]; total: number }>({
-    queryKey: ["/api/admin/users", debouncedSearch, page],
+    queryKey: ["/api/admin/users", debouncedSearch, page, filterPremium, filterCaste],
     queryFn: async () => {
       const params = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(page * PAGE_SIZE) });
       if (debouncedSearch) params.set("search", debouncedSearch);
+      if (filterPremium) params.set("premium", filterPremium);
+      if (filterCaste) params.set("caste", filterCaste);
       return (await fetch(`/api/admin/users?${params}`, { credentials: "include" })).json();
     },
   });
@@ -57,6 +61,16 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
     (handleSearch as any)._t = setTimeout(() => setDebouncedSearch(val), 400);
   };
 
+  const togglePremium = (val: "premium" | "non_premium") => {
+    setFilterPremium(p => p === val ? "" : val);
+    setPage(0);
+  };
+  const toggleCaste = (val: "sheikh" | "pir" | "murid") => {
+    setFilterCaste(c => c === val ? "" : val);
+    setPage(0);
+  };
+  const activeFilters = [filterPremium, filterCaste].filter(Boolean).length;
+
   const users = data?.users ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
@@ -85,13 +99,68 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
       </div>
 
       {/* Search */}
-      <div className="relative mb-4">
+      <div className="relative mb-3">
         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-cream/30" />
         <input value={search} onChange={e => handleSearch(e.target.value)}
           placeholder="Search by name, email, city…"
           data-testid="input-user-search"
           className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-cream placeholder-cream/30 outline-none"
           style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(201,168,76,0.15)" }} />
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <span className="text-cream/30 text-[10px] font-semibold uppercase tracking-wider">Filter:</span>
+
+        {(["premium", "non_premium"] as const).map(val => (
+          <button
+            key={val}
+            onClick={() => togglePremium(val)}
+            data-testid={`filter-${val}`}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all"
+            style={{
+              background: filterPremium === val ? "rgba(201,168,76,0.2)" : "rgba(255,255,255,0.05)",
+              border: filterPremium === val ? "1px solid rgba(201,168,76,0.55)" : "1px solid rgba(255,255,255,0.08)",
+              color: filterPremium === val ? "#c9a84c" : "rgba(253,248,240,0.45)",
+            }}
+          >
+            <Crown size={11} />
+            {val === "premium" ? "Premium" : "Non-Premium"}
+          </button>
+        ))}
+
+        <div className="w-px h-4 mx-0.5" style={{ background: "rgba(255,255,255,0.1)" }} />
+
+        {([
+          { val: "sheikh", label: "Sheikh" },
+          { val: "pir", label: "Pir" },
+          { val: "murid", label: "Mirid" },
+        ] as const).map(({ val, label }) => (
+          <button
+            key={val}
+            onClick={() => toggleCaste(val)}
+            data-testid={`filter-caste-${val}`}
+            className="px-3 py-1 rounded-full text-xs font-semibold transition-all"
+            style={{
+              background: filterCaste === val ? "rgba(123,63,160,0.2)" : "rgba(255,255,255,0.05)",
+              border: filterCaste === val ? "1px solid rgba(123,63,160,0.55)" : "1px solid rgba(255,255,255,0.08)",
+              color: filterCaste === val ? "#c9a84c" : "rgba(253,248,240,0.45)",
+            }}
+          >
+            {label}
+          </button>
+        ))}
+
+        {activeFilters > 0 && (
+          <button
+            onClick={() => { setFilterPremium(""); setFilterCaste(""); setPage(0); }}
+            data-testid="button-clear-filters"
+            className="px-3 py-1 rounded-full text-xs font-semibold transition-all ml-1"
+            style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", color: "#ef4444" }}
+          >
+            Clear ({activeFilters})
+          </button>
+        )}
       </div>
 
       {/* Table */}
