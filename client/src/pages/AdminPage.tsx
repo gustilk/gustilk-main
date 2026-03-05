@@ -507,7 +507,10 @@ function VerificationsTab({ pending, isLoading, onAction, onPhotoAction, isPendi
           onReject={(reason) => onAction(u.id, "reject", reason)}
           onBan={(reason) => onAction(u.id, "ban", reason)}
           onPhotoAction={(slotIdx, action, reason) => onPhotoAction(u.id, slotIdx, action, reason)}
-          onViewProfile={() => setLocation(`/profile/${u.id}`)}
+          onViewProfile={() => {
+            sessionStorage.setItem("profile_back_to", "/admin/approvals");
+            setLocation(`/profile/${u.id}`);
+          }}
           isPending={isPending}
         />
       ))}

@@ -136,7 +136,10 @@ function ActivityCard({ item, isPremium, blurred }: { item: ActivityItem; isPrem
       className="relative rounded-2xl overflow-hidden cursor-pointer active:scale-[0.97] transition-transform"
       style={{ aspectRatio: "3/4", background: "#1a0a2e" }}
       data-testid={`activity-card-${user.id}`}
-      onClick={() => setLocation(`/profile/${user.id}`)}
+      onClick={() => {
+        sessionStorage.setItem("profile_back_to", "/activity");
+        setLocation(`/profile/${user.id}`);
+      }}
     >
       {/* Photo */}
       {user.mainPhotoUrl ? (

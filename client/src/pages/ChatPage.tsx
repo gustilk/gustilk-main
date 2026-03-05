@@ -229,7 +229,11 @@ export default function ChatPage({ user, matchId }: Props) {
           <ArrowLeft size={22} />
         </button>
         <button
-          onClick={() => otherUser && setLocation(`/profile/${otherUser.id}`)}
+          onClick={() => {
+            if (!otherUser) return;
+            sessionStorage.setItem("profile_back_to", `/chat/${matchId}`);
+            setLocation(`/profile/${otherUser.id}`);
+          }}
           data-testid="button-view-profile"
           className="flex items-center gap-3 flex-1 min-w-0 active:opacity-70 transition-opacity text-left"
           disabled={!otherUser}
