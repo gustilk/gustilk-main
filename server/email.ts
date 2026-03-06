@@ -82,6 +82,76 @@ export async function sendPhotoApprovedEmail(to: string, name: string): Promise<
   }
 }
 
+export async function sendAccountDeletedEmail(to: string, name: string, wasPremium: boolean): Promise<void> {
+  try {
+    const resend = getResend();
+    await resend.emails.send({
+      from: "Gûstîlk <noreply@gustilk.com>",
+      to,
+      subject: "Your Gûstîlk account has been removed",
+      html: emailShell(`
+        <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">Account Removed</h2>
+        <p style="margin:0 0 20px;font-size:14px;color:rgba(253,248,240,0.6);line-height:1.7;">
+          Hi ${name}, your Gûstîlk account has been permanently removed by an administrator.
+          All your profile data, photos, matches, and messages have been deleted.
+        </p>
+        ${wasPremium ? `
+        <div style="margin:0 0 24px;padding:16px;background:rgba(201,168,76,0.08);border-radius:12px;border:1px solid rgba(201,168,76,0.2);">
+          <p style="margin:0 0 6px;font-size:12px;color:rgba(201,168,76,0.7);text-transform:uppercase;letter-spacing:1px;">Premium Subscription</p>
+          <p style="margin:0;font-size:14px;color:rgba(253,248,240,0.7);line-height:1.6;">
+            Your active premium subscription has been cancelled immediately.
+            If you believe you are owed a refund, please contact us at
+            <a href="mailto:support@gustilk.com" style="color:#c9a84c;">support@gustilk.com</a>.
+          </p>
+        </div>` : ""}
+        <p style="margin:0 0 12px;font-size:14px;color:rgba(253,248,240,0.4);line-height:1.7;">
+          If you believe this was a mistake, please contact our support team.
+        </p>
+        <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+          <tr><td style="border-radius:12px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);">
+            <a href="mailto:support@gustilk.com" style="display:inline-block;padding:12px 28px;font-size:14px;font-weight:bold;color:#c9a84c;text-decoration:none;border-radius:12px;font-family:sans-serif;">
+              Contact Support
+            </a>
+          </td></tr>
+        </table>
+      `),
+    });
+  } catch {
+  }
+}
+
+export async function sendSupportMessageAlertEmail(userDisplayName: string, messagePreview: string, matchId: string): Promise<void> {
+  try {
+    const resend = getResend();
+    const preview = messagePreview.length > 200 ? messagePreview.slice(0, 200) + "…" : messagePreview;
+    await resend.emails.send({
+      from: "Gûstîlk <noreply@gustilk.com>",
+      to: "support@gustilk.com",
+      subject: `New support message from ${userDisplayName}`,
+      html: emailShell(`
+        <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">New Support Message</h2>
+        <p style="margin:0 0 8px;font-size:13px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:1px;">From</p>
+        <p style="margin:0 0 20px;font-size:15px;color:#c9a84c;font-weight:bold;">${userDisplayName}</p>
+        <p style="margin:0 0 8px;font-size:13px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:1px;">Message</p>
+        <div style="margin:0 0 28px;padding:16px;background:rgba(255,255,255,0.04);border-radius:12px;border:1px solid rgba(255,255,255,0.08);">
+          <p style="margin:0;font-size:14px;color:rgba(253,248,240,0.8);line-height:1.7;">${preview}</p>
+        </div>
+        <p style="margin:0 0 8px;font-size:13px;color:rgba(253,248,240,0.35);line-height:1.6;">
+          The AI assistant has already sent an automatic reply. Log in as the support account to respond manually if needed.
+        </p>
+        <table cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
+          <tr><td style="border-radius:12px;background:linear-gradient(135deg,#c9a84c,#e8c97a);">
+            <a href="https://www.gustilk.com/chat/${matchId}" style="display:inline-block;padding:14px 36px;font-size:15px;font-weight:bold;color:#1a0a2e;text-decoration:none;border-radius:12px;font-family:sans-serif;">
+              Open Conversation
+            </a>
+          </td></tr>
+        </table>
+      `),
+    });
+  } catch {
+  }
+}
+
 export async function sendPhotoRejectedEmail(to: string, name: string, reason: string): Promise<void> {
   try {
     const resend = getResend();

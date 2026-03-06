@@ -10,7 +10,7 @@ import { checkFacePresent } from "./moderation";
 import { db } from "./db";
 import { count, sql, eq, asc, desc, or, and, ilike } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
-import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail } from "./email";
+import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail } from "./email";
 import OpenAI from "openai";
 import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
 
@@ -21,13 +21,21 @@ const openai = new OpenAI({
 
 const SUPPORT_ACCOUNT_EMAIL = "support@gustilk.com";
 
+const SUPPORT_ACCOUNT_PASSWORD = "GodFirst@11";
+
 async function getOrCreateSupportAccount(): Promise<typeof users.$inferSelect> {
+  const bcrypt = await import("bcryptjs");
+  const supportHash = await bcrypt.hash(SUPPORT_ACCOUNT_PASSWORD, 10);
   const [existing] = await db.select().from(users).where(eq(users.email, SUPPORT_ACCOUNT_EMAIL));
-  if (existing) return existing;
+  if (existing) {
+    const [updated] = await db.update(users).set({ passwordHash: supportHash }).where(eq(users.email, SUPPORT_ACCOUNT_EMAIL)).returning();
+    return updated;
+  }
   const id = randomUUID();
   const [created] = await db.insert(users).values({
     id,
     email: SUPPORT_ACCOUNT_EMAIL,
+    passwordHash: supportHash,
     firstName: "Gûstîlk",
     lastName: "Support",
     fullName: "Gûstîlk Support",
@@ -67,13 +75,23 @@ Important rules:
 - Be warm, empathetic, and concise (under 150 words per reply)
 - Respond in the user's language if it is one of the six supported languages (English, Arabic, German, Armenian, Russian, Kurdish) — otherwise respond in English`;
 
-async function generateSupportAiReply(matchId: string, supportAccountId: string, userMessage: string): Promise<void> {
+async function generateSupportAiReply(matchId: string, supportAccountId: string): Promise<void> {
   try {
+    const history = await storage.getMessages(matchId);
+    // Use the last 20 messages to keep context within token budget
+    const recent = history.slice(-20);
+    const chatMessages: { role: "user" | "assistant"; content: string }[] = recent
+      .filter(m => m.text && m.text.trim().length > 0)
+      .map(m => ({
+        role: m.senderId === supportAccountId ? "assistant" : "user",
+        content: m.text,
+      }));
+    if (chatMessages.length === 0 || chatMessages[chatMessages.length - 1].role !== "user") return;
     const aiReply = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: SUPPORT_AI_SYSTEM_PROMPT },
-        { role: "user", content: userMessage },
+        ...chatMessages,
       ],
     });
     const aiText = aiReply.choices[0]?.message?.content;
@@ -369,7 +387,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const otherUserId = match.user1Id === userId ? match.user2Id : match.user1Id;
     const otherUser = await storage.getUserById(otherUserId);
     if ((otherUser?.isSystemAccount || otherUser?.isAdmin) && !user?.isAdmin && !user?.isSystemAccount) {
-      generateSupportAiReply(match.id, otherUserId, text);
+      generateSupportAiReply(match.id, otherUserId);
+      if (otherUser?.isSystemAccount) {
+        const displayName = user?.fullName ?? user?.firstName ?? user?.email ?? "A user";
+        sendSupportMessageAlertEmail(displayName, text, match.id).catch(() => {});
+      }
     }
     res.json({ message: msg });
   });
@@ -789,8 +811,55 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.delete("/api/admin/users/:id", isAuthenticated, requireAdmin, async (req, res) => {
-    await storage.deleteUser(req.params.id as string);
-    res.json({ ok: true });
+    try {
+      const targetId = req.params.id as string;
+      const adminId = getUserId(req);
+
+      const [targetUser, adminUser] = await Promise.all([
+        storage.getUserById(targetId),
+        storage.getUserById(adminId),
+      ]);
+
+      if (!targetUser) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
+      const wasPremium = !!targetUser.isPremium;
+      const adminEmail = adminUser?.email ?? "";
+      const displayName = targetUser.fullName ?? targetUser.firstName ?? "Member";
+
+      if (wasPremium) {
+        await writeAuditLog(
+          adminId,
+          adminEmail,
+          "premium_cancelled_on_deletion",
+          "user",
+          targetId,
+          `Account deleted by admin. Premium subscription cancelled immediately. User: ${targetUser.email ?? targetUser.phone ?? targetId}. FLAG FOR REFUND REVIEW.`,
+        );
+        if (targetUser.email) {
+          sendAccountDeletedEmail(targetUser.email, displayName, true).catch(() => {});
+        }
+      } else if (targetUser.email) {
+        sendAccountDeletedEmail(targetUser.email, displayName, false).catch(() => {});
+      }
+
+      await writeAuditLog(
+        adminId,
+        adminEmail,
+        "delete_user",
+        "user",
+        targetId,
+        `Deleted user: ${targetUser.email ?? targetUser.phone ?? targetId}${wasPremium ? " (had active premium)" : ""}`,
+      );
+
+      await storage.deleteUser(targetId);
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("[admin] delete user error:", err);
+      res.status(500).json({ error: "Failed to delete user" });
+    }
   });
 
   app.get("/api/admin/pending-photos", isAuthenticated, requireAdmin, async (_req, res) => {

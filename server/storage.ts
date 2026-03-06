@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys, blocks, visitors, gifts, magicLinkTokens } from "@shared/schema";
+import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys, blocks, visitors, gifts, magicLinkTokens, blacklist, auditLogs } from "@shared/schema";
 import type { User, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report, InsertUser, PhotoSlot, Block, Gift } from "@shared/schema";
 import { eq, and, or, ne, notInArray, inArray, isNull, desc, sql, isNotNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
@@ -175,16 +175,33 @@ export class DatabaseStorage implements IStorage {
   async deleteUser(id: string): Promise<void> {
     cacheDel(`user:${id}`);
     cacheDelPrefix(`discover:`);
+
+    // 1. Get all match IDs for this user
     const userMatches = await db.select({ id: matches.id }).from(matches)
       .where(or(eq(matches.user1Id, id), eq(matches.user2Id, id)));
-    if (userMatches.length > 0) {
-      const matchIds = userMatches.map(m => m.id);
-      for (const matchId of matchIds) {
-        await db.delete(messages).where(eq(messages.matchId, matchId));
-      }
-      await db.delete(matches).where(or(eq(matches.user1Id, id), eq(matches.user2Id, id)));
+    const matchIds = userMatches.map(m => m.id);
+
+    // 2. Delete messages for those matches
+    if (matchIds.length > 0) {
+      await db.delete(messages).where(inArray(messages.matchId, matchIds));
     }
+
+    // 3. Delete gifts BEFORE matches (gifts.match_id FK references matches.id)
+    if (matchIds.length > 0) {
+      await db.delete(gifts).where(inArray(gifts.matchId, matchIds));
+    }
+    // Also catch any gifts by sender/recipient not covered above
     await db.delete(gifts).where(or(eq(gifts.senderId, id), eq(gifts.recipientId, id)));
+
+    // 4. Now safe to delete matches
+    await db.delete(matches).where(or(eq(matches.user1Id, id), eq(matches.user2Id, id)));
+
+    // 5. NULL out nullable FKs that would block user row deletion
+    await db.update(events).set({ creatorId: null }).where(eq(events.creatorId, id));
+    await db.update(blacklist).set({ createdBy: null }).where(eq(blacklist.createdBy, id));
+    await db.update(auditLogs).set({ adminId: null }).where(eq(auditLogs.adminId, id));
+
+    // 6. Delete remaining related records
     await db.delete(visitors).where(or(eq(visitors.fromUserId, id), eq(visitors.toUserId, id)));
     await db.delete(blocks).where(or(eq(blocks.blockerId, id), eq(blocks.blockedId, id)));
     await db.delete(likes).where(or(eq(likes.fromUserId, id), eq(likes.toUserId, id)));
@@ -194,6 +211,8 @@ export class DatabaseStorage implements IStorage {
     await db.delete(magicLinkTokens).where(eq(magicLinkTokens.userId, id));
     await db.delete(otpCodes).where(sql`identifier IN (SELECT email FROM users WHERE id = ${id} UNION SELECT phone FROM users WHERE id = ${id})`);
     await db.delete(passkeys).where(eq(passkeys.userId, id));
+
+    // 7. Finally delete the user
     await db.delete(users).where(eq(users.id, id));
   }
 
