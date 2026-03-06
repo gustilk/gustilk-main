@@ -60,12 +60,18 @@ function AdminSpinner() {
 
 const PUBLIC_POLICY_ROUTES: Record<string, React.ComponentType> = {
   "/terms": TermsPage,
+  "/terms-of-service": TermsPage,
   "/refund": RefundPage,
+  "/refunds": RefundPage,
+  "/refund-policy": RefundPage,
   "/privacy": PrivacyPage,
+  "/privacy-policy": PrivacyPage,
   "/guidelines": GuidelinesPage,
+  "/community-guidelines": GuidelinesPage,
   "/cookie-policy": CookiePolicyPage,
   "/gdpr": GdprPage,
   "/safety-tips": SafetyTipsPage,
+  "/safety": SafetyTipsPage,
 };
 
 function useGustilkUser() {
@@ -77,7 +83,7 @@ function useGustilkUser() {
 }
 
 function profileIsComplete(user: User): boolean {
-  if (user.isAdmin) return true;
+  if (user.isAdmin || (user as any).isSystemAccount) return true;
   const slots = (user as any).photoSlots as PhotoSlot[] | null ?? [];
   const hasPhoto = slots.some(s => s.status === "approved" || s.status === "pending");
   return !!(
@@ -106,7 +112,7 @@ function AppShell({ user }: { user: User }) {
     return <SocialSetupPage user={user} />;
   }
 
-  if (profileIsComplete(user) && !user.isAdmin && !user.profileVisible) {
+  if (profileIsComplete(user) && !user.isAdmin && !(user as any).isSystemAccount && !user.profileVisible) {
     return <PendingApprovalPage user={user} />;
   }
 
