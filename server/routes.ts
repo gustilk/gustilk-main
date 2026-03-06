@@ -75,13 +75,23 @@ Important rules:
 - Be warm, empathetic, and concise (under 150 words per reply)
 - Respond in the user's language if it is one of the six supported languages (English, Arabic, German, Armenian, Russian, Kurdish) — otherwise respond in English`;
 
-async function generateSupportAiReply(matchId: string, supportAccountId: string, userMessage: string): Promise<void> {
+async function generateSupportAiReply(matchId: string, supportAccountId: string): Promise<void> {
   try {
+    const history = await storage.getMessages(matchId);
+    // Use the last 20 messages to keep context within token budget
+    const recent = history.slice(-20);
+    const chatMessages: { role: "user" | "assistant"; content: string }[] = recent
+      .filter(m => m.text && m.text.trim().length > 0)
+      .map(m => ({
+        role: m.senderId === supportAccountId ? "assistant" : "user",
+        content: m.text,
+      }));
+    if (chatMessages.length === 0 || chatMessages[chatMessages.length - 1].role !== "user") return;
     const aiReply = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: SUPPORT_AI_SYSTEM_PROMPT },
-        { role: "user", content: userMessage },
+        ...chatMessages,
       ],
     });
     const aiText = aiReply.choices[0]?.message?.content;
@@ -377,7 +387,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const otherUserId = match.user1Id === userId ? match.user2Id : match.user1Id;
     const otherUser = await storage.getUserById(otherUserId);
     if ((otherUser?.isSystemAccount || otherUser?.isAdmin) && !user?.isAdmin && !user?.isSystemAccount) {
-      generateSupportAiReply(match.id, otherUserId, text);
+      generateSupportAiReply(match.id, otherUserId);
     }
     res.json({ message: msg });
   });
