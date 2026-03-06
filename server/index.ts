@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import { ZodError } from "zod";
 
 process.on("uncaughtException", (err) => {
   console.error("[ERROR] uncaughtException:", err);
@@ -86,13 +87,19 @@ app.use((req, res, next) => {
   await seedDatabase();
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
+    if (res.headersSent) {
+      return next(err);
+    }
+
+    if (err instanceof ZodError) {
+      return res.status(400).json({ message: "Validation error", errors: err.errors });
+    }
+
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    console.error("Internal Server Error:", err);
-
-    if (res.headersSent) {
-      return next(err);
+    if (status >= 500) {
+      console.error("Internal Server Error:", err);
     }
 
     return res.status(status).json({ message });

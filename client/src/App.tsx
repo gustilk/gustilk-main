@@ -60,12 +60,18 @@ function AdminSpinner() {
 
 const PUBLIC_POLICY_ROUTES: Record<string, React.ComponentType> = {
   "/terms": TermsPage,
+  "/terms-of-service": TermsPage,
   "/refund": RefundPage,
+  "/refunds": RefundPage,
+  "/refund-policy": RefundPage,
   "/privacy": PrivacyPage,
+  "/privacy-policy": PrivacyPage,
   "/guidelines": GuidelinesPage,
+  "/community-guidelines": GuidelinesPage,
   "/cookie-policy": CookiePolicyPage,
   "/gdpr": GdprPage,
   "/safety-tips": SafetyTipsPage,
+  "/safety": SafetyTipsPage,
 };
 
 function useGustilkUser() {

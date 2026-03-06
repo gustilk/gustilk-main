@@ -1,0 +1,54 @@
+Please do a full code audit and cleanup of the Gustilk PWA. Here is exactly what I need:
+
+1. CODE AUDIT
+- Review all existing code for bugs, errors, and broken logic
+- Check all API calls and make sure they return correct responses
+- Verify all database queries are working correctly
+- Check authentication flow (login, signup, logout, session handling)
+- Make sure environment variables and API keys are properly configured
+
+2. ROUTES CHECK
+- Test every single route in the app and confirm it loads correctly
+- Fix any 404 or broken routes
+- Make sure protected routes redirect to login if user is not authenticated
+- Confirm all new legal pages are accessible:
+  /privacy-policy, /terms, /refunds, /guidelines, /cookie-policy, /gdpr, /safety-tips
+
+3. BUTTONS & UI CHECK
+- Click every button in the app and confirm it works as expected
+- Check all forms submit correctly and show proper success/error messages
+- Verify all navigation links go to the correct pages
+- Make sure back buttons and close buttons work everywhere
+- Check all modals and popups open and close correctly
+
+4. FEATURES CHECK
+- User registration and login
+- Profile creation and editing
+- Photo upload
+- Matching / swiping functionality
+- Chat / messaging
+- Gift sending (Lottie animations display correctly)
+- Notifications
+- Settings and preferences
+- Block and report user
+- Subscription / coin purchase flow (if implemented)
+
+5. CLEANUP
+- Remove all unused components, files, and folders
+- Remove all commented-out code that is no longer needed
+- Remove all console.log and debug statements
+- Remove unused npm packages from package.json
+- Remove duplicate code and consolidate where possible
+- Remove any hardcoded test data or placeholder content
+
+6. PERFORMANCE
+- Check for any slow loading pages or components
+- Make sure images and assets are optimized
+- Check for any memory leaks or unnecessary re-renders
+
+7. FINAL REPORT
+- Give me a summary of everything that was fixed
+- List anything that could not be fixed and needs further discussion
+- List any missing features that still need to be built
+
+Please go through each item carefully and do not skip anything.

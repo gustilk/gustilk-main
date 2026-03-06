@@ -797,46 +797,55 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.delete("/api/admin/users/:id", isAuthenticated, requireAdmin, async (req, res) => {
-    const targetId = req.params.id as string;
-    const adminId = (req.user as any)?.id ?? "";
+    try {
+      const targetId = req.params.id as string;
+      const adminId = getUserId(req);
 
-    const targetUser = await storage.getUser(targetId);
-    if (!targetUser) {
-      res.status(404).json({ error: "User not found" });
-      return;
-    }
+      const [targetUser, adminUser] = await Promise.all([
+        storage.getUser(targetId),
+        storage.getUser(adminId),
+      ]);
 
-    const wasPremium = !!targetUser.isPremium;
+      if (!targetUser) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
 
-    if (wasPremium) {
-      const adminUser = await storage.getUser(adminId);
+      const wasPremium = !!targetUser.isPremium;
+      const adminEmail = adminUser?.email ?? "";
+      const displayName = targetUser.fullName ?? targetUser.firstName ?? "Member";
+
+      if (wasPremium) {
+        await writeAuditLog(
+          adminId,
+          adminEmail,
+          "premium_cancelled_on_deletion",
+          "user",
+          targetId,
+          `Account deleted by admin. Premium subscription cancelled immediately. User: ${targetUser.email ?? targetUser.phone ?? targetId}. FLAG FOR REFUND REVIEW.`,
+        );
+        if (targetUser.email) {
+          sendAccountDeletedEmail(targetUser.email, displayName, true).catch(() => {});
+        }
+      } else if (targetUser.email) {
+        sendAccountDeletedEmail(targetUser.email, displayName, false).catch(() => {});
+      }
+
       await writeAuditLog(
         adminId,
-        adminUser?.email ?? "",
-        "premium_cancelled_on_deletion",
+        adminEmail,
+        "delete_user",
         "user",
         targetId,
-        `Account deleted by admin. Premium subscription cancelled immediately. User: ${targetUser.email ?? targetUser.phone ?? targetId}. FLAG FOR REFUND REVIEW.`,
+        `Deleted user: ${targetUser.email ?? targetUser.phone ?? targetId}${wasPremium ? " (had active premium)" : ""}`,
       );
+
+      await storage.deleteUser(targetId);
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("[admin] delete user error:", err);
+      res.status(500).json({ error: "Failed to delete user" });
     }
-
-    const displayName = targetUser.fullName ?? targetUser.firstName ?? "Member";
-    if (targetUser.email) {
-      sendAccountDeletedEmail(targetUser.email, displayName, wasPremium).catch(() => {});
-    }
-
-    const adminUser2 = await storage.getUser(adminId);
-    await writeAuditLog(
-      adminId,
-      adminUser2?.email ?? "",
-      "delete_user",
-      "user",
-      targetId,
-      `Deleted user: ${targetUser.email ?? targetUser.phone ?? targetId}${wasPremium ? " (had active premium)" : ""}`,
-    );
-
-    await storage.deleteUser(targetId);
-    res.json({ ok: true });
   });
 
   app.get("/api/admin/pending-photos", isAuthenticated, requireAdmin, async (_req, res) => {

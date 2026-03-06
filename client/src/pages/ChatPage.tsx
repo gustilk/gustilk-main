@@ -139,8 +139,9 @@ export default function ChatPage({ user, matchId }: Props) {
 
   const giftMutation = useMutation({
     mutationFn: async ({ giftType, message, animationStyle }: { giftType: string; message: string; animationStyle: string }) => {
+      if (!otherUser) throw new Error("Match not found");
       const res = await apiRequest("POST", "/api/gifts", {
-        recipientId: otherUser!.id,
+        recipientId: otherUser.id,
         matchId,
         giftType,
         message,

@@ -240,69 +240,74 @@ export function registerAdminRoutes(app: Express, isAuthenticated: any, requireA
 
   // ─── ANALYTICS ─────────────────────────────────────────────────────────────
   app.get("/api/admin/analytics", isAuthenticated, requireAdmin, async (_req, res) => {
-    const now = Date.now();
-    if (analyticsCache && now - analyticsCache.ts < ANALYTICS_TTL) {
-      return res.json(analyticsCache.data);
+    try {
+      const now = Date.now();
+      if (analyticsCache && now - analyticsCache.ts < ANALYTICS_TTL) {
+        return res.json(analyticsCache.data);
+      }
+
+      const [
+        [totalUsers], [premiumUsers], [verifiedUsers], [bannedUsers],
+        [maleUsers], [femaleUsers],
+        [sheikhUsers], [pirUsers], [muridUsers],
+        [todaySignups], [weekSignups], [monthSignups],
+        [totalMatches], [totalMessages], [totalEvents],
+        dailySignups,
+      ] = await Promise.all([
+        db.select({ n: count() }).from(users),
+        db.select({ n: count() }).from(users).where(sql`${users.isPremium} = true`),
+        db.select({ n: count() }).from(users).where(sql`${users.isVerified} = true`),
+        db.select({ n: count() }).from(users).where(sql`${users.verificationStatus} = 'banned'`),
+        db.select({ n: count() }).from(users).where(sql`${users.gender} = 'male'`),
+        db.select({ n: count() }).from(users).where(sql`${users.gender} = 'female'`),
+        db.select({ n: count() }).from(users).where(sql`${users.caste} = 'sheikh'`),
+        db.select({ n: count() }).from(users).where(sql`${users.caste} = 'pir'`),
+        db.select({ n: count() }).from(users).where(sql`${users.caste} = 'murid'`),
+        db.select({ n: count() }).from(users).where(sql`${users.createdAt} > now() - interval '1 day'`),
+        db.select({ n: count() }).from(users).where(sql`${users.createdAt} > now() - interval '7 days'`),
+        db.select({ n: count() }).from(users).where(sql`${users.createdAt} > now() - interval '30 days'`),
+        db.select({ n: count() }).from(matches),
+        db.select({ n: count() }).from(messages),
+        db.select({ n: count() }).from(events),
+        db.execute(sql`
+          SELECT DATE(created_at) as day, COUNT(*)::int as count
+          FROM users
+          WHERE created_at > now() - interval '30 days'
+          GROUP BY DATE(created_at)
+          ORDER BY day ASC
+        `),
+      ]);
+
+      const data = {
+        users: {
+          total: Number(totalUsers.n),
+          premium: Number(premiumUsers.n),
+          verified: Number(verifiedUsers.n),
+          banned: Number(bannedUsers.n),
+          male: Number(maleUsers.n),
+          female: Number(femaleUsers.n),
+          sheikh: Number(sheikhUsers.n),
+          pir: Number(pirUsers.n),
+          murid: Number(muridUsers.n),
+          todaySignups: Number(todaySignups.n),
+          weekSignups: Number(weekSignups.n),
+          monthSignups: Number(monthSignups.n),
+        },
+        engagement: {
+          totalMatches: Number(totalMatches.n),
+          totalMessages: Number(totalMessages.n),
+          totalEvents: Number(totalEvents.n),
+        },
+        dailySignups: ((dailySignups as any).rows ?? []).map((r: any) => ({ day: r.day, count: Number(r.count) })),
+        cachedAt: new Date().toISOString(),
+      };
+
+      analyticsCache = { data, ts: now };
+      res.json(data);
+    } catch (err) {
+      console.error("[admin] analytics error:", err);
+      res.status(500).json({ error: "Failed to load analytics" });
     }
-
-    const [
-      [totalUsers], [premiumUsers], [verifiedUsers], [bannedUsers],
-      [maleUsers], [femaleUsers],
-      [sheikhUsers], [pirUsers], [muridUsers],
-      [todaySignups], [weekSignups], [monthSignups],
-      [totalMatches], [totalMessages], [totalEvents],
-      dailySignups,
-    ] = await Promise.all([
-      db.select({ n: count() }).from(users),
-      db.select({ n: count() }).from(users).where(sql`${users.isPremium} = true`),
-      db.select({ n: count() }).from(users).where(sql`${users.isVerified} = true`),
-      db.select({ n: count() }).from(users).where(sql`${users.verificationStatus} = 'banned'`),
-      db.select({ n: count() }).from(users).where(sql`${users.gender} = 'male'`),
-      db.select({ n: count() }).from(users).where(sql`${users.gender} = 'female'`),
-      db.select({ n: count() }).from(users).where(sql`${users.caste} = 'sheikh'`),
-      db.select({ n: count() }).from(users).where(sql`${users.caste} = 'pir'`),
-      db.select({ n: count() }).from(users).where(sql`${users.caste} = 'murid'`),
-      db.select({ n: count() }).from(users).where(sql`${users.createdAt} > now() - interval '1 day'`),
-      db.select({ n: count() }).from(users).where(sql`${users.createdAt} > now() - interval '7 days'`),
-      db.select({ n: count() }).from(users).where(sql`${users.createdAt} > now() - interval '30 days'`),
-      db.select({ n: count() }).from(matches),
-      db.select({ n: count() }).from(messages),
-      db.select({ n: count() }).from(events),
-      db.execute(sql`
-        SELECT DATE(created_at) as day, COUNT(*)::int as count
-        FROM users
-        WHERE created_at > now() - interval '30 days'
-        GROUP BY DATE(created_at)
-        ORDER BY day ASC
-      `),
-    ]);
-
-    const data = {
-      users: {
-        total: Number(totalUsers.n),
-        premium: Number(premiumUsers.n),
-        verified: Number(verifiedUsers.n),
-        banned: Number(bannedUsers.n),
-        male: Number(maleUsers.n),
-        female: Number(femaleUsers.n),
-        sheikh: Number(sheikhUsers.n),
-        pir: Number(pirUsers.n),
-        murid: Number(muridUsers.n),
-        todaySignups: Number(todaySignups.n),
-        weekSignups: Number(weekSignups.n),
-        monthSignups: Number(monthSignups.n),
-      },
-      engagement: {
-        totalMatches: Number(totalMatches.n),
-        totalMessages: Number(totalMessages.n),
-        totalEvents: Number(totalEvents.n),
-      },
-      dailySignups: ((dailySignups as any).rows ?? []).map((r: any) => ({ day: r.day, count: Number(r.count) })),
-      cachedAt: new Date().toISOString(),
-    };
-
-    analyticsCache = { data, ts: now };
-    res.json(data);
   });
 
   // Force refresh analytics cache
