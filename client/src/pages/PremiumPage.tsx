@@ -153,7 +153,7 @@ export default function PremiumPage({ user }: Props) {
   return (
     <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
       <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
-        <button onClick={() => setLocation("/profile")} data-testid="button-back" className="text-cream/60">
+        <button onClick={() => window.history.back()} data-testid="button-back" className="text-cream/60">
           <ArrowLeft size={22} />
         </button>
         <div className="flex items-center gap-2.5 flex-1">
