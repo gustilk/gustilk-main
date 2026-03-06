@@ -52,6 +52,7 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
       toast({ title: "User deleted" });
       setPending(null);
     },
+    onError: (err: Error) => { toast({ title: "Delete failed", description: err.message, variant: "destructive" }); setPending(null); },
   });
 
   const handleSearch = (val: string) => {

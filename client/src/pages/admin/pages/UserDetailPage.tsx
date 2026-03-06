@@ -70,6 +70,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
   const deleteMutation = useMutation({
     mutationFn: async () => (await apiRequest("DELETE", `/api/admin/users/${userId}`)).json(),
     onSuccess: () => { toast({ title: "User deleted" }); setPending(null); setLocation("/admin/users"); },
+    onError: (err: Error) => { toast({ title: "Delete failed", description: err.message, variant: "destructive" }); setPending(null); },
   });
 
   if (isLoading) {
