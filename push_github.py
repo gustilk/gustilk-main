@@ -1,4 +1,4 @@
-import os, base64, json
+import os, base64, json, time
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 
@@ -23,9 +23,20 @@ def gh(method, path, body=None):
         print("Error:", e.status, e.read().decode())
         raise
 
+def gh_blob_with_retry(f, content, max_retries=5):
+    for attempt in range(max_retries):
+        try:
+            return gh("POST", f"/repos/{REPO}/git/blobs", {"content": content, "encoding": "base64"})
+        except HTTPError as e:
+            if e.status == 403 and attempt < max_retries - 1:
+                wait = 60 * (attempt + 1)
+                print(f"  ⏳ Rate limited on {f}, waiting {wait}s before retry {attempt+2}/{max_retries}...")
+                time.sleep(wait)
+            else:
+                raise
+
 WORKSPACE = "/home/runner/workspace"
 
-# Directories to scan recursively
 INCLUDE_DIRS = [
     "server",
     "shared",
@@ -34,7 +45,6 @@ INCLUDE_DIRS = [
     "client/public/lottie",
 ]
 
-# Root-level individual files that Railway needs
 ROOT_FILES = [
     "package.json",
     "package-lock.json",
@@ -48,10 +58,8 @@ ROOT_FILES = [
     "client/index.html",
 ]
 
-# Extensions to include when scanning directories
 INCLUDE_EXTS = {".ts", ".tsx", ".js", ".json", ".css", ".html", ".md"}
 
-# Paths to skip entirely
 SKIP_PREFIXES = [
     "node_modules",
     ".git",
@@ -75,14 +83,10 @@ def should_include(rel_path):
 
 def collect_files():
     files = set()
-
-    # Add explicit root-level files
     for f in ROOT_FILES:
         abs_path = os.path.join(WORKSPACE, f)
         if os.path.exists(abs_path):
             files.add(f)
-
-    # Walk include dirs
     for d in INCLUDE_DIRS:
         abs_dir = os.path.join(WORKSPACE, d)
         if not os.path.isdir(abs_dir):
@@ -94,7 +98,6 @@ def collect_files():
                 rel_path = os.path.relpath(abs_path, WORKSPACE)
                 if should_include(rel_path):
                     files.add(rel_path)
-
     return sorted(files)
 
 def read_b64(path):
@@ -106,37 +109,39 @@ ref = gh("GET", f"/repos/{REPO}/git/ref/heads/main")
 base_sha = ref["object"]["sha"]
 print(f"Base commit: {base_sha}")
 
-# Get base tree SHA
 commit = gh("GET", f"/repos/{REPO}/git/commits/{base_sha}")
 base_tree = commit["tree"]["sha"]
 
-# Collect all files
 all_files = collect_files()
 print(f"Staging {len(all_files)} files...")
 
-# Build tree entries
 tree_entries = []
+failed = []
 for f in all_files:
     if not os.path.exists(os.path.join(WORKSPACE, f)):
         continue
     try:
         content = read_b64(f)
-        blob = gh("POST", f"/repos/{REPO}/git/blobs", {"content": content, "encoding": "base64"})
+        blob = gh_blob_with_retry(f, content)
         tree_entries.append({"path": f, "mode": "100644", "type": "blob", "sha": blob["sha"]})
         print(f"  + {f}")
     except Exception as e:
         print(f"  ! Failed to stage {f}: {e}")
+        failed.append(f)
 
-# Create new tree
+if failed:
+    print(f"\n⚠️  {len(failed)} file(s) failed to stage: {failed}")
+    print("Commit will proceed without them — re-run the script to retry.\n")
+
 new_tree = gh("POST", f"/repos/{REPO}/git/trees", {"base_tree": base_tree, "tree": tree_entries})
 
-# Create commit
 new_commit = gh("POST", f"/repos/{REPO}/git/commits", {
-    "message": "Fix: include package.json, Dockerfile, config files, and Lottie assets in push",
+    "message": "chore: sync latest changes",
     "tree": new_tree["sha"],
     "parents": [base_sha],
 })
 
-# Update branch ref
 gh("PATCH", f"/repos/{REPO}/git/refs/heads/main", {"sha": new_commit["sha"]})
 print(f"\n✅ Pushed to gustilk/gustilk-main — commit {new_commit['sha'][:7]}")
+if failed:
+    print(f"⚠️  Missing files (run again to retry): {', '.join(failed)}")
