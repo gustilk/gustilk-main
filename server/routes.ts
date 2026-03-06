@@ -816,8 +816,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const adminId = getUserId(req);
 
       const [targetUser, adminUser] = await Promise.all([
-        storage.getUser(targetId),
-        storage.getUser(adminId),
+        storage.getUserById(targetId),
+        storage.getUserById(adminId),
       ]);
 
       if (!targetUser) {
