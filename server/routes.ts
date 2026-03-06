@@ -10,7 +10,7 @@ import { checkFacePresent } from "./moderation";
 import { db } from "./db";
 import { count, sql, eq, asc, desc, or, and, ilike } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
-import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail } from "./email";
+import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail } from "./email";
 import OpenAI from "openai";
 import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
 
@@ -388,6 +388,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const otherUser = await storage.getUserById(otherUserId);
     if ((otherUser?.isSystemAccount || otherUser?.isAdmin) && !user?.isAdmin && !user?.isSystemAccount) {
       generateSupportAiReply(match.id, otherUserId);
+      if (otherUser?.isSystemAccount) {
+        const displayName = user?.fullName ?? user?.firstName ?? user?.email ?? "A user";
+        sendSupportMessageAlertEmail(displayName, text, match.id).catch(() => {});
+      }
     }
     res.json({ message: msg });
   });
