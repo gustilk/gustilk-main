@@ -28,7 +28,7 @@ async function getOrCreateSupportAccount(): Promise<typeof users.$inferSelect> {
   const supportHash = await bcrypt.hash(SUPPORT_ACCOUNT_PASSWORD, 10);
   const [existing] = await db.select().from(users).where(eq(users.email, SUPPORT_ACCOUNT_EMAIL));
   if (existing) {
-    const [updated] = await db.update(users).set({ passwordHash: supportHash }).where(eq(users.email, SUPPORT_ACCOUNT_EMAIL)).returning();
+    const [updated] = await db.update(users).set({ passwordHash: supportHash, profileVisible: false, isSystemAccount: true }).where(eq(users.email, SUPPORT_ACCOUNT_EMAIL)).returning();
     return updated;
   }
   const id = randomUUID();
