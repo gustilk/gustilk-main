@@ -28,7 +28,7 @@ async function getOrCreateSupportAccount(): Promise<typeof users.$inferSelect> {
   const supportHash = await bcrypt.hash(SUPPORT_ACCOUNT_PASSWORD, 10);
   const [existing] = await db.select().from(users).where(eq(users.email, SUPPORT_ACCOUNT_EMAIL));
   if (existing) {
-    const [updated] = await db.update(users).set({ passwordHash: supportHash, profileVisible: false, isSystemAccount: true }).where(eq(users.email, SUPPORT_ACCOUNT_EMAIL)).returning();
+    const [updated] = await db.update(users).set({ passwordHash: supportHash, profileVisible: false, isSystemAccount: true, gender: null, caste: null }).where(eq(users.email, SUPPORT_ACCOUNT_EMAIL)).returning();
     return updated;
   }
   const id = randomUUID();
@@ -44,6 +44,8 @@ async function getOrCreateSupportAccount(): Promise<typeof users.$inferSelect> {
     isVerified: true,
     verificationStatus: "approved",
     profileVisible: false,
+    gender: null,
+    caste: null,
     mainPhotoUrl: "/gustilk-logo.svg",
     bio: "Official Gûstîlk Support Assistant — here to help you 24/7.",
   } as any).returning();
