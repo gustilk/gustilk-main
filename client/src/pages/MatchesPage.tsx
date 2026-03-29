@@ -35,7 +35,7 @@ export default function MatchesPage({ user }: Props) {
   return (
     <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
       <div className="pt-12 pb-2 px-5 flex items-center gap-2.5">
-        <img src="/gustilk-logo.png?v=3" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
+        <img src="/gustilk-logo.png?v=4" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
         <h1 className="font-serif text-2xl text-gold">{t("matches.title")}</h1>
       </div>
 
@@ -163,7 +163,7 @@ function SupportChatCard({ match, onClick }: { match: MatchWithUser | undefined;
       <div className="relative flex-shrink-0">
         <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden"
           style={{ background: "linear-gradient(135deg, #1a0a2e, #2d0f4a)", border: "2px solid rgba(201,168,76,0.4)" }}>
-          <img src="/gustilk-logo.png?v=3" alt="Gûstîlk Support" className="w-8 h-8 object-contain" />
+          <img src="/gustilk-logo.png?v=4" alt="Gûstîlk Support" className="w-8 h-8 object-contain" />
         </div>
         <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
           style={{ background: "#10b981", border: "1.5px solid #0d0618" }}>
