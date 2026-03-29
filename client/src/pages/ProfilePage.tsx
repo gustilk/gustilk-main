@@ -391,6 +391,25 @@ export default function ProfilePage({ user }: Props) {
         </div>
       </div>
 
+      {/* Rejection re-upload banner */}
+      {me.verificationStatus === "rejected" && (
+        <div className="flex items-start gap-3 px-4 py-3 mx-5 mt-3 rounded-2xl"
+          style={{ background: "rgba(212,96,138,0.08)", border: "1px solid rgba(212,96,138,0.3)" }}>
+          <XCircle size={15} style={{ color: "#d4608a", flexShrink: 0, marginTop: 1 }} />
+          <div className="flex-1">
+            <p className="text-xs font-semibold mb-0.5" style={{ color: "#d4608a" }}>Profile not approved</p>
+            <p className="text-xs leading-relaxed" style={{ color: "rgba(253,248,240,0.55)" }}>
+              Update your photos, then return to submit for re-review.
+            </p>
+          </div>
+          <button onClick={() => setLocation("/")} data-testid="button-back-to-review"
+            className="text-xs font-semibold px-2 py-1 rounded-lg flex-shrink-0"
+            style={{ background: "rgba(212,96,138,0.15)", color: "#d4608a" }}>
+            Re-apply →
+          </button>
+        </div>
+      )}
+
       <div className="px-5 pt-4">
         <div
           className="rounded-3xl overflow-hidden"

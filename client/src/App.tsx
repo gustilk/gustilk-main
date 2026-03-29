@@ -136,7 +136,10 @@ function AppShell({ user }: { user: User }) {
 
   // Rejected and banned users are fully blocked — they see the PendingApprovalPage
   // which handles re-application (rejected) or a permanent ban screen (banned).
-  if (isRegularUser && (vs === "rejected" || vs === "banned")) {
+  // Exception: rejected users may navigate to /profile/edit to replace their photos
+  // before re-submitting, and to /profile to view their current photo slots.
+  const allowedForRejected = vs === "rejected" && (location === "/profile/edit" || location === "/profile");
+  if (isRegularUser && (vs === "rejected" || vs === "banned") && !allowedForRejected) {
     return <PendingApprovalPage user={user} />;
   }
 
