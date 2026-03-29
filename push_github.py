@@ -56,9 +56,23 @@ ROOT_FILES = [
     "components.json",
     "nixpacks.toml",
     "client/index.html",
+    "client/public/gustilk-logo.png",
+    "client/public/favicon.png",
+    "client/public/logo-192.png",
+    "client/public/manifest.json",
 ]
 
-INCLUDE_EXTS = {".ts", ".tsx", ".js", ".json", ".css", ".html", ".md"}
+DELETED_FILES = [
+    "client/public/gustilk-logo.svg",
+    "client/public/logo-fixed.png",
+    "client/public/logo-fixed2.png",
+    "client/public/logo-transparent.png",
+    "client/public/logo.jpeg",
+    "client/public/logo.jpg",
+    "client/public/logo.png",
+]
+
+INCLUDE_EXTS = {".ts", ".tsx", ".js", ".json", ".css", ".html", ".md", ".png", ".jpg", ".jpeg", ".svg"}
 
 SKIP_PREFIXES = [
     "node_modules",
@@ -132,6 +146,10 @@ for f in all_files:
 if failed:
     print(f"\n⚠️  {len(failed)} file(s) failed to stage: {failed}")
     print("Commit will proceed without them — re-run the script to retry.\n")
+
+for f in DELETED_FILES:
+    tree_entries.append({"path": f, "mode": "100644", "type": "blob", "sha": None})
+    print(f"  - {f} (deleted)")
 
 new_tree = gh("POST", f"/repos/{REPO}/git/trees", {"base_tree": base_tree, "tree": tree_entries})
 
