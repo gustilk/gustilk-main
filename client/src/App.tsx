@@ -32,8 +32,27 @@ import CookiePolicyPage from "@/pages/CookiePolicyPage";
 import GdprPage from "@/pages/GdprPage";
 import SafetyTipsPage from "@/pages/SafetyTipsPage";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
+import { Clock, X } from "lucide-react";
 import type { User } from "@shared/schema";
 import type { PhotoSlot } from "@shared/schema";
+
+function PendingReviewBanner() {
+  const [dismissed, setDismissed] = useState(false);
+  if (dismissed) return null;
+  return (
+    <div className="flex items-center gap-3 px-4 py-2.5"
+      style={{ background: "linear-gradient(90deg, rgba(201,168,76,0.13) 0%, rgba(123,63,160,0.1) 100%)", borderBottom: "1px solid rgba(201,168,76,0.2)" }}>
+      <Clock size={14} style={{ color: "#c9a84c", flexShrink: 0 }} />
+      <p className="text-xs flex-1 leading-snug" style={{ color: "rgba(253,248,240,0.7)" }}>
+        Your profile is <span style={{ color: "#c9a84c", fontWeight: 600 }}>under review</span> — you can browse freely while we check your account. You'll be notified once approved.
+      </p>
+      <button onClick={() => setDismissed(true)} data-testid="button-dismiss-review-banner"
+        className="flex-shrink-0 p-0.5 rounded" style={{ color: "rgba(253,248,240,0.3)" }}>
+        <X size={13} />
+      </button>
+    </div>
+  );
+}
 
 // Lazy-load admin panel so regular users never download admin code
 const AdminLayout = lazy(() => import("@/pages/admin/AdminLayout"));
@@ -112,13 +131,21 @@ function AppShell({ user }: { user: User }) {
     return <SocialSetupPage user={user} />;
   }
 
-  if (profileIsComplete(user) && !user.isAdmin && !(user as any).isSystemAccount && !user.profileVisible) {
+  const vs = user.verificationStatus;
+  const isRegularUser = !user.isAdmin && !(user as any).isSystemAccount;
+
+  // Rejected and banned users are fully blocked — they see the PendingApprovalPage
+  // which handles re-application (rejected) or a permanent ban screen (banned).
+  if (isRegularUser && (vs === "rejected" || vs === "banned")) {
     return <PendingApprovalPage user={user} />;
   }
+
+  const isPending = isRegularUser && vs === "pending";
 
   return (
     <VideoCallContext.Provider value={callCtx}>
       <div className="flex flex-col min-h-screen" style={{ background: "#0d0618", fontFamily: "'Open Sans', sans-serif" }}>
+        {isPending && !isAdminRoute && !isInCall && <PendingReviewBanner />}
         {callCtx.incomingCall && !isInCall && <IncomingCallBanner />}
         {isInCall && <VideoCallPage />}
 
