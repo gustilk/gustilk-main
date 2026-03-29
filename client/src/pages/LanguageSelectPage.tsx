@@ -29,7 +29,7 @@ export default function LanguageSelectPage({ onSelect }: Props) {
             transform: "scale(1.3)",
           }} />
           <img
-            src="/gustilk-logo.svg"
+            src="/gustilk-logo.png"
             alt="Gûstîlk"
             className="relative"
             style={{

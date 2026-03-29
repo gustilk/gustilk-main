@@ -72,7 +72,7 @@ function Logo() {
     <div className="text-center mb-5">
       <div className="inline-flex items-center justify-center mb-1">
         <img
-          src="/gustilk-logo.svg"
+          src="/gustilk-logo.png"
           alt="Gûstîlk"
           style={{
             width: "min(80px, 26vw)",
