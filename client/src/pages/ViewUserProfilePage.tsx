@@ -81,6 +81,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
   const photos = profile.photos ?? [];
   const mainPhoto = profile.mainPhotoUrl ?? photos[0] ?? null;
   const allPhotos = mainPhoto ? [mainPhoto, ...photos.filter(p => p !== mainPhoto)] : photos;
+  const shouldBlurPhotos = profile.gender === "female" && !!profile.photosBlurred && !isMatchedWithViewer;
   const displayName = profile.firstName ?? profile.fullName?.split(" ")[0] ?? "Member";
   const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[c] ?? c);
   const location = [profile.city, profile.state, profile.country].filter(Boolean).join(", ");
@@ -115,7 +116,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
                 src={allPhotos[photoIdx] ?? allPhotos[0]}
                 alt={displayName}
                 className="w-full h-full object-cover"
-                blurred={profile.gender === "female" && !!profile.photosBlurred && !isMatchedWithViewer}
+                blurred={shouldBlurPhotos}
               />
             ) : (
               <img
@@ -299,7 +300,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
                 <button key={i} onClick={() => setPhotoIdx(i)} data-testid={`thumb-photo-${i}`}
                   className="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden transition-all"
                   style={{ border: i === photoIdx ? "2px solid #c9a84c" : "2px solid transparent", opacity: i === photoIdx ? 1 : 0.65 }}>
-                  <ProtectedPhoto src={p} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                  <ProtectedPhoto src={p} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" blurred={shouldBlurPhotos} />
                 </button>
               ))}
             </div>
