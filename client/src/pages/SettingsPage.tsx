@@ -9,7 +9,7 @@ import {
   ChevronLeft, ChevronRight, Globe, Bell, FileText, Shield,
   LogOut, Trash2, AlertTriangle, Lock, Heart, MessageCircle,
   Star, CalendarDays, Smartphone, Mail, KeyRound, Phone, Eye, EyeOff, CheckCircle2, ShieldX, UserX,
-  Cookie, ShieldCheck, ShieldAlert,
+  Cookie, ShieldCheck, ShieldAlert, ImageOff,
 } from "lucide-react";
 import type { SafeUser } from "@shared/schema";
 
@@ -53,6 +53,21 @@ export default function SettingsPage({ user }: Props) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>(loadNotifPrefs);
   const [pushPermission, setPushPermission] = useState<NotificationPermission>("default");
+
+  const [profileVisible, setProfileVisible] = useState<boolean>(user.profileVisible ?? true);
+  const [photosBlurred, setPhotosBlurred] = useState<boolean>(user.photosBlurred ?? false);
+
+  const privacyMutation = useMutation({
+    mutationFn: (data: { profileVisible?: boolean; photosBlurred?: boolean }) =>
+      apiRequest("PATCH", "/api/me", data).then(r => r.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      toast({ title: "Privacy settings saved", description: "Your changes have been applied." });
+    },
+    onError: () => {
+      toast({ title: "Could not save", description: "Please try again.", variant: "destructive" });
+    },
+  });
 
   const currentLang = LANGUAGE_LIST.find(l => l.code === i18n.language) ?? LANGUAGE_LIST[0];
 
@@ -159,6 +174,20 @@ export default function SettingsPage({ user }: Props) {
   }
 
   if (subScreen === "privacy") {
+    const isFemale = user.gender === "female";
+
+    const handleProfileVisibleToggle = (val: boolean) => {
+      const prev = profileVisible;
+      setProfileVisible(val);
+      privacyMutation.mutate({ profileVisible: val }, { onError: () => setProfileVisible(prev) });
+    };
+
+    const handlePhotosBlurredToggle = (val: boolean) => {
+      const prev = photosBlurred;
+      setPhotosBlurred(val);
+      privacyMutation.mutate({ photosBlurred: val }, { onError: () => setPhotosBlurred(prev) });
+    };
+
     return (
       <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
         <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
@@ -173,6 +202,70 @@ export default function SettingsPage({ user }: Props) {
           <h1 className="font-serif text-xl text-gold">{t("settings.privacyPageTitle")}</h1>
         </div>
         <div className="flex-1 overflow-y-auto px-5 py-5 pb-16 space-y-5">
+
+          {/* Female-only privacy controls */}
+          {isFemale && (
+            <div>
+              <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Profile Controls</p>
+              <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.15)", background: "rgba(255,255,255,0.03)" }}>
+                {/* Profile Visibility */}
+                <div className="flex items-center gap-4 px-4 py-3.5">
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,168,76,0.1)" }}>
+                    <Eye size={16} color="#c9a84c" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium" style={{ color: "rgba(253,248,240,0.85)" }}>Profile visible to others</p>
+                    <p className="text-xs mt-0.5" style={{ color: "rgba(253,248,240,0.35)" }}>
+                      {profileVisible ? "Your profile appears in the discover feed" : "Your profile is hidden from discover"}
+                    </p>
+                  </div>
+                  <button
+                    data-testid="toggle-settings-profile-visible"
+                    onClick={() => handleProfileVisibleToggle(!profileVisible)}
+                    disabled={privacyMutation.isPending}
+                    className="relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none disabled:opacity-50"
+                    style={{ background: profileVisible ? "#c9a84c" : "rgba(255,255,255,0.12)" }}
+                    aria-checked={profileVisible}
+                    role="switch"
+                  >
+                    <span className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-200"
+                      style={{ background: "white", transform: profileVisible ? "translateX(20px)" : "translateX(0)", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }} />
+                  </button>
+                </div>
+
+                <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }} />
+
+                {/* Photo blur toggle */}
+                <div className="flex items-center gap-4 px-4 py-3.5">
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,168,76,0.1)" }}>
+                    <ImageOff size={16} color="#c9a84c" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium" style={{ color: "rgba(253,248,240,0.85)" }}>Blur photos until matched</p>
+                    <p className="text-xs mt-0.5" style={{ color: "rgba(253,248,240,0.35)" }}>
+                      {photosBlurred ? "Photos are blurred until you both like each other" : "Photos are visible to all who view your profile"}
+                    </p>
+                  </div>
+                  <button
+                    data-testid="toggle-settings-photos-blurred"
+                    onClick={() => handlePhotosBlurredToggle(!photosBlurred)}
+                    disabled={privacyMutation.isPending}
+                    className="relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none disabled:opacity-50"
+                    style={{ background: photosBlurred ? "#c9a84c" : "rgba(255,255,255,0.12)" }}
+                    aria-checked={photosBlurred}
+                    role="switch"
+                  >
+                    <span className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-200"
+                      style={{ background: "white", transform: photosBlurred ? "translateX(20px)" : "translateX(0)", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }} />
+                  </button>
+                </div>
+              </div>
+              <p className="text-xs text-cream/30 px-1 mt-2 leading-relaxed">
+                These settings apply to your profile only and can be changed at any time.
+              </p>
+            </div>
+          )}
+
           <p className="text-cream/50 text-sm leading-relaxed">
             {t("settings.privacyIntro")}
           </p>

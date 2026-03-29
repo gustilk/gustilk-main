@@ -114,7 +114,7 @@ export default function DiscoverPage({ user }: Props) {
 
       <div className="flex items-center justify-between px-5 pt-12 pb-4">
         <div className="flex items-center gap-2.5">
-          <img src="/gustilk-logo.svg" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
+          <img src="/gustilk-logo.png" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
           <h1 className="font-serif text-2xl text-gold">Gûstîlk</h1>
         </div>
         <button
@@ -206,7 +206,12 @@ export default function DiscoverPage({ user }: Props) {
                 style={{ height: "min(420px, 52vh)", background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}
               >
                 {current.photos && current.photos.length > 0 ? (
-                  <ProtectedPhoto src={current.photos[0]} alt={current.fullName ?? ""} className="w-full h-full object-cover" />
+                  <ProtectedPhoto
+                    src={current.photos[0]}
+                    alt={current.fullName ?? ""}
+                    className="w-full h-full object-cover"
+                    blurred={current.gender === "female" && !!current.photosBlurred}
+                  />
                 ) : (
                   <div
                     className="w-28 h-28 rounded-full flex items-center justify-center text-5xl font-serif text-gold"

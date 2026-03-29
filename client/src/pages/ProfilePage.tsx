@@ -366,7 +366,7 @@ export default function ProfilePage({ user }: Props) {
     <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
       <div className="pt-12 pb-2 px-5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <img src="/gustilk-logo.svg" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
+          <img src="/gustilk-logo.png" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
           <h1 className="font-serif text-2xl text-gold">{t("profile.title")}</h1>
         </div>
         <div className="flex items-center gap-2">
@@ -390,6 +390,25 @@ export default function ProfilePage({ user }: Props) {
           </button>
         </div>
       </div>
+
+      {/* Rejection re-upload banner */}
+      {me.verificationStatus === "rejected" && (
+        <div className="flex items-start gap-3 px-4 py-3 mx-5 mt-3 rounded-2xl"
+          style={{ background: "rgba(212,96,138,0.08)", border: "1px solid rgba(212,96,138,0.3)" }}>
+          <XCircle size={15} style={{ color: "#d4608a", flexShrink: 0, marginTop: 1 }} />
+          <div className="flex-1">
+            <p className="text-xs font-semibold mb-0.5" style={{ color: "#d4608a" }}>Profile not approved</p>
+            <p className="text-xs leading-relaxed" style={{ color: "rgba(253,248,240,0.55)" }}>
+              Update your photos, then return to submit for re-review.
+            </p>
+          </div>
+          <button onClick={() => setLocation("/")} data-testid="button-back-to-review"
+            className="text-xs font-semibold px-2 py-1 rounded-lg flex-shrink-0"
+            style={{ background: "rgba(212,96,138,0.15)", color: "#d4608a" }}>
+            Re-apply →
+          </button>
+        </div>
+      )}
 
       <div className="px-5 pt-4">
         <div

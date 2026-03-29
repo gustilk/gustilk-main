@@ -236,7 +236,7 @@ export default function ChatPage({ user, matchId }: Props) {
             <div className="relative w-10 h-10 flex-shrink-0">
               <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center"
                 style={{ background: "linear-gradient(135deg, #1a0a2e, #2d0f4a)", border: "2px solid rgba(201,168,76,0.4)" }}>
-                <img src="/gustilk-logo.svg" alt="Support" className="w-7 h-7 object-contain" />
+                <img src="/gustilk-logo.png" alt="Support" className="w-7 h-7 object-contain" />
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
                 style={{ background: "#10b981", border: "1.5px solid #0d0618" }}>
@@ -317,7 +317,7 @@ export default function ChatPage({ user, matchId }: Props) {
               <>
                 <div className="w-16 h-16 rounded-full flex items-center justify-center"
                   style={{ background: "linear-gradient(135deg, #1a0a2e, #2d0f4a)", border: "2px solid rgba(201,168,76,0.4)" }}>
-                  <img src="/gustilk-logo.svg" alt="" className="w-10 h-10 object-contain" />
+                  <img src="/gustilk-logo.png" alt="" className="w-10 h-10 object-contain" />
                 </div>
                 <div>
                   <p className="text-cream/80 text-sm font-semibold mb-1">Hi! I'm your Gûstîlk Assistant</p>

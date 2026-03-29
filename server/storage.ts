@@ -95,6 +95,7 @@ const CARD_COLUMNS = {
   isSystemAccount: users.isSystemAccount,
   activitySeenAt: users.activitySeenAt,
   matchesSeenAt: users.matchesSeenAt,
+  photosBlurred: users.photosBlurred,
   createdAt: users.createdAt,
   updatedAt: users.updatedAt,
 } as const;
@@ -469,7 +470,14 @@ export class DatabaseStorage implements IStorage {
       updatedAt: new Date(),
       applicationHistory: [...history, { action: status, reason: reason ?? "", date: new Date().toISOString() }],
     };
-    if (status === "approved") { updates.profileVisible = true; updates.rejectionReason = ""; }
+    if (status === "approved") {
+      // Female users set their own profileVisible preference during registration — don't override it.
+      // Only set profileVisible=true automatically for male users (or users with no gender set).
+      if (user?.gender !== "female") {
+        updates.profileVisible = true;
+      }
+      updates.rejectionReason = "";
+    }
     if (status === "rejected") { updates.profileVisible = false; updates.rejectionReason = reason ?? ""; }
     if (status === "banned") { updates.profileVisible = false; updates.rejectionReason = reason ?? ""; }
     await db.update(users).set(updates as any).where(eq(users.id, userId));
@@ -541,10 +549,13 @@ export class DatabaseStorage implements IStorage {
       };
     }
 
+    // Female users manage their own profileVisible preference — don't override it on photo approval.
+    // For male users and accounts with no gender, set profileVisible=true when a photo is approved.
+    const setProfileVisible = user?.gender !== "female";
     const [updated] = await db.update(users).set({
       photoSlots: slots,
       mainPhotoUrl: mainPhotoUrl ?? null,
-      profileVisible: true,
+      ...(setProfileVisible ? { profileVisible: true } : {}),
       photos: approvedSlots.map(s => s.url),
       updatedAt: new Date(),
     }).where(eq(users.id, userId)).returning();

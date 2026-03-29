@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, XCircle } from "lucide-react";
 import type { User } from "@shared/schema";
 import { COUNTRY_STATES } from "@/lib/countryStates";
 
@@ -77,6 +77,25 @@ export default function EditProfilePage({ user }: Props) {
           {saveMutation.isPending ? "Saving…" : "Save"}
         </button>
       </div>
+
+      {/* Rejection notice — photo re-upload mode */}
+      {user.verificationStatus === "rejected" && (
+        <div className="flex items-start gap-3 px-4 py-3 mx-4 mt-4 rounded-2xl"
+          style={{ background: "rgba(212,96,138,0.08)", border: "1px solid rgba(212,96,138,0.3)" }}>
+          <XCircle size={16} style={{ color: "#d4608a", flexShrink: 0, marginTop: 1 }} />
+          <div className="flex-1">
+            <p className="text-xs font-semibold mb-0.5" style={{ color: "#d4608a" }}>Re-upload mode</p>
+            <p className="text-xs leading-relaxed" style={{ color: "rgba(253,248,240,0.55)" }}>
+              Update your photos here, then return to submit your profile for re-review.
+            </p>
+          </div>
+          <button onClick={() => setLocation("/")} data-testid="button-back-to-review"
+            className="text-xs font-semibold px-2 py-1 rounded-lg flex-shrink-0"
+            style={{ background: "rgba(212,96,138,0.15)", color: "#d4608a" }}>
+            ← Back
+          </button>
+        </div>
+      )}
 
       {/* Profile Completeness Bar */}
       {(() => {

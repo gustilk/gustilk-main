@@ -281,7 +281,7 @@ export default function MatchModal({ matchedUser, currentUser, matchId, onClose 
             style={{ animation: "logo-bounce 2s ease-in-out infinite" }}
           >
             <img
-              src="/gustilk-logo.svg"
+              src="/gustilk-logo.png"
               alt="Gûstîlk"
               style={{
                 width: 48,

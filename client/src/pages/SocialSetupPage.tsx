@@ -36,7 +36,7 @@ export default function SocialSetupPage({ user }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { t } = useTranslation();
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
 
   const CASTES = [
     { value: "sheikh", label: t("setup.sheikh") },
@@ -61,6 +61,9 @@ export default function SocialSetupPage({ user }: Props) {
   const [agreedTruthful, setAgreedTruthful] = useState(false);
   const [geoState, setGeoState] = useState<GeoState>("loading");
   const [detectedCountryName, setDetectedCountryName] = useState("");
+
+  // Step 2.5 / Step 3 privacy state (for female users only)
+  const [privacyData, setPrivacyData] = useState({ profileVisible: true, photosBlurred: false });
 
   // Step 2 state
   const [photos, setPhotos] = useState<(string | null)[]>([null, null, null]);
@@ -105,12 +108,20 @@ export default function SocialSetupPage({ user }: Props) {
       let calculatedAge = today.getFullYear() - dob.getFullYear();
       const m = today.getMonth() - dob.getMonth();
       if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) calculatedAge--;
+      const isFemale = data.gender === "female";
       const payload = {
         ...data,
         age: calculatedAge,
         photos: photos.filter(Boolean) as string[],
         verificationSelfie: selfie!,
         verificationStatus: "pending" as const,
+        ...(isFemale ? {
+          profileVisible: privacyData.profileVisible,
+          photosBlurred: privacyData.photosBlurred,
+        } : {
+          profileVisible: true,
+          photosBlurred: false,
+        }),
       };
       const res = await apiRequest("PUT", "/api/profile", payload);
       return res.json();
@@ -196,6 +207,8 @@ export default function SocialSetupPage({ user }: Props) {
   };
   const maxDobDate = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().split("T")[0]; })();
   const countryHasStates = !!COUNTRY_STATES[data.country];
+  const isFemale = data.gender === "female";
+  const totalSteps = isFemale ? 3 : 2;
   const step1Valid = data.country && (!countryHasStates || data.state) && data.city.trim() && agreedGuidelines && agreedTruthful && isAtLeast18(data.dateOfBirth);
   const step2Valid = photos.filter(Boolean).length >= 1 && selfie;
   const canSubmit = step2Valid && !cropTarget && !selfieChecking;
@@ -243,7 +256,7 @@ export default function SocialSetupPage({ user }: Props) {
 
           {/* Step indicator */}
           <div className="flex items-center gap-2">
-            {[1, 2].map(s => (
+            {Array.from({ length: totalSteps }, (_, i) => i + 1).map(s => (
               <div key={s} className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
                   style={step === s
@@ -254,7 +267,7 @@ export default function SocialSetupPage({ user }: Props) {
                   }>
                   {step > s ? "✓" : s}
                 </div>
-                {s < 2 && <div className="w-8 h-px" style={{ background: step > s ? "rgba(201,168,76,0.5)" : "rgba(255,255,255,0.1)" }} />}
+                {s < totalSteps && <div className="w-8 h-px" style={{ background: step > s ? "rgba(201,168,76,0.5)" : "rgba(255,255,255,0.1)" }} />}
               </div>
             ))}
           </div>
@@ -264,7 +277,7 @@ export default function SocialSetupPage({ user }: Props) {
         {step === 1 && (
           <>
             <div className="text-center mb-7">
-              <img src="/gustilk-logo.svg" alt="Gûstîlk" className="mx-auto mb-4" style={{ width: "140px", height: "140px", objectFit: "contain", filter: "none" }} />
+              <img src="/gustilk-logo.png" alt="Gûstîlk" className="mx-auto mb-4" style={{ width: "140px", height: "140px", objectFit: "contain", filter: "none" }} />
               <h1 className="font-serif text-3xl text-gold mb-1">
                 {(() => {
                   const name = (user.fullName ?? user.firstName ?? "").split(" ")[0];
@@ -420,8 +433,125 @@ export default function SocialSetupPage({ user }: Props) {
           </>
         )}
 
-        {/* ── STEP 2: Photos + Selfie ── */}
-        {step === 2 && (
+        {/* ── STEP 2 (Female only): Privacy settings ── */}
+        {step === 2 && isFemale && (
+          <>
+            <div className="text-center mb-7">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.3)" }}>
+                <Shield size={28} color="#c9a84c" />
+              </div>
+              <h1 className="font-serif text-2xl text-gold mb-1">Your Privacy</h1>
+              <p className="text-cream/50 text-sm">Choose how your profile appears to others. You can change these anytime in Settings.</p>
+            </div>
+
+            <div className="space-y-4">
+              {/* Profile visibility */}
+              <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1.5px solid rgba(201,168,76,0.2)" }}>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold" style={{ color: "rgba(253,248,240,0.9)" }}>Profile Visibility</p>
+                    <p className="text-xs mt-1 leading-relaxed" style={{ color: "rgba(253,248,240,0.45)" }}>
+                      {privacyData.profileVisible
+                        ? "Public — anyone matching your caste can see your profile in the discover feed."
+                        : "Private — your profile is hidden from the discover feed. Only people you connect with directly can see you."}
+                    </p>
+                  </div>
+                  <button
+                    data-testid="toggle-setup-profile-visible"
+                    onClick={() => setPrivacyData(d => ({ ...d, profileVisible: !d.profileVisible }))}
+                    className="relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none mt-0.5"
+                    style={{ background: privacyData.profileVisible ? "#c9a84c" : "rgba(255,255,255,0.12)" }}
+                    aria-checked={privacyData.profileVisible}
+                    role="switch"
+                  >
+                    <span className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-200"
+                      style={{ background: "white", transform: privacyData.profileVisible ? "translateX(20px)" : "translateX(0)", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }} />
+                  </button>
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <button
+                    onClick={() => setPrivacyData(d => ({ ...d, profileVisible: true }))}
+                    data-testid="button-setup-public"
+                    className="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all"
+                    style={privacyData.profileVisible
+                      ? { background: "rgba(201,168,76,0.2)", color: "#c9a84c", border: "1.5px solid rgba(201,168,76,0.5)" }
+                      : { background: "rgba(255,255,255,0.04)", color: "rgba(253,248,240,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
+                  >
+                    Public
+                  </button>
+                  <button
+                    onClick={() => setPrivacyData(d => ({ ...d, profileVisible: false }))}
+                    data-testid="button-setup-private"
+                    className="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all"
+                    style={!privacyData.profileVisible
+                      ? { background: "rgba(201,168,76,0.2)", color: "#c9a84c", border: "1.5px solid rgba(201,168,76,0.5)" }
+                      : { background: "rgba(255,255,255,0.04)", color: "rgba(253,248,240,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
+                  >
+                    Private
+                  </button>
+                </div>
+              </div>
+
+              {/* Photo blur */}
+              <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1.5px solid rgba(201,168,76,0.2)" }}>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold" style={{ color: "rgba(253,248,240,0.9)" }}>Blur Photos Until Matched</p>
+                    <p className="text-xs mt-1 leading-relaxed" style={{ color: "rgba(253,248,240,0.45)" }}>
+                      {privacyData.photosBlurred
+                        ? "On — your photos appear blurred to others until you both like each other (match). Matched users always see your photos clearly."
+                        : "Off — your photos are visible to everyone who views your profile."}
+                    </p>
+                  </div>
+                  <button
+                    data-testid="toggle-setup-photos-blurred"
+                    onClick={() => setPrivacyData(d => ({ ...d, photosBlurred: !d.photosBlurred }))}
+                    className="relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none mt-0.5"
+                    style={{ background: privacyData.photosBlurred ? "#c9a84c" : "rgba(255,255,255,0.12)" }}
+                    aria-checked={privacyData.photosBlurred}
+                    role="switch"
+                  >
+                    <span className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-200"
+                      style={{ background: "white", transform: privacyData.photosBlurred ? "translateX(20px)" : "translateX(0)", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="rounded-xl px-4 py-3 flex items-start gap-3"
+                style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.15)" }}>
+                <Shield size={14} color="#c9a84c" className="flex-shrink-0 mt-0.5" />
+                <p className="text-xs leading-relaxed" style={{ color: "rgba(253,248,240,0.5)" }}>
+                  These settings can be changed anytime from your Privacy Settings in the app.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  data-testid="button-back-privacy-setup"
+                  className="px-5 py-4 rounded-xl text-sm font-semibold"
+                  style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
+                >
+                  Back
+                </button>
+                <button
+                  onClick={() => setStep(3)}
+                  data-testid="button-next-privacy"
+                  className="flex-1 py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
+                  style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 6px 20px rgba(201,168,76,0.3)" }}
+                >
+                  {t("setup.continueToPhotos")}
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ── STEP 2 (Male) / STEP 3 (Female): Photos + Selfie ── */}
+        {((step === 2 && !isFemale) || (step === 3 && isFemale)) && (
           <>
             <div className="text-center mb-7">
               <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
@@ -562,7 +692,7 @@ export default function SocialSetupPage({ user }: Props) {
               <div className="flex gap-3">
                 <button
                   type="button"
-                  onClick={() => setStep(1)}
+                  onClick={() => setStep(isFemale ? 2 : 1)}
                   data-testid="button-back-step"
                   className="px-5 py-4 rounded-xl text-sm font-semibold"
                   style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
