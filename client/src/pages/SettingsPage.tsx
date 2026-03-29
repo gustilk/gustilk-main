@@ -177,13 +177,15 @@ export default function SettingsPage({ user }: Props) {
     const isFemale = user.gender === "female";
 
     const handleProfileVisibleToggle = (val: boolean) => {
+      const prev = profileVisible;
       setProfileVisible(val);
-      privacyMutation.mutate({ profileVisible: val });
+      privacyMutation.mutate({ profileVisible: val }, { onError: () => setProfileVisible(prev) });
     };
 
     const handlePhotosBlurredToggle = (val: boolean) => {
+      const prev = photosBlurred;
       setPhotosBlurred(val);
-      privacyMutation.mutate({ photosBlurred: val });
+      privacyMutation.mutate({ photosBlurred: val }, { onError: () => setPhotosBlurred(prev) });
     };
 
     return (
