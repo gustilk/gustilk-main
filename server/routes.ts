@@ -338,7 +338,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     try {
       const userId = getUserId(req);
       const parsed = privacySettingsSchema.parse(req.body);
-      const updated = await storage.updateUser(userId, parsed);
+      const currentUser = await storage.getUserById(userId);
+      // photosBlurred is a female-only feature — strip it for non-female users
+      const safePayload = currentUser?.gender !== "female"
+        ? { profileVisible: parsed.profileVisible }
+        : parsed;
+      const updated = await storage.updateUser(userId, safePayload);
       res.json({ user: updated });
     } catch (err: any) {
       if (err?.name === "ZodError") return res.status(400).json({ error: err.errors[0].message });
