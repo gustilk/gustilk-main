@@ -473,7 +473,7 @@ export class DatabaseStorage implements IStorage {
     if (status === "approved") {
       // Female users set their own profileVisible preference during registration — don't override it.
       // Only set profileVisible=true automatically for male users (or users with no gender set).
-      if ((user as any)?.gender !== "female") {
+      if (user?.gender !== "female") {
         updates.profileVisible = true;
       }
       updates.rejectionReason = "";
@@ -551,7 +551,7 @@ export class DatabaseStorage implements IStorage {
 
     // Female users manage their own profileVisible preference — don't override it on photo approval.
     // For male users and accounts with no gender, set profileVisible=true when a photo is approved.
-    const setProfileVisible = (user as any)?.gender !== "female";
+    const setProfileVisible = user?.gender !== "female";
     const [updated] = await db.update(users).set({
       photoSlots: slots,
       mainPhotoUrl: mainPhotoUrl ?? null,
