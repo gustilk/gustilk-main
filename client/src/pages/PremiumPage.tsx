@@ -157,7 +157,7 @@ export default function PremiumPage({ user }: Props) {
           <ArrowLeft size={22} />
         </button>
         <div className="flex items-center gap-2.5 flex-1">
-          <img src="/gustilk-logo.png" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
+          <img src="/gustilk-logo.png?v=3" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
           <h1 className="font-serif text-2xl text-gold">Premium</h1>
         </div>
       </div>
