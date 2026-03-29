@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupSession, registerAuthRoutes, isAuthenticated } from "./auth";
-import { profileUpdateSchema, users, matches, messages, events, eventAttendees, magicLinkTokens } from "@shared/schema";
+import { profileUpdateSchema, privacySettingsSchema, users, matches, messages, events, eventAttendees, magicLinkTokens } from "@shared/schema";
 import { verifyCountryFromRequest, verifyIraqFromRequest, getClientIp, lookupIpCountry } from "./geo";
 import { setupWs } from "./ws";
 import { z } from "zod";
@@ -325,7 +325,25 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.get("/api/profile/:userId", isAuthenticated, async (req: any, res) => {
     const user = await storage.getUserById(req.params.userId as string);
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json({ user });
+    const viewerId = getUserId(req);
+    let isMatchedWithViewer = false;
+    if (viewerId && viewerId !== req.params.userId) {
+      const viewerMatches = await storage.getMatches(viewerId);
+      isMatchedWithViewer = viewerMatches.some(m => m.otherUser?.id === req.params.userId);
+    }
+    res.json({ user, isMatchedWithViewer });
+  });
+
+  app.patch("/api/me", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      const parsed = privacySettingsSchema.parse(req.body);
+      const updated = await storage.updateUser(userId, parsed);
+      res.json({ user: updated });
+    } catch (err: any) {
+      if (err?.name === "ZodError") return res.status(400).json({ error: err.errors[0].message });
+      res.status(500).json({ error: err.message });
+    }
   });
 
   // ─── DISCOVER ─────────────────────────────────────────────

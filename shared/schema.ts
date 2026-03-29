@@ -211,6 +211,13 @@ export const profileUpdateSchema = z.object({
   removedRejectedUrls: z.array(z.string()).optional(),
   verificationSelfie: z.string().optional(),
   verificationStatus: z.literal("pending").optional(),
+  profileVisible: z.boolean().optional(),
+  photosBlurred: z.boolean().optional(),
+});
+
+export const privacySettingsSchema = z.object({
+  profileVisible: z.boolean().optional(),
+  photosBlurred: z.boolean().optional(),
 });
 
 // ─── TYPES ─────────────────────────────────────────────────────────────────────

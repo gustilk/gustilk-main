@@ -47,7 +47,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
 
   const isPremium = !!viewer.isPremium;
 
-  const { data, isLoading } = useQuery<{ user: SafeUser }>({
+  const { data, isLoading } = useQuery<{ user: SafeUser; isMatchedWithViewer: boolean }>({
     queryKey: ["/api/profile", userId],
     queryFn: () => fetch(`/api/profile/${userId}`, { credentials: "include" }).then(r => r.json()),
   });
@@ -58,6 +58,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
   });
 
   const profile = data?.user;
+  const isMatchedWithViewer = data?.isMatchedWithViewer ?? false;
   const match = matchData?.matches?.find(m => m.otherUser?.id === userId);
 
   if (isLoading) {
@@ -114,6 +115,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
                 src={allPhotos[photoIdx] ?? allPhotos[0]}
                 alt={displayName}
                 className="w-full h-full object-cover"
+                blurred={profile.gender === "female" && !!profile.photosBlurred && !isMatchedWithViewer}
               />
             ) : (
               <img

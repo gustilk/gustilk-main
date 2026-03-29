@@ -95,6 +95,7 @@ const CARD_COLUMNS = {
   isSystemAccount: users.isSystemAccount,
   activitySeenAt: users.activitySeenAt,
   matchesSeenAt: users.matchesSeenAt,
+  photosBlurred: users.photosBlurred,
   createdAt: users.createdAt,
   updatedAt: users.updatedAt,
 } as const;
