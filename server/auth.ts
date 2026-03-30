@@ -2,6 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import bcrypt from "bcryptjs";
+import rateLimit from "express-rate-limit";
 import {
   generateRegistrationOptions,
   verifyRegistrationResponse,
@@ -74,6 +75,30 @@ function saveSession(req: Request): Promise<void> {
   );
 }
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { message: "Too many login attempts. Please try again in 15 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { message: "Too many registration attempts. Please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const passKeyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 15,
+  message: { message: "Too many passkey attempts. Please try again in 15 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 export function registerAuthRoutes(app: Express) {
   app.get("/api/auth/me", isAuthenticated, async (req, res) => {
     try {
@@ -86,7 +111,7 @@ export function registerAuthRoutes(app: Express) {
     }
   });
 
-  app.post("/api/auth/register", async (req, res) => {
+  app.post("/api/auth/register", registerLimiter, async (req, res) => {
     try {
       const { email, password, firstName, lastName } = req.body;
       if (!email || !password) return res.status(400).json({ message: "Email and password required" });
@@ -118,7 +143,7 @@ export function registerAuthRoutes(app: Express) {
     }
   });
 
-  app.post("/api/auth/login", async (req, res) => {
+  app.post("/api/auth/login", loginLimiter, async (req, res) => {
     try {
       const { email, password } = req.body;
       if (!email || !password) return res.status(400).json({ message: "Email and password required" });
@@ -142,7 +167,7 @@ export function registerAuthRoutes(app: Express) {
 
   // ── Passkey / Biometric auth ──────────────────────────────────────────────
 
-  app.post("/api/auth/passkey/options", async (req, res) => {
+  app.post("/api/auth/passkey/options", passKeyLimiter, async (req, res) => {
     try {
       const { phone } = req.body;
       if (!phone) return res.status(400).json({ message: "Phone required" });
@@ -207,7 +232,7 @@ export function registerAuthRoutes(app: Express) {
     }
   });
 
-  app.post("/api/auth/passkey/register-verify", async (req, res) => {
+  app.post("/api/auth/passkey/register-verify", passKeyLimiter, async (req, res) => {
     try {
       const challenge = req.session.webAuthnChallenge;
       const phone = req.session.webAuthnPhone;
