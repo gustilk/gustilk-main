@@ -21,11 +21,11 @@ const openai = new OpenAI({
 
 const SUPPORT_ACCOUNT_EMAIL = "support@gustilk.com";
 
-const SUPPORT_ACCOUNT_PASSWORD = "GodFirst@11";
-
 async function getOrCreateSupportAccount(): Promise<typeof users.$inferSelect> {
+  const secret = process.env.SUPPORT_ACCOUNT_SECRET;
+  if (!secret) throw new Error("SUPPORT_ACCOUNT_SECRET environment variable is not set");
   const bcrypt = await import("bcryptjs");
-  const supportHash = await bcrypt.hash(SUPPORT_ACCOUNT_PASSWORD, 10);
+  const supportHash = await bcrypt.hash(secret, 10);
   const [existing] = await db.select().from(users).where(eq(users.email, SUPPORT_ACCOUNT_EMAIL));
   if (existing) {
     const [updated] = await db.update(users).set({ passwordHash: supportHash, profileVisible: false, isSystemAccount: true, gender: null, caste: null }).where(eq(users.email, SUPPORT_ACCOUNT_EMAIL)).returning();
