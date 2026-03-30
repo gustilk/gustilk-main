@@ -63,13 +63,6 @@ ROOT_FILES = [
 ]
 
 DELETED_FILES = [
-    "client/public/gustilk-logo.svg",
-    "client/public/logo-fixed.png",
-    "client/public/logo-fixed2.png",
-    "client/public/logo-transparent.png",
-    "client/public/logo.jpeg",
-    "client/public/logo.jpg",
-    "client/public/logo.png",
 ]
 
 INCLUDE_EXTS = {".ts", ".tsx", ".js", ".json", ".css", ".html", ".md", ".png", ".jpg", ".jpeg", ".svg"}

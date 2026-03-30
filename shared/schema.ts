@@ -216,7 +216,6 @@ export const profileUpdateSchema = z.object({
 });
 
 export const privacySettingsSchema = z.object({
-  profileVisible: z.boolean().optional(),
   photosBlurred: z.boolean().optional(),
 });
 

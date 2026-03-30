@@ -54,11 +54,10 @@ export default function SettingsPage({ user }: Props) {
   const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>(loadNotifPrefs);
   const [pushPermission, setPushPermission] = useState<NotificationPermission>("default");
 
-  const [profileVisible, setProfileVisible] = useState<boolean>(user.profileVisible ?? true);
   const [photosBlurred, setPhotosBlurred] = useState<boolean>(user.photosBlurred ?? false);
 
   const privacyMutation = useMutation({
-    mutationFn: (data: { profileVisible?: boolean; photosBlurred?: boolean }) =>
+    mutationFn: (data: { photosBlurred?: boolean }) =>
       apiRequest("PATCH", "/api/me", data).then(r => r.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
@@ -176,12 +175,6 @@ export default function SettingsPage({ user }: Props) {
   if (subScreen === "privacy") {
     const isFemale = user.gender === "female";
 
-    const handleProfileVisibleToggle = (val: boolean) => {
-      const prev = profileVisible;
-      setProfileVisible(val);
-      privacyMutation.mutate({ profileVisible: val }, { onError: () => setProfileVisible(prev) });
-    };
-
     const handlePhotosBlurredToggle = (val: boolean) => {
       const prev = photosBlurred;
       setPhotosBlurred(val);
@@ -206,35 +199,8 @@ export default function SettingsPage({ user }: Props) {
           {/* Female-only privacy controls */}
           {isFemale && (
             <div>
-              <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Profile Controls</p>
+              <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Photo Privacy</p>
               <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.15)", background: "rgba(255,255,255,0.03)" }}>
-                {/* Profile Visibility */}
-                <div className="flex items-center gap-4 px-4 py-3.5">
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,168,76,0.1)" }}>
-                    <Eye size={16} color="#c9a84c" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium" style={{ color: "rgba(253,248,240,0.85)" }}>Profile visible to others</p>
-                    <p className="text-xs mt-0.5" style={{ color: "rgba(253,248,240,0.35)" }}>
-                      {profileVisible ? "Your profile appears in the discover feed" : "Your profile is hidden from discover"}
-                    </p>
-                  </div>
-                  <button
-                    data-testid="toggle-settings-profile-visible"
-                    onClick={() => handleProfileVisibleToggle(!profileVisible)}
-                    disabled={privacyMutation.isPending}
-                    className="relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none disabled:opacity-50"
-                    style={{ background: profileVisible ? "#c9a84c" : "rgba(255,255,255,0.12)" }}
-                    aria-checked={profileVisible}
-                    role="switch"
-                  >
-                    <span className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-200"
-                      style={{ background: "white", transform: profileVisible ? "translateX(20px)" : "translateX(0)", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }} />
-                  </button>
-                </div>
-
-                <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }} />
-
                 {/* Photo blur toggle */}
                 <div className="flex items-center gap-4 px-4 py-3.5">
                   <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,168,76,0.1)" }}>
