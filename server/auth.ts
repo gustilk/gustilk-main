@@ -152,10 +152,10 @@ export function registerAuthRoutes(app: Express) {
       if (!emailResult.success) return res.status(400).json({ message: emailResult.error.errors[0].message });
 
       const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase().trim()));
-      if (!user || !user.passwordHash) return res.status(401).json({ message: "Invalid email or password" });
+      if (!user || !user.passwordHash) return res.status(401).json({ message: "No account found with that email address." });
 
       const ok = await bcrypt.compare(password, user.passwordHash);
-      if (!ok) return res.status(401).json({ message: "Invalid email or password" });
+      if (!ok) return res.status(401).json({ message: "Incorrect password. Please try again." });
 
       req.session.userId = user.id;
       await saveSession(req);
