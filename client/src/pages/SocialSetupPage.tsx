@@ -63,7 +63,7 @@ export default function SocialSetupPage({ user }: Props) {
   const [detectedCountryName, setDetectedCountryName] = useState("");
 
   // Step 2.5 / Step 3 privacy state (for female users only)
-  const [privacyData, setPrivacyData] = useState({ profileVisible: true, photosBlurred: false });
+  const [privacyData, setPrivacyData] = useState({ photosBlurred: false });
 
   // Step 2 state
   const [photos, setPhotos] = useState<(string | null)[]>([null, null, null]);
@@ -115,11 +115,10 @@ export default function SocialSetupPage({ user }: Props) {
         photos: photos.filter(Boolean) as string[],
         verificationSelfie: selfie!,
         verificationStatus: "pending" as const,
+        profileVisible: true,
         ...(isFemale ? {
-          profileVisible: privacyData.profileVisible,
           photosBlurred: privacyData.photosBlurred,
         } : {
-          profileVisible: true,
           photosBlurred: false,
         }),
       };
@@ -446,53 +445,6 @@ export default function SocialSetupPage({ user }: Props) {
             </div>
 
             <div className="space-y-4">
-              {/* Profile visibility */}
-              <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1.5px solid rgba(201,168,76,0.2)" }}>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold" style={{ color: "rgba(253,248,240,0.9)" }}>Profile Visibility</p>
-                    <p className="text-xs mt-1 leading-relaxed" style={{ color: "rgba(253,248,240,0.45)" }}>
-                      {privacyData.profileVisible
-                        ? "Public — anyone matching your caste can see your profile in the discover feed."
-                        : "Private — your profile is hidden from the discover feed. Only people you connect with directly can see you."}
-                    </p>
-                  </div>
-                  <button
-                    data-testid="toggle-setup-profile-visible"
-                    onClick={() => setPrivacyData(d => ({ ...d, profileVisible: !d.profileVisible }))}
-                    className="relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none mt-0.5"
-                    style={{ background: privacyData.profileVisible ? "#c9a84c" : "rgba(255,255,255,0.12)" }}
-                    aria-checked={privacyData.profileVisible}
-                    role="switch"
-                  >
-                    <span className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full transition-transform duration-200"
-                      style={{ background: "white", transform: privacyData.profileVisible ? "translateX(20px)" : "translateX(0)", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }} />
-                  </button>
-                </div>
-                <div className="mt-3 flex gap-2">
-                  <button
-                    onClick={() => setPrivacyData(d => ({ ...d, profileVisible: true }))}
-                    data-testid="button-setup-public"
-                    className="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all"
-                    style={privacyData.profileVisible
-                      ? { background: "rgba(201,168,76,0.2)", color: "#c9a84c", border: "1.5px solid rgba(201,168,76,0.5)" }
-                      : { background: "rgba(255,255,255,0.04)", color: "rgba(253,248,240,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
-                  >
-                    Public
-                  </button>
-                  <button
-                    onClick={() => setPrivacyData(d => ({ ...d, profileVisible: false }))}
-                    data-testid="button-setup-private"
-                    className="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all"
-                    style={!privacyData.profileVisible
-                      ? { background: "rgba(201,168,76,0.2)", color: "#c9a84c", border: "1.5px solid rgba(201,168,76,0.5)" }
-                      : { background: "rgba(255,255,255,0.04)", color: "rgba(253,248,240,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
-                  >
-                    Private
-                  </button>
-                </div>
-              </div>
-
               {/* Photo blur */}
               <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1.5px solid rgba(201,168,76,0.2)" }}>
                 <div className="flex items-start justify-between gap-4">

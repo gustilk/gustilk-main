@@ -340,9 +340,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const parsed = privacySettingsSchema.parse(req.body);
       const currentUser = await storage.getUserById(userId);
       // photosBlurred is a female-only feature — strip it for non-female users
-      const safePayload = currentUser?.gender !== "female"
-        ? { profileVisible: parsed.profileVisible }
-        : parsed;
+      const safePayload = currentUser?.gender !== "female" ? {} : parsed;
       const updated = await storage.updateUser(userId, safePayload);
       res.json({ user: updated });
     } catch (err: any) {
