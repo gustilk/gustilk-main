@@ -239,9 +239,11 @@ export class DatabaseStorage implements IStorage {
         notInArray(users.id, dislikedIds),
         notInArray(users.id, blockedByMe),
         notInArray(users.id, blockedMe),
-        sql`${users.verificationStatus} != 'banned'`,
+        eq(users.verificationStatus, "approved"),
         eq(users.profileVisible, true),
         isNotNull(users.mainPhotoUrl),
+        ne(users.isSystemAccount, true),
+        ne(users.isAdmin, true),
       )
     ).limit(50);
 

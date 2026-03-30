@@ -46,7 +46,7 @@ export default function DiscoverPage({ user }: Props) {
     },
   });
 
-  const profiles = data?.profiles ?? [];
+  const profiles = (data?.profiles ?? []).filter(p => p.id !== user.id);
   const current = profiles[currentIndex];
 
   // Record a visit when a new profile is shown
