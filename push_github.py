@@ -1,4 +1,4 @@
-import os, base64, json, time
+import os, base64, json, time, hashlib
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 
@@ -23,14 +23,14 @@ def gh(method, path, body=None):
         print("Error:", e.status, e.read().decode())
         raise
 
-def gh_blob_with_retry(f, content, max_retries=5):
+def gh_with_retry(method, path, body=None, label="", max_retries=5):
     for attempt in range(max_retries):
         try:
-            return gh("POST", f"/repos/{REPO}/git/blobs", {"content": content, "encoding": "base64"})
+            return gh(method, path, body)
         except HTTPError as e:
             if e.status == 403 and attempt < max_retries - 1:
                 wait = 60 * (attempt + 1)
-                print(f"  ⏳ Rate limited on {f}, waiting {wait}s before retry {attempt+2}/{max_retries}...")
+                print(f"  ⏳ Rate limited on {label}, waiting {wait}s (retry {attempt+2}/{max_retries})...")
                 time.sleep(wait)
             else:
                 raise
@@ -107,44 +107,81 @@ def collect_files():
                     files.add(rel_path)
     return sorted(files)
 
+def git_blob_sha(path):
+    """Compute the Git blob SHA1 for a file (same as GitHub stores)."""
+    with open(os.path.join(WORKSPACE, path), "rb") as f:
+        data = f.read()
+    header = f"blob {len(data)}\0".encode()
+    return hashlib.sha1(header + data).hexdigest()
+
 def read_b64(path):
     with open(os.path.join(WORKSPACE, path), "rb") as f:
         return base64.b64encode(f.read()).decode()
 
-# Get current branch HEAD
+# ── Get current HEAD ──────────────────────────────────────────────────────────
 ref = gh("GET", f"/repos/{REPO}/git/ref/heads/main")
 base_sha = ref["object"]["sha"]
 print(f"Base commit: {base_sha}")
 
 commit = gh("GET", f"/repos/{REPO}/git/commits/{base_sha}")
-base_tree = commit["tree"]["sha"]
+base_tree_sha = commit["tree"]["sha"]
 
+# ── Fetch full tree from GitHub (to compare SHAs) ────────────────────────────
+print("Fetching current GitHub tree...")
+tree_resp = gh("GET", f"/repos/{REPO}/git/trees/{base_tree_sha}?recursive=1")
+github_shas = {item["path"]: item["sha"] for item in tree_resp.get("tree", []) if item["type"] == "blob"}
+
+# ── Collect local files and detect changes ───────────────────────────────────
 all_files = collect_files()
-print(f"Staging {len(all_files)} files...")
+changed = []
+unchanged = []
 
-tree_entries = []
-failed = []
 for f in all_files:
     if not os.path.exists(os.path.join(WORKSPACE, f)):
         continue
+    local_sha = git_blob_sha(f)
+    if github_shas.get(f) != local_sha:
+        changed.append(f)
+    else:
+        unchanged.append(f)
+
+print(f"\n{len(changed)} changed, {len(unchanged)} unchanged, {len(DELETED_FILES)} deleted")
+
+if not changed and not DELETED_FILES:
+    print("✅ Nothing to push — GitHub is already up to date.")
+    exit(0)
+
+print("\nChanged files:")
+for f in changed:
+    print(f"  + {f}")
+
+# ── Upload blobs only for changed files ──────────────────────────────────────
+tree_entries = []
+failed = []
+
+for f in changed:
     try:
         content = read_b64(f)
-        blob = gh_blob_with_retry(f, content)
+        blob = gh_with_retry("POST", f"/repos/{REPO}/git/blobs",
+                              {"content": content, "encoding": "base64"}, label=f)
         tree_entries.append({"path": f, "mode": "100644", "type": "blob", "sha": blob["sha"]})
-        print(f"  + {f}")
     except Exception as e:
         print(f"  ! Failed to stage {f}: {e}")
         failed.append(f)
-
-if failed:
-    print(f"\n⚠️  {len(failed)} file(s) failed to stage: {failed}")
-    print("Commit will proceed without them — re-run the script to retry.\n")
 
 for f in DELETED_FILES:
     tree_entries.append({"path": f, "mode": "100644", "type": "blob", "sha": None})
     print(f"  - {f} (deleted)")
 
-new_tree = gh("POST", f"/repos/{REPO}/git/trees", {"base_tree": base_tree, "tree": tree_entries})
+if failed:
+    print(f"\n⚠️  {len(failed)} file(s) failed to stage: {failed}")
+
+if not tree_entries:
+    print("Nothing staged — aborting.")
+    exit(1)
+
+# ── Create tree, commit, update ref ──────────────────────────────────────────
+new_tree = gh("POST", f"/repos/{REPO}/git/trees", {"base_tree": base_tree_sha, "tree": tree_entries})
 
 new_commit = gh("POST", f"/repos/{REPO}/git/commits", {
     "message": "chore: sync latest changes",
