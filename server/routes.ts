@@ -364,13 +364,16 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.post("/api/like/:targetId", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const targetId = req.params.targetId as string;
+    if (targetId === userId) return res.status(400).json({ error: "You cannot like yourself." });
     const result = await storage.likeUser(userId, targetId);
     res.json(result);
   });
 
   app.post("/api/dislike/:targetId", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
-    await storage.dislikeUser(userId, req.params.targetId as string);
+    const targetId = req.params.targetId as string;
+    if (targetId === userId) return res.status(400).json({ error: "You cannot dislike yourself." });
+    await storage.dislikeUser(userId, targetId);
     res.json({ ok: true });
   });
 
