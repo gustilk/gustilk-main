@@ -152,6 +152,41 @@ export async function sendSupportMessageAlertEmail(userDisplayName: string, mess
   }
 }
 
+export async function sendAdminApprovalNeededEmail(
+  adminEmail: string,
+  applicantName: string,
+  applicantEmail: string,
+  adminPanelUrl = "https://www.gustilk.com/admin"
+): Promise<void> {
+  if (!adminEmail) return;
+  try {
+    const resend = getResend();
+    await resend.emails.send({
+      from: "Gûstîlk <noreply@gustilk.com>",
+      to: adminEmail,
+      subject: `New profile pending approval — ${applicantName}`,
+      html: emailShell(`
+        <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">New Profile Awaiting Approval</h2>
+        <p style="margin:0 0 8px;font-size:13px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:1px;">Applicant</p>
+        <p style="margin:0 0 6px;font-size:16px;color:#c9a84c;font-weight:bold;">${applicantName}</p>
+        <p style="margin:0 0 24px;font-size:13px;color:rgba(253,248,240,0.5);">${applicantEmail}</p>
+        <p style="margin:0 0 20px;font-size:14px;color:rgba(253,248,240,0.6);line-height:1.7;">
+          A new member has submitted their profile and selfie for review.
+          Please visit the admin panel to approve or reject the application.
+        </p>
+        <table cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
+          <tr><td style="border-radius:12px;background:linear-gradient(135deg,#c9a84c,#e8c97a);">
+            <a href="${adminPanelUrl}" style="display:inline-block;padding:14px 36px;font-size:15px;font-weight:bold;color:#1a0a2e;text-decoration:none;border-radius:12px;font-family:sans-serif;">
+              Review in Admin Panel
+            </a>
+          </td></tr>
+        </table>
+      `),
+    });
+  } catch {
+  }
+}
+
 export async function sendPhotoRejectedEmail(to: string, name: string, reason: string): Promise<void> {
   try {
     const resend = getResend();

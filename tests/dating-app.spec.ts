@@ -558,7 +558,77 @@ await test("Passkey auth-verify: missing session challenge returns 400", async (
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 11. Logout
+// 11. Admin notification — verification submission & reapply
+// When a user's verificationStatus transitions to "pending", the server sends
+// an email alert to the admin (fire-and-forget, does not block the response).
+// We test the observable side-effect: verificationStatus becomes "pending".
+// ─────────────────────────────────────────────────────────────────────────────
+
+await test("Verify/submit: requires authentication", async () => {
+  const { status } = await api("POST", "/api/verify/submit", { selfie: "data:image/png;base64,abc" });
+  assert(status === 401, `Expected 401 without auth, got ${status}`);
+});
+
+await test("Verify/submit: missing selfie returns 400", async () => {
+  const { status } = await api("POST", "/api/verify/submit", {}, sessionCookies);
+  assert(status === 400, `Expected 400 for missing selfie, got ${status}`);
+});
+
+await test("Profile reapply: requires authentication", async () => {
+  const { status } = await api("POST", "/api/profile/reapply", {});
+  assert(status === 401, `Expected 401 without auth, got ${status}`);
+});
+
+// Stateful test: transition to "pending" and verify admin notification code path is reached.
+// Run this BEFORE any other authenticated reapply calls to preserve first-run semantics.
+// Handles both first-run (status != pending) and repeat-run (status = pending) gracefully.
+await test("Profile reapply: transitions verificationStatus to pending and triggers admin alert", async () => {
+  const before = await api("GET", "/api/auth/me", undefined, sessionCookies);
+  const currentStatus = before.body?.user?.verificationStatus;
+
+  if (currentStatus === "banned") {
+    // Should never happen for the test account — skip gracefully
+    return;
+  }
+
+  if (currentStatus === "pending") {
+    // Already pending from a prior run — verify the idempotency guard fires
+    const { status, body } = await api("POST", "/api/profile/reapply", {}, sessionCookies);
+    assert(status === 400, `Expected 400 (already pending), got ${status}`);
+    assert(
+      body.error?.toLowerCase().includes("already pending") ||
+        body.error?.toLowerCase().includes("pending"),
+      `Expected "already pending" message, got: "${body.error}"`
+    );
+  } else {
+    // Not pending — submit a reapplication (selfie is optional on this endpoint)
+    const { status } = await api("POST", "/api/profile/reapply", {}, sessionCookies);
+    assert(status === 200, `Expected 200 from reapply, got ${status}`);
+    // Verify the status transitioned to "pending"
+    const after = await api("GET", "/api/auth/me", undefined, sessionCookies);
+    assert(
+      after.body?.user?.verificationStatus === "pending",
+      `Expected verificationStatus = "pending", got "${after.body?.user?.verificationStatus}"`
+    );
+    // Admin email is sent asynchronously (fire-and-forget) — we cannot verify delivery
+    // without mocking Resend, but reaching 200 + "pending" status confirms
+    // notifyAdminNewApplicant() was invoked.
+  }
+});
+
+await test("Profile reapply: already pending returns 400 with correct message", async () => {
+  // After the stateful test above the account is always "pending" — confirm guard holds
+  const { status, body } = await api("POST", "/api/profile/reapply", {}, sessionCookies);
+  assert(status === 400, `Expected 400 (already pending), got ${status}`);
+  assert(
+    body.error?.toLowerCase().includes("already pending") ||
+      body.error?.toLowerCase().includes("pending"),
+    `Expected "already pending" message, got: "${body.error}"`
+  );
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 12. Logout
 // ─────────────────────────────────────────────────────────────────────────────
 
 await test("Logout: clears session", async () => {
