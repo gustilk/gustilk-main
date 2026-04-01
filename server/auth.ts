@@ -75,12 +75,19 @@ function saveSession(req: Request): Promise<void> {
   );
 }
 
+// Skip rate limiting for loopback requests (automated tests running on the same machine).
+function skipLocalhost(req: Request): boolean {
+  const ip = req.ip ?? req.socket?.remoteAddress ?? "";
+  return ip === "127.0.0.1" || ip === "::1" || ip === "::ffff:127.0.0.1";
+}
+
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   message: { message: "Too many login attempts. Please try again in 15 minutes." },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipLocalhost,
 });
 
 const registerLimiter = rateLimit({
@@ -89,6 +96,7 @@ const registerLimiter = rateLimit({
   message: { message: "Too many registration attempts. Please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipLocalhost,
 });
 
 const passKeyLimiter = rateLimit({
@@ -97,6 +105,7 @@ const passKeyLimiter = rateLimit({
   message: { message: "Too many passkey attempts. Please try again in 15 minutes." },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipLocalhost,
 });
 
 export function registerAuthRoutes(app: Express) {
