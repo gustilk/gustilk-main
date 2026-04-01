@@ -69,9 +69,14 @@ let sessionCookies: string[] = [];
     firstName: "ApiTest",
     lastName: "User",
   });
-  if (regRes.status === 200) {
-    // Newly registered — session cookies are in the register response
-    sessionCookies = extractCookies(regRes.headers);
+  if (regRes.status === 200 && regRes.body.pending) {
+    // Newly registered — server returns { pending: true }; need to activate via dev endpoint
+    const codeRes = await api("GET", `/api/auth/dev/activation-code?email=${encodeURIComponent(testEmail)}`);
+    const code = codeRes.body.code;
+    if (!code) throw new Error("Dev activation-code endpoint returned no code: " + JSON.stringify(codeRes.body));
+    const activateRes = await api("POST", "/api/auth/activate", { email: testEmail, code });
+    sessionCookies = extractCookies(activateRes.headers);
+    if (!sessionCookies.length) throw new Error("Activation did not return session cookies: " + JSON.stringify(activateRes.body));
   } else {
     // Account already exists (409) or registration rate-limited (429) — log in instead
     const loginRes = await api("POST", "/api/auth/login", {
@@ -149,9 +154,9 @@ await test("Register: duplicate email returns 409", async () => {
   }
 });
 
-await test("Register: new account succeeds and returns user (or rate-limited)", async () => {
-  // Test that a fresh email + valid payload returns 200 with user data.
-  // 429 is accepted because rate-limit is correct server behaviour and does not indicate a bug.
+await test("Register: new account returns pending=true and email (or rate-limited)", async () => {
+  // Since activation was added, successful registration returns { pending: true, email }
+  // rather than a session. 429 is still acceptable (rate-limit).
   const freshEmail = `reg-val-${Date.now()}@gustilk.test`;
   const { status, body } = await api("POST", "/api/auth/register", {
     email: freshEmail,
@@ -161,8 +166,8 @@ await test("Register: new account succeeds and returns user (or rate-limited)", 
   });
   assert(status === 200 || status === 429, `Expected 200 or 429, got ${status} — ${JSON.stringify(body)}`);
   if (status === 200) {
-    assert(body.user?.email === freshEmail, `Email mismatch: ${body.user?.email}`);
-    assert(!body.user?.passwordHash, "passwordHash should be stripped from response");
+    assert(body.pending === true, `Expected pending=true, got: ${JSON.stringify(body)}`);
+    assert(body.email === freshEmail, `Email mismatch: ${body.email}`);
   }
 });
 
@@ -175,16 +180,150 @@ await test("Register: missing first name returns 400", async () => {
 });
 
 await test("Register: short password returns 400", async () => {
-  const { status } = await api("POST", "/api/auth/register", {
+  const { status, body } = await api("POST", "/api/auth/register", {
     email: `short-pw-${Date.now()}@test.com`,
     password: "abc",
     firstName: "Short",
   });
   assert(status === 400 || status === 429, `Expected 400 or 429, got ${status}`);
+  if (status === 400) assert(body.message?.toLowerCase().includes("8 characters") || body.message?.toLowerCase().includes("characters"), `Got: "${body.message}"`);
+});
+
+await test("Register: common password is blocked with 400", async () => {
+  const { status, body } = await api("POST", "/api/auth/register", {
+    email: `common-pw-${Date.now()}@test.com`,
+    password: "password123",
+    firstName: "Weak",
+  });
+  assert(status === 400 || status === 429, `Expected 400 or 429, got ${status}`);
+  if (status === 400) assert(body.message?.toLowerCase().includes("common") || body.message?.toLowerCase().includes("stronger"), `Got: "${body.message}"`);
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 3. Session / Auth
+// 3. Email activation flow
+// After registration the server returns { pending: true }. The account is locked
+// until the user enters the 6-digit code sent to their email.
+// The /api/auth/dev/activation-code endpoint (disabled in production) lets tests
+// retrieve the code without an actual inbox.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Use a stable per-run email so repeated test runs don't accumulate garbage users
+const activationTestEmail = `activate-${Date.now()}@gustilk.test`;
+let activationCode = "";
+
+await test("Activation: register creates unverified account (returns pending)", async () => {
+  const { status, body } = await api("POST", "/api/auth/register", {
+    email: activationTestEmail,
+    password: testPassword,
+    firstName: "ActTest",
+  });
+  assert(status === 200 || status === 429, `Expected 200 or 429, got ${status}`);
+  if (status === 200) {
+    assert(body.pending === true, `Expected pending=true, got: ${JSON.stringify(body)}`);
+    assert(body.email === activationTestEmail, `Expected email in response, got: ${JSON.stringify(body)}`);
+  }
+});
+
+await test("Activation: unverified account cannot log in (403)", async () => {
+  // Only relevant if the previous test successfully registered the account
+  const { status, body } = await api("POST", "/api/auth/login", {
+    email: activationTestEmail,
+    password: testPassword,
+  });
+  if (status === 429) return;
+  // If the registration test was rate-limited, the account may not exist → 401
+  // If it registered, the account is unverified → 403
+  assert(
+    status === 403 || status === 401,
+    `Expected 403 (unverified) or 401 (account not created), got ${status}: ${JSON.stringify(body)}`
+  );
+  if (status === 403) {
+    assert(
+      body.message?.toLowerCase().includes("verify"),
+      `Expected "verify" message, got: "${body.message}"`
+    );
+  }
+});
+
+await test("Activation: dev/activation-code endpoint returns code for test emails", async () => {
+  const { status, body } = await api("GET", `/api/auth/dev/activation-code?email=${encodeURIComponent(activationTestEmail)}`);
+  // If the account doesn't exist (registration was rate-limited), this is 404 — skip
+  if (status === 404) return;
+  assert(status === 200, `Expected 200, got ${status}`);
+  assert(body.code && /^\d{6}$/.test(body.code), `Expected 6-digit code, got: "${body.code}"`);
+  assert(body.isEmailVerified === false, `Expected isEmailVerified=false, got: ${body.isEmailVerified}`);
+  activationCode = body.code;
+});
+
+await test("Activation: wrong code returns 400", async () => {
+  if (!activationCode) return; // account wasn't created (rate-limited) — skip
+  const wrong = activationCode === "000000" ? "111111" : "000000";
+  const { status, body } = await api("POST", "/api/auth/activate", {
+    email: activationTestEmail,
+    code: wrong,
+  });
+  assert(status === 400, `Expected 400 for wrong code, got ${status}`);
+  assert(
+    body.message?.toLowerCase().includes("incorrect") || body.message?.toLowerCase().includes("invalid"),
+    `Got: "${body.message}"`
+  );
+});
+
+await test("Activation: missing code returns 400", async () => {
+  const { status } = await api("POST", "/api/auth/activate", { email: activationTestEmail });
+  assert(status === 400, `Expected 400 for missing code, got ${status}`);
+});
+
+await test("Activation: correct code activates account and creates session", async () => {
+  if (!activationCode) return; // account wasn't created — skip
+  const { status, body, headers } = await api("POST", "/api/auth/activate", {
+    email: activationTestEmail,
+    code: activationCode,
+  });
+  assert(status === 200, `Expected 200, got ${status}: ${JSON.stringify(body)}`);
+  assert(body.user?.email === activationTestEmail, `Email mismatch: ${body.user?.email}`);
+  assert(!body.user?.passwordHash, "passwordHash must be stripped");
+  const cookies = extractCookies(headers);
+  assert(cookies.length > 0, "Expected session cookie after activation");
+});
+
+await test("Activation: already-verified account cannot activate again (400)", async () => {
+  if (!activationCode) return; // account wasn't created — skip
+  const { status, body } = await api("POST", "/api/auth/activate", {
+    email: activationTestEmail,
+    code: activationCode,
+  });
+  // Code was cleared on success so this should now say "no activation code" or "already verified"
+  assert(status === 400, `Expected 400 for re-activation attempt, got ${status}`);
+  assert(
+    body.message?.toLowerCase().includes("already verified") ||
+      body.message?.toLowerCase().includes("no activation code"),
+    `Got: "${body.message}"`
+  );
+});
+
+await test("Activation: resend-activation returns ok", async () => {
+  // Always returns ok (to avoid email enumeration), even for non-existent addresses
+  const { status, body } = await api("POST", "/api/auth/resend-activation", {
+    email: "never-registered@gustilk.test",
+  });
+  assert(status === 200, `Expected 200, got ${status}`);
+  assert(body.ok === true, `Expected ok=true, got: ${JSON.stringify(body)}`);
+});
+
+await test("Activation: login succeeds after email is verified", async () => {
+  if (!activationCode) return; // account wasn't created — skip
+  const { status, body } = await api("POST", "/api/auth/login", {
+    email: activationTestEmail,
+    password: testPassword,
+  });
+  if (status === 429) return;
+  assert(status === 200, `Expected 200 after activation, got ${status}: ${JSON.stringify(body)}`);
+  assert(body.user?.email === activationTestEmail, `Email mismatch: ${body.user?.email}`);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 4. Session / Auth
 // ─────────────────────────────────────────────────────────────────────────────
 
 await test("Auth/me: returns user when session cookie is present", async () => {

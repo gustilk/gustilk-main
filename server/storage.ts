@@ -96,6 +96,7 @@ const CARD_COLUMNS = {
   activitySeenAt: users.activitySeenAt,
   matchesSeenAt: users.matchesSeenAt,
   photosBlurred: users.photosBlurred,
+  isEmailVerified: users.isEmailVerified,
   createdAt: users.createdAt,
   updatedAt: users.updatedAt,
 } as const;

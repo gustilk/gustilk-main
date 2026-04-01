@@ -13,6 +13,36 @@ function triggerLangPicker() {
 
 type Screen = "home" | "email" | "phone";
 
+// ── Password strength ─────────────────────────────────────────────────────────
+const COMMON_PASSWORDS_FE = new Set([
+  "password","password1","password12","password123","password1234",
+  "123456","1234567","12345678","123456789","1234567890",
+  "qwerty","qwerty123","qwerty1","qwertyuiop",
+  "abc123","abc1234","iloveyou","admin","admin123","welcome","welcome1",
+  "monkey","dragon","master","master123","hello","hello123",
+  "shadow","sunshine","princess","football","charlie","donald",
+  "letmein","696969","superman","batman","trustno1","pass123",
+  "111111","000000","987654321","666666","121212","654321",
+]);
+
+interface PwStrength { level: 0|1|2|3; label: string; tips: string[]; color: string; }
+
+function getPasswordStrength(pw: string): PwStrength {
+  if (!pw) return { level: 0, label: "", tips: [], color: "" };
+  if (COMMON_PASSWORDS_FE.has(pw.toLowerCase())) {
+    return { level: 0, label: "Too common", tips: ["Choose something more unique"], color: "#ef4444" };
+  }
+  const tips: string[] = [];
+  if (pw.length < 8) tips.push("needs 8+ characters");
+  if (!/[0-9]/.test(pw)) tips.push("add a number");
+  if (!/[!@#$%^&*()\-_+=[\]{};:'"\\|,.<>/?]/.test(pw)) tips.push("add a special character like !@#$");
+  if (!/[A-Z]/.test(pw)) tips.push("add an uppercase letter");
+  const level = (pw.length < 8 ? 0 : tips.length === 0 ? 3 : tips.length === 1 ? 2 : 1) as 0|1|2|3;
+  const labels = ["Too weak", "Weak", "Fair", "Strong"];
+  const colors = ["#ef4444", "#f97316", "#eab308", "#22c55e"];
+  return { level, label: labels[level], tips, color: colors[level] };
+}
+
 export default function LandingPage() {
   const [screen, setScreen] = useState<Screen>("home");
   const currentLang = LANGUAGE_LIST.find(l => l.code === i18n.language) ?? LANGUAGE_LIST[0];
@@ -180,7 +210,7 @@ function SubmitButton({ loading, loadingText, disabled, onClick, "data-testid": 
 function EmailScreen({ onBack }: { onBack: () => void }) {
   const { t } = useTranslation();
   const [, setLocation] = useLocation();
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [mode, setMode] = useState<"login" | "register" | "activate">("login");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState(() => localStorage.getItem("gustilk_email") ?? "");
@@ -196,10 +226,19 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
   const [forgotError, setForgotError] = useState<string | null>(null);
   const [ageStatus, setAgeStatus] = useState<"unchecked" | "confirmed" | "blocked">("unchecked");
 
+  // Activation screen state
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
+  const [activationError, setActivationError] = useState<string | null>(null);
+  const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const passwordMismatch = mode === "register" && confirmPassword.length > 0 && password !== confirmPassword;
   const namesValid = mode === "login" || firstName.trim().length > 0;
-  const canSubmit = emailValid && namesValid && (mode === "login" || (password.length > 0 && password === confirmPassword));
+  const pwStrength = mode === "register" ? getPasswordStrength(password) : null;
+  const pwBlocked = mode === "register" && password.length > 0 && (pwStrength?.level ?? 1) === 0;
+  const canSubmit = emailValid && namesValid && (mode === "login" || (password.length > 0 && password === confirmPassword && !pwBlocked));
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -213,12 +252,21 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
     setLoading(true);
     try {
       const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
-      await apiRequest("POST", endpoint, {
+      const res = await apiRequest("POST", endpoint, {
         email: email.trim(),
         password,
         ...(mode === "register" ? { firstName: firstName.trim(), lastName: lastName.trim() } : {}),
       });
       localStorage.setItem("gustilk_email", email.trim());
+      if (res?.pending) {
+        // Registration succeeded — show email activation screen
+        setPendingEmail(email.trim());
+        setOtpDigits(["", "", "", "", "", ""]);
+        setActivationError(null);
+        setMode("activate");
+        setLoading(false);
+        return;
+      }
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       setLocation("/discover");
     } catch (err: any) {
@@ -226,6 +274,15 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
       let msg: string;
       try { msg = JSON.parse(raw).message || raw; } catch { msg = raw; }
       const lower = msg.toLowerCase();
+      if (lower.includes("verify your email") || lower.includes("activation")) {
+        // Account exists but not activated — go to activation screen
+        setPendingEmail(email.trim());
+        setOtpDigits(["", "", "", "", "", ""]);
+        setActivationError(null);
+        setMode("activate");
+        setLoading(false);
+        return;
+      }
       if (lower.includes("password") || lower.includes("credentials") || lower.includes("invalid") || lower.includes("incorrect")) {
         setPasswordError(msg);
       } else if (lower.includes("email") || lower.includes("user") || lower.includes("not found") || lower.includes("exist")) {
@@ -235,6 +292,41 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
       }
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function activateAccount(e: React.FormEvent) {
+    e.preventDefault();
+    const code = otpDigits.join("");
+    if (code.length < 6) return;
+    setActivationError(null);
+    setLoading(true);
+    try {
+      await apiRequest("POST", "/api/auth/activate", { email: pendingEmail, code });
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      setLocation("/discover");
+    } catch (err: any) {
+      const raw: string = err.message?.match(/\d+: (.+)/)?.[1] || err.message || "Something went wrong";
+      let msg: string;
+      try { msg = JSON.parse(raw).message || raw; } catch { msg = raw; }
+      setActivationError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function resendCode() {
+    setResendState("sending");
+    try {
+      await fetch("/api/auth/resend-activation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: pendingEmail }),
+      });
+      setResendState("sent");
+      setTimeout(() => setResendState("idle"), 30000);
+    } catch {
+      setResendState("idle");
     }
   }
 
@@ -273,7 +365,118 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
       </button>
       <Logo />
 
-      <div className="flex rounded-xl p-1 mb-6" style={{ background: "rgba(255,255,255,0.05)" }}>
+      {/* ── Email activation screen ─────────────────────────────────────────── */}
+      {mode === "activate" && (
+        <div className="animate-slide-up" data-testid="section-activate">
+          <div className="rounded-2xl p-5 text-center mb-6" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.2)" }}>
+            <div className="text-3xl mb-2">✉️</div>
+            <h2 className="font-serif text-lg text-gold mb-1.5" data-testid="text-activate-title">Check your inbox</h2>
+            <p className="text-cream/55 text-sm leading-relaxed">
+              We sent a 6-digit code to{" "}
+              <span className="font-semibold text-cream/80" data-testid="text-pending-email">{pendingEmail}</span>
+            </p>
+          </div>
+
+          <form onSubmit={activateAccount} className="space-y-5">
+            {/* 6-digit OTP boxes */}
+            <div>
+              <label className="block text-cream/60 text-xs font-semibold mb-3 uppercase tracking-wider text-center">
+                Activation code
+              </label>
+              <div className="flex gap-2 justify-center">
+                {otpDigits.map((digit, i) => (
+                  <input
+                    key={i}
+                    ref={el => { otpRefs.current[i] = el; }}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    data-testid={`input-otp-${i}`}
+                    className="w-12 h-14 text-center text-2xl font-bold rounded-xl outline-none transition-all"
+                    style={{
+                      background: "rgba(255,255,255,0.07)",
+                      border: `2px solid ${digit ? "rgba(201,168,76,0.6)" : "rgba(201,168,76,0.2)"}`,
+                      color: "#fdf8f0",
+                      caretColor: "#c9a84c",
+                    }}
+                    onFocus={e => (e.currentTarget.style.borderColor = "#c9a84c")}
+                    onBlur={e => (e.currentTarget.style.borderColor = digit ? "rgba(201,168,76,0.6)" : "rgba(201,168,76,0.2)")}
+                    onChange={e => {
+                      const val = e.target.value.replace(/\D/g, "").slice(-1);
+                      const next = [...otpDigits];
+                      next[i] = val;
+                      setOtpDigits(next);
+                      setActivationError(null);
+                      if (val && i < 5) otpRefs.current[i + 1]?.focus();
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === "Backspace" && !digit && i > 0) {
+                        otpRefs.current[i - 1]?.focus();
+                      }
+                    }}
+                    onPaste={e => {
+                      const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+                      if (pasted.length > 0) {
+                        const next = Array.from({ length: 6 }, (_, j) => pasted[j] ?? "");
+                        setOtpDigits(next);
+                        setActivationError(null);
+                        e.preventDefault();
+                        otpRefs.current[Math.min(pasted.length, 5)]?.focus();
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+              {activationError && (
+                <p className="text-xs mt-3 text-center font-medium" style={{ color: "#d4608a" }} data-testid="text-activation-error">
+                  {activationError}
+                </p>
+              )}
+            </div>
+
+            <SubmitButton
+              loading={loading}
+              loadingText="Verifying…"
+              disabled={otpDigits.join("").length < 6}
+              data-testid="button-activate"
+            >
+              Verify &amp; continue
+            </SubmitButton>
+          </form>
+
+          {/* Resend code */}
+          <div className="mt-5 text-center space-y-2">
+            {resendState === "sent" ? (
+              <p className="text-xs font-medium" style={{ color: "#22c55e" }} data-testid="text-resend-sent">
+                New code sent — check your inbox
+              </p>
+            ) : (
+              <button
+                type="button"
+                onClick={resendCode}
+                disabled={resendState === "sending"}
+                data-testid="button-resend-code"
+                className="text-xs font-medium disabled:opacity-50"
+                style={{ color: "rgba(201,168,76,0.6)" }}
+              >
+                {resendState === "sending" ? "Sending…" : "Didn't get it? Resend code"}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setMode("register")}
+              data-testid="button-back-to-register"
+              className="block w-full text-xs"
+              style={{ color: "rgba(253,248,240,0.3)" }}
+            >
+              ← Back to sign up
+            </button>
+          </div>
+        </div>
+      )}
+
+      {mode !== "activate" && <div className="flex rounded-xl p-1 mb-6" style={{ background: "rgba(255,255,255,0.05)" }}>
         {(["login", "register"] as const).map(m => (
           <button
             key={m}
@@ -288,9 +491,9 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
             {m === "login" ? t("auth.signIn") : t("auth.signUp")}
           </button>
         ))}
-      </div>
+      </div>}
 
-      {mode === "register" && ageStatus === "unchecked" && (
+      {mode !== "activate" && mode === "register" && ageStatus === "unchecked" && (
         <div className="animate-slide-up space-y-5">
           <div className="rounded-2xl p-5 text-center" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.2)" }}>
             <div className="text-3xl mb-3">🔞</div>
@@ -318,7 +521,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
         </div>
       )}
 
-      {mode === "register" && ageStatus === "blocked" && (
+      {mode !== "activate" && mode === "register" && ageStatus === "blocked" && (
         <div className="animate-slide-up space-y-4">
           <div className="rounded-2xl p-5 text-center" style={{ background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.2)" }}>
             <div className="text-3xl mb-3">🚫</div>
@@ -337,7 +540,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
         </div>
       )}
 
-      {(mode === "login" || ageStatus === "confirmed") && <form onSubmit={submit} className="space-y-4">
+      {mode !== "activate" && (mode === "login" || ageStatus === "confirmed") && <form onSubmit={submit} className="space-y-4">
         {mode === "register" && (
           <div className="flex gap-3">
             <div className="flex-1">
@@ -418,6 +621,42 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
           </div>
           {passwordError && (
             <p className="text-xs mt-1.5 font-medium" style={{ color: "#d4608a" }}>{passwordError}</p>
+          )}
+
+          {/* ── Password strength indicator (register only) ── */}
+          {mode === "register" && password.length > 0 && (
+            <div className="mt-2.5">
+              <div className="flex gap-1.5 mb-1.5">
+                {[0, 1, 2].map(i => (
+                  <div
+                    key={i}
+                    data-testid={`bar-pw-strength-${i}`}
+                    className="h-1.5 flex-1 rounded-full transition-all duration-300"
+                    style={{
+                      background: i < pwStrength!.level ? pwStrength!.color : "rgba(255,255,255,0.1)",
+                    }}
+                  />
+                ))}
+                {pwStrength!.label && (
+                  <span
+                    data-testid="text-pw-strength-label"
+                    className="text-xs font-semibold leading-none self-center ml-1 whitespace-nowrap"
+                    style={{ color: pwStrength!.color }}
+                  >
+                    {pwStrength!.label}
+                  </span>
+                )}
+              </div>
+              {pwStrength!.tips.length > 0 && (
+                <ul data-testid="list-pw-tips" className="space-y-0.5">
+                  {pwStrength!.tips.map(tip => (
+                    <li key={tip} className="text-xs" style={{ color: "rgba(253,248,240,0.4)" }}>
+                      • {tip}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           )}
         </div>
 

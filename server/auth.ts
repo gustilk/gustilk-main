@@ -17,8 +17,33 @@ import { storage } from "./storage";
 import { users, passkeys } from "@shared/schema";
 import { isValidListedPhone } from "@shared/countries";
 import { eq, and } from "drizzle-orm";
+import { sendActivationCodeEmail } from "./email";
 
 const emailSchema = z.string().email("Please enter a valid email address");
+
+// ── Password security ──────────────────────────────────────────────────────────
+const COMMON_PASSWORDS = new Set([
+  "password","password1","password12","password123","password1234",
+  "123456","1234567","12345678","123456789","1234567890",
+  "qwerty","qwerty123","qwerty1","qwertyuiop",
+  "abc123","abc1234","iloveyou","admin","admin123","welcome","welcome1",
+  "monkey","dragon","master","master123","hello","hello123",
+  "shadow","sunshine","princess","football","charlie","donald",
+  "letmein","696969","superman","batman","trustno1","pass123",
+  "111111","000000","987654321","666666","121212","654321",
+]);
+
+function generateActivationCode(): string {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function validatePassword(password: string): string | null {
+  if (password.length < 8) return "Password must be at least 8 characters";
+  if (COMMON_PASSWORDS.has(password.toLowerCase())) {
+    return "This password is too common — please choose a stronger one";
+  }
+  return null;
+}
 
 const PgSession = connectPgSimple(session);
 
@@ -129,27 +154,100 @@ export function registerAuthRoutes(app: Express) {
       const emailResult = emailSchema.safeParse(email.trim());
       if (!emailResult.success) return res.status(400).json({ message: emailResult.error.errors[0].message });
 
-      if (password.length < 6) return res.status(400).json({ message: "Password must be at least 6 characters" });
+      const pwError = validatePassword(password);
+      if (pwError) return res.status(400).json({ message: pwError });
 
       const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.email, email.toLowerCase().trim()));
       if (existing) return res.status(409).json({ message: "An account with this email already exists" });
 
       const hash = await bcrypt.hash(password, 10);
-      const [user] = await db.insert(users).values({
+      const code = generateActivationCode();
+      const expiry = new Date(Date.now() + 15 * 60 * 1000);
+
+      await db.insert(users).values({
         id: randomUUID(),
         email: email.toLowerCase().trim(),
         passwordHash: hash,
         firstName: firstName.trim(),
         lastName: lastName?.trim() || null,
         fullName: lastName?.trim() ? `${firstName.trim()} ${lastName.trim()}` : firstName.trim(),
-      }).returning();
+        isEmailVerified: false,
+        emailActivationCode: code,
+        emailActivationExpiry: expiry,
+      });
 
-      req.session.userId = user.id;
-      await saveSession(req);
-      res.json({ user: safeUser(user as any) });
+      sendActivationCodeEmail(email.toLowerCase().trim(), firstName.trim(), code).catch(() => {});
+      res.json({ pending: true, email: email.toLowerCase().trim() });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }
+  });
+
+  // ── Email activation ───────────────────────────────────────────────────────
+
+  app.post("/api/auth/activate", async (req, res) => {
+    try {
+      const { email, code } = req.body;
+      if (!email || !code) return res.status(400).json({ message: "Email and code are required" });
+
+      const [user] = await db.select().from(users).where(eq(users.email, (email as string).toLowerCase().trim()));
+      if (!user) return res.status(400).json({ message: "Invalid activation code" });
+      if (user.isEmailVerified) return res.status(400).json({ message: "Email already verified — please sign in" });
+
+      if (!user.emailActivationCode || !user.emailActivationExpiry) {
+        return res.status(400).json({ message: "No activation code found. Please request a new one." });
+      }
+      if (new Date() > new Date(user.emailActivationExpiry)) {
+        return res.status(400).json({ message: "Activation code has expired — please request a new one." });
+      }
+      if (user.emailActivationCode !== String(code).trim()) {
+        return res.status(400).json({ message: "Incorrect activation code. Please check your email." });
+      }
+
+      await db.update(users).set({
+        isEmailVerified: true,
+        emailActivationCode: null as any,
+        emailActivationExpiry: null as any,
+      }).where(eq(users.id, user.id));
+
+      req.session.userId = user.id;
+      await saveSession(req);
+      const updated = await storage.getUserById(user.id);
+      res.json({ user: safeUser(updated as any) });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/auth/resend-activation", async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) return res.status(400).json({ message: "Email required" });
+
+      const [user] = await db.select().from(users).where(eq(users.email, (email as string).toLowerCase().trim()));
+      // Always return ok — never reveal whether an email is registered
+      if (!user || user.isEmailVerified) return res.json({ ok: true });
+
+      const code = generateActivationCode();
+      const expiry = new Date(Date.now() + 15 * 60 * 1000);
+      await db.update(users).set({ emailActivationCode: code, emailActivationExpiry: expiry }).where(eq(users.id, user.id));
+      sendActivationCodeEmail(user.email!, user.firstName ?? "there", code).catch(() => {});
+      res.json({ ok: true });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ── Dev-only: return activation code for automated tests ───────────────────
+  app.get("/api/auth/dev/activation-code", async (req, res) => {
+    if (process.env.NODE_ENV === "production") return res.status(404).json({ message: "Not found" });
+    const email = (req.query.email as string | undefined)?.toLowerCase().trim();
+    if (!email) return res.status(400).json({ message: "email query param required" });
+    const [user] = await db
+      .select({ code: users.emailActivationCode, expiry: users.emailActivationExpiry, verified: users.isEmailVerified })
+      .from(users).where(eq(users.email, email));
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({ code: user.code, expiry: user.expiry, isEmailVerified: user.verified });
   });
 
   app.post("/api/auth/login", loginLimiter, async (req, res) => {
@@ -165,6 +263,10 @@ export function registerAuthRoutes(app: Express) {
 
       const ok = await bcrypt.compare(password, user.passwordHash);
       if (!ok) return res.status(401).json({ message: "Incorrect password. Please try again." });
+
+      if (!user.isEmailVerified) {
+        return res.status(403).json({ message: "Please verify your email address before signing in. Check your inbox for the activation code." });
+      }
 
       req.session.userId = user.id;
       await saveSession(req);

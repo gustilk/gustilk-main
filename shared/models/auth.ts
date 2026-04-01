@@ -64,6 +64,9 @@ export const users = pgTable("users", {
   activitySeenAt: timestamp("activity_seen_at"),
   matchesSeenAt: timestamp("matches_seen_at"),
   photosBlurred: boolean("photos_blurred").default(false),
+  isEmailVerified: boolean("is_email_verified").default(false),
+  emailActivationCode: varchar("email_activation_code", { length: 6 }),
+  emailActivationExpiry: timestamp("email_activation_expiry"),
 });
 
 export type UpsertUser = typeof users.$inferInsert;

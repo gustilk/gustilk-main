@@ -31,6 +31,31 @@ function emailShell(body: string): string {
 </html>`;
 }
 
+export async function sendActivationCodeEmail(to: string, firstName: string, code: string): Promise<void> {
+  try {
+    const resend = getResend();
+    await resend.emails.send({
+      from: "Gûstîlk <noreply@gustilk.com>",
+      to,
+      subject: `Your Gûstîlk activation code: ${code}`,
+      html: emailShell(`
+        <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">Verify your email</h2>
+        <p style="margin:0 0 24px;font-size:14px;color:rgba(253,248,240,0.6);line-height:1.7;">
+          Hi ${firstName}, enter the code below to activate your Gûstîlk account.
+          This code expires in <strong style="color:#c9a84c;">15 minutes</strong>.
+        </p>
+        <div style="margin:0 auto 28px;max-width:220px;text-align:center;padding:20px 28px;background:rgba(201,168,76,0.1);border-radius:16px;border:1.5px solid rgba(201,168,76,0.35);">
+          <p style="margin:0;font-size:38px;font-weight:bold;letter-spacing:10px;color:#c9a84c;font-family:monospace;">${code}</p>
+        </div>
+        <p style="margin:0 0 8px;font-size:12px;color:rgba(253,248,240,0.3);line-height:1.6;">
+          If you didn't create an account, you can safely ignore this email.
+        </p>
+      `),
+    });
+  } catch {
+  }
+}
+
 export async function sendMagicLinkEmail(to: string, magicLink: string): Promise<void> {
   const resend = getResend();
   await resend.emails.send({
