@@ -31,6 +31,31 @@ function emailShell(body: string): string {
 </html>`;
 }
 
+export async function sendActivationCodeEmail(to: string, firstName: string, code: string): Promise<void> {
+  try {
+    const resend = getResend();
+    await resend.emails.send({
+      from: "Gûstîlk <noreply@gustilk.com>",
+      to,
+      subject: `Your Gûstîlk activation code: ${code}`,
+      html: emailShell(`
+        <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">Verify your email</h2>
+        <p style="margin:0 0 24px;font-size:14px;color:rgba(253,248,240,0.6);line-height:1.7;">
+          Hi ${firstName}, enter the code below to activate your Gûstîlk account.
+          This code expires in <strong style="color:#c9a84c;">15 minutes</strong>.
+        </p>
+        <div style="margin:0 auto 28px;max-width:220px;text-align:center;padding:20px 28px;background:rgba(201,168,76,0.1);border-radius:16px;border:1.5px solid rgba(201,168,76,0.35);">
+          <p style="margin:0;font-size:38px;font-weight:bold;letter-spacing:10px;color:#c9a84c;font-family:monospace;">${code}</p>
+        </div>
+        <p style="margin:0 0 8px;font-size:12px;color:rgba(253,248,240,0.3);line-height:1.6;">
+          If you didn't create an account, you can safely ignore this email.
+        </p>
+      `),
+    });
+  } catch {
+  }
+}
+
 export async function sendMagicLinkEmail(to: string, magicLink: string): Promise<void> {
   const resend = getResend();
   await resend.emails.send({
@@ -143,6 +168,41 @@ export async function sendSupportMessageAlertEmail(userDisplayName: string, mess
           <tr><td style="border-radius:12px;background:linear-gradient(135deg,#c9a84c,#e8c97a);">
             <a href="https://www.gustilk.com/chat/${matchId}" style="display:inline-block;padding:14px 36px;font-size:15px;font-weight:bold;color:#1a0a2e;text-decoration:none;border-radius:12px;font-family:sans-serif;">
               Open Conversation
+            </a>
+          </td></tr>
+        </table>
+      `),
+    });
+  } catch {
+  }
+}
+
+export async function sendAdminApprovalNeededEmail(
+  adminEmail: string,
+  applicantName: string,
+  applicantEmail: string,
+  adminPanelUrl = "https://www.gustilk.com/admin"
+): Promise<void> {
+  if (!adminEmail) return;
+  try {
+    const resend = getResend();
+    await resend.emails.send({
+      from: "Gûstîlk <noreply@gustilk.com>",
+      to: adminEmail,
+      subject: `New profile pending approval — ${applicantName}`,
+      html: emailShell(`
+        <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">New Profile Awaiting Approval</h2>
+        <p style="margin:0 0 8px;font-size:13px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:1px;">Applicant</p>
+        <p style="margin:0 0 6px;font-size:16px;color:#c9a84c;font-weight:bold;">${applicantName}</p>
+        <p style="margin:0 0 24px;font-size:13px;color:rgba(253,248,240,0.5);">${applicantEmail}</p>
+        <p style="margin:0 0 20px;font-size:14px;color:rgba(253,248,240,0.6);line-height:1.7;">
+          A new member has submitted their profile and selfie for review.
+          Please visit the admin panel to approve or reject the application.
+        </p>
+        <table cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
+          <tr><td style="border-radius:12px;background:linear-gradient(135deg,#c9a84c,#e8c97a);">
+            <a href="${adminPanelUrl}" style="display:inline-block;padding:14px 36px;font-size:15px;font-weight:bold;color:#1a0a2e;text-decoration:none;border-radius:12px;font-family:sans-serif;">
+              Review in Admin Panel
             </a>
           </td></tr>
         </table>

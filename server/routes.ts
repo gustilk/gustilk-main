@@ -10,7 +10,7 @@ import { checkFacePresent } from "./moderation";
 import { db } from "./db";
 import { count, sql, eq, asc, desc, or, and, ilike } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
-import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail } from "./email";
+import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail, sendAdminApprovalNeededEmail } from "./email";
 import OpenAI from "openai";
 import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
 
@@ -56,6 +56,24 @@ async function getOrCreateSupportAccount(): Promise<typeof users.$inferSelect> {
 async function isAdminMatch(match: { user1Id: string; user2Id: string }): Promise<boolean> {
   const [u1, u2] = await Promise.all([storage.getUserById(match.user1Id), storage.getUserById(match.user2Id)]);
   return !!(u1?.isAdmin || u2?.isAdmin || u1?.isSystemAccount || u2?.isSystemAccount);
+}
+
+async function notifyAdminNewApplicant(applicantId: string): Promise<void> {
+  try {
+    const [adminUser] = await db
+      .select({ email: users.email })
+      .from(users)
+      .where(eq(users.isAdmin, true))
+      .limit(1);
+    const adminEmail = adminUser?.email;
+    if (!adminEmail) return;
+    const applicant = await storage.getUserById(applicantId);
+    if (!applicant) return;
+    const name = applicant.fullName ?? applicant.firstName ?? "A new member";
+    const email = applicant.email ?? applicant.phone ?? "unknown";
+    sendAdminApprovalNeededEmail(adminEmail, name, email).catch(() => {});
+  } catch {
+  }
 }
 
 const SUPPORT_AI_SYSTEM_PROMPT = `You are the Official Gûstîlk Support Assistant — a friendly AI for the Gûstîlk app, a Yezidi community dating platform. You help users with:
@@ -306,6 +324,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       }
 
       const data = user?.country ? rest : parsed;
+      // Detect first-time pending transition to trigger admin notification
+      const becomingPending =
+        (data as any).verificationStatus === "pending" &&
+        user?.verificationStatus !== "pending";
       const updated = await storage.updateUser(userId, {
         ...(data as any),
         ...(photosIncluded ? {
@@ -315,6 +337,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           mainPhotoUrl: mainPhotoUrl ?? null,
         } : {}),
       });
+      if (becomingPending) notifyAdminNewApplicant(userId);
       res.json({ user: updated });
     } catch (err: any) {
       if (err?.name === "ZodError") return res.status(400).json({ error: err.errors[0].message });
@@ -532,6 +555,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       }
     }
     await storage.updateUser(userId, { verificationSelfie: selfie, verificationStatus: "pending" });
+    notifyAdminNewApplicant(userId);
     res.json({ ok: true });
   });
 
@@ -547,6 +571,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       if (!faceCheck.faceDetected) return res.status(400).json({ error: "Please upload a clear selfie showing your face." });
     }
     await storage.reapplyUser(userId, selfie);
+    notifyAdminNewApplicant(userId);
     res.json({ ok: true });
   });
 
