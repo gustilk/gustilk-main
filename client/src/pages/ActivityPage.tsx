@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { formatDistanceToNow } from "date-fns";
-import { Heart, Eye, Send, Crown, Lock } from "lucide-react";
+import { Heart, Eye, Send, Crown, Lock, Check, X } from "lucide-react";
 import type { SafeUser } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface ActivityItem {
   user: SafeUser;
@@ -133,6 +134,7 @@ export default function ActivityPage({ user }: Props) {
               <ActivityCard
                 key={`${item.user.id}-${idx}`}
                 item={item}
+                tab={tab}
                 isPremium={isPremium ?? false}
                 blurred={!isPremium && tab !== "likes-sent"}
                 onBeforeNavigate={() => {
@@ -148,54 +150,91 @@ export default function ActivityPage({ user }: Props) {
   );
 }
 
-function ActivityCard({ item, isPremium, blurred, onBeforeNavigate }: {
+function ActivityCard({ item, isPremium, blurred, tab, onBeforeNavigate, onActed }: {
   item: ActivityItem;
   isPremium: boolean;
   blurred: boolean;
+  tab: Tab;
   onBeforeNavigate: () => void;
+  onActed?: (userId: string) => void;
 }) {
   const [, setLocation] = useLocation();
+  const [done, setDone] = useState(false);
   const { user, createdAt } = item;
   const displayName = user.firstName ?? user.fullName?.split(" ")[0] ?? "Member";
   const timeAgo = formatDistanceToNow(new Date(createdAt), { addSuffix: true });
 
+  const likeMutation = useMutation({
+    mutationFn: () => apiRequest("POST", `/api/like/${user.id}`),
+    onSuccess: () => {
+      setDone(true);
+      queryClient.invalidateQueries({ queryKey: ["/api/activity/likes-received"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/discover"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
+      onActed?.(user.id);
+    },
+  });
+
+  const dislikeMutation = useMutation({
+    mutationFn: () => apiRequest("POST", `/api/dislike/${user.id}`),
+    onSuccess: () => {
+      setDone(true);
+      queryClient.invalidateQueries({ queryKey: ["/api/activity/likes-received"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/discover"] });
+      onActed?.(user.id);
+    },
+  });
+
+  if (done) return null;
+
+  const showActions = tab === "likes-received" && isPremium && !blurred;
+  const busy = likeMutation.isPending || dislikeMutation.isPending;
+
   return (
     <div
-      className="relative rounded-2xl overflow-hidden cursor-pointer active:scale-[0.97] transition-transform"
+      className="relative rounded-2xl overflow-hidden transition-transform"
       style={{ aspectRatio: "3/4", background: "#1a0a2e" }}
       data-testid={`activity-card-${user.id}`}
-      onClick={() => {
-        onBeforeNavigate();
-        sessionStorage.setItem("profile_back_to", "/activity");
-        setLocation(`/profile/${user.id}`);
-      }}
     >
-      {/* Photo */}
-      {user.mainPhotoUrl ? (
-        <img
-          src={user.mainPhotoUrl}
-          alt={displayName}
-          className="w-full h-full object-cover"
-          style={{ filter: blurred ? "blur(18px) brightness(0.65) saturate(0.4)" : "none", transform: blurred ? "scale(1.08)" : "none" }}
-        />
-      ) : (
-        <div
-          className="w-full h-full flex items-center justify-center"
-          style={{ background: "linear-gradient(135deg, #1a0a2e, #2d1054)" }}
-        >
-          <span className="text-4xl font-serif text-gold/40">{displayName[0]?.toUpperCase()}</span>
-        </div>
-      )}
+      {/* Photo — tappable area navigates to profile */}
+      <div
+        className="absolute inset-0 cursor-pointer active:scale-[0.97] transition-transform"
+        onClick={() => {
+          if (showActions) return;
+          onBeforeNavigate();
+          sessionStorage.setItem("profile_back_to", "/activity");
+          setLocation(`/profile/${user.id}`);
+        }}
+      >
+        {user.mainPhotoUrl ? (
+          <img
+            src={user.mainPhotoUrl}
+            alt={displayName}
+            className="w-full h-full object-cover"
+            style={{ filter: blurred ? "blur(18px) brightness(0.65) saturate(0.4)" : "none", transform: blurred ? "scale(1.08)" : "none" }}
+          />
+        ) : (
+          <div
+            className="w-full h-full flex items-center justify-center"
+            style={{ background: "linear-gradient(135deg, #1a0a2e, #2d1054)" }}
+          >
+            <span className="text-4xl font-serif text-gold/40">{displayName[0]?.toUpperCase()}</span>
+          </div>
+        )}
+      </div>
 
       {/* Gradient overlay */}
       <div
-        className="absolute inset-0"
-        style={{ background: blurred ? "rgba(13,6,24,0.35)" : "linear-gradient(to top, rgba(13,6,24,0.9) 0%, rgba(13,6,24,0.2) 50%, transparent 100%)" }}
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: blurred ? "rgba(13,6,24,0.35)" : "linear-gradient(to top, rgba(13,6,24,0.95) 0%, rgba(13,6,24,0.3) 55%, transparent 100%)" }}
       />
 
-      {/* Premium lock overlay — tap to view profile (photos blurred there) */}
+      {/* Premium lock overlay */}
       {blurred && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center gap-2 cursor-pointer"
+          onClick={() => { onBeforeNavigate(); sessionStorage.setItem("profile_back_to", "/activity"); setLocation(`/profile/${user.id}`); }}
+        >
           <div
             className="w-10 h-10 rounded-full flex items-center justify-center"
             style={{ background: "rgba(13,6,24,0.8)", border: "1.5px solid rgba(201,168,76,0.4)" }}
@@ -206,15 +245,43 @@ function ActivityCard({ item, isPremium, blurred, onBeforeNavigate }: {
         </div>
       )}
 
-      {/* Info at bottom — always show name for non-blurred */}
+      {/* Info + action buttons at bottom */}
       <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
-        {!blurred ? (
-          <>
+        {!blurred && (
+          <div
+            className="cursor-pointer mb-2"
+            onClick={() => { onBeforeNavigate(); sessionStorage.setItem("profile_back_to", "/activity"); setLocation(`/profile/${user.id}`); }}
+          >
             <p className="text-cream font-semibold text-sm truncate">{displayName}{user.age ? `, ${user.age}` : ""}</p>
             <p className="text-cream/50 text-[10px]">{timeAgo}</p>
-          </>
-        ) : (
-          <p className="text-cream/40 text-[10px] text-center">{timeAgo}</p>
+          </div>
+        )}
+        {blurred && <p className="text-cream/40 text-[10px] text-center">{timeAgo}</p>}
+
+        {/* Accept / Decline buttons — Hinge-style, only on Likes tab for premium */}
+        {showActions && (
+          <div className="flex gap-2 mt-1">
+            <button
+              data-testid={`btn-decline-${user.id}`}
+              disabled={busy}
+              onClick={(e) => { e.stopPropagation(); dislikeMutation.mutate(); }}
+              className="flex-1 flex items-center justify-center gap-1 rounded-xl py-2 text-xs font-semibold transition-opacity disabled:opacity-50"
+              style={{ background: "rgba(212,96,138,0.18)", border: "1px solid rgba(212,96,138,0.4)", color: "#d4608a" }}
+            >
+              <X size={13} strokeWidth={2.5} />
+              Pass
+            </button>
+            <button
+              data-testid={`btn-accept-${user.id}`}
+              disabled={busy}
+              onClick={(e) => { e.stopPropagation(); likeMutation.mutate(); }}
+              className="flex-1 flex items-center justify-center gap-1 rounded-xl py-2 text-xs font-semibold transition-opacity disabled:opacity-50"
+              style={{ background: "rgba(201,168,76,0.18)", border: "1px solid rgba(201,168,76,0.5)", color: "#c9a84c" }}
+            >
+              <Heart size={13} strokeWidth={2.5} />
+              Like
+            </button>
+          </div>
         )}
       </div>
     </div>
