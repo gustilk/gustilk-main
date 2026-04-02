@@ -252,11 +252,12 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
     setLoading(true);
     try {
       const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
-      const res = await apiRequest("POST", endpoint, {
+      const rawRes = await apiRequest("POST", endpoint, {
         email: email.trim(),
         password,
         ...(mode === "register" ? { firstName: firstName.trim(), lastName: lastName.trim() } : {}),
       });
+      const res = await rawRes.json();
       localStorage.setItem("gustilk_email", email.trim());
       if (res?.pending) {
         // Registration succeeded — show email activation screen
