@@ -224,7 +224,6 @@ export class DatabaseStorage implements IStorage {
     if (cached !== undefined) return cached;
 
     const likedIds    = db.select({ id: likes.toUserId   }).from(likes).where(eq(likes.fromUserId, userId));
-    const likedMeIds  = db.select({ id: likes.fromUserId }).from(likes).where(eq(likes.toUserId,   userId));
     const dislikedIds = db.select({ id: dislikes.toUserId }).from(dislikes).where(eq(dislikes.fromUserId, userId));
     const blockedByMe = db.select({ id: blocks.blockedId }).from(blocks).where(eq(blocks.blockerId, userId));
     const blockedMe   = db.select({ id: blocks.blockerId }).from(blocks).where(eq(blocks.blockedId, userId));
@@ -238,7 +237,6 @@ export class DatabaseStorage implements IStorage {
         sql`${users.age} >= ${minAge}`,
         sql`${users.age} <= ${maxAge}`,
         notInArray(users.id, likedIds),
-        notInArray(users.id, likedMeIds),
         notInArray(users.id, dislikedIds),
         notInArray(users.id, blockedByMe),
         notInArray(users.id, blockedMe),
@@ -257,10 +255,10 @@ export class DatabaseStorage implements IStorage {
 
   async likeUser(fromUserId: string, toUserId: string): Promise<{ matched: boolean; matchId?: string }> {
     await db.insert(likes).values({ id: randomUUID(), fromUserId, toUserId }).onConflictDoNothing();
-    // Bust both users' discover caches: the liker no longer sees the liked profile,
-    // and the liked user should no longer see the liker (moves to "who liked you").
+    // Only bust the liker's discover cache — they've made their decision so the
+    // liked profile should disappear from their feed. The liked user's feed is
+    // unaffected; they still see the liker until they swipe themselves.
     cacheDelPrefix(`discover:${fromUserId}:`);
-    cacheDelPrefix(`discover:${toUserId}:`);
     cacheDel(`matches:${fromUserId}`);
     cacheDel(`matches:${toUserId}`);
 
