@@ -161,14 +161,14 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
         {/* Back button */}
         <button onClick={goBack} data-testid="button-back-profile"
           className="absolute top-12 left-4 w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ background: "rgba(13,6,24,0.7)", border: "1px solid rgba(255,255,255,0.15)" }}>
+          style={{ background: "rgba(13,6,24,0.7)", border: "1px solid rgba(255,255,255,0.15)", zIndex: 30 }}>
           <ArrowLeft size={18} color="rgba(253,248,240,0.85)" />
         </button>
 
         {/* Report button */}
         <button onClick={() => setShowReport(true)} data-testid="button-report-profile"
           className="absolute top-12 right-4 w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ background: "rgba(13,6,24,0.7)", border: "1px solid rgba(255,255,255,0.15)" }}>
+          style={{ background: "rgba(13,6,24,0.7)", border: "1px solid rgba(255,255,255,0.15)", zIndex: 30 }}>
           <Flag size={16} color="rgba(253,248,240,0.5)" />
         </button>
 
