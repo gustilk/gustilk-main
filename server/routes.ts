@@ -14,7 +14,12 @@ import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sen
 import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI | null {
+  if (!process.env.OPENAI_API_KEY) return null;
+  if (!_openai) _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return _openai;
+}
 
 const SUPPORT_ACCOUNT_EMAIL = "support@gustilk.com";
 
@@ -200,9 +205,10 @@ async function generateSupportAiReply(matchId: string, supportAccountId: string)
     if (chatMessages.length === 0 || chatMessages[chatMessages.length - 1].role !== "user") return;
     // Try AI first; fall back to rule-based on any error
     let replyText: string | null = null;
-    if (process.env.OPENAI_API_KEY) {
+    const openaiClient = getOpenAI();
+    if (openaiClient) {
       try {
-        const aiReply = await openai.chat.completions.create({
+        const aiReply = await openaiClient.chat.completions.create({
           model: "gpt-4o-mini",
           messages: [
             { role: "system", content: SUPPORT_AI_SYSTEM_PROMPT },
