@@ -3,8 +3,12 @@ import type { Request } from "express";
 export function getClientIp(req: Request): string | null {
   const forwarded = req.headers["x-forwarded-for"];
   if (forwarded) {
-    const first = (Array.isArray(forwarded) ? forwarded[0] : forwarded).split(",")[0].trim();
-    if (first) return first;
+    const raw = Array.isArray(forwarded) ? forwarded[0] : forwarded;
+    const parts = raw.split(",").map(s => s.trim()).filter(Boolean);
+    // Read the LAST entry — this is appended by the trusted reverse proxy (Railway/Nginx)
+    // and cannot be forged by the client, unlike the first entry which the client controls.
+    const last = parts[parts.length - 1];
+    if (last) return last;
   }
   return req.socket?.remoteAddress ?? null;
 }
