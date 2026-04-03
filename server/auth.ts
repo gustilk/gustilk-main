@@ -139,6 +139,20 @@ export function registerAuthRoutes(app: Express) {
       const user = await storage.getUserById(req.session.userId!);
       if (!user) return res.status(404).json({ message: "User not found" });
       db.update(users).set({ activitySeenAt: new Date() } as any).where(eq(users.id, req.session.userId!)).catch(() => {});
+
+      // Auto-correct premium expiry: if premiumUntil has passed, clear isPremium flag silently
+      const now = new Date();
+      if (user.isPremium && user.premiumUntil && user.premiumUntil < now) {
+        storage.updateUser(user.id, { isPremium: false, premiumUntil: null }).catch(() => {});
+        (user as any).isPremium = false;
+        (user as any).premiumUntil = null;
+      }
+      // Reverse desync: premiumUntil still in future but isPremium was somehow false
+      if (!user.isPremium && user.premiumUntil && user.premiumUntil > now) {
+        storage.updateUser(user.id, { isPremium: true }).catch(() => {});
+        (user as any).isPremium = true;
+      }
+
       res.json({ user: safeUser(user as any) });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
