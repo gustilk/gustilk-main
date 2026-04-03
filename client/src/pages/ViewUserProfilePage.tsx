@@ -30,19 +30,12 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
     return stored;
   });
 
-  // Single source of truth for going back.
-  // • When the user arrived via in-app navigation, history.back() pops the
-  //   pushState entry that setLocation() created — works on all browsers
-  //   including iOS Safari and Android Chrome, and also covers the native
-  //   back button and the iOS swipe-back gesture.
-  // • When the user arrived via a direct URL / external link (no referrer
-  //   stored), fall back to /discover so they stay in the app.
+  // Navigate back to wherever the user came from.
+  // Use the stored referrer URL directly — history.back() is unreliable in SPA
+  // routing because the stack may contain unexpected entries. A direct
+  // setLocation to the known referrer is always correct.
   const goBack = useCallback(() => {
-    if (referrer) {
-      history.back();
-    } else {
-      setLocation("/discover");
-    }
+    setLocation(referrer ?? "/discover");
   }, [referrer, setLocation]);
 
   const isPremium = !!viewer.isPremium;
