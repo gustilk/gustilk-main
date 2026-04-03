@@ -655,7 +655,18 @@ export class DatabaseStorage implements IStorage {
     const rows = await db.select().from(likes).where(eq(likes.toUserId, userId)).orderBy(desc(likes.createdAt));
     if (rows.length === 0) return [];
     const fromIds = [...new Set(rows.map(r => r.fromUserId))];
-    const userRows = await db.select(CARD_COLUMNS).from(users).where(inArray(users.id, fromIds));
+
+    // Exclude people the current user has already liked back or passed
+    const alreadyLiked = db.select({ id: likes.toUserId }).from(likes).where(eq(likes.fromUserId, userId));
+    const alreadyDisliked = db.select({ id: dislikes.toUserId }).from(dislikes).where(eq(dislikes.fromUserId, userId));
+
+    const userRows = await db.select(CARD_COLUMNS).from(users).where(
+      and(
+        inArray(users.id, fromIds),
+        notInArray(users.id, alreadyLiked),
+        notInArray(users.id, alreadyDisliked),
+      )
+    );
     const userMap = new Map(userRows.map(u => [u.id, enrichCardUser(u)]));
     return rows
       .map(r => ({ user: userMap.get(r.fromUserId), createdAt: r.createdAt! }))
