@@ -9,7 +9,7 @@ import {
   ChevronLeft, ChevronRight, Globe, Bell, FileText, Shield,
   LogOut, Trash2, AlertTriangle, Lock, Heart, MessageCircle,
   Star, CalendarDays, Smartphone, Mail, KeyRound, Phone, Eye, EyeOff, CheckCircle2, ShieldX, UserX,
-  Cookie, ShieldCheck, ShieldAlert, ImageOff,
+  Cookie, ShieldCheck, ShieldAlert, ImageOff, LifeBuoy,
 } from "lucide-react";
 import type { SafeUser } from "@shared/schema";
 
@@ -67,6 +67,26 @@ export default function SettingsPage({ user }: Props) {
       toast({ title: "Could not save", description: "Please try again.", variant: "destructive" });
     },
   });
+
+  const { data: matchesData } = useQuery<{ matches: any[] }>({ queryKey: ["/api/matches"] });
+  const supportMatch = matchesData?.matches?.find((m: any) => m.otherUser?.isSystemAccount);
+
+  const startSupportMutation = useMutation({
+    mutationFn: async () => (await apiRequest("POST", "/api/support/start")).json(),
+    onSuccess: (data: { matchId: string }) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
+      setLocation(`/chat/${data.matchId}?support=1`);
+    },
+    onError: () => toast({ title: "Could not open support chat", variant: "destructive" }),
+  });
+
+  function openSupportChat() {
+    if (supportMatch) {
+      setLocation(`/chat/${supportMatch.id}?support=1`);
+    } else {
+      startSupportMutation.mutate();
+    }
+  }
 
   const currentLang = LANGUAGE_LIST.find(l => l.code === i18n.language) ?? LANGUAGE_LIST[0];
 
@@ -424,6 +444,19 @@ export default function SettingsPage({ user }: Props) {
             <Row icon={KeyRound} label="Email, Password & Phone" sub="Change your login credentials" onClick={() => setSubScreen("account")} testId="button-settings-account" />
             <Divider />
             <Row icon={ShieldX} label="Blocked Users" sub="Manage who you've blocked" onClick={() => setSubScreen("blocked-users")} testId="button-settings-blocked" />
+          </div>
+        </div>
+
+        <div>
+          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Contact Us</p>
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
+            <Row
+              icon={LifeBuoy}
+              label="Help & Support"
+              sub="Chat with our support team"
+              onClick={openSupportChat}
+              testId="button-settings-support"
+            />
           </div>
         </div>
 

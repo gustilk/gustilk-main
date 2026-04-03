@@ -1,11 +1,10 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { Lock, MessageCircle, Bot, BadgeCheck } from "lucide-react";
+import { Lock, MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
 import type { SafeUser, MatchWithUser } from "@shared/schema";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 
 function getActiveLabel(ts: Date | string | null | undefined): string | null {
   if (!ts) return null;
@@ -28,24 +27,8 @@ export default function MatchesPage({ user }: Props) {
   });
 
   const allMatches = data?.matches ?? [];
-  const supportMatch = allMatches.find(m => m.otherUser?.isSystemAccount);
   const regularMatches = allMatches.filter(m => !m.otherUser?.isSystemAccount);
 
-  const startSupportMutation = useMutation({
-    mutationFn: async () => (await apiRequest("POST", "/api/support/start")).json(),
-    onSuccess: (data: { matchId: string }) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
-      setLocation(`/chat/${data.matchId}?support=1`);
-    },
-  });
-
-  function openSupportChat() {
-    if (supportMatch) {
-      setLocation(`/chat/${supportMatch.id}?support=1`);
-    } else {
-      startSupportMutation.mutate();
-    }
-  }
   const newMatches = regularMatches.filter(m => !m.lastMessage);
   const conversations = regularMatches.filter(m => !!m.lastMessage);
 
@@ -54,15 +37,6 @@ export default function MatchesPage({ user }: Props) {
       <div className="pt-12 pb-2 px-5 flex items-center gap-2.5">
         <img src="/gustilk-logo.png?v=4" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
         <h1 className="font-serif text-2xl text-gold">{t("matches.title")}</h1>
-      </div>
-
-      {/* Pinned Gûstîlk Support chat — always shown */}
-      <div className="px-4 pt-2 pb-1">
-        <SupportChatCard
-          match={supportMatch}
-          loading={startSupportMutation.isPending}
-          onClick={openSupportChat}
-        />
       </div>
 
       {isLoading ? (
@@ -161,57 +135,6 @@ export default function MatchesPage({ user }: Props) {
         </div>
       )}
     </div>
-  );
-}
-
-function SupportChatCard({ match, loading, onClick }: { match: MatchWithUser | undefined; loading?: boolean; onClick: () => void }) {
-  const lastMsg = match?.lastMessage;
-  const hasUnread = (match?.unreadCount || 0) > 0;
-
-  return (
-    <button
-      onClick={onClick}
-      disabled={loading}
-      data-testid="support-chat-card"
-      className="w-full flex items-center gap-3.5 p-3.5 rounded-2xl text-left transition-all"
-      style={{
-        background: "linear-gradient(135deg, rgba(123,63,160,0.12), rgba(201,168,76,0.08))",
-        border: "1px solid rgba(201,168,76,0.25)",
-      }}
-    >
-      <div className="relative flex-shrink-0">
-        <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden"
-          style={{ background: "linear-gradient(135deg, #1a0a2e, #2d0f4a)", border: "2px solid rgba(201,168,76,0.4)" }}>
-          <img src="/gustilk-logo.png?v=4" alt="Gûstîlk Support" className="w-8 h-8 object-contain" />
-        </div>
-        <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
-          style={{ background: "#10b981", border: "1.5px solid #0d0618" }}>
-          <Bot size={9} color="white" />
-        </span>
-        {hasUnread && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
-            style={{ background: "#d4608a", color: "white" }}>
-            {(match?.unreadCount || 0) > 9 ? "9+" : match?.unreadCount}
-          </span>
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 mb-0.5">
-          <span className="font-semibold text-sm text-cream" data-testid="text-support-name">Gûstîlk Support</span>
-          <BadgeCheck size={13} color="#10b981" />
-          <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold ml-0.5"
-            style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.3)" }}>
-            AI
-          </span>
-        </div>
-        <p className="text-xs text-cream/40 truncate">
-          {loading ? "Starting chat…" : lastMsg ? lastMsg.text : "Welcome — tap to ask for help 24/7"}
-        </p>
-      </div>
-      <span className="text-cream/25 text-xs flex-shrink-0">
-        {lastMsg?.createdAt ? formatDistanceToNow(new Date(lastMsg.createdAt), { addSuffix: true }) : ""}
-      </span>
-    </button>
   );
 }
 
