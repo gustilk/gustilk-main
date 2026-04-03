@@ -101,18 +101,21 @@ export default function ChatPage({ user, matchId }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const { startCall, callState } = useVideoCallContext();
 
-  const { data: matchData, isLoading: matchLoading } = useQuery<{ matches: MatchWithUser[] }>({
+  const [location] = useLocation();
+  const isSupportChatFromUrl = new URLSearchParams(location.split("?")[1] ?? "").get("support") === "1";
+
+  const { data: matchData, isLoading: matchLoading, isFetching: matchFetching } = useQuery<{ matches: MatchWithUser[] }>({
     queryKey: ["/api/matches"],
   });
 
   const match = matchData?.matches?.find(m => m.id === matchId);
   const otherUser = match?.otherUser;
-  const isSupportChat = !!match?.otherUser?.isSystemAccount;
+  const isSupportChat = !!match?.otherUser?.isSystemAccount || isSupportChatFromUrl;
 
   const { data: msgData, isLoading } = useQuery<{ messages: Message[] }>({
     queryKey: ["/api/messages", matchId],
     refetchInterval: isSupportChat ? 3000 : 15000,
-    enabled: !!user.isPremium || isSupportChat || matchLoading,
+    enabled: !!user.isPremium || isSupportChat,
   });
 
   const { data: giftData } = useQuery<{ gifts: GiftType[] }>({
@@ -172,7 +175,7 @@ export default function ChatPage({ user, matchId }: Props) {
     }
   };
 
-  if (!user.isPremium && !isSupportChat && !matchLoading) {
+  if (!user.isPremium && !isSupportChat && !matchLoading && !matchFetching) {
     return (
       <div className="flex flex-col h-screen" style={{ background: "#0d0618" }}>
         <div className="flex items-center gap-3 px-4 pt-12 pb-3"

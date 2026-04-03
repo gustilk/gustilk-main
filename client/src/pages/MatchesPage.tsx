@@ -35,13 +35,13 @@ export default function MatchesPage({ user }: Props) {
     mutationFn: async () => (await apiRequest("POST", "/api/support/start")).json(),
     onSuccess: (data: { matchId: string }) => {
       queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
-      setLocation(`/chat/${data.matchId}`);
+      setLocation(`/chat/${data.matchId}?support=1`);
     },
   });
 
   function openSupportChat() {
     if (supportMatch) {
-      setLocation(`/chat/${supportMatch.id}`);
+      setLocation(`/chat/${supportMatch.id}?support=1`);
     } else {
       startSupportMutation.mutate();
     }
