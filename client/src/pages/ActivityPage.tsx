@@ -200,7 +200,6 @@ function ActivityCard({ item, isPremium, blurred, tab, onBeforeNavigate, onActed
       <div
         className="absolute inset-0 cursor-pointer active:scale-[0.97] transition-transform"
         onClick={() => {
-          if (showActions) return;
           onBeforeNavigate();
           sessionStorage.setItem("profile_back_to", "/activity");
           setLocation(`/profile/${user.id}`);
