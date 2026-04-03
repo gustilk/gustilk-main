@@ -12,6 +12,9 @@ import { count, sql, eq, asc, desc, or, and, ilike } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
 import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail, sendAdminApprovalNeededEmail } from "./email";
 import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
+import OpenAI from "openai";
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const SUPPORT_ACCOUNT_EMAIL = "support@gustilk.com";
 
@@ -129,19 +132,95 @@ const SUPPORT_RULES: SupportRule[] = [
 
 const SUPPORT_FALLBACK = `Thanks for reaching out to Gûstîlk Support! 😊\n\nI'm the automated support assistant. I'm not sure I fully understood your question — could you give me a bit more detail?\n\nOr if you'd prefer to speak with a human, email us at **support@gustilk.com** and our team will get back to you within 24 hours.`;
 
+const SUPPORT_AI_SYSTEM_PROMPT = `You are the Official Gûstîlk Support Assistant — a warm, knowledgeable AI for the Gûstîlk app, a Yezidi community dating platform. You have deep knowledge of every feature and policy.
+
+MATCHING & DISCOVERY
+• Members are matched strictly within their caste (Sheikh, Pir, or Mirid) with members of the opposite gender
+• Swipe right (heart) to like someone — they disappear from your Discover feed
+• If they also like you back from their "Likes You" inbox, you match and can message each other
+• Liked profiles move to the other person's "Likes You" tab (Activity page) — not your Discover feed
+• Disliking someone removes them from your feed permanently
+
+PROFILE & VERIFICATION
+• Complete your profile: add a bio, occupation, city, caste, date of birth, and up to 6 approved photos
+• A verification selfie is required — the admin team reviews it within 24–48 hours
+• You will receive an email once your profile is approved or if changes are needed
+• While pending, your profile is not visible in Discover
+• You can re-apply for verification after making corrections
+
+PREMIUM SUBSCRIPTION
+• Free users can like and match but cannot send messages
+• Premium unlocks: messaging matches, seeing who liked you in Activity, video calls, sending virtual gifts
+• Upgrade from the Premium tab or the profile page
+
+MESSAGING & CHAT
+• Only premium members can send messages to their matches
+• The Matches page shows all your conversations and the Gûstîlk Support chat
+• You can view a match's full profile by tapping their avatar in the chat header
+• Virtual gifts (animated) can be sent from the chat screen (premium only)
+
+ACTIVITY TAB
+• "Likes" shows everyone who has liked you — premium users can Accept (like back) or Pass (decline) directly
+• "Visitors" shows recent profile views
+• "Likes Sent" shows profiles you have already liked
+
+COMMUNITY EVENTS
+• Browse Yezidi community events in the Events tab
+• RSVP to events and see who else is attending
+
+ACCOUNT & SETTINGS
+• Change display language: English, Arabic, German, Armenian, Russian, Kurdish (Kurmanji)
+• Enable/disable notifications, manage privacy settings, block or report users
+• Forgot password? Use the Magic Link option on the login screen — a one-click link is sent to your email
+• Biometric / passkey login is available after your first login with phone number verification
+
+SAFETY & REPORTING
+• Use the flag icon on any profile to report harassment, fake accounts, or abuse
+• Blocked users cannot see your profile or contact you
+
+If the user describes harassment, abuse, impersonation, or a safety threat, respond with empathy, confirm you are flagging it for the admin team, and remind them to use the in-app Report button on the offending profile.
+
+IMPORTANT RULES
+- Always be transparent that you are an AI assistant, not a human
+- If a user explicitly requests a human agent, tell them to email support@gustilk.com and that a human will respond within 24 hours
+- Be warm, empathetic, and concise (aim for under 120 words per reply unless a detailed explanation is genuinely needed)
+- Never make up information — if you are unsure, say so and direct them to support@gustilk.com
+- Respond in the user's language if it is one of the six supported languages (English, Arabic, German, Armenian, Russian, Kurdish) — otherwise respond in English`;
+
 async function generateSupportAiReply(matchId: string, supportAccountId: string): Promise<void> {
   try {
     const history = await storage.getMessages(matchId);
-    if (history.length === 0) return;
-    // Find the last message sent by the user (not by support)
-    const userMessages = history.filter(m => m.senderId !== supportAccountId && m.text?.trim());
-    if (userMessages.length === 0) return;
-    const lastUserMsg = userMessages[userMessages.length - 1].text ?? "";
-    // Small delay so the reply doesn't appear instant (feels more natural)
-    await new Promise(r => setTimeout(r, 1200));
-    const matched = SUPPORT_RULES.find(rule => rule.keywords.test(lastUserMsg));
-    const replyText = matched ? matched.reply : SUPPORT_FALLBACK;
-    await storage.sendMessage(matchId, supportAccountId, replyText);
+    const recent = history.slice(-20);
+    const chatMessages: { role: "user" | "assistant"; content: string }[] = recent
+      .filter(m => m.text && m.text.trim().length > 0)
+      .map(m => ({
+        role: m.senderId === supportAccountId ? "assistant" : "user",
+        content: m.text,
+      }));
+    if (chatMessages.length === 0 || chatMessages[chatMessages.length - 1].role !== "user") return;
+    // Try AI first; fall back to rule-based on any error
+    let replyText: string | null = null;
+    if (process.env.OPENAI_API_KEY) {
+      try {
+        const aiReply = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: SUPPORT_AI_SYSTEM_PROMPT },
+            ...chatMessages,
+          ],
+          max_tokens: 400,
+        });
+        replyText = aiReply.choices[0]?.message?.content ?? null;
+      } catch (aiErr) {
+        console.error("[AI support reply error]", aiErr);
+      }
+    }
+    if (!replyText) {
+      const lastUserMsg = chatMessages.filter(m => m.role === "user").pop()?.content ?? "";
+      const matched = SUPPORT_RULES.find(rule => rule.keywords.test(lastUserMsg));
+      replyText = matched ? matched.reply : SUPPORT_FALLBACK;
+    }
+    if (replyText) await storage.sendMessage(matchId, supportAccountId, replyText);
   } catch (e) {
     console.error("[Support reply error]", e);
   }
