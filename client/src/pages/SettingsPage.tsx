@@ -251,7 +251,7 @@ export default function SettingsPage({ user }: Props) {
           {/* Female-only privacy controls */}
           {isFemale && (
             <div>
-              <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Photo Privacy</p>
+              <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.photoPrivacy")}</p>
               <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.15)", background: "rgba(255,255,255,0.03)" }}>
                 {/* Photo blur toggle */}
                 <div className="flex items-center gap-4 px-4 py-3.5">
@@ -259,9 +259,9 @@ export default function SettingsPage({ user }: Props) {
                     <ImageOff size={16} color="#c9a84c" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium" style={{ color: "rgba(253,248,240,0.85)" }}>Blur photos until matched</p>
+                    <p className="text-sm font-medium" style={{ color: "rgba(253,248,240,0.85)" }}>{t("settings.blurPhotos")}</p>
                     <p className="text-xs mt-0.5" style={{ color: "rgba(253,248,240,0.35)" }}>
-                      {photosBlurred ? "Photos are blurred until you both like each other" : "Photos are visible to all who view your profile"}
+                      {photosBlurred ? t("settings.blurPhotosOnDesc") : t("settings.blurPhotosOffDesc")}
                     </p>
                   </div>
                   <button
@@ -279,7 +279,7 @@ export default function SettingsPage({ user }: Props) {
                 </div>
               </div>
               <p className="text-xs text-cream/30 px-1 mt-2 leading-relaxed">
-                These settings apply to your profile only and can be changed at any time.
+                {t("settings.photoPrivacyFooter")}
               </p>
             </div>
           )}
@@ -446,9 +446,9 @@ export default function SettingsPage({ user }: Props) {
   if (subScreen === "feature-request") {
     return (
       <FeedbackSubScreen
-        title="Feature Request"
+        title={t("settings.featureRequest")}
         icon={Lightbulb}
-        placeholder="What feature would you like to see in Gûstîlk? Describe your idea in as much detail as you like."
+        placeholder={t("settings.featureRequestPlaceholder")}
         messagePrefix="FEATURE REQUEST: "
         supportMatch={supportMatch}
         onBack={() => setSubScreen(null)}
@@ -460,9 +460,9 @@ export default function SettingsPage({ user }: Props) {
   if (subScreen === "feedback") {
     return (
       <FeedbackSubScreen
-        title="Give Us Feedback"
+        title={t("settings.giveUsFeedback")}
         icon={ThumbsUp}
-        placeholder="Share your experience, thoughts or any suggestions to help us improve Gûstîlk."
+        placeholder={t("settings.giveUsFeedbackPlaceholder")}
         messagePrefix="FEEDBACK: "
         supportMatch={supportMatch}
         onBack={() => setSubScreen(null)}
@@ -503,58 +503,58 @@ export default function SettingsPage({ user }: Props) {
 
         {/* ── ACCOUNT ─────────────────────────────────────────────────── */}
         <div>
-          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Account</p>
+          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.accountSection")}</p>
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
-            <Row icon={Mail} label="Edit Email" sub={user.email ? `Current: ${user.email}` : "Add your email address"} onClick={() => setSubScreen("account")} testId="button-settings-email" />
+            <Row icon={Mail} label={t("settings.editEmail")} sub={user.email ? t("settings.editEmailSubSet", { email: user.email }) : t("settings.editEmailSubNotSet")} onClick={() => setSubScreen("account")} testId="button-settings-email" />
             <Divider />
-            <Row icon={KeyRound} label="Edit Password" sub="Change your account password" onClick={() => setSubScreen("account")} testId="button-settings-password" />
+            <Row icon={KeyRound} label={t("settings.editPassword")} sub={t("settings.editPasswordSub")} onClick={() => setSubScreen("account")} testId="button-settings-password" />
             <Divider />
-            <Row icon={ShieldX} label="Manage Account" sub="Blocked users and account actions" onClick={() => setSubScreen("blocked-users")} testId="button-settings-manage-account" />
+            <Row icon={ShieldX} label={t("settings.manageAccount")} sub={t("settings.manageAccountSub")} onClick={() => setSubScreen("blocked-users")} testId="button-settings-manage-account" />
           </div>
         </div>
 
         {/* ── CONTACT US ──────────────────────────────────────────────── */}
         <div>
-          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Contact Us</p>
+          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.contactUsSection")}</p>
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
-            <Row icon={LifeBuoy} label="Help & Support" sub="Chat with our support team 24/7" onClick={openSupportChat} testId="button-settings-support" />
+            <Row icon={LifeBuoy} label={t("settings.helpSupport")} sub={t("settings.helpSupportSub")} onClick={openSupportChat} testId="button-settings-support" />
             <Divider />
-            <Row icon={Lightbulb} label="Feature Request" sub="Suggest a new feature" onClick={() => setSubScreen("feature-request")} testId="button-settings-feature-request" />
+            <Row icon={Lightbulb} label={t("settings.featureRequest")} sub={t("settings.featureRequestSub")} onClick={() => setSubScreen("feature-request")} testId="button-settings-feature-request" />
             <Divider />
-            <Row icon={ThumbsUp} label="Give Us Feedback" sub="Share your thoughts about the app" onClick={() => setSubScreen("feedback")} testId="button-settings-feedback" />
+            <Row icon={ThumbsUp} label={t("settings.giveUsFeedback")} sub={t("settings.giveUsFeedbackSub")} onClick={() => setSubScreen("feedback")} testId="button-settings-feedback" />
             <Divider />
-            <Row icon={HelpCircle} label="FAQ" sub="Frequently asked questions" onClick={() => setSubScreen("faq")} testId="button-settings-faq" />
+            <Row icon={HelpCircle} label={t("settings.faq")} sub={t("settings.faqSub")} onClick={() => setSubScreen("faq")} testId="button-settings-faq" />
           </div>
         </div>
 
         {/* ── SUBSCRIPTION ────────────────────────────────────────────── */}
         <div>
-          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Subscription</p>
+          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.subscriptionSection")}</p>
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
-            <Row icon={ScrollText} label="Subscription Terms" sub="Read the full subscription terms" onClick={() => setSubScreen("subscription-terms")} testId="button-settings-sub-terms" />
+            <Row icon={ScrollText} label={t("settings.subscriptionTerms")} sub={t("settings.subscriptionTermsSub")} onClick={() => setSubScreen("subscription-terms")} testId="button-settings-sub-terms" />
             <Divider />
             <Row
               icon={Info}
-              label="What is Gûstîlk Premium?"
-              sub="See what's included in Premium"
+              label={t("settings.whatIsPremium")}
+              sub={t("settings.whatIsPremiumSub")}
               onClick={() => setLocation("/premium")}
               testId="button-settings-what-is-premium"
             />
             <Divider />
             <Row
               icon={Settings2}
-              label="Manage Subscription"
+              label={t("settings.manageSubscription")}
               sub={user.isPremium
-                ? (user.premiumUntil ? `Active until ${new Date(user.premiumUntil).toLocaleDateString()}` : "Active membership")
-                : "Upgrade or renew your Premium"}
+                ? (user.premiumUntil ? t("settings.manageSubscriptionActiveUntil", { date: new Date(user.premiumUntil).toLocaleDateString() }) : t("settings.manageSubscriptionActive"))
+                : t("settings.manageSubscriptionNotActive")}
               onClick={() => setLocation("/premium")}
               testId="button-settings-manage-subscription"
             />
             <Divider />
             <Row
               icon={RefreshCw}
-              label={restoreMutation.isPending ? "Restoring…" : "Restore Purchases"}
-              sub="Already subscribed? Tap to restore"
+              label={restoreMutation.isPending ? t("settings.restorePurchasesIng") : t("settings.restorePurchases")}
+              sub={t("settings.restorePurchasesSub")}
               onClick={() => { if (!restoreMutation.isPending) restoreMutation.mutate(); }}
               testId="button-settings-restore-premium"
             />
@@ -563,19 +563,19 @@ export default function SettingsPage({ user }: Props) {
 
         {/* ── LEGAL ───────────────────────────────────────────────────── */}
         <div>
-          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Legal</p>
+          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.legalSection")}</p>
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
-            <Row icon={Lock} label="Privacy Policy" sub="How we collect and use your data" onClick={() => setSubScreen("privacy")} testId="button-settings-privacy" />
+            <Row icon={Lock} label={t("settings.privacyMenuItem")} sub={t("settings.privacyMenuSub")} onClick={() => setSubScreen("privacy")} testId="button-settings-privacy" />
             <Divider />
-            <Row icon={FileText} label="Terms of Use" sub="Our terms and conditions" onClick={() => setSubScreen("guidelines")} testId="button-settings-terms" />
+            <Row icon={FileText} label={t("settings.termsOfUse")} sub={t("settings.termsOfUseSub")} onClick={() => setSubScreen("guidelines")} testId="button-settings-terms" />
             <Divider />
-            <Row icon={Cookie} label="Cookie Policy" sub="How we use cookies and tracking" onClick={() => setLocation("/cookie-policy")} testId="button-settings-cookie-policy" />
+            <Row icon={Cookie} label={t("settings.cookiePolicy")} sub={t("settings.cookiePolicySub")} onClick={() => setLocation("/cookie-policy")} testId="button-settings-cookie-policy" />
             <Divider />
-            <Row icon={Shield} label="Agreements" sub="User agreements and policies" onClick={() => setSubScreen("guidelines")} testId="button-settings-agreements" />
+            <Row icon={Shield} label={t("settings.agreements")} sub={t("settings.agreementsSub")} onClick={() => setSubScreen("guidelines")} testId="button-settings-agreements" />
             <Divider />
-            <Row icon={ShieldAlert} label="Gûstîlk Community Rules" sub="Standards for using our platform" onClick={() => setSubScreen("guidelines")} testId="button-settings-community-rules" />
+            <Row icon={ShieldAlert} label={t("settings.communityRules")} sub={t("settings.communityRulesSub")} onClick={() => setSubScreen("guidelines")} testId="button-settings-community-rules" />
             <Divider />
-            <Row icon={ShieldCheck} label="Privacy Preference Center" sub="GDPR rights and cookie preferences" onClick={() => setLocation("/gdpr")} testId="button-settings-privacy-prefs" />
+            <Row icon={ShieldCheck} label={t("settings.privacyPreferenceCenter")} sub={t("settings.privacyPreferenceCenterSub")} onClick={() => setLocation("/gdpr")} testId="button-settings-privacy-prefs" />
           </div>
         </div>
 
@@ -628,7 +628,7 @@ export default function SettingsPage({ user }: Props) {
                     style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.25)" }}>
                     <Star size={13} color="#c9a84c" className="flex-shrink-0 mt-0.5" />
                     <p className="text-xs" style={{ color: "rgba(201,168,76,0.85)" }}>
-                      You have an active Premium membership. Deleting your account will permanently cancel it with no refund.
+                      {t("settings.premiumDeleteWarning")}
                     </p>
                   </div>
                 )}
@@ -663,6 +663,7 @@ export default function SettingsPage({ user }: Props) {
 }
 
 function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () => void }) {
+  const { t } = useTranslation();
   const [emailForm, setEmailForm] = useState({ newEmail: "", currentPassword: "" });
   const [emailError, setEmailError] = useState<string | null>(null);
   const [emailDone, setEmailDone] = useState(false);
@@ -716,7 +717,7 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
         <button onClick={onBack} data-testid="button-back-account" className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,0.06)" }}>
           <ChevronLeft size={18} color="rgba(253,248,240,0.7)" />
         </button>
-        <h1 className="font-serif text-xl text-gold">Account Security</h1>
+        <h1 className="font-serif text-xl text-gold">{t("settings.accountSecurity")}</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 py-5 pb-20 space-y-5">
@@ -725,22 +726,22 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
         <div className="rounded-2xl p-4 space-y-3" style={sectionStyle}>
           <div className="flex items-center gap-2 mb-1">
             <Mail size={16} color="#c9a84c" />
-            <p className="text-sm font-semibold text-gold">Change Email</p>
+            <p className="text-sm font-semibold text-gold">{t("settings.changeEmail")}</p>
           </div>
-          <p className="text-xs text-cream/40 -mt-1">Current: {user.email ?? "Not set"}</p>
+          <p className="text-xs text-cream/40 -mt-1">{user.email ? t("settings.changeEmailCurrent", { value: user.email }) : t("settings.notSet")}</p>
           {emailDone ? (
             <div className="flex items-center gap-2 py-2" style={{ color: "#10b981" }}>
-              <CheckCircle2 size={16} /><span className="text-sm font-medium">Email updated successfully</span>
+              <CheckCircle2 size={16} /><span className="text-sm font-medium">{t("settings.emailUpdated")}</span>
             </div>
           ) : (
             <>
               <div>
-                <label className={labelClass}>New Email</label>
+                <label className={labelClass}>{t("settings.newEmail")}</label>
                 <input type="email" value={emailForm.newEmail} onChange={e => { setEmailForm(f => ({ ...f, newEmail: e.target.value })); setEmailError(null); }}
                   placeholder="new@email.com" data-testid="input-new-email" className={inputClass} style={inputStyle} />
               </div>
               <div>
-                <label className={labelClass}>Current Password</label>
+                <label className={labelClass}>{t("settings.currentPassword")}</label>
                 <input type="password" value={emailForm.currentPassword} onChange={e => { setEmailForm(f => ({ ...f, currentPassword: e.target.value })); setEmailError(null); }}
                   placeholder="Confirm with your password" data-testid="input-email-current-password" className={inputClass} style={inputStyle} />
               </div>
@@ -748,7 +749,7 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
               <button onClick={() => emailMutation.mutate()} disabled={!emailForm.newEmail || !emailForm.currentPassword || emailMutation.isPending}
                 data-testid="button-save-email" className="w-full py-3 rounded-xl text-sm font-bold disabled:opacity-50"
                 style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
-                {emailMutation.isPending ? "Saving…" : "Update Email"}
+                {emailMutation.isPending ? t("settings.savingEllipsis") : t("settings.updateEmail")}
               </button>
             </>
           )}
@@ -758,16 +759,16 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
         <div className="rounded-2xl p-4 space-y-3" style={sectionStyle}>
           <div className="flex items-center gap-2 mb-1">
             <KeyRound size={16} color="#c9a84c" />
-            <p className="text-sm font-semibold text-gold">Change Password</p>
+            <p className="text-sm font-semibold text-gold">{t("settings.changePassword")}</p>
           </div>
           {pwDone ? (
             <div className="flex items-center gap-2 py-2" style={{ color: "#10b981" }}>
-              <CheckCircle2 size={16} /><span className="text-sm font-medium">Password changed successfully</span>
+              <CheckCircle2 size={16} /><span className="text-sm font-medium">{t("settings.passwordUpdated")}</span>
             </div>
           ) : (
             <>
               <div>
-                <label className={labelClass}>Current Password</label>
+                <label className={labelClass}>{t("settings.currentPassword")}</label>
                 <div className="relative">
                   <input type={showCurrent ? "text" : "password"} value={pwForm.currentPassword} onChange={e => { setPwForm(f => ({ ...f, currentPassword: e.target.value })); setPwError(null); }}
                     placeholder="Enter current password" data-testid="input-current-password" className={`${inputClass} pr-11`} style={inputStyle} />
@@ -777,7 +778,7 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
                 </div>
               </div>
               <div>
-                <label className={labelClass}>New Password</label>
+                <label className={labelClass}>{t("settings.newPassword")}</label>
                 <div className="relative">
                   <input type={showNew ? "text" : "password"} value={pwForm.newPassword} onChange={e => { setPwForm(f => ({ ...f, newPassword: e.target.value })); setPwError(null); }}
                     placeholder="At least 6 characters" data-testid="input-new-password" className={`${inputClass} pr-11`} style={inputStyle} />
@@ -787,14 +788,14 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
                 </div>
               </div>
               <div>
-                <label className={labelClass}>Confirm New Password</label>
+                <label className={labelClass}>{t("settings.confirmNewPassword")}</label>
                 <input type="password" value={pwForm.confirmPassword} onChange={e => setPwForm(f => ({ ...f, confirmPassword: e.target.value }))}
                   placeholder="Repeat new password" data-testid="input-confirm-new-password" className={inputClass} style={{
                     ...inputStyle,
                     border: pwForm.confirmPassword && pwForm.confirmPassword !== pwForm.newPassword ? "1.5px solid rgba(212,96,138,0.7)" : inputStyle.border
                   }} />
                 {pwForm.confirmPassword && pwForm.confirmPassword !== pwForm.newPassword && (
-                  <p className={errorClass} style={{ color: "#d4608a" }}>Passwords do not match</p>
+                  <p className={errorClass} style={{ color: "#d4608a" }}>{t("settings.passwordsDoNotMatch")}</p>
                 )}
               </div>
               {pwError && <p className={errorClass} style={{ color: "#d4608a" }}>{pwError}</p>}
@@ -802,7 +803,7 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
                 disabled={!pwForm.currentPassword || !pwForm.newPassword || pwForm.newPassword !== pwForm.confirmPassword || pwMutation.isPending}
                 data-testid="button-save-password" className="w-full py-3 rounded-xl text-sm font-bold disabled:opacity-50"
                 style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
-                {pwMutation.isPending ? "Saving…" : "Update Password"}
+                {pwMutation.isPending ? t("settings.savingEllipsis") : t("settings.updatePassword")}
               </button>
             </>
           )}
@@ -812,17 +813,17 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
         <div className="rounded-2xl p-4 space-y-3" style={sectionStyle}>
           <div className="flex items-center gap-2 mb-1">
             <Phone size={16} color="#c9a84c" />
-            <p className="text-sm font-semibold text-gold">Change Phone Number</p>
+            <p className="text-sm font-semibold text-gold">{t("settings.changePhone")}</p>
           </div>
-          <p className="text-xs text-cream/40 -mt-1">Current: {user.phone ?? "Not set"}</p>
+          <p className="text-xs text-cream/40 -mt-1">{user.phone ? t("settings.changeEmailCurrent", { value: user.phone }) : t("settings.notSet")}</p>
           {phoneDone ? (
             <div className="flex items-center gap-2 py-2" style={{ color: "#10b981" }}>
-              <CheckCircle2 size={16} /><span className="text-sm font-medium">Phone number updated successfully</span>
+              <CheckCircle2 size={16} /><span className="text-sm font-medium">{t("settings.phoneUpdated")}</span>
             </div>
           ) : (
             <>
               <div>
-                <label className={labelClass}>New Phone Number</label>
+                <label className={labelClass}>{t("settings.newPhoneNumber")}</label>
                 <input type="tel" value={phoneForm.newPhone} onChange={e => { setPhoneForm({ newPhone: e.target.value }); setPhoneError(null); }}
                   placeholder="+1 555 000 0000" data-testid="input-new-phone" className={inputClass} style={inputStyle} />
               </div>
@@ -830,7 +831,7 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
               <button onClick={() => phoneMutation.mutate()} disabled={!phoneForm.newPhone || phoneMutation.isPending}
                 data-testid="button-save-phone" className="w-full py-3 rounded-xl text-sm font-bold disabled:opacity-50"
                 style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
-                {phoneMutation.isPending ? "Saving…" : "Update Phone"}
+                {phoneMutation.isPending ? t("settings.savingEllipsis") : t("settings.updatePhone")}
               </button>
             </>
           )}
@@ -856,6 +857,7 @@ function SubScreenShell({ title, onBack, testId, children }: { title: string; on
 }
 
 function FaqSubScreen({ onBack }: { onBack: () => void }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState<number | null>(null);
   const faqs = [
     { q: "How does matching work on Gûstîlk?", a: "Gûstîlk matches you with members of the opposite gender within your own caste (Sheikh, Pir, or Murid). You can browse profiles, send likes, and once both of you like each other you become a match and can message each other." },
@@ -868,7 +870,7 @@ function FaqSubScreen({ onBack }: { onBack: () => void }) {
     { q: "How do I restore my Premium subscription?", a: "Go to Settings → Subscription → Restore Purchases. The app will check your account record and re-activate Premium if a valid subscription is found." },
   ];
   return (
-    <SubScreenShell title="FAQ" onBack={onBack} testId="button-back-faq">
+    <SubScreenShell title={t("settings.faq")} onBack={onBack} testId="button-back-faq">
       <div className="flex-1 overflow-y-auto px-5 py-5 pb-16 space-y-3">
         {faqs.map((item, i) => (
           <div key={i} className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
@@ -903,6 +905,7 @@ function FeedbackSubScreen({ title, icon: Icon, placeholder, messagePrefix, supp
   onBack: () => void;
   onNavigate: (url: string) => void;
 }) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [text, setText] = useState("");
 
@@ -936,7 +939,7 @@ function FeedbackSubScreen({ title, icon: Icon, placeholder, messagePrefix, supp
           data-testid="input-feedback-text"
           value={text}
           onChange={e => setText(e.target.value)}
-          placeholder="Write your message here…"
+          placeholder={t("settings.feedbackPlaceholder")}
           rows={7}
           className="w-full px-4 py-3.5 rounded-2xl text-sm placeholder-cream/20 outline-none resize-none"
           style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(201,168,76,0.2)", color: "#fdf8f0" }}
@@ -949,10 +952,10 @@ function FeedbackSubScreen({ title, icon: Icon, placeholder, messagePrefix, supp
           style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
         >
           <Send size={15} />
-          {sendMutation.isPending ? "Sending…" : "Send Message"}
+          {sendMutation.isPending ? t("settings.feedbackSending") : t("settings.feedbackSend")}
         </button>
         <p className="text-center text-xs" style={{ color: "rgba(253,248,240,0.3)" }}>
-          Your message will be sent to our support team via the in-app chat.
+          {t("settings.feedbackFooter")}
         </p>
       </div>
     </SubScreenShell>
@@ -960,8 +963,9 @@ function FeedbackSubScreen({ title, icon: Icon, placeholder, messagePrefix, supp
 }
 
 function SubscriptionTermsSubScreen({ onBack }: { onBack: () => void }) {
+  const { t } = useTranslation();
   return (
-    <SubScreenShell title="Subscription Terms" onBack={onBack} testId="button-back-sub-terms">
+    <SubScreenShell title={t("settings.subscriptionTerms")} onBack={onBack} testId="button-back-sub-terms">
       <div className="flex-1 overflow-y-auto px-5 py-5 pb-16 space-y-4">
         {[
           { title: "Billing & Payment", body: "Gûstîlk Premium is billed on a monthly basis. Payment is charged to your selected payment method at the start of each billing period. All prices are shown in USD and may vary by region." },
@@ -1048,6 +1052,7 @@ function NotifToggleRow({ icon: Icon, label, sub, checked, onChange, testId, dis
 }
 
 function BlockedUsersScreen({ onBack }: { onBack: () => void }) {
+  const { t } = useTranslation();
   const { data, isLoading } = useQuery<{ users: SafeUser[] }>({
     queryKey: ["/api/blocks"],
   });
@@ -1074,9 +1079,9 @@ function BlockedUsersScreen({ onBack }: { onBack: () => void }) {
           <ChevronLeft size={18} color="rgba(253,248,240,0.7)" />
         </button>
         <div>
-          <h1 className="font-serif text-2xl text-gold">Blocked Users</h1>
+          <h1 className="font-serif text-2xl text-gold">{t("settings.blockedUsersTitle")}</h1>
           <p className="text-cream/40 text-xs mt-0.5">
-            {isLoading ? "Loading…" : `${blockedUsers.length} ${blockedUsers.length === 1 ? "person" : "people"} blocked`}
+            {isLoading ? t("common.loading") : t(blockedUsers.length === 1 ? "settings.blockedCount_one" : "settings.blockedCount_other", { count: blockedUsers.length })}
           </p>
         </div>
       </div>
@@ -1094,7 +1099,7 @@ function BlockedUsersScreen({ onBack }: { onBack: () => void }) {
             >
               <ShieldX size={24} color="rgba(201,168,76,0.4)" />
             </div>
-            <p className="text-cream/40 text-sm text-center">You haven't blocked anyone</p>
+            <p className="text-cream/40 text-sm text-center">{t("settings.noneBlocked")}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -1128,7 +1133,7 @@ function BlockedUsersScreen({ onBack }: { onBack: () => void }) {
                   className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-50"
                   style={{ background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}
                 >
-                  Unblock
+                  {t("settings.unblock")}
                 </button>
               </div>
             ))}
