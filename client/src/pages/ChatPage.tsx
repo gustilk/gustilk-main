@@ -101,7 +101,7 @@ export default function ChatPage({ user, matchId }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const { startCall, callState } = useVideoCallContext();
 
-  const { data: matchData } = useQuery<{ matches: MatchWithUser[] }>({
+  const { data: matchData, isLoading: matchLoading } = useQuery<{ matches: MatchWithUser[] }>({
     queryKey: ["/api/matches"],
   });
 
@@ -112,7 +112,7 @@ export default function ChatPage({ user, matchId }: Props) {
   const { data: msgData, isLoading } = useQuery<{ messages: Message[] }>({
     queryKey: ["/api/messages", matchId],
     refetchInterval: isSupportChat ? 3000 : 15000,
-    enabled: !!user.isPremium || isSupportChat,
+    enabled: !!user.isPremium || isSupportChat || matchLoading,
   });
 
   const { data: giftData } = useQuery<{ gifts: GiftType[] }>({
@@ -172,7 +172,7 @@ export default function ChatPage({ user, matchId }: Props) {
     }
   };
 
-  if (!user.isPremium && !isSupportChat) {
+  if (!user.isPremium && !isSupportChat && !matchLoading) {
     return (
       <div className="flex flex-col h-screen" style={{ background: "#0d0618" }}>
         <div className="flex items-center gap-3 px-4 pt-12 pb-3"
