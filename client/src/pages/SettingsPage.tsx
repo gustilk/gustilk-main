@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -10,6 +10,7 @@ import {
   LogOut, Trash2, AlertTriangle, Lock, Heart, MessageCircle,
   Star, CalendarDays, Smartphone, Mail, KeyRound, Phone, Eye, EyeOff, CheckCircle2, ShieldX, UserX,
   Cookie, ShieldCheck, ShieldAlert, ImageOff, LifeBuoy, RefreshCw, Crown,
+  Lightbulb, ThumbsUp, HelpCircle, ScrollText, Info, Settings2, Send,
 } from "lucide-react";
 import type { SafeUser } from "@shared/schema";
 
@@ -41,7 +42,7 @@ function saveNotifPrefs(prefs: NotifPrefs) {
 
 interface Props { user: SafeUser }
 
-type SubScreen = null | "guidelines" | "privacy" | "language" | "notifications" | "account" | "blocked-users";
+type SubScreen = null | "guidelines" | "privacy" | "language" | "notifications" | "account" | "blocked-users" | "faq" | "feature-request" | "feedback" | "subscription-terms";
 
 interface TranslatedSection { title: string; body: string; }
 
@@ -430,6 +431,42 @@ export default function SettingsPage({ user }: Props) {
     return <BlockedUsersScreen onBack={() => setSubScreen(null)} />;
   }
 
+  if (subScreen === "faq") {
+    return <FaqSubScreen onBack={() => setSubScreen(null)} />;
+  }
+
+  if (subScreen === "feature-request") {
+    return (
+      <FeedbackSubScreen
+        title="Feature Request"
+        icon={Lightbulb}
+        placeholder="What feature would you like to see in Gûstîlk? Describe your idea in as much detail as you like."
+        messagePrefix="FEATURE REQUEST: "
+        supportMatch={supportMatch}
+        onBack={() => setSubScreen(null)}
+        onNavigate={(url) => setLocation(url)}
+      />
+    );
+  }
+
+  if (subScreen === "feedback") {
+    return (
+      <FeedbackSubScreen
+        title="Give Us Feedback"
+        icon={ThumbsUp}
+        placeholder="Share your experience, thoughts or any suggestions to help us improve Gûstîlk."
+        messagePrefix="FEEDBACK: "
+        supportMatch={supportMatch}
+        onBack={() => setSubScreen(null)}
+        onNavigate={(url) => setLocation(url)}
+      />
+    );
+  }
+
+  if (subScreen === "subscription-terms") {
+    return <SubscriptionTermsSubScreen onBack={() => setSubScreen(null)} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col pb-24" style={{ background: "#0d0618" }}>
       <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
@@ -446,89 +483,91 @@ export default function SettingsPage({ user }: Props) {
 
       <div className="flex-1 overflow-y-auto px-5 pt-5 space-y-4">
 
+        {/* ── PREFERENCES ─────────────────────────────────────────────── */}
         <div>
           <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.preferencesSection")}</p>
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
             <Row icon={Globe} label={t("profile.language")} sub={`${currentLang.flag} ${currentLang.native}`} onClick={() => setSubScreen("language")} testId="button-settings-language" />
             <Divider />
-            <Row
-              icon={Bell}
-              label={t("settings.notifMenuItem")}
-              sub={t("settings.notifMenuSub")}
-              onClick={() => setSubScreen("notifications")}
-              testId="button-settings-notifications"
-            />
+            <Row icon={Bell} label={t("settings.notifMenuItem")} sub={t("settings.notifMenuSub")} onClick={() => setSubScreen("notifications")} testId="button-settings-notifications" />
           </div>
         </div>
 
-        {/* ── SUBSCRIPTION ───────────────────────────────────────────── */}
+        {/* ── ACCOUNT ─────────────────────────────────────────────────── */}
+        <div>
+          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Account</p>
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
+            <Row icon={Mail} label="Edit Email" sub={user.email ? `Current: ${user.email}` : "Add your email address"} onClick={() => setSubScreen("account")} testId="button-settings-email" />
+            <Divider />
+            <Row icon={KeyRound} label="Edit Password" sub="Change your account password" onClick={() => setSubScreen("account")} testId="button-settings-password" />
+            <Divider />
+            <Row icon={ShieldX} label="Manage Account" sub="Blocked users and account actions" onClick={() => setSubScreen("blocked-users")} testId="button-settings-manage-account" />
+          </div>
+        </div>
+
+        {/* ── CONTACT US ──────────────────────────────────────────────── */}
+        <div>
+          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Contact Us</p>
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
+            <Row icon={LifeBuoy} label="Help & Support" sub="Chat with our support team 24/7" onClick={openSupportChat} testId="button-settings-support" />
+            <Divider />
+            <Row icon={Lightbulb} label="Feature Request" sub="Suggest a new feature" onClick={() => setSubScreen("feature-request")} testId="button-settings-feature-request" />
+            <Divider />
+            <Row icon={ThumbsUp} label="Give Us Feedback" sub="Share your thoughts about the app" onClick={() => setSubScreen("feedback")} testId="button-settings-feedback" />
+            <Divider />
+            <Row icon={HelpCircle} label="FAQ" sub="Frequently asked questions" onClick={() => setSubScreen("faq")} testId="button-settings-faq" />
+          </div>
+        </div>
+
+        {/* ── SUBSCRIPTION ────────────────────────────────────────────── */}
         <div>
           <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Subscription</p>
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
-            {user.isPremium ? (
-              <Row
-                icon={Crown}
-                label="Gûstîlk Premium"
-                sub={user.premiumUntil
-                  ? `Active until ${new Date(user.premiumUntil).toLocaleDateString()}`
-                  : "Active — enjoy all premium features"}
-                onClick={() => setLocation("/premium")}
-                testId="button-settings-premium-status"
-              />
-            ) : (
-              <Row
-                icon={Crown}
-                label="Upgrade to Premium"
-                sub="Unlock messaging, video calls & more"
-                onClick={() => setLocation("/premium")}
-                testId="button-settings-upgrade"
-              />
-            )}
+            <Row icon={ScrollText} label="Subscription Terms" sub="Read the full subscription terms" onClick={() => setSubScreen("subscription-terms")} testId="button-settings-sub-terms" />
+            <Divider />
+            <Row
+              icon={Info}
+              label="What is Gûstîlk Premium?"
+              sub="See what's included in Premium"
+              onClick={() => setLocation("/premium")}
+              testId="button-settings-what-is-premium"
+            />
+            <Divider />
+            <Row
+              icon={Settings2}
+              label="Manage Subscription"
+              sub={user.isPremium
+                ? (user.premiumUntil ? `Active until ${new Date(user.premiumUntil).toLocaleDateString()}` : "Active membership")
+                : "Upgrade or renew your Premium"}
+              onClick={() => setLocation("/premium")}
+              testId="button-settings-manage-subscription"
+            />
             <Divider />
             <Row
               icon={RefreshCw}
-              label={restoreMutation.isPending ? "Restoring…" : "Restore Premium"}
-              sub="Already subscribed? Tap to sync your membership"
+              label={restoreMutation.isPending ? "Restoring…" : "Restore Purchases"}
+              sub="Already subscribed? Tap to restore"
               onClick={() => { if (!restoreMutation.isPending) restoreMutation.mutate(); }}
               testId="button-settings-restore-premium"
             />
           </div>
         </div>
 
+        {/* ── LEGAL ───────────────────────────────────────────────────── */}
         <div>
-          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Account Security</p>
+          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Legal</p>
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
-            <Row icon={KeyRound} label="Email, Password & Phone" sub="Change your login credentials" onClick={() => setSubScreen("account")} testId="button-settings-account" />
+            <Row icon={Lock} label="Privacy Policy" sub="How we collect and use your data" onClick={() => setSubScreen("privacy")} testId="button-settings-privacy" />
             <Divider />
-            <Row icon={ShieldX} label="Blocked Users" sub="Manage who you've blocked" onClick={() => setSubScreen("blocked-users")} testId="button-settings-blocked" />
-          </div>
-        </div>
-
-        <div>
-          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Contact Us</p>
-          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
-            <Row
-              icon={LifeBuoy}
-              label="Help & Support"
-              sub="Chat with our support team"
-              onClick={openSupportChat}
-              testId="button-settings-support"
-            />
-          </div>
-        </div>
-
-        <div>
-          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Legal & Safety</p>
-          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
-            <Row icon={FileText} label={t("settings.guidelinesMenuItem")} sub={t("settings.guidelinesMenuSub")} onClick={() => setSubScreen("guidelines")} testId="button-settings-guidelines" />
-            <Divider />
-            <Row icon={Lock} label={t("settings.privacyMenuItem")} sub={t("settings.privacyMenuSub")} onClick={() => setSubScreen("privacy")} testId="button-settings-privacy" />
+            <Row icon={FileText} label="Terms of Use" sub="Our terms and conditions" onClick={() => setSubScreen("guidelines")} testId="button-settings-terms" />
             <Divider />
             <Row icon={Cookie} label="Cookie Policy" sub="How we use cookies and tracking" onClick={() => setLocation("/cookie-policy")} testId="button-settings-cookie-policy" />
             <Divider />
-            <Row icon={ShieldCheck} label="GDPR Privacy Notice" sub="Your rights under EU & UK data law" onClick={() => setLocation("/gdpr")} testId="button-settings-gdpr" />
+            <Row icon={Shield} label="Agreements" sub="User agreements and policies" onClick={() => setSubScreen("guidelines")} testId="button-settings-agreements" />
             <Divider />
-            <Row icon={ShieldAlert} label="Safety Tips" sub="Stay safe while using Gûstîlk" onClick={() => setLocation("/safety-tips")} testId="button-settings-safety-tips" />
+            <Row icon={ShieldAlert} label="Gûstîlk Community Rules" sub="Standards for using our platform" onClick={() => setSubScreen("guidelines")} testId="button-settings-community-rules" />
+            <Divider />
+            <Row icon={ShieldCheck} label="Privacy Preference Center" sub="GDPR rights and cookie preferences" onClick={() => setLocation("/gdpr")} testId="button-settings-privacy-prefs" />
           </div>
         </div>
 
@@ -791,6 +830,148 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
 
       </div>
     </div>
+  );
+}
+
+function SubScreenShell({ title, onBack, testId, children }: { title: string; onBack: () => void; testId: string; children: ReactNode }) {
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
+      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
+        <button onClick={onBack} data-testid={testId} className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,0.06)" }}>
+          <ChevronLeft size={18} color="rgba(253,248,240,0.7)" />
+        </button>
+        <h1 className="font-serif text-xl text-gold">{title}</h1>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function FaqSubScreen({ onBack }: { onBack: () => void }) {
+  const [open, setOpen] = useState<number | null>(null);
+  const faqs = [
+    { q: "How does matching work on Gûstîlk?", a: "Gûstîlk matches you with members of the opposite gender within your own caste (Sheikh, Pir, or Murid). You can browse profiles, send likes, and once both of you like each other you become a match and can message each other." },
+    { q: "What does Premium include?", a: "Premium unlocks messaging with your matches, video calling, seeing who liked you in the Activity tab, sending virtual gifts, and more. Free members can browse and like profiles but need Premium to start conversations." },
+    { q: "How do I get verified?", a: "Go to your profile and tap the verification badge. You'll be asked to submit a selfie. Our team reviews it within 24 hours and if approved your profile gets a green tick, which increases your match rate." },
+    { q: "Why is my profile not showing to others?", a: "Your profile must be complete (caste, city, country, age, gender, and at least one approved photo) before it becomes visible in Discover. Make sure your verification photo is approved." },
+    { q: "How do I report or block someone?", a: "Open their profile and tap the flag icon (⚑) at the top. You can choose to report or block. Blocked users can no longer see your profile or contact you." },
+    { q: "I'm from Iraq — do I get free Premium?", a: "Yes! Users connecting from Iraq receive free Premium membership as our way of supporting the Yezidi community at home. The app verifies your location automatically when you subscribe." },
+    { q: "Can I delete my account?", a: "Yes. Go to Settings → Account, scroll down and tap Delete Account. This permanently removes all your data, matches, and messages. Active Premium subscriptions are cancelled with no refund." },
+    { q: "How do I restore my Premium subscription?", a: "Go to Settings → Subscription → Restore Purchases. The app will check your account record and re-activate Premium if a valid subscription is found." },
+  ];
+  return (
+    <SubScreenShell title="FAQ" onBack={onBack} testId="button-back-faq">
+      <div className="flex-1 overflow-y-auto px-5 py-5 pb-16 space-y-3">
+        {faqs.map((item, i) => (
+          <div key={i} className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
+            <button
+              data-testid={`faq-item-${i}`}
+              className="w-full flex items-center gap-3 px-4 py-4 text-left"
+              onClick={() => setOpen(open === i ? null : i)}
+            >
+              <span className="flex-1 text-sm font-medium" style={{ color: "rgba(253,248,240,0.85)" }}>{item.q}</span>
+              <ChevronRight size={15} color="rgba(253,248,240,0.25)" style={{ transform: open === i ? "rotate(90deg)" : "rotate(0)", transition: "transform 0.2s" }} />
+            </button>
+            {open === i && (
+              <div className="px-4 pb-4">
+                <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} className="pt-3">
+                  <p className="text-sm leading-relaxed" style={{ color: "rgba(253,248,240,0.55)" }}>{item.a}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </SubScreenShell>
+  );
+}
+
+function FeedbackSubScreen({ title, icon: Icon, placeholder, messagePrefix, supportMatch, onBack, onNavigate }: {
+  title: string;
+  icon: any;
+  placeholder: string;
+  messagePrefix: string;
+  supportMatch: any;
+  onBack: () => void;
+  onNavigate: (url: string) => void;
+}) {
+  const { toast } = useToast();
+  const [text, setText] = useState("");
+
+  const sendMutation = useMutation({
+    mutationFn: async () => {
+      let matchId = supportMatch?.id as string | undefined;
+      if (!matchId) {
+        const r = await apiRequest("POST", "/api/support/start");
+        const d = await r.json();
+        matchId = d.matchId as string;
+      }
+      await apiRequest("POST", `/api/messages/${matchId}`, { text: `${messagePrefix}${text.trim()}` });
+      return matchId as string;
+    },
+    onSuccess: (matchId) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
+      toast({ title: "Message sent!", description: "We'll get back to you in the support chat." });
+      onNavigate(`/chat/${matchId}?support=1`);
+    },
+    onError: () => toast({ title: "Could not send", description: "Please try again.", variant: "destructive" }),
+  });
+
+  return (
+    <SubScreenShell title={title} onBack={onBack} testId={`button-back-${title.toLowerCase().replace(/ /g, "-")}`}>
+      <div className="flex-1 overflow-y-auto px-5 py-5 pb-16 flex flex-col gap-4">
+        <div className="rounded-2xl p-4 flex items-start gap-3" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.15)" }}>
+          <Icon size={18} color="#c9a84c" className="flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-cream/60 leading-relaxed">{placeholder}</p>
+        </div>
+        <textarea
+          data-testid="input-feedback-text"
+          value={text}
+          onChange={e => setText(e.target.value)}
+          placeholder="Write your message here…"
+          rows={7}
+          className="w-full px-4 py-3.5 rounded-2xl text-sm placeholder-cream/20 outline-none resize-none"
+          style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(201,168,76,0.2)", color: "#fdf8f0" }}
+        />
+        <button
+          data-testid="button-send-feedback"
+          onClick={() => sendMutation.mutate()}
+          disabled={!text.trim() || sendMutation.isPending}
+          className="w-full py-3.5 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-40"
+          style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
+        >
+          <Send size={15} />
+          {sendMutation.isPending ? "Sending…" : "Send Message"}
+        </button>
+        <p className="text-center text-xs" style={{ color: "rgba(253,248,240,0.3)" }}>
+          Your message will be sent to our support team via the in-app chat.
+        </p>
+      </div>
+    </SubScreenShell>
+  );
+}
+
+function SubscriptionTermsSubScreen({ onBack }: { onBack: () => void }) {
+  return (
+    <SubScreenShell title="Subscription Terms" onBack={onBack} testId="button-back-sub-terms">
+      <div className="flex-1 overflow-y-auto px-5 py-5 pb-16 space-y-4">
+        {[
+          { title: "Billing & Payment", body: "Gûstîlk Premium is billed on a monthly basis. Payment is charged to your selected payment method at the start of each billing period. All prices are shown in USD and may vary by region." },
+          { title: "Auto-Renewal", body: "Your subscription renews automatically unless you cancel at least 24 hours before the end of the current period. You can manage or cancel your subscription at any time through the Manage Subscription option in Settings." },
+          { title: "Free Trial", body: "Where a free trial is offered, it will be clearly stated at the time of sign-up. Any unused portion of a free trial will be forfeited when a paid subscription is purchased." },
+          { title: "Refund Policy", body: "Except as required by applicable law, payments are non-refundable. If you believe you were charged in error, please contact us via Help & Support within 14 days of the charge." },
+          { title: "Cancellation", body: "You may cancel your subscription at any time. Cancellation takes effect at the end of the current billing period; you retain access to Premium features until that date." },
+          { title: "Price Changes", body: "Gûstîlk may change subscription pricing with at least 30 days' notice. Continued use of the service after a price change constitutes acceptance of the new pricing." },
+          { title: "Iraq Free Premium", body: "Users connecting from Iraq are eligible for a complimentary Premium membership while this promotion is active. This offer is subject to change and is verified by server-side IP geolocation to prevent abuse." },
+          { title: "Contact", body: "For billing questions or disputes, open Help & Support in Settings and our team will assist you as quickly as possible." },
+        ].map((s, i) => (
+          <div key={i} className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(201,168,76,0.1)" }}>
+            <p className="text-gold text-sm font-semibold mb-1.5">{s.title}</p>
+            <p className="text-cream/55 text-sm leading-relaxed">{s.body}</p>
+          </div>
+        ))}
+      </div>
+    </SubScreenShell>
   );
 }
 
