@@ -227,7 +227,7 @@ export default function ProfilePage({ user }: Props) {
   const { t } = useTranslation();
 
   const startSupportChatMutation = useMutation({
-    mutationFn: async () => (await apiRequest("POST", "/api/support/start-chat")).json(),
+    mutationFn: async () => (await apiRequest("POST", "/api/support/start")).json(),
     onSuccess: (data: { matchId: string }) => setLocation(`/chat/${data.matchId}`),
     onError: () => toast({ title: "Could not open support chat", variant: "destructive" }),
   });
