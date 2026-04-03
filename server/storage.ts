@@ -246,7 +246,6 @@ export class DatabaseStorage implements IStorage {
         eq(users.profileVisible, true),
         isNotNull(users.mainPhotoUrl),
         ne(users.isSystemAccount, true),
-        ne(users.isAdmin, true),
       )
     ).limit(50);
 

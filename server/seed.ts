@@ -233,11 +233,12 @@ export async function seedDatabase() {
         age: 42,
         verificationStatus: "approved",
         isVerified: true,
+        isEmailVerified: true,
         profileVisible: true,
       });
       console.log("Seeded admin user.");
     } else {
-      await db.update(users).set({ passwordHash: adminHash, isAdmin: true, isPremium: true, premiumUntil: adminPremiumUntil }).where(eq(users.email, "admin@gustilk.com"));
+      await db.update(users).set({ passwordHash: adminHash, isAdmin: true, isPremium: true, premiumUntil: adminPremiumUntil, profileVisible: true, isVerified: true, verificationStatus: "approved", isEmailVerified: true, gender: "male", caste: "murid" }).where(eq(users.email, "admin@gustilk.com"));
       console.log("Admin credentials refreshed.");
     }
 
