@@ -102,7 +102,9 @@ export default function ChatPage({ user, matchId }: Props) {
   const { startCall, callState } = useVideoCallContext();
 
   const [location] = useLocation();
-  const isSupportChatFromUrl = new URLSearchParams(location.split("?")[1] ?? "").get("support") === "1";
+  const _qs = new URLSearchParams(location.split("?")[1] ?? "");
+  const isSupportChatFromUrl = _qs.get("support") === "1";
+  const backTo = _qs.get("from") === "settings" ? "/settings" : "/matches";
 
   const { data: matchData, isLoading: matchLoading, isFetching: matchFetching } = useQuery<{ matches: MatchWithUser[] }>({
     queryKey: ["/api/matches"],
@@ -180,7 +182,7 @@ export default function ChatPage({ user, matchId }: Props) {
       <div className="flex flex-col h-screen" style={{ background: "#0d0618" }}>
         <div className="flex items-center gap-3 px-4 pt-12 pb-3"
           style={{ background: "rgba(13,6,24,0.97)", borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
-          <button onClick={() => setLocation("/matches")} data-testid="button-back" className="text-cream/60">
+          <button onClick={() => setLocation(backTo)} data-testid="button-back" className="text-cream/60">
             <ArrowLeft size={22} />
           </button>
           <div className="relative w-10 h-10 flex-shrink-0">
@@ -219,7 +221,7 @@ export default function ChatPage({ user, matchId }: Props) {
             <Star size={17} fill="#1a0a2e" color="#1a0a2e" />
             {t("chat.upgradeButton")}
           </button>
-          <button onClick={() => setLocation("/matches")} className="text-cream/35 text-sm">{t("chat.backToMatches")}</button>
+          <button onClick={() => setLocation(backTo)} className="text-cream/35 text-sm">{t("chat.backToMatches")}</button>
         </div>
       </div>
     );
@@ -230,7 +232,7 @@ export default function ChatPage({ user, matchId }: Props) {
       {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-12 pb-3"
         style={{ background: "rgba(13,6,24,0.97)", borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
-        <button onClick={() => setLocation("/matches")} data-testid="button-back" className="text-cream/60">
+        <button onClick={() => setLocation(backTo)} data-testid="button-back" className="text-cream/60">
           <ArrowLeft size={22} />
         </button>
 
@@ -452,7 +454,7 @@ export default function ChatPage({ user, matchId }: Props) {
           reportedUserId={otherUser.id}
           reportedUserName={otherUser.firstName ?? otherUser.fullName?.split(" ")[0] ?? "Member"}
           onClose={() => setShowReport(false)}
-          onBlocked={() => { setShowReport(false); setLocation("/matches"); }}
+          onBlocked={() => { setShowReport(false); setLocation(backTo); }}
         />
       )}
     </div>
