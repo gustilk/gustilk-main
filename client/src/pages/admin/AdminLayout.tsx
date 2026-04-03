@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Users, UserCheck, Camera, Flag, Shield, Ban, Copy,
   BarChart2, CreditCard, Tag, Share2, Bell, Megaphone, Mail, MessageSquare,
   Calendar, Heart, Globe, Settings, Star, Download, Server, Database,
-  FileText, ChevronRight, Menu, LogOut, Hash,
+  FileText, ChevronRight, Menu, LogOut, Hash, ShieldAlert,
 } from "lucide-react";
 import type { User } from "@shared/schema";
 
@@ -36,6 +36,7 @@ import AppStorePage from "./pages/AppStorePage";
 import ExportPage from "./pages/ExportPage";
 import SystemPage from "./pages/SystemPage";
 import BackupsPage from "./pages/BackupsPage";
+import SuspiciousLoginsPage from "./pages/SuspiciousLoginsPage";
 
 interface NavItem {
   label: string;
@@ -67,9 +68,10 @@ const NAV: NavGroup[] = [
   {
     title: "Safety",
     items: [
-      { label: "Reports",    path: "/admin/reports",    icon: Flag },
-      { label: "Blacklist",  path: "/admin/blacklist",  icon: Ban },
-      { label: "Duplicates", path: "/admin/duplicates", icon: Copy },
+      { label: "Reports",            path: "/admin/reports",            icon: Flag },
+      { label: "Blacklist",          path: "/admin/blacklist",          icon: Ban },
+      { label: "Duplicates",         path: "/admin/duplicates",         icon: Copy },
+      { label: "Suspicious Logins",  path: "/admin/suspicious-logins",  icon: ShieldAlert },
     ],
   },
   {
@@ -152,7 +154,8 @@ export default function AdminLayout({ user }: { user: User }) {
   const [onAppStore]       = useRoute("/admin/app-store");
   const [onExport]         = useRoute("/admin/export");
   const [onSystem]         = useRoute("/admin/system");
-  const [onBackups]        = useRoute("/admin/backups");
+  const [onBackups]            = useRoute("/admin/backups");
+  const [onSuspiciousLogins]   = useRoute("/admin/suspicious-logins");
 
   const { data: pendingPhotosData } = useQuery<{ users: any[] }>({
     queryKey: ["/api/admin/pending-photos"],
@@ -176,8 +179,9 @@ export default function AdminLayout({ user }: { user: User }) {
     if (onApprovals)      return <ApprovalsPage user={user} />;
     if (onReports)        return <ReportsPage user={user} />;
     if (onModeration)     return <ModerationPage user={user} />;
-    if (onBlacklist)      return <BlacklistPage user={user} />;
-    if (onDuplicates)     return <DuplicatesPage user={user} />;
+    if (onBlacklist)           return <BlacklistPage user={user} />;
+    if (onDuplicates)          return <DuplicatesPage user={user} />;
+    if (onSuspiciousLogins)    return <SuspiciousLoginsPage user={user} />;
     if (onAnalytics)      return <AnalyticsPage user={user} />;
     if (onPayments)       return <PaymentsPage user={user} />;
     if (onPromoCodes)     return <PromoCodesPage user={user} />;

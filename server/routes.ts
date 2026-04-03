@@ -8,7 +8,7 @@ import { setupWs } from "./ws";
 import { z } from "zod";
 import { checkFacePresent } from "./moderation";
 import { db } from "./db";
-import { count, sql, eq, asc, desc, or, and, ilike } from "drizzle-orm";
+import { count, sql, eq, asc, desc, or, and, ilike, isNotNull } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
 import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail, sendAdminApprovalNeededEmail } from "./email";
 import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
@@ -984,6 +984,35 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.post("/api/admin/ban/:userId", isAuthenticated, requireAdmin, async (req, res) => {
     await storage.banUser(req.params.userId as string);
+    res.json({ ok: true });
+  });
+
+  // ── Suspicious logins ─────────────────────────────────────────────────────
+  app.get("/api/admin/suspicious-logins", isAuthenticated, requireAdmin, async (_req, res) => {
+    const flagged = await db
+      .select()
+      .from(users)
+      .where(and(eq(users.country, "Iraq"), isNotNull(users.suspiciousLoginAt)))
+      .orderBy(desc(users.suspiciousLoginAt));
+    res.json({ users: flagged.map(u => ({
+      id: u.id, fullName: u.fullName, email: u.email,
+      isPremium: u.isPremium, premiumUntil: u.premiumUntil,
+      suspiciousLoginAt: u.suspiciousLoginAt, suspiciousLoginIp: u.suspiciousLoginIp,
+      mainPhotoUrl: u.mainPhotoUrl,
+    })) });
+  });
+
+  app.post("/api/admin/suspicious-logins/:userId/revoke-premium", isAuthenticated, requireAdmin, async (req, res) => {
+    await db.update(users)
+      .set({ isPremium: false, premiumUntil: null } as any)
+      .where(eq(users.id, req.params.userId));
+    res.json({ ok: true });
+  });
+
+  app.post("/api/admin/suspicious-logins/:userId/dismiss", isAuthenticated, requireAdmin, async (req, res) => {
+    await db.update(users)
+      .set({ suspiciousLoginAt: null, suspiciousLoginIp: null } as any)
+      .where(eq(users.id, req.params.userId));
     res.json({ ok: true });
   });
 

@@ -18,8 +18,20 @@ import { users, passkeys } from "@shared/schema";
 import { isValidListedPhone } from "@shared/countries";
 import { eq, and } from "drizzle-orm";
 import { sendActivationCodeEmail } from "./email";
+import { verifyIraqFromRequest, getClientIp } from "./geo";
 
 const emailSchema = z.string().email("Please enter a valid email address");
+
+// Fire-and-forget: flag Iraq accounts that log in from outside Iraq
+async function flagSuspiciousLoginIfNeeded(req: Request, user: { id: string; country?: string | null }) {
+  if (user.country !== "Iraq") return;
+  const { isIraq } = await verifyIraqFromRequest(req);
+  if (!isIraq) {
+    const ip = getClientIp(req) ?? "unknown";
+    db.update(users).set({ suspiciousLoginAt: new Date(), suspiciousLoginIp: ip } as any)
+      .where(eq(users.id, user.id)).catch(() => {});
+  }
+}
 
 // ── Password security ──────────────────────────────────────────────────────────
 const COMMON_PASSWORDS = new Set([
@@ -226,6 +238,7 @@ export function registerAuthRoutes(app: Express) {
 
       req.session.userId = user.id;
       await saveSession(req);
+      flagSuspiciousLoginIfNeeded(req, user).catch(() => {});
       const updated = await storage.getUserById(user.id);
       res.json({ user: safeUser(updated as any) });
     } catch (err: any) {
@@ -284,6 +297,7 @@ export function registerAuthRoutes(app: Express) {
 
       req.session.userId = user.id;
       await saveSession(req);
+      flagSuspiciousLoginIfNeeded(req, user).catch(() => {});
       res.json({ user: safeUser(user as any) });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
@@ -399,6 +413,7 @@ export function registerAuthRoutes(app: Express) {
 
       req.session.userId = user.id;
       await saveSession(req);
+      flagSuspiciousLoginIfNeeded(req, user).catch(() => {});
       res.json({ user: safeUser(user as any) });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
@@ -449,6 +464,7 @@ export function registerAuthRoutes(app: Express) {
 
       req.session.userId = user.id;
       await saveSession(req);
+      flagSuspiciousLoginIfNeeded(req, user).catch(() => {});
       res.json({ user: safeUser(user as any) });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
