@@ -1,14 +1,16 @@
 import { useState, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { ArrowLeft, MessageCircle, Video, Star, Lock, MapPin, Shield, Flag, Crown } from "lucide-react";
+import { ArrowLeft, MessageCircle, Video, Star, Lock, MapPin, Shield, Flag, Crown, Heart, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { SafeUser, MatchWithUser } from "@shared/schema";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
 import ReportModal from "@/components/ReportModal";
 import { useVideoCallContext } from "@/hooks/useVideoCall";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 const REFERRER_KEY = "profile_back_to";
+const LIKE_ACTIONS_KEY = "profile_show_like_actions";
 
 interface Props {
   viewer: SafeUser;
@@ -30,6 +32,15 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
     return stored;
   });
 
+  // Whether to show inline Like/Pass buttons (set when arriving from likes-received).
+  const [showLikeActions] = useState<boolean>(() => {
+    const stored = sessionStorage.getItem(LIKE_ACTIONS_KEY);
+    if (stored) sessionStorage.removeItem(LIKE_ACTIONS_KEY);
+    return stored === "true";
+  });
+
+  const [actedOnLike, setActedOnLike] = useState(false);
+
   // Navigate back to wherever the user came from.
   // Use the stored referrer URL directly — history.back() is unreliable in SPA
   // routing because the stack may contain unexpected entries. A direct
@@ -39,6 +50,27 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
   }, [referrer, setLocation]);
 
   const isPremium = !!viewer.isPremium;
+
+  const likeMutation = useMutation({
+    mutationFn: () => apiRequest("POST", `/api/like/${userId}`),
+    onSuccess: () => {
+      setActedOnLike(true);
+      queryClient.invalidateQueries({ queryKey: ["/api/activity/likes-received"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/discover"] });
+      goBack();
+    },
+  });
+
+  const dislikeMutation = useMutation({
+    mutationFn: () => apiRequest("POST", `/api/dislike/${userId}`),
+    onSuccess: () => {
+      setActedOnLike(true);
+      queryClient.invalidateQueries({ queryKey: ["/api/activity/likes-received"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/discover"] });
+      goBack();
+    },
+  });
 
   const { data, isLoading } = useQuery<{ user: SafeUser; isMatchedWithViewer: boolean }>({
     queryKey: ["/api/profile", userId],
@@ -228,6 +260,32 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
             <p className="text-cream/70 text-sm leading-relaxed" data-testid="text-profile-bio">
               {profile.bio}
             </p>
+          </div>
+        )}
+
+        {/* ── Like / Pass bar — shown when arriving from Likes Received ── */}
+        {showLikeActions && !actedOnLike && (
+          <div className="flex gap-3">
+            <button
+              onClick={() => dislikeMutation.mutate()}
+              disabled={dislikeMutation.isPending || likeMutation.isPending}
+              data-testid="button-pass-from-likes"
+              className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all active:scale-95 disabled:opacity-50"
+              style={{ background: "rgba(212,96,138,0.12)", border: "1.5px solid rgba(212,96,138,0.45)", color: "#d4608a" }}
+            >
+              <X size={18} strokeWidth={2.5} />
+              Pass
+            </button>
+            <button
+              onClick={() => likeMutation.mutate()}
+              disabled={likeMutation.isPending || dislikeMutation.isPending}
+              data-testid="button-like-from-likes"
+              className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all active:scale-95 disabled:opacity-50"
+              style={{ background: "rgba(201,168,76,0.12)", border: "1.5px solid rgba(201,168,76,0.5)", color: "#c9a84c" }}
+            >
+              <Heart size={18} strokeWidth={2.5} />
+              Like Back
+            </button>
           </div>
         )}
 

@@ -202,6 +202,7 @@ function ActivityCard({ item, isPremium, blurred, tab, onBeforeNavigate, onActed
         onClick={() => {
           onBeforeNavigate();
           sessionStorage.setItem("profile_back_to", "/activity");
+          if (showActions) sessionStorage.setItem("profile_show_like_actions", "true");
           setLocation(`/profile/${user.id}`);
         }}
       >
@@ -249,7 +250,7 @@ function ActivityCard({ item, isPremium, blurred, tab, onBeforeNavigate, onActed
         {!blurred && (
           <div
             className="cursor-pointer mb-2"
-            onClick={() => { onBeforeNavigate(); sessionStorage.setItem("profile_back_to", "/activity"); setLocation(`/profile/${user.id}`); }}
+            onClick={() => { onBeforeNavigate(); sessionStorage.setItem("profile_back_to", "/activity"); if (showActions) sessionStorage.setItem("profile_show_like_actions", "true"); setLocation(`/profile/${user.id}`); }}
           >
             <p className="text-cream font-semibold text-sm truncate">{displayName}{user.age ? `, ${user.age}` : ""}</p>
             <p className="text-cream/50 text-[10px]">{timeAgo}</p>
