@@ -76,14 +76,14 @@ export default function SettingsPage({ user }: Props) {
     mutationFn: async () => (await apiRequest("POST", "/api/support/start")).json(),
     onSuccess: (data: { matchId: string }) => {
       queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
-      setLocation(`/chat/${data.matchId}?support=1`);
+      setLocation(`/chat/${data.matchId}?support=1&from=settings`);
     },
     onError: () => toast({ title: "Could not open support chat", variant: "destructive" }),
   });
 
   function openSupportChat() {
     if (supportMatch) {
-      setLocation(`/chat/${supportMatch.id}?support=1`);
+      setLocation(`/chat/${supportMatch.id}?support=1&from=settings`);
     } else {
       startSupportMutation.mutate();
     }
@@ -912,7 +912,7 @@ function FeedbackSubScreen({ title, icon: Icon, placeholder, messagePrefix, supp
     onSuccess: (matchId) => {
       queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
       toast({ title: "Message sent!", description: "We'll get back to you in the support chat." });
-      onNavigate(`/chat/${matchId}?support=1`);
+      onNavigate(`/chat/${matchId}?support=1&from=settings`);
     },
     onError: () => toast({ title: "Could not send", description: "Please try again.", variant: "destructive" }),
   });
