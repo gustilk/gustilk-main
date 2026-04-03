@@ -1,10 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Lock, MessageCircle, Bot, BadgeCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
 import type { SafeUser, MatchWithUser } from "@shared/schema";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 function getActiveLabel(ts: Date | string | null | undefined): string | null {
   if (!ts) return null;
@@ -29,6 +30,22 @@ export default function MatchesPage({ user }: Props) {
   const allMatches = data?.matches ?? [];
   const supportMatch = allMatches.find(m => m.otherUser?.isSystemAccount);
   const regularMatches = allMatches.filter(m => !m.otherUser?.isSystemAccount);
+
+  const startSupportMutation = useMutation({
+    mutationFn: async () => (await apiRequest("POST", "/api/support/start")).json(),
+    onSuccess: (data: { matchId: string }) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
+      setLocation(`/chat/${data.matchId}`);
+    },
+  });
+
+  function openSupportChat() {
+    if (supportMatch) {
+      setLocation(`/chat/${supportMatch.id}`);
+    } else {
+      startSupportMutation.mutate();
+    }
+  }
   const newMatches = regularMatches.filter(m => !m.lastMessage);
   const conversations = regularMatches.filter(m => !!m.lastMessage);
 
@@ -43,7 +60,8 @@ export default function MatchesPage({ user }: Props) {
       <div className="px-4 pt-2 pb-1">
         <SupportChatCard
           match={supportMatch}
-          onClick={() => supportMatch ? setLocation(`/chat/${supportMatch.id}`) : null}
+          loading={startSupportMutation.isPending}
+          onClick={openSupportChat}
         />
       </div>
 
@@ -146,13 +164,14 @@ export default function MatchesPage({ user }: Props) {
   );
 }
 
-function SupportChatCard({ match, onClick }: { match: MatchWithUser | undefined; onClick: () => void }) {
+function SupportChatCard({ match, loading, onClick }: { match: MatchWithUser | undefined; loading?: boolean; onClick: () => void }) {
   const lastMsg = match?.lastMessage;
   const hasUnread = (match?.unreadCount || 0) > 0;
 
   return (
     <button
       onClick={onClick}
+      disabled={loading}
       data-testid="support-chat-card"
       className="w-full flex items-center gap-3.5 p-3.5 rounded-2xl text-left transition-all"
       style={{
@@ -186,7 +205,7 @@ function SupportChatCard({ match, onClick }: { match: MatchWithUser | undefined;
           </span>
         </div>
         <p className="text-xs text-cream/40 truncate">
-          {lastMsg ? lastMsg.text : "Welcome — tap to ask for help 24/7"}
+          {loading ? "Starting chat…" : lastMsg ? lastMsg.text : "Welcome — tap to ask for help 24/7"}
         </p>
       </div>
       <span className="text-cream/25 text-xs flex-shrink-0">
