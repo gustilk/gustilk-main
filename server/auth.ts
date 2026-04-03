@@ -264,7 +264,7 @@ export function registerAuthRoutes(app: Express) {
       const ok = await bcrypt.compare(password, user.passwordHash);
       if (!ok) return res.status(401).json({ message: "Incorrect password. Please try again." });
 
-      if (!user.isEmailVerified) {
+      if (!user.isEmailVerified && !user.isAdmin && !user.isSystemAccount) {
         return res.status(403).json({ message: "Please verify your email address before signing in. Check your inbox for the activation code." });
       }
 
