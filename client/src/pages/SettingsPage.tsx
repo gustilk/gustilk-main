@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { isNative, restoreIAPPurchases } from "@/lib/purchases";
 import { useTranslation } from "react-i18next";
 import { LANGUAGE_LIST, LangCode, setLanguage } from "@/i18n";
 import {
@@ -90,8 +91,15 @@ export default function SettingsPage({ user }: Props) {
   }
 
   const restoreMutation = useMutation({
-    mutationFn: async (): Promise<{ restored: boolean; isPremium: boolean; premiumUntil: string | null; message: string }> =>
-      (await apiRequest("POST", "/api/premium/restore")).json(),
+    mutationFn: async (): Promise<{ restored: boolean; isPremium: boolean; premiumUntil: string | null; message: string }> => {
+      if (isNative()) {
+        const rcResult = await restoreIAPPurchases();
+        if (!rcResult.restored) {
+          return { restored: false, isPremium: false, premiumUntil: null, message: rcResult.error ?? "No active subscription found." };
+        }
+      }
+      return (await apiRequest("POST", "/api/premium/restore")).json();
+    },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       if (data.restored) {

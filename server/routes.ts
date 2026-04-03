@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupSession, registerAuthRoutes, isAuthenticated } from "./auth";
+import { setupSession, registerAuthRoutes, isAuthenticated, sessionMiddleware } from "./auth";
 import { profileUpdateSchema, privacySettingsSchema, users, matches, messages, events, eventAttendees, magicLinkTokens } from "@shared/schema";
 import { verifyCountryFromRequest, verifyIraqFromRequest, getClientIp, lookupIpCountry } from "./geo";
 import { setupWs } from "./ws";
@@ -239,7 +239,7 @@ function getUserId(req: any): string {
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
   setupSession(app);
   registerAuthRoutes(app);
-  setupWs(httpServer);
+  setupWs(httpServer, sessionMiddleware);
 
   // Ensure support account exists on startup
   getOrCreateSupportAccount().catch(e => console.error("[startup] support account error:", e));
@@ -341,6 +341,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       // Country is locked once set — ignore any country update if the user already has one
       const { country: _ignored, ...rest } = parsed as any;
 
+      let grantIraqPremium = false;
       if (!user?.country && (parsed as any).country) {
         // First time setting country — verify server-side that the IP matches
         const claimedCountry: string = (parsed as any).country;
@@ -348,6 +349,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         if (!geoCheck.allowed) {
           return res.status(403).json({ error: geoCheck.reason ?? "Location verification failed." });
         }
+        // Iraq is always free — grant permanent premium right now so they never need to visit the Premium page
+        if (claimedCountry === "Iraq") grantIraqPremium = true;
       }
 
       const photosIncluded = Array.isArray((parsed as any).photos);
@@ -441,6 +444,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         user?.verificationStatus !== "pending";
       const updated = await storage.updateUser(userId, {
         ...(data as any),
+        ...(grantIraqPremium ? { isPremium: true, premiumUntil: null } : {}),
         ...(photosIncluded ? {
           photoSlots: updatedSlots,
           photos: keptApproved,
@@ -642,68 +646,23 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
 
-    // Iraq users get free premium — but we verify server-side that the connection is actually from Iraq
-    if (user?.country === "Iraq") {
-      const geoCheck = await verifyIraqFromRequest(req);
-      if (!geoCheck.isIraq) {
-        return res.status(403).json({ error: geoCheck.reason ?? "Free membership is only available from Iraq." });
-      }
+    if (user?.country !== "Iraq") {
+      // Non-Iraq users require payment integration (not yet live)
+      return res.status(402).json({ error: "Payment required. Contact support@gustilk.com to get early access." });
     }
 
-    const until = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    await storage.updateUser(userId, { isPremium: true, premiumUntil: until });
+    // Iraq is always free — country was geo-verified at signup, no re-check needed here.
+    // premiumUntil: null means no expiry — Iraq premium is permanent.
+    await storage.updateUser(userId, { isPremium: true, premiumUntil: null });
     res.json({ ok: true });
   });
 
-  /**
-   * POST /api/premium/restore
-   *
-   * "Restore Purchases" endpoint.  Works for web, and will be the server-side
-   * verification target when this app is wrapped in a native shell (Capacitor /
-   * React Native) that sends an Apple / Google receipt for validation.
-   *
-   * Current logic (web):
-   *  1. Re-read the user row so we always work from fresh DB state.
-   *  2. If premiumUntil is still in the future → make sure isPremium=true and
-   *     return { restored: true }.
-   *  3. If premiumUntil has passed (or was never set) → clear isPremium, return
-   *     { restored: false } so the client can show a friendly "no active
-   *     subscription" message.
-   *
-   * Native IAP extension point:
-   *  When a native receipt payload is present in the body ({ receipt, platform })
-   *  the server should validate it with Apple / Google servers and, on success,
-   *  update premiumUntil with the real expiry date from the receipt.  The stub
-   *  for that verification is included below so future devs know exactly where
-   *  to add it.
-   */
   app.post("/api/premium/restore", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const now = new Date();
-
-    // ── Native IAP extension point ──────────────────────────────────────────
-    // When the native shell sends a receipt, verify it with the store and
-    // derive the real expiry date before falling through to the DB check.
-    //
-    // const { receipt, platform } = req.body;
-    // if (receipt && platform === "ios") {
-    //   const appleExpiry = await verifyAppleReceipt(receipt);
-    //   if (appleExpiry > now) {
-    //     await storage.updateUser(userId, { isPremium: true, premiumUntil: appleExpiry });
-    //     return res.json({ restored: true, isPremium: true, premiumUntil: appleExpiry, message: "Premium restored from App Store" });
-    //   }
-    // }
-    // if (receipt && platform === "android") {
-    //   const googleExpiry = await verifyGooglePlayReceipt(receipt);
-    //   if (googleExpiry > now) {
-    //     await storage.updateUser(userId, { isPremium: true, premiumUntil: googleExpiry });
-    //     return res.json({ restored: true, isPremium: true, premiumUntil: googleExpiry, message: "Premium restored from Google Play" });
-    //   }
-    // }
-    // ── End native extension point ──────────────────────────────────────────
 
     // Web / server-side record check
     if (user.premiumUntil && user.premiumUntil > now) {
@@ -857,6 +816,15 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const userId = getUserId(req);
     const items = await storage.getVisitors(userId);
     res.json({ items });
+  });
+
+  // ─── PUSH NOTIFICATIONS ───────────────────────────────────
+  app.post("/api/push/register", isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const { token, platform } = req.body;
+    if (!token || !platform) return res.status(400).json({ error: "token and platform required" });
+    await storage.updateUser(userId, { pushToken: token, pushPlatform: platform } as any);
+    res.json({ ok: true });
   });
 
   // ─── BLOCKS ───────────────────────────────────────────────

@@ -67,21 +67,21 @@ declare module "express-session" {
   }
 }
 
+export const sessionMiddleware = session({
+  store: new PgSession({ pool, tableName: "sessions" }),
+  secret: process.env.SESSION_SECRET || "gustilk-dev-secret",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+  },
+});
+
 export function setupSession(app: Express) {
-  app.use(
-    session({
-      store: new PgSession({ pool, tableName: "sessions" }),
-      secret: process.env.SESSION_SECRET || "gustilk-dev-secret",
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax",
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-      },
-    })
-  );
+  app.use(sessionMiddleware);
 }
 
 export function isAuthenticated(req: Request, res: Response, next: NextFunction) {

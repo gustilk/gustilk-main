@@ -5,6 +5,7 @@ import { SiPaypal, SiApplepay, SiGooglepay, SiVenmo, SiKlarna } from "react-icon
 import type { SafeUser } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { isNative, purchasePremium } from "@/lib/purchases";
 
 
 interface Props { user: SafeUser }
@@ -117,29 +118,42 @@ export default function PremiumPage({ user }: Props) {
       try {
         await apiRequest("POST", "/api/premium/subscribe", {});
         await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-        toast({ title: "Welcome to Premium!", description: "Your free Iraqi membership is now active." });
+        toast({ title: "Welcome to Premium!", description: "Premium is free for you — always." });
         setLocation("/discover");
       } catch (err: any) {
         const raw: string = err?.message ?? "";
         const statusMatch = raw.match(/^(\d+): ([\s\S]+)$/);
         if (statusMatch) {
-          const [, status, bodyText] = statusMatch;
+          const [, , bodyText] = statusMatch;
           let description = "Please try again.";
           try { description = JSON.parse(bodyText)?.error ?? bodyText; } catch { description = bodyText; }
-          toast({
-            title: status === "403" ? "Location verification failed" : "Something went wrong",
-            description,
-            variant: "destructive",
-          });
+          toast({ title: "Something went wrong", description, variant: "destructive" });
         } else {
           toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
         }
       }
+    } else if (isNative()) {
+      // Native app — trigger App Store / Google Play IAP sheet via RevenueCat
+      const result = await purchasePremium();
+      if (result.cancelled) {
+        // User dismissed the sheet — do nothing
+      } else if (result.success) {
+        // IAP succeeded — sync premium status from our server
+        try {
+          await apiRequest("POST", "/api/premium/restore", {});
+          await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+          toast({ title: "Welcome to Premium!", description: "You now have full access." });
+          setLocation("/discover");
+        } catch {
+          toast({ title: "Purchase successful!", description: "Restart the app if premium doesn't activate immediately." });
+        }
+      } else {
+        toast({ title: "Purchase failed", description: result.error ?? "Please try again.", variant: "destructive" });
+      }
     } else {
-      await new Promise(r => setTimeout(r, 1500));
       toast({
         title: "Payment setup required",
-        description: `${method?.label ?? "Payment"} integration coming soon. Contact support@gustilk.com.`,
+        description: `${method?.label ?? "Payment"} integration is coming soon. Email support@gustilk.com to get early access.`,
       });
     }
     setLoading(false);
@@ -289,7 +303,7 @@ export default function PremiumPage({ user }: Props) {
           }
         >
           <Star size={17} fill={isFree ? "white" : "#1a0a2e"} />
-          {loading ? "Processing…" : isFree ? "Get Free Premium" : `Subscribe via ${method?.label ?? "Payment"}`}
+          {loading ? "Processing…" : isFree ? "Get Free Premium" : isNative() ? "Subscribe — $5 / month" : `Subscribe via ${method?.label ?? "Payment"}`}
         </button>
 
         <p className="text-center text-cream/25 text-xs">

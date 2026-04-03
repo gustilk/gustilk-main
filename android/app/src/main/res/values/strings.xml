@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Gûstîlk</string>
+    <string name="title_activity_main">Gûstîlk</string>
+    <string name="package_name">com.gustilk.app</string>
+    <string name="custom_url_scheme">com.gustilk.app</string>
+</resources>

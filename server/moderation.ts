@@ -106,11 +106,3 @@ export async function checkFacePresent(base64DataUrl: string): Promise<FaceCheck
   }
 }
 
-export async function moderatePhotos(photos: string[]): Promise<ModerationResult> {
-  for (const photo of photos) {
-    if (!photo || !photo.startsWith("data:image")) continue;
-    const result = await moderateImage(photo);
-    if (!result.safe) return result;
-  }
-  return { safe: true };
-}

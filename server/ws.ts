@@ -1,44 +1,47 @@
 import { WebSocketServer, WebSocket } from "ws";
 import type { Server } from "http";
+import type { RequestHandler } from "express";
 
 const clients = new Map<string, WebSocket>();
 
-export function setupWs(httpServer: Server) {
+export function setupWs(httpServer: Server, sessionMiddleware: RequestHandler) {
   const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
 
   wss.on("error", (err) => {
     console.error("[ws] server error:", err.message);
   });
 
-  wss.on("connection", (ws) => {
-    let userId: string | null = null;
+  wss.on("connection", (ws, req) => {
+    // Authenticate via session cookie — do not trust any userId sent by the client
+    sessionMiddleware(req as any, {} as any, () => {
+      const userId: string | undefined = (req as any).session?.userId;
 
-    ws.on("error", (err) => {
-      console.error("[ws] client error:", err.message);
-    });
+      if (!userId) {
+        ws.close(4401, "Unauthorized");
+        return;
+      }
 
-    ws.on("message", (raw) => {
-      try {
-        const msg = JSON.parse(raw.toString());
+      clients.set(userId, ws);
 
-        if (msg.type === "register") {
-          userId = String(msg.userId);
-          clients.set(userId, ws);
-          return;
-        }
+      ws.on("error", (err) => {
+        console.error("[ws] client error:", err.message);
+      });
 
-        if (!userId) return;
+      ws.on("message", (raw) => {
+        try {
+          const msg = JSON.parse(raw.toString());
 
-        const targetId = String(msg.to);
-        const target = clients.get(targetId);
-        if (target && target.readyState === WebSocket.OPEN) {
-          target.send(JSON.stringify({ ...msg, from: userId }));
-        }
-      } catch {}
-    });
+          const targetId = String(msg.to);
+          const target = clients.get(targetId);
+          if (target && target.readyState === WebSocket.OPEN) {
+            target.send(JSON.stringify({ ...msg, from: userId }));
+          }
+        } catch {}
+      });
 
-    ws.on("close", () => {
-      if (userId) clients.delete(userId);
+      ws.on("close", () => {
+        clients.delete(userId);
+      });
     });
   });
 }

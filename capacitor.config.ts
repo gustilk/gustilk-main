@@ -21,6 +21,18 @@ const config: CapacitorConfig = {
       androidSplashResourceName: "splash",
       showSpinner: false,
     },
+    Camera: {
+      // Prompt text shown on iOS when requesting camera/photo library access
+      ios: {
+        usageDescription: "Gûstîlk uses your camera for profile photos, verification selfies, and video calls.",
+        photoLibraryUsageDescription: "Gûstîlk accesses your photo library so you can upload profile photos.",
+        photoLibraryAddOnlyUsageDescription: "Gûstîlk can save photos to your library.",
+        microphoneUsageDescription: "Gûstîlk uses your microphone for video calls with your matches.",
+      },
+    },
+    PushNotifications: {
+      presentationOptions: ["badge", "sound", "alert"],
+    },
   },
 
   ios: {

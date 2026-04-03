@@ -66,6 +66,8 @@ export const users = pgTable("users", {
   photosBlurred: boolean("photos_blurred").default(false),
   suspiciousLoginAt: timestamp("suspicious_login_at"),
   suspiciousLoginIp: text("suspicious_login_ip"),
+  pushToken: text("push_token"),
+  pushPlatform: text("push_platform"),
   isEmailVerified: boolean("is_email_verified").default(false),
   emailActivationCode: varchar("email_activation_code", { length: 6 }),
   emailActivationExpiry: timestamp("email_activation_expiry"),

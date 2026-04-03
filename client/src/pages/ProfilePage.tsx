@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import type { SafeUser } from "@shared/schema";
 import type { PhotoSlot } from "@shared/schema";
 import { PhotoCropModal } from "@/components/PhotoCropModal";
+import { pickPhoto } from "@/lib/camera";
 
 type LocalSlot = { url: string; status: "approved" | "new" } | null;
 
@@ -261,6 +262,7 @@ export default function ProfilePage({ user }: Props) {
   const [previewOpen, setPreviewOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingSlotRef = useRef<number>(0);
+  const [pickerBusy, setPickerBusy] = useState(false);
 
   const { data } = useQuery<{ user: SafeUser }>({
     queryKey: ["/api/auth/me"],
@@ -302,10 +304,16 @@ export default function ProfilePage({ user }: Props) {
     },
   });
 
-  const openPicker = (slotIdx: number) => {
-    pendingSlotRef.current = slotIdx;
-    if (fileInputRef.current) { fileInputRef.current.value = ""; fileInputRef.current.click(); }
-  };
+  const openPicker = useCallback(async (slotIdx: number) => {
+    if (pickerBusy) return;
+    setPickerBusy(true);
+    try {
+      const result = await pickPhoto("prompt");
+      if (result) setCropTarget({ imgSrc: result.dataUrl, slotIdx });
+    } finally {
+      setPickerBusy(false);
+    }
+  }, [pickerBusy]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

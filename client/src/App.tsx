@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense, useRef } from "react";
 import { Switch, Route, useLocation, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
@@ -35,6 +35,8 @@ import CookieConsentBanner from "@/components/CookieConsentBanner";
 import { Clock, X } from "lucide-react";
 import type { User } from "@shared/schema";
 import type { PhotoSlot } from "@shared/schema";
+import { initPurchases } from "@/lib/purchases";
+import { initPushNotifications } from "@/lib/pushNotifications";
 
 function PendingReviewBanner() {
   const [dismissed, setDismissed] = useState(false);
@@ -116,7 +118,7 @@ function profileIsComplete(user: User): boolean {
 }
 
 function AppShell({ user }: { user: User }) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const isChat = location.startsWith("/chat/");
   const isEventDetail = location.startsWith("/events/") && location !== "/events";
   const isVerifyPage = location === "/verify" || location === "/pending-verification";
@@ -126,6 +128,27 @@ function AppShell({ user }: { user: User }) {
 
   const callCtx = useVideoCallProvider(user.id, !!user.isPremium);
   const isInCall = callCtx.callState === "active" || callCtx.callState === "calling" || callCtx.callState === "ringing";
+
+  // Initialise native services once per authenticated session
+  const nativeInitDone = useRef(false);
+  useEffect(() => {
+    if (nativeInitDone.current) return;
+    nativeInitDone.current = true;
+
+    // RevenueCat — IAP for premium subscriptions
+    initPurchases();
+
+    // Push notifications — register device token + handle tap-to-open
+    initPushNotifications(setLocation);
+
+    // Android hardware back button
+    import("@capacitor/app").then(({ App }) => {
+      App.addListener("backButton", ({ canGoBack }) => {
+        if (canGoBack) window.history.back();
+        else App.exitApp();
+      });
+    }).catch(() => {});
+  }, []);
 
   if (!profileIsComplete(user) && location !== "/complete-profile") {
     return <SocialSetupPage user={user} />;
