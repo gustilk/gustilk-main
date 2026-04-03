@@ -422,7 +422,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           return res.status(400).json({ error: "You can have a maximum of 6 photos." });
         }
 
-        keptApproved = keptSlots.filter((s: any) => s.status === "approved").map((s: any) => s.url);
+        const keptApprovedUnordered = keptSlots.filter((s: any) => s.status === "approved").map((s: any) => s.url);
+        // Reorder approved photos to match the order the user submitted (first = main photo)
+        const keptApprovedSet = new Set(keptApprovedUnordered);
+        keptApproved = submittedPhotos.filter(p => keptApprovedSet.has(p));
       }
 
       let mainPhotoUrl = user?.mainPhotoUrl;
