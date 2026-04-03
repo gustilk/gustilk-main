@@ -655,6 +655,82 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
+  /**
+   * POST /api/premium/restore
+   *
+   * "Restore Purchases" endpoint.  Works for web, and will be the server-side
+   * verification target when this app is wrapped in a native shell (Capacitor /
+   * React Native) that sends an Apple / Google receipt for validation.
+   *
+   * Current logic (web):
+   *  1. Re-read the user row so we always work from fresh DB state.
+   *  2. If premiumUntil is still in the future → make sure isPremium=true and
+   *     return { restored: true }.
+   *  3. If premiumUntil has passed (or was never set) → clear isPremium, return
+   *     { restored: false } so the client can show a friendly "no active
+   *     subscription" message.
+   *
+   * Native IAP extension point:
+   *  When a native receipt payload is present in the body ({ receipt, platform })
+   *  the server should validate it with Apple / Google servers and, on success,
+   *  update premiumUntil with the real expiry date from the receipt.  The stub
+   *  for that verification is included below so future devs know exactly where
+   *  to add it.
+   */
+  app.post("/api/premium/restore", isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const user = await storage.getUserById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const now = new Date();
+
+    // ── Native IAP extension point ──────────────────────────────────────────
+    // When the native shell sends a receipt, verify it with the store and
+    // derive the real expiry date before falling through to the DB check.
+    //
+    // const { receipt, platform } = req.body;
+    // if (receipt && platform === "ios") {
+    //   const appleExpiry = await verifyAppleReceipt(receipt);
+    //   if (appleExpiry > now) {
+    //     await storage.updateUser(userId, { isPremium: true, premiumUntil: appleExpiry });
+    //     return res.json({ restored: true, isPremium: true, premiumUntil: appleExpiry, message: "Premium restored from App Store" });
+    //   }
+    // }
+    // if (receipt && platform === "android") {
+    //   const googleExpiry = await verifyGooglePlayReceipt(receipt);
+    //   if (googleExpiry > now) {
+    //     await storage.updateUser(userId, { isPremium: true, premiumUntil: googleExpiry });
+    //     return res.json({ restored: true, isPremium: true, premiumUntil: googleExpiry, message: "Premium restored from Google Play" });
+    //   }
+    // }
+    // ── End native extension point ──────────────────────────────────────────
+
+    // Web / server-side record check
+    if (user.premiumUntil && user.premiumUntil > now) {
+      // Subscription record is still valid — re-activate the flag if it was lost
+      if (!user.isPremium) {
+        await storage.updateUser(userId, { isPremium: true });
+      }
+      return res.json({
+        restored: true,
+        isPremium: true,
+        premiumUntil: user.premiumUntil,
+        message: "Your Premium membership has been restored.",
+      });
+    }
+
+    // No valid subscription found — clean up any stale flag
+    if (user.isPremium) {
+      await storage.updateUser(userId, { isPremium: false, premiumUntil: null });
+    }
+    res.json({
+      restored: false,
+      isPremium: false,
+      premiumUntil: null,
+      message: "No active subscription found.",
+    });
+  });
+
   // ─── VERIFICATION ─────────────────────────────────────────
   app.post("/api/verify/submit", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);

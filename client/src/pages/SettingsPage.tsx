@@ -9,7 +9,7 @@ import {
   ChevronLeft, ChevronRight, Globe, Bell, FileText, Shield,
   LogOut, Trash2, AlertTriangle, Lock, Heart, MessageCircle,
   Star, CalendarDays, Smartphone, Mail, KeyRound, Phone, Eye, EyeOff, CheckCircle2, ShieldX, UserX,
-  Cookie, ShieldCheck, ShieldAlert, ImageOff, LifeBuoy,
+  Cookie, ShieldCheck, ShieldAlert, ImageOff, LifeBuoy, RefreshCw, Crown,
 } from "lucide-react";
 import type { SafeUser } from "@shared/schema";
 
@@ -87,6 +87,29 @@ export default function SettingsPage({ user }: Props) {
       startSupportMutation.mutate();
     }
   }
+
+  const restoreMutation = useMutation({
+    mutationFn: async (): Promise<{ restored: boolean; isPremium: boolean; premiumUntil: string | null; message: string }> =>
+      (await apiRequest("POST", "/api/premium/restore")).json(),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      if (data.restored) {
+        toast({
+          title: "Premium Restored",
+          description: data.premiumUntil
+            ? `Active until ${new Date(data.premiumUntil).toLocaleDateString()}`
+            : "Your Premium membership is active.",
+        });
+      } else {
+        toast({
+          title: "No Active Subscription",
+          description: "We couldn't find an active subscription linked to your account.",
+          variant: "destructive",
+        });
+      }
+    },
+    onError: () => toast({ title: "Restore failed", description: "Please try again.", variant: "destructive" }),
+  });
 
   const currentLang = LANGUAGE_LIST.find(l => l.code === i18n.language) ?? LANGUAGE_LIST[0];
 
@@ -434,6 +457,40 @@ export default function SettingsPage({ user }: Props) {
               sub={t("settings.notifMenuSub")}
               onClick={() => setSubScreen("notifications")}
               testId="button-settings-notifications"
+            />
+          </div>
+        </div>
+
+        {/* ── SUBSCRIPTION ───────────────────────────────────────────── */}
+        <div>
+          <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">Subscription</p>
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
+            {user.isPremium ? (
+              <Row
+                icon={Crown}
+                label="Gûstîlk Premium"
+                sub={user.premiumUntil
+                  ? `Active until ${new Date(user.premiumUntil).toLocaleDateString()}`
+                  : "Active — enjoy all premium features"}
+                onClick={() => setLocation("/premium")}
+                testId="button-settings-premium-status"
+              />
+            ) : (
+              <Row
+                icon={Crown}
+                label="Upgrade to Premium"
+                sub="Unlock messaging, video calls & more"
+                onClick={() => setLocation("/premium")}
+                testId="button-settings-upgrade"
+              />
+            )}
+            <Divider />
+            <Row
+              icon={RefreshCw}
+              label={restoreMutation.isPending ? "Restoring…" : "Restore Premium"}
+              sub="Already subscribed? Tap to sync your membership"
+              onClick={() => { if (!restoreMutation.isPending) restoreMutation.mutate(); }}
+              testId="button-settings-restore-premium"
             />
           </div>
         </div>
