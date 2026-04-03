@@ -11,13 +11,7 @@ import { db } from "./db";
 import { count, sql, eq, asc, desc, or, and, ilike } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
 import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail, sendAdminApprovalNeededEmail } from "./email";
-import OpenAI from "openai";
 import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
-
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
 
 const SUPPORT_ACCOUNT_EMAIL = "support@gustilk.com";
 
@@ -77,84 +71,79 @@ async function notifyAdminNewApplicant(applicantId: string): Promise<void> {
   }
 }
 
-const SUPPORT_AI_SYSTEM_PROMPT = `You are the Official Gûstîlk Support Assistant — a warm, knowledgeable AI for the Gûstîlk app, a Yezidi community dating platform. You have deep knowledge of every feature and policy.
+type SupportRule = { keywords: RegExp; reply: string };
+const SUPPORT_RULES: SupportRule[] = [
+  {
+    keywords: /match|how.*work|discover|like|swipe|heart|caste|sheikh|pir|mirid|murid/i,
+    reply: `Great question! Here's how matching works on Gûstîlk:\n\n• Profiles are matched strictly within your caste (Sheikh, Pir, or Mirid) with members of the opposite gender.\n• Tap the heart on a profile to like them — they'll disappear from your Discover feed and appear in their "Likes You" inbox.\n• If they like you back, you both match and can start messaging (Premium required to send messages).\n• Disliking someone removes them from your feed permanently.\n\nNeed anything else? 😊`,
+  },
+  {
+    keywords: /premium|subscri|paid|unlock|upgrade|price|cost|pay/i,
+    reply: `Gûstîlk Premium unlocks the full experience:\n\n✅ Send messages to your matches\n✅ See who liked you in the Activity tab\n✅ Video calls with matches\n✅ Send virtual gifts\n\nFree accounts can still like profiles and receive matches — you just need Premium to chat.\n\nTo upgrade, go to the **Premium** tab or tap the crown icon on your profile. If you have trouble with a payment, email support@gustilk.com and we'll sort it out.`,
+  },
+  {
+    keywords: /verif|selfie|photo|approv|pending|reject|banned|reapply|re-apply|visible|profile.*not show/i,
+    reply: `Profile verification on Gûstîlk:\n\n• Upload a clear selfie — our admin team reviews it within 24–48 hours.\n• You'll get an email once approved (or if changes are needed).\n• While your application is pending, your profile isn't visible in Discover yet.\n• If your profile was declined, correct the issue and tap **Re-apply for Verification** in your profile settings.\n\nFor photos: each photo is individually reviewed. Approved photos appear on your profile; rejected ones are flagged with a reason.\n\nStill waiting? Email support@gustilk.com with your registered email and we'll check your status.`,
+  },
+  {
+    keywords: /messag|chat|send.*message|can.*message|cannot message|message.*not work/i,
+    reply: `Messaging on Gûstîlk requires a **Premium subscription**.\n\nOnce you're Premium:\n• Open the **Matches** tab to see all your conversations.\n• Tap any match to open the chat.\n• You can also send virtual gifts from the chat screen.\n\nIf you're Premium and still can't message, try logging out and back in. If the issue persists, email support@gustilk.com.`,
+  },
+  {
+    keywords: /activity|likes you|who liked|visitor|likes sent/i,
+    reply: `The **Activity** tab has three sections:\n\n👍 **Likes** — Everyone who has liked your profile. Premium users can Accept (like back) or Pass directly from here.\n👁 **Visitors** — Recent profile views.\n❤️ **Likes Sent** — Profiles you've already liked.\n\nPremium is required to act on incoming likes from the Activity tab.`,
+  },
+  {
+    keywords: /event|community|rsvp|attend/i,
+    reply: `Gûstîlk features a **Community Events** tab where you can:\n\n• Browse upcoming Yezidi community events.\n• RSVP to events you're interested in.\n• See other members who are attending.\n\nEvents are added by the Gûstîlk team and community organizers. If you'd like to list an event, email support@gustilk.com.`,
+  },
+  {
+    keywords: /password|forgot|login|sign in|can.*log|reset|magic link|passkey|biometric/i,
+    reply: `Having trouble logging in? Here are your options:\n\n🔑 **Forgot password** — On the login screen, tap **"Magic Link"** and enter your email. You'll receive a one-click sign-in link.\n📱 **Passkey / biometric login** — Available after your first successful login. Set it up in Account Settings.\n\nIf you're locked out and the magic link isn't arriving, check your spam folder or email support@gustilk.com with your registered email address.`,
+  },
+  {
+    keywords: /report|block|harass|abuse|fake|spam|unsafe|danger|threat|impersonat/i,
+    reply: `Your safety is our top priority. Here's what to do:\n\n🚩 **Report a user** — Tap the flag icon on their profile to report harassment, fake accounts, or abuse. Our team reviews all reports.\n🚫 **Block a user** — Blocking prevents them from seeing your profile or contacting you.\n\nIf you feel you're in immediate danger, please contact local authorities.\n\nI'm flagging your message for our admin team to review. You can also reach us directly at support@gustilk.com.`,
+  },
+  {
+    keywords: /language|english|arabic|german|armenian|russian|kurdish|kurmanji/i,
+    reply: `Gûstîlk supports **6 languages**: English, Arabic, German, Armenian, Russian, and Kurdish (Kurmanji).\n\nTo change your display language:\n1. Go to **Profile → Settings**.\n2. Tap **Language**.\n3. Select your preferred language.\n\nThe app will update immediately. If your language isn't listed, let us know at support@gustilk.com — we're always working to expand.`,
+  },
+  {
+    keywords: /delete.*account|account.*delete|remove.*account|close.*account/i,
+    reply: `We're sorry to see you go! To delete your account:\n\n1. Go to **Profile → Settings → Account**.\n2. Tap **Delete Account** and confirm.\n\n⚠️ This is permanent — all your matches, messages, and profile data will be removed and cannot be recovered.\n\nIf you're leaving because of an issue we can fix, please let us know at support@gustilk.com — we'd love the chance to help first.`,
+  },
+  {
+    keywords: /human|real person|agent|staff|team|not.*robot|not.*bot|speak.*person|talk.*person/i,
+    reply: `Totally understood! I'm an automated support assistant, but a real member of our team is here to help.\n\n📧 Email us at **support@gustilk.com** and a human will respond within 24 hours.\n\nPlease include your registered email address in your message so we can look up your account quickly.`,
+  },
+  {
+    keywords: /gift|virtual gift|send.*gift/i,
+    reply: `Virtual gifts are a fun Premium feature! 🎁\n\nTo send a gift:\n1. Open a chat with one of your matches.\n2. Tap the **gift icon** in the chat toolbar.\n3. Pick an animated gift and send it.\n\nGifts are visible to both of you in the chat. Premium subscription is required to send gifts.`,
+  },
+  {
+    keywords: /video.*call|call.*video|voice call/i,
+    reply: `Video calling is available for **Premium members** with an active match.\n\nTo start a video call:\n1. Open a chat with your match.\n2. Tap the **video camera icon** in the chat header.\n\nBoth users need a stable internet connection. If calls aren't connecting, try switching between Wi-Fi and mobile data. Persistent issues? Email support@gustilk.com.`,
+  },
+];
 
-MATCHING & DISCOVERY
-• Members are matched strictly within their caste (Sheikh, Pir, or Mirid) with members of the opposite gender
-• Swipe right (heart) to like someone — they disappear from your Discover feed
-• If they also like you back from their "Likes You" inbox, you match and can message each other
-• Liked profiles move to the other person's "Likes You" tab (Activity page) — not your Discover feed
-• Disliking someone removes them from your feed permanently
-
-PROFILE & VERIFICATION
-• Complete your profile: add a bio, occupation, city, caste, date of birth, and up to 6 approved photos
-• A verification selfie is required — the admin team reviews it within 24–48 hours
-• You will receive an email once your profile is approved or if changes are needed
-• While pending, your profile is not visible in Discover
-• You can re-apply for verification after making corrections
-
-PREMIUM SUBSCRIPTION
-• Free users can like and match but cannot send messages
-• Premium unlocks: messaging matches, seeing who liked you in Activity, video calls, sending virtual gifts
-• Upgrade from the Premium tab or the profile page
-
-MESSAGING & CHAT
-• Only premium members can send messages to their matches
-• The Matches page shows all your conversations and the Gûstîlk Support chat
-• You can view a match's full profile by tapping their avatar in the chat header
-• Virtual gifts (animated) can be sent from the chat screen (premium only)
-
-ACTIVITY TAB
-• "Likes" shows everyone who has liked you — premium users can Accept (like back) or Pass (decline) directly
-• "Visitors" shows recent profile views
-• "Likes Sent" shows profiles you have already liked
-
-COMMUNITY EVENTS
-• Browse Yezidi community events in the Events tab
-• RSVP to events and see who else is attending
-
-ACCOUNT & SETTINGS
-• Change display language: English, Arabic, German, Armenian, Russian, Kurdish (Kurmanji)
-• Enable/disable notifications, manage privacy settings, block or report users
-• Forgot password? Use the Magic Link option on the login screen — a one-click link is sent to your email
-• Biometric / passkey login is available after your first login with phone number verification
-
-SAFETY & REPORTING
-• Use the flag icon on any profile to report harassment, fake accounts, or abuse
-• Blocked users cannot see your profile or contact you
-
-If the user describes harassment, abuse, impersonation, or a safety threat, respond with empathy, confirm you are flagging it for the admin team, and remind them to use the in-app Report button on the offending profile.
-
-IMPORTANT RULES
-- Always be transparent that you are an AI assistant, not a human
-- If a user explicitly requests a human agent, tell them to email support@gustilk.com and that a human will respond within 24 hours
-- Be warm, empathetic, and concise (aim for under 120 words per reply unless a detailed explanation is genuinely needed)
-- Never make up information — if you are unsure, say so and direct them to support@gustilk.com
-- Respond in the user's language if it is one of the six supported languages (English, Arabic, German, Armenian, Russian, Kurdish) — otherwise respond in English`;
+const SUPPORT_FALLBACK = `Thanks for reaching out to Gûstîlk Support! 😊\n\nI'm the automated support assistant. I'm not sure I fully understood your question — could you give me a bit more detail?\n\nOr if you'd prefer to speak with a human, email us at **support@gustilk.com** and our team will get back to you within 24 hours.`;
 
 async function generateSupportAiReply(matchId: string, supportAccountId: string): Promise<void> {
   try {
     const history = await storage.getMessages(matchId);
-    // Use the last 20 messages to keep context within token budget
-    const recent = history.slice(-20);
-    const chatMessages: { role: "user" | "assistant"; content: string }[] = recent
-      .filter(m => m.text && m.text.trim().length > 0)
-      .map(m => ({
-        role: m.senderId === supportAccountId ? "assistant" : "user",
-        content: m.text,
-      }));
-    if (chatMessages.length === 0 || chatMessages[chatMessages.length - 1].role !== "user") return;
-    const aiReply = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: SUPPORT_AI_SYSTEM_PROMPT },
-        ...chatMessages,
-      ],
-    });
-    const aiText = aiReply.choices[0]?.message?.content;
-    if (aiText) await storage.sendMessage(matchId, supportAccountId, aiText);
+    if (history.length === 0) return;
+    // Find the last message sent by the user (not by support)
+    const userMessages = history.filter(m => m.senderId !== supportAccountId && m.text?.trim());
+    if (userMessages.length === 0) return;
+    const lastUserMsg = userMessages[userMessages.length - 1].text ?? "";
+    // Small delay so the reply doesn't appear instant (feels more natural)
+    await new Promise(r => setTimeout(r, 1200));
+    const matched = SUPPORT_RULES.find(rule => rule.keywords.test(lastUserMsg));
+    const replyText = matched ? matched.reply : SUPPORT_FALLBACK;
+    await storage.sendMessage(matchId, supportAccountId, replyText);
   } catch (e) {
-    console.error("[AI support reply error]", e);
+    console.error("[Support reply error]", e);
   }
 }
 
