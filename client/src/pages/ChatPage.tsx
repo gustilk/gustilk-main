@@ -164,6 +164,18 @@ export default function ChatPage({ user, matchId }: Props) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [timeline.length]);
 
+  // Mark this match's messages as read as soon as the chat is opened
+  useEffect(() => {
+    if (!matchId) return;
+    apiRequest("POST", `/api/messages/${matchId}/read`).catch(() => {});
+    // Optimistically zero out unreadCount for this match in the cache
+    queryClient.setQueryData(["/api/matches"], (old: any) =>
+      old
+        ? { ...old, matches: old.matches?.map((m: any) => m.id === matchId ? { ...m, unreadCount: 0 } : m) }
+        : old
+    );
+  }, [matchId]);
+
   const handleSend = () => {
     const trimmed = text.trim();
     if (!trimmed || sendMutation.isPending) return;
