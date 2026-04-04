@@ -8,6 +8,7 @@ import { setupWs } from "./ws";
 import { z } from "zod";
 import { checkFacePresent } from "./moderation";
 import { db } from "./db";
+import { cacheDel } from "./cache";
 import { count, sql, eq, asc, desc, or, and, ilike, isNotNull } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
 import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail, sendAdminApprovalNeededEmail } from "./email";
@@ -800,12 +801,17 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       .where(and(eq(messages.readAt, null as any), sql`${messages.senderId} != ${userId}`));
     // Update matchesSeenAt
     await db.update(users).set({ matchesSeenAt: new Date() } as any).where(eq(users.id, userId));
+    // Bust the server-side matches cache so the next /api/matches call returns fresh unreadCounts
+    cacheDel(`matches:${userId}`);
     res.json({ ok: true });
   });
 
   app.post("/api/seen/activity", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
-    await db.update(users).set({ activitySeenAt: new Date() } as any).where(eq(users.id, userId));
+    const now = new Date();
+    await db.update(users).set({ activitySeenAt: now } as any).where(eq(users.id, userId));
+    // Bust the user cache so the next /api/auth/me returns the updated activitySeenAt
+    cacheDel(`user:${userId}`);
     res.json({ ok: true });
   });
 
