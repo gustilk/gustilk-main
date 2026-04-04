@@ -2,7 +2,11 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, MapPin, ChevronLeft, Shield, AlertTriangle, XCircle } from "lucide-react";
+import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, MapPin, ChevronLeft, Shield, AlertTriangle, XCircle, GripVertical, Trash2 } from "lucide-react";
+import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, useSortable, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -12,6 +16,76 @@ import { PhotoCropModal } from "@/components/PhotoCropModal";
 import { pickPhoto } from "@/lib/camera";
 
 type LocalSlot = { url: string; status: "approved" | "new" } | null;
+
+function SortablePhotoItem({
+  id, slot, idx, onTap, onAdd,
+}: {
+  id: string; slot: LocalSlot; idx: number; onTap: (idx: number) => void; onAdd: (idx: number) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+    disabled: !slot,
+  });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 20 : 1,
+    position: "relative",
+  };
+
+  if (!slot) {
+    return (
+      <div ref={setNodeRef} style={style}>
+        <button
+          onClick={() => onAdd(idx)}
+          data-testid={`button-add-photo-${idx}`}
+          className="w-full rounded-2xl flex flex-col items-center justify-center gap-1"
+          style={{ aspectRatio: "1 / 1", background: "rgba(255,255,255,0.03)", border: "2px dashed rgba(201,168,76,0.18)" }}
+        >
+          <ImagePlus size={20} color="rgba(201,168,76,0.28)" />
+          <span className="text-xs" style={{ color: "rgba(253,248,240,0.18)" }}>Photo {idx + 1}</span>
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <div
+        className="rounded-2xl overflow-hidden select-none"
+        style={{ aspectRatio: "1 / 1", opacity: isDragging ? 0.7 : 1, cursor: "grab" }}
+        onClick={() => !isDragging && onTap(idx)}
+        data-testid={`img-profile-photo-${idx}`}
+        {...attributes}
+        {...listeners}
+      >
+        <img
+          src={slot.url}
+          alt={`Photo ${idx + 1}`}
+          className="w-full h-full object-cover pointer-events-none"
+          style={slot.status === "new" ? { filter: "brightness(0.75)" } : {}}
+          draggable={false}
+        />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.55) 0%, transparent 55%)" }} />
+        {slot.status === "new" && (
+          <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold"
+            style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}>
+            Pending
+          </div>
+        )}
+        {idx === 0 && (
+          <div className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded flex items-center gap-1 text-[10px] font-bold"
+            style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}>
+            <Star size={8} fill="#1a0a2e" color="#1a0a2e" /> Cover
+          </div>
+        )}
+        <div className="absolute top-1.5 right-1.5 rounded-full p-0.5" style={{ background: "rgba(13,6,24,0.5)" }}>
+          <GripVertical size={12} color="rgba(255,255,255,0.5)" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const REJECTION_EXPIRY_MS = 24 * 60 * 60 * 1000;
 
@@ -260,9 +334,25 @@ export default function ProfilePage({ user }: Props) {
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [cropTarget, setCropTarget] = useState<{ imgSrc: string; slotIdx: number } | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [selectedPhotoIdx, setSelectedPhotoIdx] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingSlotRef = useRef<number>(0);
   const [pickerBusy, setPickerBusy] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 220, tolerance: 6 } }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIdx = parseInt((active.id as string).replace("slot-", ""));
+    const newIdx = parseInt((over.id as string).replace("slot-", ""));
+    if (isNaN(oldIdx) || isNaN(newIdx)) return;
+    setLocalSlots(prev => arrayMove([...prev], oldIdx, newIdx));
+    setPhotosEdited(true);
+  };
 
   const { data } = useQuery<{ user: SafeUser }>({
     queryKey: ["/api/auth/me"],
@@ -551,73 +641,74 @@ export default function ProfilePage({ user }: Props) {
           <p className="text-xs mt-2 font-medium" style={{ color: "#d4608a" }}>{photoError}</p>
         )}
 
-        {/* Approved + new upload slots */}
-        <div className="grid grid-cols-3 gap-2">
-          {Array.from({ length: 6 }).map((_, idx) => {
-            const slot = localSlots[idx];
-            return (
-              <div key={idx} className="relative">
-                {slot ? (
-                  <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
-                    <img
-                      src={slot.url}
-                      alt={`Photo ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                      data-testid={`img-profile-photo-${idx}`}
-                      style={slot.status === "new" ? { filter: "brightness(0.75)" } : {}}
-                    />
-                    {slot.status === "new" && (
-                      <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold"
-                        style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}>
-                        Pending
-                      </div>
-                    )}
-                    <button
-                      onClick={() => removePhoto(idx)}
-                      data-testid={`button-remove-photo-${idx}`}
-                      className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full flex items-center justify-center z-10"
-                      style={{ background: "rgba(212,96,138,0.9)" }}
-                    >
-                      <X size={10} color="white" />
-                    </button>
-                    {slot.status === "approved" && (
-                      idx === 0 ? (
-                        <div
-                          className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded flex items-center gap-1 text-xs font-bold"
-                          style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
-                        >
-                          <Star size={9} fill="#1a0a2e" color="#1a0a2e" />
-                          {t("profile.mainPhoto")}
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setAsMain(idx)}
-                          data-testid={`button-set-main-photo-${idx}`}
-                          className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded flex items-center gap-1 text-xs font-semibold transition-all active:scale-95"
-                          style={{ background: "rgba(0,0,0,0.55)", color: "rgba(201,168,76,0.9)", border: "1px solid rgba(201,168,76,0.35)" }}
-                        >
-                          <Star size={9} color="#c9a84c" />
-                          {t("profile.mainPhoto")}
-                        </button>
-                      )
-                    )}
-                  </div>
-                ) : (
+        {/* Approved + new upload slots — drag to reorder, tap for options */}
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={Array.from({ length: 6 }, (_, i) => `slot-${i}`)} strategy={rectSortingStrategy}>
+            <div className="grid grid-cols-3 gap-2">
+              {Array.from({ length: 6 }, (_, idx) => (
+                <SortablePhotoItem
+                  key={`slot-${idx}`}
+                  id={`slot-${idx}`}
+                  slot={localSlots[idx]}
+                  idx={idx}
+                  onTap={i => setSelectedPhotoIdx(i)}
+                  onAdd={openPicker}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+        <p className="text-xs mt-2" style={{ color: "rgba(253,248,240,0.2)" }}>{t("profile.photoInstruction")}</p>
+
+        {/* Photo action sheet */}
+        {selectedPhotoIdx !== null && (
+          <div
+            className="fixed inset-0 z-50 flex items-end"
+            style={{ background: "rgba(0,0,0,0.72)" }}
+            onClick={() => setSelectedPhotoIdx(null)}
+          >
+            <div
+              className="w-full rounded-t-3xl px-5 pt-3 pb-10"
+              style={{ background: "#1a0a2e", border: "1px solid rgba(201,168,76,0.15)" }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: "rgba(255,255,255,0.12)" }} />
+              <p className="text-center text-xs font-semibold mb-4 uppercase tracking-wider" style={{ color: "rgba(253,248,240,0.35)" }}>
+                Photo {selectedPhotoIdx + 1}
+              </p>
+              <div className="flex flex-col gap-2">
+                {selectedPhotoIdx !== 0 && localSlots[selectedPhotoIdx]?.status === "approved" && (
                   <button
-                    onClick={() => openPicker(idx)}
-                    data-testid={`button-add-photo-${idx}`}
-                    className="w-full rounded-2xl flex flex-col items-center justify-center gap-1"
-                    style={{ aspectRatio: "1 / 1", background: "rgba(255,255,255,0.03)", border: "2px dashed rgba(201,168,76,0.18)" }}
+                    data-testid="button-set-cover"
+                    onClick={() => { setAsMain(selectedPhotoIdx!); setSelectedPhotoIdx(null); }}
+                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.98]"
+                    style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}
                   >
-                    <ImagePlus size={20} color="rgba(201,168,76,0.28)" />
-                    <span className="text-xs" style={{ color: "rgba(253,248,240,0.18)" }}>Photo {idx + 1}</span>
+                    <Star size={16} color="#c9a84c" />
+                    Set as Cover Photo
                   </button>
                 )}
+                <button
+                  data-testid="button-delete-photo"
+                  onClick={() => { removePhoto(selectedPhotoIdx!); setSelectedPhotoIdx(null); }}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.98]"
+                  style={{ background: "rgba(212,96,138,0.1)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.2)" }}
+                >
+                  <Trash2 size={16} color="#d4608a" />
+                  Delete Photo
+                </button>
+                <button
+                  data-testid="button-cancel-photo-action"
+                  onClick={() => setSelectedPhotoIdx(null)}
+                  className="w-full flex items-center justify-center px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.98]"
+                  style={{ background: "rgba(255,255,255,0.04)", color: "rgba(253,248,240,0.45)" }}
+                >
+                  Cancel
+                </button>
               </div>
-            );
-          })}
-        </div>
-        <p className="text-xs mt-2" style={{ color: "rgba(253,248,240,0.2)" }}>{t("profile.photoInstruction")}</p>
+            </div>
+          </div>
+        )}
 
         {/* Pending review */}
         {pendingSlots.length > 0 && (
