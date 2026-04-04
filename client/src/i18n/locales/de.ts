@@ -1,5 +1,5 @@
 export default {
-  lang: { name: "German", native: "Deutsch", flag: "/flags/de.svg", dir: "ltr" },
+  lang: { name: "German", native: "Deutsch", flag: "🇩🇪", dir: "ltr" },
   languagePicker: {
     title: "Willkommen bei Gûstîlk",
     subtitle: "Wähle deine Sprache, um fortzufahren",
