@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+﻿import { useState, useRef, useEffect, useCallback } from "react";
+import PeacockLogo from "@/components/PeacockLogo";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -368,7 +369,7 @@ export default function ProfilePage({ user }: Props) {
     <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
       <div className="pt-12 pb-2 px-5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <img src="/gustilk-logo.png?v=4" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
+          <PeacockLogo size={48} />
           <h1 className="font-serif text-2xl text-gold">{t("profile.title")}</h1>
         </div>
         <div className="flex items-center gap-2">
@@ -407,7 +408,7 @@ export default function ProfilePage({ user }: Props) {
           <button onClick={() => setLocation("/")} data-testid="button-back-to-review"
             className="text-xs font-semibold px-2 py-1 rounded-lg flex-shrink-0"
             style={{ background: "rgba(212,96,138,0.15)", color: "#d4608a" }}>
-            Re-apply →
+            Re-apply â†’
           </button>
         </div>
       )}
@@ -437,7 +438,7 @@ export default function ProfilePage({ user }: Props) {
               <div className="flex items-end justify-between">
                 <div>
                   <h2 className="font-serif text-2xl text-white font-bold" data-testid="text-profile-name">{me.fullName ?? me.firstName ?? "Member"}</h2>
-                  <p className="text-white/60 text-sm">{me.city}{me.state ? `, ${me.state}` : ""}, {me.country} · {(me as any).dateOfBirth ? (() => {
+                  <p className="text-white/60 text-sm">{me.city}{me.state ? `, ${me.state}` : ""}, {me.country} Â· {(me as any).dateOfBirth ? (() => {
                     const dob = new Date((me as any).dateOfBirth);
                     const today = new Date();
                     let a = today.getFullYear() - dob.getFullYear();
@@ -531,7 +532,7 @@ export default function ProfilePage({ user }: Props) {
         </div>
       </div>
 
-      {/* ── Photo Gallery ── */}
+      {/* â”€â”€ Photo Gallery â”€â”€ */}
       <div className="px-5 mt-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs text-cream/40 uppercase tracking-wider font-semibold">{t("profile.photos")}</h3>

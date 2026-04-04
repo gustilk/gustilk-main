@@ -1,4 +1,5 @@
-import { useState, useEffect, lazy, Suspense, useRef } from "react";
+﻿import { useState, useEffect, lazy, Suspense, useRef } from "react";
+import PeacockLogo from "@/components/PeacockLogo";
 import { Switch, Route, useLocation, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
@@ -46,7 +47,7 @@ function PendingReviewBanner() {
       style={{ background: "linear-gradient(90deg, rgba(201,168,76,0.13) 0%, rgba(123,63,160,0.1) 100%)", borderBottom: "1px solid rgba(201,168,76,0.2)" }}>
       <Clock size={14} style={{ color: "#c9a84c", flexShrink: 0 }} />
       <p className="text-xs flex-1 leading-snug" style={{ color: "rgba(253,248,240,0.7)" }}>
-        Your profile is <span style={{ color: "#c9a84c", fontWeight: 600 }}>under review</span> — you can browse freely while we check your account. You'll be notified once approved.
+        Your profile is <span style={{ color: "#c9a84c", fontWeight: 600 }}>under review</span> â€” you can browse freely while we check your account. You'll be notified once approved.
       </p>
       <button onClick={() => setDismissed(true)} data-testid="button-dismiss-review-banner"
         className="flex-shrink-0 p-0.5 rounded" style={{ color: "rgba(253,248,240,0.3)" }}>
@@ -59,7 +60,7 @@ function PendingReviewBanner() {
 // Lazy-load admin panel so regular users never download admin code
 const AdminLayout = lazy(() => import("@/pages/admin/AdminLayout"));
 
-// Stable wrapper component — must be defined outside AppShell so its
+// Stable wrapper component â€” must be defined outside AppShell so its
 // reference never changes between renders, preventing wouter from
 // unmounting/remounting the admin layout on every sub-page navigation.
 function AdminRoute({ user }: { user: User }) {
@@ -135,10 +136,10 @@ function AppShell({ user }: { user: User }) {
     if (nativeInitDone.current) return;
     nativeInitDone.current = true;
 
-    // RevenueCat — IAP for premium subscriptions
+    // RevenueCat â€” IAP for premium subscriptions
     initPurchases();
 
-    // Push notifications — register device token + handle tap-to-open
+    // Push notifications â€” register device token + handle tap-to-open
     initPushNotifications(setLocation);
 
     // Android hardware back button
@@ -157,7 +158,7 @@ function AppShell({ user }: { user: User }) {
   const vs = user.verificationStatus;
   const isRegularUser = !user.isAdmin && !(user as any).isSystemAccount;
 
-  // Rejected and banned users are fully blocked — they see the PendingApprovalPage
+  // Rejected and banned users are fully blocked â€” they see the PendingApprovalPage
   // which handles re-application (rejected) or a permanent ban screen (banned).
   // Exception: rejected users may navigate to /profile/edit to replace their photos
   // before re-submitting, and to /profile to view their current photo slots.
@@ -217,7 +218,7 @@ function Router() {
     return (
       <div className="flex items-center justify-center min-h-screen" style={{ background: "#0d0618" }}>
         <div className="text-center">
-          <div className="font-serif text-4xl text-gold mb-3">Gûstîlk</div>
+          <PeacockLogo size={96} cycle intervalMs={600} className="mx-auto mb-4" />
           <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin mx-auto" />
         </div>
       </div>
@@ -271,3 +272,4 @@ export default function App() {
     </QueryClientProvider>
   );
 }
+

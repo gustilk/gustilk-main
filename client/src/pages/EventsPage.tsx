@@ -1,4 +1,5 @@
-import { useState } from "react";
+﻿import { useState } from "react";
+import PeacockLogo from "@/components/PeacockLogo";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -22,9 +23,9 @@ const TYPE_BG: Record<string, string> = {
 };
 
 const TYPE_EMOJI: Record<string, string> = {
-  cultural: "🏛",
-  meetup: "🤝",
-  online: "💻",
+  cultural: "ðŸ›",
+  meetup: "ðŸ¤",
+  online: "ðŸ’»",
 };
 
 const EMPTY_FORM = {
@@ -125,7 +126,7 @@ export default function EventsPage({ user }: Props) {
       <div className="pt-12 pb-4 px-5">
         <div className="flex items-center justify-between mb-0.5">
           <div className="flex items-center gap-2.5">
-            <img src="/gustilk-logo.png?v=4" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
+          <PeacockLogo size={48} />
             <h1 className="font-serif text-2xl text-gold">{t("events.title")}</h1>
           </div>
           {(user.isAdmin || user.isPremium) && (
@@ -189,7 +190,7 @@ export default function EventsPage({ user }: Props) {
   );
 }
 
-// ─── Full-screen form ──────────────────────────────────────────────────────
+// â”€â”€â”€ Full-screen form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
   initial: FormData;
@@ -219,9 +220,9 @@ function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
   const dividerStyle = { height: "1px", background: "rgba(201,168,76,0.08)", margin: "0 16px" };
 
   const typeOptions: { value: FormData["type"]; label: string; emoji: string; color: string }[] = [
-    { value: "meetup", label: "Meetup", emoji: "🤝", color: "#d4608a" },
-    { value: "cultural", label: "Cultural", emoji: "🏛", color: "#c9a84c" },
-    { value: "online", label: "Online", emoji: "💻", color: "#9b6bd4" },
+    { value: "meetup", label: "Meetup", emoji: "ðŸ¤", color: "#d4608a" },
+    { value: "cultural", label: "Cultural", emoji: "ðŸ›", color: "#c9a84c" },
+    { value: "online", label: "Online", emoji: "ðŸ’»", color: "#9b6bd4" },
   ];
 
   return (
@@ -250,7 +251,7 @@ function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
           className="text-sm font-bold transition-all disabled:opacity-30"
           style={{ color: isValid && !isPending ? "#c9a84c" : "rgba(201,168,76,0.3)" }}
         >
-          {isPending ? "Saving…" : isEditing ? "Save" : "Create"}
+          {isPending ? "Savingâ€¦" : isEditing ? "Save" : "Create"}
         </button>
       </div>
 
@@ -285,7 +286,7 @@ function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
             <input
               className={inputCls}
               style={{ ...inputStyle, border: "none", background: "transparent", padding: "0" }}
-              placeholder="Give your event a name…"
+              placeholder="Give your event a nameâ€¦"
               value={form.title}
               onChange={e => set("title", e.target.value)}
               data-testid="input-event-title"
@@ -326,7 +327,7 @@ function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
             <input
               className={inputCls}
               style={{ ...inputStyle, border: "none", background: "transparent", padding: "0" }}
-              placeholder="Address or online link…"
+              placeholder="Address or online linkâ€¦"
               value={form.location}
               onChange={e => set("location", e.target.value)}
               data-testid="input-event-location"
@@ -338,7 +339,7 @@ function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
             <input
               className={inputCls}
               style={{ ...inputStyle, border: "none", background: "transparent", padding: "0" }}
-              placeholder="e.g. Iraq, Germany…"
+              placeholder="e.g. Iraq, Germanyâ€¦"
               value={form.country}
               onChange={e => set("country", e.target.value)}
               data-testid="input-event-country"
@@ -370,14 +371,14 @@ function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
           className="w-full py-4 rounded-2xl font-bold text-sm transition-all disabled:opacity-40"
           style={{ background: isValid ? "linear-gradient(135deg, #7b3fa0, #d4608a)" : "rgba(255,255,255,0.06)", color: "white" }}
         >
-          {isPending ? "Saving…" : isEditing ? "Save Changes" : "Create Event"}
+          {isPending ? "Savingâ€¦" : isEditing ? "Save Changes" : "Create Event"}
         </button>
       </div>
     </div>
   );
 }
 
-// ─── Event card ────────────────────────────────────────────────────────────
+// â”€â”€â”€ Event card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function EventCard({ event, user, onAttend, onOpen, onEdit, onDelete, isPending }: {
   event: EventWithAttendance;
@@ -392,10 +393,10 @@ function EventCard({ event, user, onAttend, onOpen, onEdit, onDelete, isPending 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const typeStyle = TYPE_COLORS[event.type] ?? TYPE_COLORS.cultural;
   const bgGradient = event.imageUrl ? undefined : TYPE_BG[event.type] ?? TYPE_BG.cultural;
-  const emoji = TYPE_EMOJI[event.type] ?? "📅";
+  const emoji = TYPE_EMOJI[event.type] ?? "ðŸ“…";
 
   const dateLabel = (() => {
-    try { return format(new Date(event.date), "EEE, MMM d · HH:mm"); } catch { return ""; }
+    try { return format(new Date(event.date), "EEE, MMM d Â· HH:mm"); } catch { return ""; }
   })();
 
   const canManage = user.isAdmin || event.isCreator;
@@ -435,7 +436,7 @@ function EventCard({ event, user, onAttend, onOpen, onEdit, onDelete, isPending 
           </div>
           <div className="flex items-center gap-1.5">
             <MapPin size={11} color="rgba(201,168,76,0.7)" />
-            <span className="text-cream/50 text-xs truncate">{event.location} · {event.country}</span>
+            <span className="text-cream/50 text-xs truncate">{event.location} Â· {event.country}</span>
           </div>
         </div>
       </button>
@@ -451,7 +452,7 @@ function EventCard({ event, user, onAttend, onOpen, onEdit, onDelete, isPending 
             : { background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white" }
           }
         >
-          {event.isAttending ? `✓ ${t("events.attending")}` : t("events.attend")}
+          {event.isAttending ? `âœ“ ${t("events.attending")}` : t("events.attend")}
         </button>
         <button
           onClick={onOpen}

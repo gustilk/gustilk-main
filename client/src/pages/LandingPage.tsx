@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
+import PeacockLogo from "@/components/PeacockLogo";
 import { Link, useLocation } from "wouter";
 import { Heart, Shield, Users, Eye, EyeOff, Phone, Mail, ArrowLeft, Globe, ChevronDown, Search, X, Fingerprint } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -13,7 +14,7 @@ function triggerLangPicker() {
 
 type Screen = "home" | "email" | "phone";
 
-// ── Password strength ─────────────────────────────────────────────────────────
+// â”€â”€ Password strength â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const COMMON_PASSWORDS_FE = new Set([
   "password","password1","password12","password123","password1234",
   "123456","1234567","12345678","123456789","1234567890",
@@ -77,21 +78,21 @@ export default function LandingPage() {
       <div className="relative z-10 text-center pb-5 px-4 space-y-1.5">
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <Link href="/privacy" data-testid="link-footer-privacy" className="text-cream/25 text-xs hover:text-cream/50 transition-colors">Privacy Policy</Link>
-          <span className="text-cream/15 text-xs">·</span>
+          <span className="text-cream/15 text-xs">Â·</span>
           <Link href="/terms" data-testid="link-footer-terms" className="text-cream/25 text-xs hover:text-cream/50 transition-colors">Terms</Link>
-          <span className="text-cream/15 text-xs">·</span>
+          <span className="text-cream/15 text-xs">Â·</span>
           <Link href="/refund" data-testid="link-footer-refund" className="text-cream/25 text-xs hover:text-cream/50 transition-colors">Refunds</Link>
-          <span className="text-cream/15 text-xs">·</span>
+          <span className="text-cream/15 text-xs">Â·</span>
           <Link href="/guidelines" data-testid="link-footer-guidelines" className="text-cream/25 text-xs hover:text-cream/50 transition-colors">Guidelines</Link>
         </div>
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <Link href="/cookie-policy" data-testid="link-footer-cookie-policy" className="text-cream/20 text-xs hover:text-cream/45 transition-colors">Cookie Policy</Link>
-          <span className="text-cream/12 text-xs">·</span>
+          <span className="text-cream/12 text-xs">Â·</span>
           <Link href="/gdpr" data-testid="link-footer-gdpr" className="text-cream/20 text-xs hover:text-cream/45 transition-colors">GDPR Notice</Link>
-          <span className="text-cream/12 text-xs">·</span>
+          <span className="text-cream/12 text-xs">Â·</span>
           <Link href="/safety-tips" data-testid="link-footer-safety-tips" className="text-cream/20 text-xs hover:text-cream/45 transition-colors">Safety Tips</Link>
         </div>
-        <p className="text-cream/15 text-xs">© 2026 Gûstîlk · Built with love for the Yezidi community</p>
+        <p className="text-cream/15 text-xs">Â© 2026 GÃ»stÃ®lk Â· Built with love for the Yezidi community</p>
       </div>
     </div>
   );
@@ -101,18 +102,10 @@ function Logo() {
   return (
     <div className="text-center mb-5">
       <div className="inline-flex items-center justify-center mb-1">
-        <img
-          src="/gustilk-logo.png?v=4"
-          alt="Gûstîlk"
-          style={{
-            width: "min(80px, 26vw)",
-            height: "auto",
-            objectFit: "contain",
-          }}
-        />
+        <PeacockLogo size={80} cycle intervalMs={2500} />
       </div>
-      <h1 className="font-serif text-5xl font-bold text-gold tracking-wide">Gûstîlk</h1>
-      <p className="text-cream/30 text-xs tracking-[0.3em] uppercase mt-1">Yezidi · Community</p>
+      <h1 className="font-serif text-5xl font-bold text-gold tracking-wide">GÃ»stÃ®lk</h1>
+      <p className="text-cream/30 text-xs tracking-[0.3em] uppercase mt-1">Yezidi Â· Community</p>
     </div>
   );
 }
@@ -202,7 +195,7 @@ function SubmitButton({ loading, loadingText, disabled, onClick, "data-testid": 
       className="w-full py-4 rounded-2xl font-bold text-base disabled:opacity-60"
       style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 8px 32px rgba(201,168,76,0.4)" }}
     >
-      {loading ? (loadingText ?? "Please wait…") : children}
+      {loading ? (loadingText ?? "Please waitâ€¦") : children}
     </button>
   );
 }
@@ -260,7 +253,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
       const res = await rawRes.json();
       localStorage.setItem("gustilk_email", email.trim());
       if (res?.pending) {
-        // Registration succeeded — show email activation screen
+        // Registration succeeded â€” show email activation screen
         setPendingEmail(email.trim());
         setOtpDigits(["", "", "", "", "", ""]);
         setActivationError(null);
@@ -276,7 +269,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
       try { msg = JSON.parse(raw).message || raw; } catch { msg = raw; }
       const lower = msg.toLowerCase();
       if (lower.includes("verify your email") || lower.includes("activation")) {
-        // Account exists but not activated — go to activation screen
+        // Account exists but not activated â€” go to activation screen
         setPendingEmail(email.trim());
         setOtpDigits(["", "", "", "", "", ""]);
         setActivationError(null);
@@ -354,7 +347,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
         setForgotState("sent");
       }
     } catch {
-      setForgotError("Network error — please check your connection and try again.");
+      setForgotError("Network error â€” please check your connection and try again.");
       setForgotState("error");
     }
   }
@@ -366,11 +359,11 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
       </button>
       <Logo />
 
-      {/* ── Email activation screen ─────────────────────────────────────────── */}
+      {/* â”€â”€ Email activation screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {mode === "activate" && (
         <div className="animate-slide-up" data-testid="section-activate">
           <div className="rounded-2xl p-5 text-center mb-6" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.2)" }}>
-            <div className="text-3xl mb-2">✉️</div>
+            <div className="text-3xl mb-2">âœ‰ï¸</div>
             <h2 className="font-serif text-lg text-gold mb-1.5" data-testid="text-activate-title">Check your inbox</h2>
             <p className="text-cream/55 text-sm leading-relaxed">
               We sent a 6-digit code to{" "}
@@ -438,7 +431,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
 
             <SubmitButton
               loading={loading}
-              loadingText="Verifying…"
+              loadingText="Verifyingâ€¦"
               disabled={otpDigits.join("").length < 6}
               data-testid="button-activate"
             >
@@ -450,7 +443,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
           <div className="mt-5 text-center space-y-2">
             {resendState === "sent" ? (
               <p className="text-xs font-medium" style={{ color: "#22c55e" }} data-testid="text-resend-sent">
-                New code sent — check your inbox
+                New code sent â€” check your inbox
               </p>
             ) : (
               <button
@@ -461,7 +454,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
                 className="text-xs font-medium disabled:opacity-50"
                 style={{ color: "rgba(201,168,76,0.6)" }}
               >
-                {resendState === "sending" ? "Sending…" : "Didn't get it? Resend code"}
+                {resendState === "sending" ? "Sendingâ€¦" : "Didn't get it? Resend code"}
               </button>
             )}
             <button
@@ -471,7 +464,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
               className="block w-full text-xs"
               style={{ color: "rgba(253,248,240,0.3)" }}
             >
-              ← Back to sign up
+              â† Back to sign up
             </button>
           </div>
         </div>
@@ -497,7 +490,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
       {mode !== "activate" && mode === "register" && ageStatus === "unchecked" && (
         <div className="animate-slide-up space-y-5">
           <div className="rounded-2xl p-5 text-center" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.2)" }}>
-            <div className="text-3xl mb-3">🔞</div>
+            <div className="text-3xl mb-3">ðŸ”ž</div>
             <h2 className="font-serif text-lg text-gold mb-2" data-testid="text-age-gate-title">{t("ageGate.title")}</h2>
             <p className="text-cream/55 text-sm leading-relaxed">{t("ageGate.body")}</p>
           </div>
@@ -525,7 +518,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
       {mode !== "activate" && mode === "register" && ageStatus === "blocked" && (
         <div className="animate-slide-up space-y-4">
           <div className="rounded-2xl p-5 text-center" style={{ background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.2)" }}>
-            <div className="text-3xl mb-3">🚫</div>
+            <div className="text-3xl mb-3">ðŸš«</div>
             <h2 className="font-serif text-lg mb-2" style={{ color: "#ef4444" }} data-testid="text-age-blocked-title">{t("ageGate.blockedTitle")}</h2>
             <p className="text-cream/50 text-sm leading-relaxed">{t("ageGate.blockedBody")}</p>
           </div>
@@ -624,7 +617,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
             <p className="text-xs mt-1.5 font-medium" style={{ color: "#d4608a" }}>{passwordError}</p>
           )}
 
-          {/* ── Password strength indicator (register only) ── */}
+          {/* â”€â”€ Password strength indicator (register only) â”€â”€ */}
           {mode === "register" && password.length > 0 && (
             <div className="mt-2.5">
               <div className="flex gap-1.5 mb-1.5">
@@ -652,7 +645,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
                 <ul data-testid="list-pw-tips" className="space-y-0.5">
                   {pwStrength!.tips.map(tip => (
                     <li key={tip} className="text-xs" style={{ color: "rgba(253,248,240,0.4)" }}>
-                      • {tip}
+                      â€¢ {tip}
                     </li>
                   ))}
                 </ul>
@@ -744,7 +737,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
                     className="flex-1 py-2 rounded-lg text-xs font-bold disabled:opacity-60"
                     style={{ background: "linear-gradient(135deg,#c9a84c,#e8c97a)", color: "#1a0a2e" }}
                   >
-                    {forgotState === "sending" ? "Sending…" : "Send magic link"}
+                    {forgotState === "sending" ? "Sendingâ€¦" : "Send magic link"}
                   </button>
                   <button
                     type="button"
@@ -967,7 +960,7 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
             />
           </div>
           <p className="text-cream/30 text-xs mt-1.5 text-center">
-            {country.flag} {country.name} · {country.dial}
+            {country.flag} {country.name} Â· {country.dial}
           </p>
         </div>
 

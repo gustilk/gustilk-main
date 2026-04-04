@@ -1,4 +1,5 @@
-import { useState } from "react";
+﻿import { useState } from "react";
+import PeacockLogo from "@/components/PeacockLogo";
 import { useLocation } from "wouter";
 import { ArrowLeft, Star, Check, Eye, Heart, MessageCircle, Users, Globe, CreditCard, Smartphone } from "lucide-react";
 import { SiPaypal, SiApplepay, SiGooglepay, SiVenmo, SiKlarna } from "react-icons/si";
@@ -41,14 +42,14 @@ const METHODS: Record<string, Method> = {
   google_pay:{ id: "google_pay",label: "Google Pay",     icon: <SiGooglepay size={20} />,    fields: [], redirectOnly: true },
   venmo:     { id: "venmo",     label: "Venmo",          icon: <SiVenmo size={18} />,        fields: [{ key: "handle", label: "Venmo Username", placeholder: "@your-username" }] },
   klarna:    { id: "klarna",    label: "Klarna",         icon: <SiKlarna size={18} />,       fields: [{ key: "email", label: "Email", placeholder: "your@email.com", type: "email" }] },
-  sepa:      { id: "sepa",      label: "SEPA",           icon: <span className="text-xs font-bold">€</span>, fields: [{ key: "iban", label: "IBAN", placeholder: "DE89 3704 0044 0532 0130 00" }, { key: "bic", label: "BIC", placeholder: "COBADEFFXXX" }] },
+  sepa:      { id: "sepa",      label: "SEPA",           icon: <span className="text-xs font-bold">â‚¬</span>, fields: [{ key: "iban", label: "IBAN", placeholder: "DE89 3704 0044 0532 0130 00" }, { key: "bic", label: "BIC", placeholder: "COBADEFFXXX" }] },
   giropay:   { id: "giropay",   label: "Giropay",        icon: <span className="text-xs font-bold">GP</span>,fields: [{ key: "iban", label: "IBAN", placeholder: "DE89 3704 0044 0532 0130 00" }, { key: "bic", label: "BIC", placeholder: "COBADEFFXXX" }] },
   ideal:     { id: "ideal",     label: "iDEAL",          icon: <span className="text-xs font-bold">iD</span>,fields: [{ key: "bank", label: "Bank", placeholder: "ABN AMRO / ING / Rabobank" }] },
   swish:     { id: "swish",     label: "Swish",          icon: <Smartphone size={16} />,     fields: [{ key: "phone", label: "Phone", placeholder: "+46 70 000 0000", type: "tel" }] },
   bancontact:{ id: "bancontact",label: "Bancontact",     icon: <span className="text-xs font-bold">BC</span>,fields: [{ key: "card", label: "Card Number", placeholder: "6703 xxxx xxxx xxxx" }, { key: "expiry", label: "MM / YY", placeholder: "12 / 27" }] },
   interac:   { id: "interac",   label: "Interac",        icon: <span className="text-xs font-bold">INT</span>,fields: [{ key: "email", label: "Email", placeholder: "your@email.com", type: "email" }] },
   bpay:      { id: "bpay",      label: "BPAY",           icon: <span className="text-xs font-bold">BP</span>,fields: [{ key: "biller", label: "Biller Code", placeholder: "12345" }, { key: "ref", label: "Reference", placeholder: "00000000" }] },
-  mir:       { id: "mir",       label: "MIR",            icon: <span className="text-xs font-bold">МИР</span>,fields: CARD_FIELDS },
+  mir:       { id: "mir",       label: "MIR",            icon: <span className="text-xs font-bold">ÐœÐ˜Ð </span>,fields: CARD_FIELDS },
   idram:     { id: "idram",     label: "IDram",          icon: <Smartphone size={16} />,     fields: [{ key: "phone", label: "Phone", placeholder: "+374 XX XXX XXX", type: "tel" }] },
   bog_pay:   { id: "bog_pay",   label: "BOG Pay",        icon: <Smartphone size={16} />,     fields: [], redirectOnly: true },
   lyf_pay:   { id: "lyf_pay",   label: "Lyf Pay",        icon: <Smartphone size={16} />,     fields: [], redirectOnly: true },
@@ -61,20 +62,20 @@ type CountryConfig = {
 };
 
 const COUNTRY_DATA: Record<string, CountryConfig> = {
-  USA:       { isFree: false, flag: "🇺🇸", methods: ["card", "paypal", "apple_pay", "google_pay"] },
-  Canada:    { isFree: false, flag: "🇨🇦", methods: ["card", "paypal", "apple_pay", "google_pay", "interac"] },
-  Australia: { isFree: false, flag: "🇦🇺", methods: ["card", "paypal", "apple_pay", "google_pay", "bpay"] },
-  Germany:   { isFree: false, flag: "🇩🇪", methods: ["card", "sepa", "paypal", "apple_pay", "google_pay", "klarna", "giropay"] },
-  Holland:   { isFree: false, flag: "🇳🇱", methods: ["card", "ideal", "paypal", "apple_pay", "google_pay", "klarna"] },
-  Sweden:    { isFree: false, flag: "🇸🇪", methods: ["card", "swish", "paypal", "apple_pay", "google_pay", "klarna"] },
-  Belgium:   { isFree: false, flag: "🇧🇪", methods: ["card", "bancontact", "paypal", "apple_pay", "google_pay"] },
-  France:    { isFree: false, flag: "🇫🇷", methods: ["card", "paypal", "apple_pay", "google_pay", "klarna", "lyf_pay"] },
-  Turkey:    { isFree: false, flag: "🇹🇷", methods: ["card", "paypal", "apple_pay", "google_pay"] },
-  Armenia:   { isFree: false, flag: "🇦🇲", methods: ["card", "paypal", "idram"] },
-  Georgia:   { isFree: false, flag: "🇬🇪", methods: ["card", "paypal", "apple_pay", "google_pay", "bog_pay"] },
-  Russia:    { isFree: false, flag: "🇷🇺", methods: ["card", "mir"] },
-  UK:        { isFree: false, flag: "🇬🇧", methods: ["card", "paypal", "apple_pay", "google_pay", "klarna"] },
-  Iraq:      { isFree: true,  flag: "🇮🇶", methods: [] },
+  USA:       { isFree: false, flag: "ðŸ‡ºðŸ‡¸", methods: ["card", "paypal", "apple_pay", "google_pay"] },
+  Canada:    { isFree: false, flag: "ðŸ‡¨ðŸ‡¦", methods: ["card", "paypal", "apple_pay", "google_pay", "interac"] },
+  Australia: { isFree: false, flag: "ðŸ‡¦ðŸ‡º", methods: ["card", "paypal", "apple_pay", "google_pay", "bpay"] },
+  Germany:   { isFree: false, flag: "ðŸ‡©ðŸ‡ª", methods: ["card", "sepa", "paypal", "apple_pay", "google_pay", "klarna", "giropay"] },
+  Holland:   { isFree: false, flag: "ðŸ‡³ðŸ‡±", methods: ["card", "ideal", "paypal", "apple_pay", "google_pay", "klarna"] },
+  Sweden:    { isFree: false, flag: "ðŸ‡¸ðŸ‡ª", methods: ["card", "swish", "paypal", "apple_pay", "google_pay", "klarna"] },
+  Belgium:   { isFree: false, flag: "ðŸ‡§ðŸ‡ª", methods: ["card", "bancontact", "paypal", "apple_pay", "google_pay"] },
+  France:    { isFree: false, flag: "ðŸ‡«ðŸ‡·", methods: ["card", "paypal", "apple_pay", "google_pay", "klarna", "lyf_pay"] },
+  Turkey:    { isFree: false, flag: "ðŸ‡¹ðŸ‡·", methods: ["card", "paypal", "apple_pay", "google_pay"] },
+  Armenia:   { isFree: false, flag: "ðŸ‡¦ðŸ‡²", methods: ["card", "paypal", "idram"] },
+  Georgia:   { isFree: false, flag: "ðŸ‡¬ðŸ‡ª", methods: ["card", "paypal", "apple_pay", "google_pay", "bog_pay"] },
+  Russia:    { isFree: false, flag: "ðŸ‡·ðŸ‡º", methods: ["card", "mir"] },
+  UK:        { isFree: false, flag: "ðŸ‡¬ðŸ‡§", methods: ["card", "paypal", "apple_pay", "google_pay", "klarna"] },
+  Iraq:      { isFree: true,  flag: "ðŸ‡®ðŸ‡¶", methods: [] },
 };
 
 function getCountryConfig(country: string): CountryConfig {
@@ -118,7 +119,7 @@ export default function PremiumPage({ user }: Props) {
       try {
         await apiRequest("POST", "/api/premium/subscribe", {});
         await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-        toast({ title: "Welcome to Premium!", description: "Premium is free for you — always." });
+        toast({ title: "Welcome to Premium!", description: "Premium is free for you â€” always." });
         setLocation("/discover");
       } catch (err: any) {
         const raw: string = err?.message ?? "";
@@ -133,12 +134,12 @@ export default function PremiumPage({ user }: Props) {
         }
       }
     } else if (isNative()) {
-      // Native app — trigger App Store / Google Play IAP sheet via RevenueCat
+      // Native app â€” trigger App Store / Google Play IAP sheet via RevenueCat
       const result = await purchasePremium();
       if (result.cancelled) {
-        // User dismissed the sheet — do nothing
+        // User dismissed the sheet â€” do nothing
       } else if (result.success) {
-        // IAP succeeded — sync premium status from our server
+        // IAP succeeded â€” sync premium status from our server
         try {
           await apiRequest("POST", "/api/premium/restore", {});
           await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
@@ -171,7 +172,7 @@ export default function PremiumPage({ user }: Props) {
           <ArrowLeft size={22} />
         </button>
         <div className="flex items-center gap-2.5 flex-1">
-          <img src="/gustilk-logo.png?v=4" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
+          <PeacockLogo size={48} />
           <h1 className="font-serif text-2xl text-gold">Premium</h1>
         </div>
       </div>
@@ -182,7 +183,7 @@ export default function PremiumPage({ user }: Props) {
           <div className="flex justify-center mb-4">
             {isFree ? (
               <div className="w-20 h-20 rounded-full flex items-center justify-center text-4xl"
-                style={{ background: "rgba(201,168,76,0.08)", border: "2px solid #c9a84c" }}>🎉</div>
+                style={{ background: "rgba(201,168,76,0.08)", border: "2px solid #c9a84c" }}>ðŸŽ‰</div>
             ) : (
               <div className="w-20 h-20 rounded-full flex items-center justify-center"
                 style={{ border: "2px solid #c9a84c" }}>
@@ -192,7 +193,7 @@ export default function PremiumPage({ user }: Props) {
           </div>
           {isFree ? (
             <>
-              <h2 className="font-serif text-3xl text-gold mb-1">مجاناً!</h2>
+              <h2 className="font-serif text-3xl text-gold mb-1">Ù…Ø¬Ø§Ù†Ø§Ù‹!</h2>
               <p className="text-cream/60 text-sm">Premium is free for users in Iraq</p>
               <p className="text-cream/35 text-xs mt-1">As a thank-you to our Yezidi homeland community</p>
             </>
@@ -303,7 +304,7 @@ export default function PremiumPage({ user }: Props) {
           }
         >
           <Star size={17} fill={isFree ? "white" : "#1a0a2e"} />
-          {loading ? "Processing…" : isFree ? "Get Free Premium" : isNative() ? "Subscribe — $5 / month" : `Subscribe via ${method?.label ?? "Payment"}`}
+          {loading ? "Processingâ€¦" : isFree ? "Get Free Premium" : isNative() ? "Subscribe â€” $5 / month" : `Subscribe via ${method?.label ?? "Payment"}`}
         </button>
 
         <p className="text-center text-cream/25 text-xs">
