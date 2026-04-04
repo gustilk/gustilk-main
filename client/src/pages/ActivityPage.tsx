@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { formatDistanceToNow } from "date-fns";
@@ -21,6 +22,7 @@ export default function ActivityPage({ user }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Restore tab from sessionStorage when returning from a profile
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>(() => {
     const stored = sessionStorage.getItem("activity_return_tab") as Tab | null;
     if (stored) { sessionStorage.removeItem("activity_return_tab"); return stored; }
@@ -56,9 +58,9 @@ export default function ActivityPage({ user }: Props) {
   });
 
   const tabs: { id: Tab; label: string; icon: typeof Heart; data: ActivityItem[] | undefined; loading: boolean }[] = [
-    { id: "likes-received", label: "Likes", icon: Heart, data: likesReceived?.items, loading: loadingLR },
-    { id: "visitors", label: "Visitors", icon: Eye, data: visitors?.items, loading: loadingV },
-    { id: "likes-sent", label: "Likes Sent", icon: Send, data: likesSent?.items, loading: loadingLS },
+    { id: "likes-received", label: t("activity.tabLikes"), icon: Heart, data: likesReceived?.items, loading: loadingLR },
+    { id: "visitors", label: t("activity.tabVisitors"), icon: Eye, data: visitors?.items, loading: loadingV },
+    { id: "likes-sent", label: t("activity.tabLikesSent"), icon: Send, data: likesSent?.items, loading: loadingLS },
   ];
 
   const activeTab = tabs.find(t => t.id === tab)!;
@@ -72,8 +74,8 @@ export default function ActivityPage({ user }: Props) {
     <div className="min-h-screen flex flex-col pb-24" style={{ background: "#0d0618" }}>
       {/* Header */}
       <div className="px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
-        <h1 className="font-serif text-2xl text-gold">Activity</h1>
-        <p className="text-cream/40 text-xs mt-1">See who's interested in you</p>
+        <h1 className="font-serif text-2xl text-gold">{t("activity.title")}</h1>
+        <p className="text-cream/40 text-xs mt-1">{t("activity.subtitle")}</p>
       </div>
 
       {/* Premium banner for free users */}
@@ -85,8 +87,8 @@ export default function ActivityPage({ user }: Props) {
         >
           <Crown size={18} color="#c9a84c" className="flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gold">Upgrade to Premium</p>
-            <p className="text-cream/50 text-xs">See who liked you and who visited your profile</p>
+            <p className="text-sm font-semibold text-gold">{t("activity.upgradePremium")}</p>
+            <p className="text-cream/50 text-xs">{t("activity.upgradePremiumDesc")}</p>
           </div>
         </div>
       )}
@@ -196,7 +198,7 @@ function ActivityCard({ item, isPremium, blurred, tab, onBeforeNavigate, onActed
       style={{ aspectRatio: "3/4", background: "#1a0a2e" }}
       data-testid={`activity-card-${user.id}`}
     >
-      {/* Photo — tappable area navigates to profile */}
+      {/* Photo â€” tappable area navigates to profile */}
       <div
         className="absolute inset-0 cursor-pointer active:scale-[0.97] transition-transform"
         onClick={() => {
@@ -258,7 +260,7 @@ function ActivityCard({ item, isPremium, blurred, tab, onBeforeNavigate, onActed
         )}
         {blurred && <p className="text-cream/40 text-[10px] text-center">{timeAgo}</p>}
 
-        {/* Accept / Decline buttons — Hinge-style, only on Likes tab for premium */}
+        {/* Accept / Decline buttons â€” Hinge-style, only on Likes tab for premium */}
         {showActions && (
           <div className="flex gap-2 mt-1">
             <button
@@ -310,3 +312,4 @@ function EmptyState({ tab }: { tab: Tab }) {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useState, useEffect, type ReactNode } from "react";
+﻿import { useState, useEffect, type ReactNode } from "react";
 import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -491,7 +491,7 @@ export default function SettingsPage({ user }: Props) {
 
       <div className="flex-1 overflow-y-auto px-5 pt-5 space-y-4">
 
-        {/* ── PREFERENCES ─────────────────────────────────────────────── */}
+        {/* â”€â”€ PREFERENCES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div>
           <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.preferencesSection")}</p>
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
@@ -501,7 +501,7 @@ export default function SettingsPage({ user }: Props) {
           </div>
         </div>
 
-        {/* ── ACCOUNT ─────────────────────────────────────────────────── */}
+        {/* â”€â”€ ACCOUNT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div>
           <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.accountSection")}</p>
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
@@ -513,7 +513,7 @@ export default function SettingsPage({ user }: Props) {
           </div>
         </div>
 
-        {/* ── CONTACT US ──────────────────────────────────────────────── */}
+        {/* â”€â”€ CONTACT US â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div>
           <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.contactUsSection")}</p>
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
@@ -527,7 +527,7 @@ export default function SettingsPage({ user }: Props) {
           </div>
         </div>
 
-        {/* ── SUBSCRIPTION ────────────────────────────────────────────── */}
+        {/* â”€â”€ SUBSCRIPTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div>
           <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.subscriptionSection")}</p>
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
@@ -561,7 +561,7 @@ export default function SettingsPage({ user }: Props) {
           </div>
         </div>
 
-        {/* ── LEGAL ───────────────────────────────────────────────────── */}
+        {/* â”€â”€ LEGAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div>
           <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.legalSection")}</p>
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
@@ -859,16 +859,10 @@ function SubScreenShell({ title, onBack, testId, children }: { title: string; on
 function FaqSubScreen({ onBack }: { onBack: () => void }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState<number | null>(null);
-  const faqs = [
-    { q: "How does matching work on Gûstîlk?", a: "Gûstîlk matches you with members of the opposite gender within your own caste (Sheikh, Pir, or Murid). You can browse profiles, send likes, and once both of you like each other you become a match and can message each other." },
-    { q: "What does Premium include?", a: "Premium unlocks messaging with your matches, video calling, seeing who liked you in the Activity tab, sending virtual gifts, and more. Free members can browse and like profiles but need Premium to start conversations." },
-    { q: "How do I get verified?", a: "Go to your profile and tap the verification badge. You'll be asked to submit a selfie. Our team reviews it within 24 hours and if approved your profile gets a green tick, which increases your match rate." },
-    { q: "Why is my profile not showing to others?", a: "Your profile must be complete (caste, city, country, age, gender, and at least one approved photo) before it becomes visible in Discover. Make sure your verification photo is approved." },
-    { q: "How do I report or block someone?", a: "Open their profile and tap the flag icon (⚑) at the top. You can choose to report or block. Blocked users can no longer see your profile or contact you." },
-    { q: "I'm from Iraq — do I get free Premium?", a: "Yes! Users connecting from Iraq receive free Premium membership as our way of supporting the Yezidi community at home. The app verifies your location automatically when you subscribe." },
-    { q: "Can I delete my account?", a: "Yes. Go to Settings → Account, scroll down and tap Delete Account. This permanently removes all your data, matches, and messages. Active Premium subscriptions are cancelled with no refund." },
-    { q: "How do I restore my Premium subscription?", a: "Go to Settings → Subscription → Restore Purchases. The app will check your account record and re-activate Premium if a valid subscription is found." },
-  ];
+  const faqs = Array.from({ length: 8 }, (_, idx) => ({
+    q: t(`faq.q${idx + 1}`),
+    a: t(`faq.a${idx + 1}`),
+  }));
   return (
     <SubScreenShell title={t("settings.faq")} onBack={onBack} testId="button-back-faq">
       <div className="flex-1 overflow-y-auto px-5 py-5 pb-16 space-y-3">
@@ -968,12 +962,12 @@ function SubscriptionTermsSubScreen({ onBack }: { onBack: () => void }) {
     <SubScreenShell title={t("settings.subscriptionTerms")} onBack={onBack} testId="button-back-sub-terms">
       <div className="flex-1 overflow-y-auto px-5 py-5 pb-16 space-y-4">
         {[
-          { title: "Billing & Payment", body: "Gûstîlk Premium is billed on a monthly basis. Payment is charged to your selected payment method at the start of each billing period. All prices are shown in USD and may vary by region." },
+          { title: "Billing & Payment", body: "GÃ»stÃ®lk Premium is billed on a monthly basis. Payment is charged to your selected payment method at the start of each billing period. All prices are shown in USD and may vary by region." },
           { title: "Auto-Renewal", body: "Your subscription renews automatically unless you cancel at least 24 hours before the end of the current period. You can manage or cancel your subscription at any time through the Manage Subscription option in Settings." },
           { title: "Free Trial", body: "Where a free trial is offered, it will be clearly stated at the time of sign-up. Any unused portion of a free trial will be forfeited when a paid subscription is purchased." },
           { title: "Refund Policy", body: "Except as required by applicable law, payments are non-refundable. If you believe you were charged in error, please contact us via Help & Support within 14 days of the charge." },
           { title: "Cancellation", body: "You may cancel your subscription at any time. Cancellation takes effect at the end of the current billing period; you retain access to Premium features until that date." },
-          { title: "Price Changes", body: "Gûstîlk may change subscription pricing with at least 30 days' notice. Continued use of the service after a price change constitutes acceptance of the new pricing." },
+          { title: "Price Changes", body: "GÃ»stÃ®lk may change subscription pricing with at least 30 days' notice. Continued use of the service after a price change constitutes acceptance of the new pricing." },
           { title: "Iraq Free Premium", body: "Users connecting from Iraq are eligible for a complimentary Premium membership while this promotion is active. This offer is subject to change and is verified by server-side IP geolocation to prevent abuse." },
           { title: "Contact", body: "For billing questions or disputes, open Help & Support in Settings and our team will assist you as quickly as possible." },
         ].map((s, i) => (
