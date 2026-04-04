@@ -1,5 +1,5 @@
 export default {
-  lang: { name: "Arabic", native: "العربية", flag: "/flags/sa.svg", dir: "rtl" },
+  lang: { name: "Arabic", native: "العربية", flag: "/flags/iq.svg", dir: "rtl" },
   languagePicker: {
     title: "مرحباً بك في غوستيلك",
     subtitle: "اختر لغتك للمتابعة",
