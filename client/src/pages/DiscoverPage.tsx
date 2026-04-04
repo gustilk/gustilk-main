@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { SlidersHorizontal, X, Heart, RefreshCw, MapPin, Info } from "lucide-react";
+import { SlidersHorizontal, X, Heart, RefreshCw, MapPin, Info, Undo2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import MatchModal from "@/components/MatchModal";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
@@ -17,6 +17,14 @@ function getActiveLabel(ts: Date | string | null | undefined): string | null {
   if (hours < 72) return "Active recently";
   return null;
 }
+
+interface UndoState {
+  profile: SafeUser;
+  action: "like" | "dislike";
+  matchId?: string;
+}
+
+const UNDO_DURATION = 5500; // ms
 
 interface Props { user: SafeUser }
 
@@ -36,6 +44,11 @@ export default function DiscoverPage({ user }: Props) {
   const [matchData, setMatchData] = useState<{ user: SafeUser; matchId: string } | null>(null);
   const [swipeDir, setSwipeDir] = useState<"left" | "right" | null>(null);
   const [swipeAnim, setSwipeAnim] = useState<"like" | "dislike" | null>(null);
+  const [undoState, setUndoState] = useState<UndoState | null>(null);
+  const [undoProgress, setUndoProgress] = useState(100);
+  const [returningFrom, setReturningFrom] = useState<"left" | "right" | null>(null);
+  const undoTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const undoStartRef = useRef<number>(0);
   const lastVisitedId = useRef<string | null>(null);
 
   const { data, isLoading, refetch } = useQuery<{ profiles: SafeUser[] }>({
@@ -57,6 +70,60 @@ export default function DiscoverPage({ user }: Props) {
     }
   }, [current?.id]);
 
+  const clearUndoTimer = useCallback(() => {
+    if (undoTimerRef.current !== null) {
+      clearInterval(undoTimerRef.current);
+      undoTimerRef.current = null;
+    }
+  }, []);
+
+  const startUndo = useCallback((profile: SafeUser, action: "like" | "dislike", matchId?: string) => {
+    clearUndoTimer();
+    setUndoState({ profile, action, matchId });
+    setUndoProgress(100);
+    undoStartRef.current = Date.now();
+
+    undoTimerRef.current = setInterval(() => {
+      const elapsed = Date.now() - undoStartRef.current;
+      const remaining = Math.max(0, 100 - (elapsed / UNDO_DURATION) * 100);
+      setUndoProgress(remaining);
+      if (remaining <= 0) {
+        clearUndoTimer();
+        setUndoState(null);
+      }
+    }, 50);
+  }, [clearUndoTimer]);
+
+  const undoMutation = useMutation({
+    mutationFn: async ({ action, profileId }: { action: "like" | "dislike"; profileId: string }) => {
+      const endpoint = action === "like" ? `/api/like/${profileId}` : `/api/dislike/${profileId}`;
+      await apiRequest("DELETE", endpoint);
+    },
+    onSuccess: (_, { action }) => {
+      clearUndoTimer();
+      const profileToReturn = undoState?.profile;
+      const dir = action === "like" ? "right" : "left";
+      setUndoState(null);
+      setUndoProgress(100);
+
+      if (profileToReturn) {
+        // Invalidate match queries if it was a like (in case a match was created)
+        if (action === "like") {
+          queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
+        }
+        // Step 1: place card off-screen instantly (no transition)
+        setReturningFrom(dir);
+        // Step 2: on next frame, clear returningFrom — CSS transition will animate it to center
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setReturningFrom(null);
+            setCurrentIndex(i => Math.max(0, i - 1));
+          });
+        });
+      }
+    },
+  });
+
   const likeMutation = useMutation({
     mutationFn: async (userId: string) => {
       const res = await apiRequest("POST", `/api/like/${userId}`);
@@ -68,7 +135,7 @@ export default function DiscoverPage({ user }: Props) {
         setMatchData({ user: liked, matchId: result.matchId });
         queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
       }
-      advanceCard("right");
+      advanceCard("right", liked, result.matched ? result.matchId : undefined);
     },
   });
 
@@ -76,18 +143,32 @@ export default function DiscoverPage({ user }: Props) {
     mutationFn: async (userId: string) => {
       await apiRequest("POST", `/api/dislike/${userId}`);
     },
-    onSuccess: () => advanceCard("left"),
+    onSuccess: (_, userId) => {
+      const passed = profiles.find(p => p.id === userId);
+      advanceCard("left", passed);
+    },
   });
 
-  const advanceCard = (dir: "left" | "right") => {
+  const advanceCard = (dir: "left" | "right", profile?: SafeUser, matchId?: string) => {
     setSwipeDir(dir);
     setSwipeAnim(dir === "right" ? "like" : "dislike");
     setTimeout(() => {
       setSwipeDir(null);
       setSwipeAnim(null);
       setCurrentIndex(i => i + 1);
+      if (profile) {
+        startUndo(profile, dir === "right" ? "like" : "dislike", matchId);
+      }
     }, 500);
   };
+
+  const handleUndo = () => {
+    if (!undoState || undoMutation.isPending) return;
+    undoMutation.mutate({ action: undoState.action, profileId: undoState.profile.id });
+  };
+
+  // Cleanup undo timer on unmount
+  useEffect(() => () => clearUndoTimer(), [clearUndoTimer]);
 
   const handleRefresh = () => {
     setMinAge(pendingMin);
@@ -97,6 +178,15 @@ export default function DiscoverPage({ user }: Props) {
   };
 
   const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[c] ?? c);
+
+  // Card transform: returning animation takes priority over swipe exit
+  const cardTransform = (() => {
+    if (returningFrom === "left") return "translateX(-120%) rotate(-15deg)";
+    if (returningFrom === "right") return "translateX(120%) rotate(15deg)";
+    if (swipeDir === "left") return "translateX(-120%) rotate(-15deg)";
+    if (swipeDir === "right") return "translateX(120%) rotate(15deg)";
+    return "none";
+  })();
 
   return (
     <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
@@ -192,12 +282,13 @@ export default function DiscoverPage({ user }: Props) {
         ) : (
           <>
             <div
-              className="relative rounded-3xl overflow-hidden transition-all duration-300"
+              className="relative rounded-3xl overflow-hidden"
               style={{
                 border: "1.5px solid rgba(201,168,76,0.2)",
                 boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(74,30,107,0.3)",
-                transform: swipeDir === "left" ? "translateX(-120%) rotate(-15deg)" : swipeDir === "right" ? "translateX(120%) rotate(15deg)" : "none",
+                transform: cardTransform,
                 opacity: swipeDir ? 0 : 1,
+                transition: returningFrom ? "none" : "transform 0.3s ease, opacity 0.3s ease",
               }}
               data-testid={`card-profile-${current.id}`}
             >
@@ -293,7 +384,47 @@ export default function DiscoverPage({ user }: Props) {
               {profiles.length - currentIndex - 1} more profile{profiles.length - currentIndex - 1 !== 1 ? "s" : ""} to discover
             </p>
 
-            <div className="flex justify-center gap-10 mt-5">
+            {/* Undo pill */}
+            <div
+              className="flex items-center justify-center mt-4"
+              style={{
+                opacity: undoState ? 1 : 0,
+                transform: undoState ? "translateY(0)" : "translateY(8px)",
+                transition: "opacity 0.25s ease, transform 0.25s ease",
+                pointerEvents: undoState ? "auto" : "none",
+              }}
+            >
+              <button
+                onClick={handleUndo}
+                disabled={undoMutation.isPending}
+                data-testid="button-undo"
+                className="relative flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold overflow-hidden"
+                style={{
+                  background: "rgba(13,6,24,0.9)",
+                  border: "1.5px solid rgba(201,168,76,0.6)",
+                  color: "#c9a84c",
+                  backdropFilter: "blur(8px)",
+                }}
+              >
+                {/* Progress bar background */}
+                <span
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background: "rgba(201,168,76,0.12)",
+                    transformOrigin: "left center",
+                    transform: `scaleX(${undoProgress / 100})`,
+                    transition: "transform 0.05s linear",
+                  }}
+                />
+                <Undo2 size={15} />
+                <span className="relative z-10">
+                  {t("discover.undo")}
+                  {undoState ? ` — ${undoState.profile.fullName ?? undoState.profile.firstName ?? ""}` : ""}
+                </span>
+              </button>
+            </div>
+
+            <div className="flex justify-center gap-10 mt-4">
               <button
                 onClick={() => dislikeMutation.mutate(current.id)}
                 disabled={dislikeMutation.isPending || likeMutation.isPending}

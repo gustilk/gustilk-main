@@ -1,4 +1,4 @@
-import { db } from "./db";
+﻿import { db } from "./db";
 import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys, blocks, visitors, gifts, magicLinkTokens, blacklist, auditLogs } from "@shared/schema";
 import type { User, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report, InsertUser, PhotoSlot, Block, Gift } from "@shared/schema";
 import { eq, and, or, ne, notInArray, inArray, isNull, desc, sql, isNotNull } from "drizzle-orm";
@@ -14,6 +14,8 @@ export interface IStorage {
 
   likeUser(fromUserId: string, toUserId: string): Promise<{ matched: boolean; matchId?: string }>;
   dislikeUser(fromUserId: string, toUserId: string): Promise<void>;
+  unlikeUser(fromUserId: string, toUserId: string): Promise<void>;
+  undislikeUser(fromUserId: string, toUserId: string): Promise<void>;
 
   getMatches(userId: string): Promise<MatchWithUser[]>;
   getMatch(matchId: string): Promise<Match | undefined>;
@@ -288,12 +290,26 @@ export class DatabaseStorage implements IStorage {
     cacheDelPrefix(`discover:${fromUserId}:`);
   }
 
+  async unlikeUser(fromUserId: string, toUserId: string): Promise<void> {
+    await db.delete(likes).where(and(eq(likes.fromUserId, fromUserId), eq(likes.toUserId, toUserId)));
+    await db.delete(matches).where(or(and(eq(matches.user1Id, fromUserId), eq(matches.user2Id, toUserId)), and(eq(matches.user1Id, toUserId), eq(matches.user2Id, fromUserId))));
+    cacheDelPrefix("discover:" + fromUserId + ":");
+    cacheDelPrefix("discover:" + toUserId + ":");
+    cacheDel("matches:" + fromUserId);
+    cacheDel("matches:" + toUserId);
+  }
+
+  async undislikeUser(fromUserId: string, toUserId: string): Promise<void> {
+    await db.delete(dislikes).where(and(eq(dislikes.fromUserId, fromUserId), eq(dislikes.toUserId, toUserId)));
+    cacheDelPrefix("discover:" + fromUserId + ":");
+  }
+
   async getMatches(userId: string): Promise<MatchWithUser[]> {
     const ck = `matches:${userId}`;
     const cached = cacheGet<MatchWithUser[]>(ck);
     if (cached !== undefined) return cached;
 
-    // 1. Fetch all match rows for this user — ID-only for blocks
+    // 1. Fetch all match rows for this user â€” ID-only for blocks
     const [userMatches, blockedByMeRows, blockedMeRows] = await Promise.all([
       db.select().from(matches)
         .where(or(eq(matches.user1Id, userId), eq(matches.user2Id, userId)))
@@ -317,7 +333,7 @@ export class DatabaseStorage implements IStorage {
       visibleMatches.map(m => m.user1Id === userId ? m.user2Id : m.user1Id)
     )];
 
-    // 2. Three parallel queries instead of N×3 sequential queries:
+    // 2. Three parallel queries instead of NÃ—3 sequential queries:
     //    a) slim user rows for all other users (no photo blobs)
     //    b) latest message per match via DISTINCT ON (one DB round-trip)
     //    c) unread count per match via GROUP BY (one DB round-trip)
@@ -470,7 +486,7 @@ export class DatabaseStorage implements IStorage {
       applicationHistory: [...history, { action: status, reason: reason ?? "", date: new Date().toISOString() }],
     };
     if (status === "approved") {
-      // Female users set their own profileVisible preference during registration — don't override it.
+      // Female users set their own profileVisible preference during registration â€” don't override it.
       // Only set profileVisible=true automatically for male users (or users with no gender set).
       if (user?.gender !== "female") {
         updates.profileVisible = true;
@@ -548,7 +564,7 @@ export class DatabaseStorage implements IStorage {
       };
     }
 
-    // Female users manage their own profileVisible preference — don't override it on photo approval.
+    // Female users manage their own profileVisible preference â€” don't override it on photo approval.
     // For male users and accounts with no gender, set profileVisible=true when a photo is approved.
     const setProfileVisible = user?.gender !== "female";
     const [updated] = await db.update(users).set({
@@ -719,3 +735,4 @@ export class DatabaseStorage implements IStorage {
 }
 
 export const storage = new DatabaseStorage();
+

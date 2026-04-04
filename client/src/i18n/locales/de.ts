@@ -164,6 +164,7 @@
     applyFilters: "Filter anwenden",
     finding: "Profile werden gesuchtâ€¦",
     refresh: "Aktualisieren",
+    undo: "Rückgängig",
   },
   matches: {
     title: "Matches",

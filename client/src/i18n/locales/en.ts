@@ -155,6 +155,7 @@
     applyFilters: "Apply Filters",
     finding: "Finding profilesâ€¦",
     refresh: "Refresh",
+    undo: "Undo",
     noMore: "No more profiles right now.",
     noMoreSub: "Check back later for new members.",
     pass: "Pass",
