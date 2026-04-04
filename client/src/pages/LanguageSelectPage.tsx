@@ -73,7 +73,7 @@ export default function LanguageSelectPage({ onSelect }: Props) {
                   transform: isActive ? "scale(1.02)" : "scale(1)",
                 }}
               >
-                {flag.startsWith("/") ? (
+                {flag.startsWith("/") || flag.startsWith("http") ? (
                   <img src={flag} alt="" className="flex-shrink-0 rounded-sm object-cover" style={{ width: "28px", height: "20px" }} />
                 ) : (
                   <span className="text-2xl flex-shrink-0">{flag}</span>

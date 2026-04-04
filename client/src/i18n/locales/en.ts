@@ -1,5 +1,5 @@
 ﻿export default {
-  lang: { name: "English", native: "English", flag: "ðŸ‡¬ðŸ‡§", dir: "ltr" },
+  lang: { name: "English", native: "English", flag: "/flags/gb.svg", dir: "ltr" },
   languagePicker: {
     title: "Welcome to GÃ»stÃ®lk",
     subtitle: "Choose your language to continue",

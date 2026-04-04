@@ -1,5 +1,5 @@
 ﻿export default {
-  lang: { name: "Arabic", native: "Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©", flag: "ðŸ‡®ðŸ‡¶", dir: "rtl" },
+  lang: { name: "Arabic", native: "Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©", flag: "/flags/sa.svg", dir: "rtl" },
   languagePicker: {
     title: "Ù…Ø±Ø­Ø¨Ø§Ù‹ Ø¨Ùƒ ÙÙŠ ØºÙˆØ³ØªÙŠÙ„Ùƒ",
     subtitle: "Ø§Ø®ØªØ± Ù„ØºØªÙƒ Ù„Ù„Ù…ØªØ§Ø¨Ø¹Ø©",
