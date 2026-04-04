@@ -259,7 +259,7 @@ export default {
     aboutMe: "عنّي",
     howOthersSeeYou: "كيف يراك الآخرون",
     previewNote: "هذه هي بالضبط كيفية ظهور ملفك الشخصي للأعضاء الآخرين",
-    photoInstruction: "اضغط ★ لتعيين كصورة رئيسية · × للإزالة · أقصى عدد 6 صور",
+    photoInstruction: "اضغط على الصورة لتعيينها كغلاف أو حذفها · اضغط مطولاً واسحب لإعادة الترتيب · أقصى 6 صور",
     photosUpdated: "تم تحديث الصور",
     couldNotSavePhotos: "تعذر حفظ الصور",
   },

@@ -259,7 +259,7 @@ export default {
     aboutMe: "Über mich",
     howOthersSeeYou: "Wie andere Sie sehen",
     previewNote: "So erscheint Ihr Profil genau für andere Mitglieder",
-    photoInstruction: "Tippen Sie auf ★, um als Hauptbild festzulegen · × zum Entfernen · max. 6 Fotos",
+    photoInstruction: "Foto antippen zum Festlegen als Titelbild oder Löschen · Gedrückt halten & ziehen zum Sortieren · max. 6 Fotos",
     photosUpdated: "Fotos aktualisiert",
     couldNotSavePhotos: "Fotos konnten nicht gespeichert werden",
   },

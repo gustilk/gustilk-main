@@ -259,7 +259,7 @@ export default {
     aboutMe: "About Me",
     howOthersSeeYou: "How others see you",
     previewNote: "This is exactly how your profile appears to other members",
-    photoInstruction: "Tap ★ to set as main photo · × to remove · max 6 photos",
+    photoInstruction: "Tap a photo to set as cover or delete · Hold & drag to reorder · max 6 photos",
     photosUpdated: "Photos updated",
     couldNotSavePhotos: "Could not save photos",
   },
