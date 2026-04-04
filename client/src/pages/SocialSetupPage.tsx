@@ -1,5 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
-import PeacockLogo from "@/components/PeacockLogo";
+import { useState, useEffect, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -22,7 +21,7 @@ const COUNTRY_NAME_MAP: Record<string, string> = {
   "Netherlands": "Holland", "United Kingdom": "UK", "Great Britain": "UK",
   "Germany": "Germany", "Canada": "Canada", "Australia": "Australia",
   "Sweden": "Sweden", "Belgium": "Belgium", "France": "France",
-  "Turkey": "Turkey", "TÃ¼rkiye": "Turkey", "Iraq": "Iraq",
+  "Turkey": "Turkey", "Türkiye": "Turkey", "Iraq": "Iraq",
   "Armenia": "Armenia", "Georgia": "Georgia", "Russia": "Russia", "Russian Federation": "Russia",
 };
 
@@ -236,10 +235,10 @@ export default function SocialSetupPage({ user }: Props) {
 
         {/* App name */}
         <div className="text-center mb-5">
-          <span className="font-serif text-2xl font-bold" style={{ color: "#c9a84c" }}>GÃ»stÃ®lk</span>
+          <span className="font-serif text-2xl font-bold" style={{ color: "#c9a84c" }}>Gûstîlk</span>
         </div>
 
-        {/* Top bar â€” back button + step indicator */}
+        {/* Top bar — back button + step indicator */}
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => logoutMutation.mutate()}
@@ -267,7 +266,7 @@ export default function SocialSetupPage({ user }: Props) {
                       ? { background: "rgba(201,168,76,0.3)", color: "#c9a84c" }
                       : { background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.3)", border: "1px solid rgba(255,255,255,0.1)" }
                   }>
-                  {step > s ? "âœ“" : s}
+                  {step > s ? "✓" : s}
                 </div>
                 {s < totalSteps && <div className="w-8 h-px" style={{ background: step > s ? "rgba(201,168,76,0.5)" : "rgba(255,255,255,0.1)" }} />}
               </div>
@@ -275,11 +274,11 @@ export default function SocialSetupPage({ user }: Props) {
           </div>
         </div>
 
-        {/* â”€â”€ STEP 1: Profile details â”€â”€ */}
+        {/* ── STEP 1: Profile details ── */}
         {step === 1 && (
           <>
             <div className="text-center mb-7">
-              <PeacockLogo size={140} />
+              <img src="/gustilk-logo.png?v=4" alt="Gûstîlk" className="mx-auto mb-4" style={{ width: "140px", height: "140px", objectFit: "contain", filter: "none" }} />
               <h1 className="font-serif text-3xl text-gold mb-1">
                 {(() => {
                   const name = (user.fullName ?? user.firstName ?? "").split(" ")[0];
@@ -435,7 +434,7 @@ export default function SocialSetupPage({ user }: Props) {
           </>
         )}
 
-        {/* â”€â”€ STEP 2 (Female only): Privacy settings â”€â”€ */}
+        {/* ── STEP 2 (Female only): Privacy settings ── */}
         {step === 2 && isFemale && (
           <>
             <div className="text-center mb-7">
@@ -455,8 +454,8 @@ export default function SocialSetupPage({ user }: Props) {
                     <p className="text-sm font-semibold" style={{ color: "rgba(253,248,240,0.9)" }}>Blur Photos Until Matched</p>
                     <p className="text-xs mt-1 leading-relaxed" style={{ color: "rgba(253,248,240,0.45)" }}>
                       {privacyData.photosBlurred
-                        ? "On â€” your photos appear blurred to others until you both like each other (match). Matched users always see your photos clearly."
-                        : "Off â€” your photos are visible to everyone who views your profile."}
+                        ? "On — your photos appear blurred to others until you both like each other (match). Matched users always see your photos clearly."
+                        : "Off — your photos are visible to everyone who views your profile."}
                     </p>
                   </div>
                   <button
@@ -505,7 +504,7 @@ export default function SocialSetupPage({ user }: Props) {
           </>
         )}
 
-        {/* â”€â”€ STEP 2 (Male) / STEP 3 (Female): Photos + Selfie â”€â”€ */}
+        {/* ── STEP 2 (Male) / STEP 3 (Female): Photos + Selfie ── */}
         {((step === 2 && !isFemale) || (step === 3 && isFemale)) && (
           <>
             <div className="text-center mb-7">
@@ -571,7 +570,7 @@ export default function SocialSetupPage({ user }: Props) {
                     </div>
                   ))}
                 </div>
-                <p className="text-cream/30 text-xs mt-2 pl-0.5">At least 1 photo required Â· up to 3</p>
+                <p className="text-cream/30 text-xs mt-2 pl-0.5">At least 1 photo required · up to 3</p>
               </div>
 
               {/* Verification selfie */}
@@ -792,7 +791,7 @@ function Checkbox({ checked, onChange, testId, children }: {
           : { border: "1.5px solid rgba(201,168,76,0.4)", background: "rgba(255,255,255,0.05)" }
         }
       >
-        {checked && <span className="text-ink text-xs font-bold">âœ“</span>}
+        {checked && <span className="text-ink text-xs font-bold">✓</span>}
       </div>
       <span className="text-cream/55 text-xs leading-relaxed">{children}</span>
     </label>

@@ -1,5 +1,4 @@
-﻿import { useQuery } from "@tanstack/react-query";
-import PeacockLogo from "@/components/PeacockLogo";
+import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Lock, MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -36,7 +35,7 @@ export default function MatchesPage({ user }: Props) {
   return (
     <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
       <div className="pt-12 pb-2 px-5 flex items-center gap-2.5">
-          <PeacockLogo size={48} />
+        <img src="/gustilk-logo.png?v=4" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
         <h1 className="font-serif text-2xl text-gold">{t("matches.title")}</h1>
       </div>
 
@@ -264,7 +263,7 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
               {isPremium ? (other.firstName ?? other.fullName?.split(" ")[0] ?? "Member") : t("matches.lockedName")}
             </span>
             {isPremium && getActiveLabel(other.activitySeenAt) && (
-              <span className="text-[10px] text-emerald-400 flex-shrink-0 font-medium">â— {getActiveLabel(other.activitySeenAt)}</span>
+              <span className="text-[10px] text-emerald-400 flex-shrink-0 font-medium">● {getActiveLabel(other.activitySeenAt)}</span>
             )}
           </div>
           {isPremium && (
@@ -273,7 +272,7 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
         </div>
         {isPremium && (
           <div className="text-xs text-cream/35 mb-1">
-            {other.caste ? other.caste.charAt(0).toUpperCase() + other.caste.slice(1) : ""} Â· {other.city}
+            {other.caste ? other.caste.charAt(0).toUpperCase() + other.caste.slice(1) : ""} · {other.city}
           </div>
         )}
         <div className="flex items-center gap-1.5">

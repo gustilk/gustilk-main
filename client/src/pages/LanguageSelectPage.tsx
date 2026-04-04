@@ -1,5 +1,4 @@
-﻿import { useState } from "react";
-import PeacockLogo from "@/components/PeacockLogo";
+import { useState } from "react";
 import { LANGUAGE_LIST, LangCode, setLanguage } from "@/i18n";
 
 
@@ -29,17 +28,28 @@ export default function LanguageSelectPage({ onSelect }: Props) {
             filter: "blur(16px)",
             transform: "scale(1.3)",
           }} />
-          <PeacockLogo size={180} cycle intervalMs={3000} filter={"none"} />
+          <img
+            src="/gustilk-logo.png?v=4"
+            alt="Gûstîlk"
+            className="relative"
+            style={{
+              width: "180px",
+              height: "180px",
+              objectFit: "contain",
+              filter: "none",
+
+            }}
+          />
         </div>
 
         <h1
           className="font-serif text-3xl font-bold text-center mb-2"
           style={{ color: "#c9a84c" }}
         >
-          GÃ»stÃ®lk
+          Gûstîlk
         </h1>
         <p className="text-center text-sm mb-8" style={{ color: "rgba(253,248,240,0.45)" }}>
-          Choose your language Â· Ø§Ø®ØªØ± Ù„ØºØªÙƒ Â· ZimanÃª xwe hilbijÃªre
+          Choose your language · اختر لغتك · Zimanê xwe hilbijêre
         </p>
 
         <div className="w-full grid grid-cols-2 gap-2.5">
@@ -86,4 +96,3 @@ export default function LanguageSelectPage({ onSelect }: Props) {
     </div>
   );
 }
-

@@ -1,5 +1,4 @@
-﻿import { useState, useRef, useEffect, useMemo } from "react";
-import PeacockLogo from "@/components/PeacockLogo";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -17,17 +16,17 @@ interface Props {
   matchId: string;
 }
 
-// â”€â”€â”€ Gift catalogue â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Gift catalogue ────────────────────────────────────────────────────────
 export const GIFTS = [
   { id: "rose",         lottie: "/lottie/rose.json",              name: "Rose",         color: "#e83e6c" },
   { id: "butterfly",    lottie: "/lottie/butterfly.json",          name: "Butterfly",    color: "#7b3fa0" },
   { id: "diamond",      lottie: "/lottie/add-to-favorites.json",  name: "Favourite",    color: "#f59e0b" },
   { id: "crown",        lottie: "/lottie/valentines.json",         name: "Valentine",    color: "#c9a84c" },
-  { id: "balloon",      lottie: "/lottie/butterfly-hearts.json",   name: "Butterfly â™¥", color: "#f97316" },
+  { id: "balloon",      lottie: "/lottie/butterfly-hearts.json",   name: "Butterfly ♥", color: "#f97316" },
   { id: "sparkle",      lottie: "/lottie/celebration.json",        name: "Celebrate",   color: "#c9a84c" },
   { id: "birds",        lottie: "/lottie/bird-pair.json",          name: "Birds",       color: "#67e8f9" },
   { id: "garden",       lottie: "/lottie/couple-garden.json",      name: "Garden",      color: "#22c55e" },
-  { id: "ring",         lottie: "/lottie/rose2.json",              name: "Rose â™¥",      color: "#a855f7" },
+  { id: "ring",         lottie: "/lottie/rose2.json",              name: "Rose ♥",      color: "#a855f7" },
   { id: "unbox",        lottie: "/lottie/gift-unbox.json",         name: "Surprise",    color: "#c9a84c" },
   { id: "heart-pulse",  lottie: "/lottie/heart-pulse.json",        name: "Heart",       color: "#ef4444" },
   { id: "filling-heart",lottie: "/lottie/filling-heart.json",      name: "Full Heart",  color: "#e83e6c" },
@@ -62,19 +61,19 @@ export const GIFTS = [
   { id: "blonde-lady",    lottie: "/lottie/blonde-lady.json",        name: "Lady Wave",      color: "#c9a84c" },
   { id: "bouquet",        lottie: "/lottie/bouquet.json",            name: "Bouquet",        color: "#d4608a" },
   { id: "bouquet-hearts", lottie: "/lottie/bouquet-hearts.json",     name: "Heart Bouquet",  color: "#ef4444" },
-  { id: "brunette-lady",  lottie: "/lottie/brunette-lady.json",      name: "Lady Wave â™¥",   color: "#d4608a" },
+  { id: "brunette-lady",  lottie: "/lottie/brunette-lady.json",      name: "Lady Wave ♥",   color: "#d4608a" },
   { id: "cat",            lottie: "/lottie/cat.json",                name: "Cat",            color: "#7b3fa0" },
-  { id: "pink-lady",      lottie: "/lottie/pink-lady.json",          name: "Lady Wave ðŸ’—",   color: "#d4608a" },
+  { id: "pink-lady",      lottie: "/lottie/pink-lady.json",          name: "Lady Wave 💗",   color: "#d4608a" },
   { id: "pink-heart",     lottie: "/lottie/pink-heart.json",         name: "Pink Heart",     color: "#e83e6c" },
   { id: "pink-rose",      lottie: "/lottie/pink-rose.json",          name: "Pink Rose",      color: "#d4608a" },
-  { id: "red-rose-sticker",lottie:"/lottie/red-rose-sticker.json",   name: "Red Rose ðŸŒ¹",    color: "#e83e6c" },
+  { id: "red-rose-sticker",lottie:"/lottie/red-rose-sticker.json",   name: "Red Rose 🌹",    color: "#e83e6c" },
 ];
 
 function giftById(id: string) {
   return GIFTS.find(g => g.id === id) ?? { id, lottie: null as string | null, name: "Gift", color: "#c9a84c" };
 }
 
-// â”€â”€â”€ Merged timeline item â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Merged timeline item ─────────────────────────────────────────────────
 type TimelineItem =
   | { kind: "message"; data: Message }
   | { kind: "gift";    data: GiftType };
@@ -92,7 +91,7 @@ function mergeTimeline(messages: Message[], gifts: GiftType[]): TimelineItem[] {
   return items;
 }
 
-// â”€â”€â”€ ChatPage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── ChatPage ─────────────────────────────────────────────────────────────
 export default function ChatPage({ user, matchId }: Props) {
   const [, setLocation] = useLocation();
   const { t } = useTranslation();
@@ -242,7 +241,7 @@ export default function ChatPage({ user, matchId }: Props) {
             <div className="relative w-10 h-10 flex-shrink-0">
               <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center"
                 style={{ background: "linear-gradient(135deg, #1a0a2e, #2d0f4a)", border: "2px solid rgba(201,168,76,0.4)" }}>
-          <PeacockLogo size={28} />
+                <img src="/gustilk-logo.png?v=4" alt="Support" className="w-7 h-7 object-contain" />
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
                 style={{ background: "#10b981", border: "1.5px solid #0d0618" }}>
@@ -251,12 +250,12 @@ export default function ChatPage({ user, matchId }: Props) {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
-                <h2 className="text-cream font-semibold text-sm" data-testid="text-chat-name">GÃ»stÃ®lk Support</h2>
+                <h2 className="text-cream font-semibold text-sm" data-testid="text-chat-name">Gûstîlk Support</h2>
                 <BadgeCheck size={13} color="#10b981" />
                 <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
                   style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.3)" }}>AI</span>
               </div>
-              <p className="text-cream/35 text-xs">Official GÃ»stÃ®lk Assistant Â· Always online</p>
+              <p className="text-cream/35 text-xs">Official Gûstîlk Assistant · Always online</p>
             </div>
           </div>
         ) : (
@@ -280,7 +279,7 @@ export default function ChatPage({ user, matchId }: Props) {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1">
                 <h2 className="text-cream font-semibold text-sm" data-testid="text-chat-name">
-                  {otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "Loadingâ€¦"}
+                  {otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "Loading…"}
                 </h2>
                 <ChevronRight size={13} className="text-cream/30 flex-shrink-0" />
               </div>
@@ -323,10 +322,10 @@ export default function ChatPage({ user, matchId }: Props) {
               <>
                 <div className="w-16 h-16 rounded-full flex items-center justify-center"
                   style={{ background: "linear-gradient(135deg, #1a0a2e, #2d0f4a)", border: "2px solid rgba(201,168,76,0.4)" }}>
-          <PeacockLogo size={40} />
+                  <img src="/gustilk-logo.png?v=4" alt="" className="w-10 h-10 object-contain" />
                 </div>
                 <div>
-                  <p className="text-cream/80 text-sm font-semibold mb-1">Hi! I'm your GÃ»stÃ®lk Assistant</p>
+                  <p className="text-cream/80 text-sm font-semibold mb-1">Hi! I'm your Gûstîlk Assistant</p>
                   <p className="text-cream/40 text-xs">Ask me anything about the app, your profile, or matching</p>
                 </div>
                 <div className="flex flex-wrap justify-center gap-2 max-w-xs">
@@ -347,7 +346,7 @@ export default function ChatPage({ user, matchId }: Props) {
             ) : (
               <>
                 <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ border: "2px solid rgba(201,168,76,0.3)" }}>
-                  <span className="text-2xl text-gold font-serif">âœ¦</span>
+                  <span className="text-2xl text-gold font-serif">✦</span>
                 </div>
                 <div>
                   <p className="text-cream/60 text-sm font-medium mb-1">
@@ -395,7 +394,7 @@ export default function ChatPage({ user, matchId }: Props) {
       {/* Input bar */}
       <div className="flex items-end gap-2 px-4 py-3"
         style={{ background: "rgba(13,6,24,0.97)", borderTop: "1px solid rgba(201,168,76,0.15)" }}>
-        {/* Gift button â€” premium only, hidden in support chat */}
+        {/* Gift button — premium only, hidden in support chat */}
         {!isSupportChat && (
           <div className="relative flex-shrink-0">
             <button
@@ -407,7 +406,7 @@ export default function ChatPage({ user, matchId }: Props) {
             >
               <Gift size={18} />
             </button>
-            <span className="absolute -top-1 -right-1 text-[9px] leading-none select-none pointer-events-none">ðŸ‘‘</span>
+            <span className="absolute -top-1 -right-1 text-[9px] leading-none select-none pointer-events-none">👑</span>
           </div>
         )}
 
@@ -462,7 +461,7 @@ export default function ChatPage({ user, matchId }: Props) {
   );
 }
 
-// â”€â”€â”€ Countdown helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Countdown helper ──────────────────────────────────────────────────────
 function msgTimeLeft(expiresAt: Date | string | null | undefined): string | null {
   if (!expiresAt) return null;
   const ms = new Date(expiresAt).getTime() - Date.now();
@@ -474,7 +473,7 @@ function msgTimeLeft(expiresAt: Date | string | null | undefined): string | null
   return "< 1m";
 }
 
-// â”€â”€â”€ Message bubble â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Message bubble ────────────────────────────────────────────────────────
 function MessageBubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
   const [, tick] = useState(0);
   useEffect(() => {
@@ -531,7 +530,7 @@ function MessageBubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
   );
 }
 
-// â”€â”€â”€ Gift reveal overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Gift reveal overlay ─────────────────────────────────────────────────────
 
 let revealCssInjected = false;
 function injectRevealCSS() {
@@ -556,9 +555,9 @@ function injectRevealCSS() {
 }
 
 const CONFETTI_COLORS = ["#ff4444","#ff8800","#ffdd00","#44dd44","#4488ff","#aa44ff","#ff44aa","#c9a84c","#ff6600","#00ccff"];
-const SPARKLE_CHARS = ["âœ¨","â­","âœ¦","â˜…","ðŸ’«","âœ·","âœ¸"];
-const HEART_CHARS = ["â¤ï¸","ðŸ’•","ðŸ’–","ðŸ’—","ðŸ’“","ðŸ’","ðŸ©·","â™¥"];
-const FLOWER_CHARS = ["ðŸŒ¸","ðŸŒº","ðŸŒ¼","ðŸŒ·","ðŸŒ»","ðŸ’"];
+const SPARKLE_CHARS = ["✨","⭐","✦","★","💫","✷","✸"];
+const HEART_CHARS = ["❤️","💕","💖","💗","💓","💝","🩷","♥"];
+const FLOWER_CHARS = ["🌸","🌺","🌼","🌷","🌻","💐"];
 const FW_COLORS = ["#ff4444","#ffaa00","#44ff88","#4488ff","#ff44ff","#ffff44","#ff8800","#00ffcc","#ff6699","#aaffaa"];
 
 function genRevealParticles(style: string) {
@@ -655,7 +654,7 @@ function GiftRevealOverlay({ gift, onClose, isPreview = false }: { gift: GiftTyp
       data-testid="gift-reveal-overlay"
     >
 
-      {/* â”€â”€ Particles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Particles ─────────────────────────────────────────── */}
       {particles.map((p: any) => {
         if (p.type === "confetti") return (
           <div key={p.id} style={{
@@ -713,11 +712,11 @@ function GiftRevealOverlay({ gift, onClose, isPreview = false }: { gift: GiftTyp
       >
         {g.lottie
           ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} placeholderSize={80} />
-          : <span style={{ fontSize: 120 }}>ðŸŽ</span>
+          : <span style={{ fontSize: 120 }}>🎁</span>
         }
       </div>
 
-      {/* Message only â€” no name */}
+      {/* Message only — no name */}
       {gift.message && (
         <div
           className="text-center mt-6 px-8 z-10"
@@ -735,7 +734,7 @@ function GiftRevealOverlay({ gift, onClose, isPreview = false }: { gift: GiftTyp
           className="absolute top-12 flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase"
           style={{ background: "rgba(201,168,76,0.18)", border: "1px solid rgba(201,168,76,0.4)", color: "#c9a84c" }}
         >
-          <span>âœ¦</span> Preview <span>âœ¦</span>
+          <span>✦</span> Preview <span>✦</span>
         </div>
       )}
 
@@ -750,7 +749,7 @@ function GiftRevealOverlay({ gift, onClose, isPreview = false }: { gift: GiftTyp
   );
 }
 
-// â”€â”€â”€ Gift bubble â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Gift bubble ────────────────────────────────────────────────────────────
 function GiftBubble({ gift, isMine, viewerId }: { gift: GiftType; isMine: boolean; viewerId: string }) {
   const storageKey = `gift-revealed-${viewerId}-${gift.id}`;
   const [revealed, setRevealed] = useState(() => {
@@ -781,15 +780,15 @@ function GiftBubble({ gift, isMine, viewerId }: { gift: GiftType; isMine: boolea
             style={{ background: "none", border: "none", cursor: "pointer" }}
           >
             {revealed ? (
-              /* Revealed â€” bare animation, no card */
+              /* Revealed — bare animation, no card */
               <div style={{ width: 90, height: 90 }}>
                 {g.lottie
                   ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} placeholderSize={34} />
-                  : <span className="text-5xl">ðŸŽ</span>
+                  : <span className="text-5xl">🎁</span>
                 }
               </div>
             ) : (
-              /* Unrevealed â€” mystery card */
+              /* Unrevealed — mystery card */
               <div
                 className="flex flex-col items-center gap-1 px-4 py-3 rounded-2xl"
                 style={{
@@ -810,7 +809,7 @@ function GiftBubble({ gift, isMine, viewerId }: { gift: GiftType; isMine: boolea
                 >
                   <Gift size={34} style={{ color: g.color, opacity: 0.85 }} />
                 </div>
-                <p style={{ color: g.color, opacity: 0.5 }} className="text-[9px] mt-1 tracking-wide">Tap to reveal âœ¦</p>
+                <p style={{ color: g.color, opacity: 0.5 }} className="text-[9px] mt-1 tracking-wide">Tap to reveal ✦</p>
               </div>
             )}
           </button>
@@ -820,7 +819,7 @@ function GiftBubble({ gift, isMine, viewerId }: { gift: GiftType; isMine: boolea
             {gift.message && (
               <p className="text-cream/55 text-xs leading-snug italic mb-1">"{gift.message}"</p>
             )}
-            <p className="text-cream/25 text-[10px]">{isMine ? "You sent a gift" : "Sent you a gift"} Â· {timeLabel}</p>
+            <p className="text-cream/25 text-[10px]">{isMine ? "You sent a gift" : "Sent you a gift"} · {timeLabel}</p>
           </div>
         </div>
       </div>
@@ -828,14 +827,14 @@ function GiftBubble({ gift, isMine, viewerId }: { gift: GiftType; isMine: boolea
   );
 }
 
-// â”€â”€â”€ Gift picker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Gift picker ───────────────────────────────────────────────────────────
 const ANIM_STYLES = [
-  { id: "none",      label: "No Animation", icon: "âœ•" },
-  { id: "confetti",  label: "Confetti",     icon: "ðŸŽŠ" },
-  { id: "sparkles",  label: "Sparkles",     icon: "âœ¨" },
-  { id: "fireworks", label: "Fireworks",    icon: "ðŸŽ†" },
-  { id: "hearts",    label: "Hearts",       icon: "â¤ï¸" },
-  { id: "flowers",   label: "Flowers",      icon: "ðŸŒ¸" },
+  { id: "none",      label: "No Animation", icon: "✕" },
+  { id: "confetti",  label: "Confetti",     icon: "🎊" },
+  { id: "sparkles",  label: "Sparkles",     icon: "✨" },
+  { id: "fireworks", label: "Fireworks",    icon: "🎆" },
+  { id: "hearts",    label: "Hearts",       icon: "❤️" },
+  { id: "flowers",   label: "Flowers",      icon: "🌸" },
 ];
 
 function GiftPicker({ recipientName, isPending, onSend, onClose }: {
@@ -873,22 +872,22 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
     >
       <div className="w-full max-w-sm flex flex-col rounded-t-3xl" style={{ background: "#130820", border: "1px solid rgba(201,168,76,0.2)", maxHeight: "82vh" }}>
 
-        {/* â”€â”€ Header â”€â”€ */}
+        {/* ── Header ── */}
         <div className="flex items-center justify-between px-5 py-4 flex-shrink-0" style={{ borderBottom: "1px solid rgba(201,168,76,0.1)" }}>
           <div>
             <h3 className="font-serif text-lg text-gold">Send a Gift</h3>
             <p className="text-cream/40 text-xs mt-0.5">to {recipientName}</p>
           </div>
-          <button onClick={onClose} className="text-cream/40 text-lg leading-none" data-testid="button-close-gift-picker">âœ•</button>
+          <button onClick={onClose} className="text-cream/40 text-lg leading-none" data-testid="button-close-gift-picker">✕</button>
         </div>
 
-        {/* â”€â”€ Animation style strip â€” always visible â”€â”€ */}
+        {/* ── Animation style strip — always visible ── */}
         <div className="flex-shrink-0 px-4 pt-3 pb-2" style={{ borderBottom: "1px solid rgba(201,168,76,0.08)" }}>
           <p className="text-cream/35 text-[10px] font-semibold uppercase tracking-wider mb-2">
             Animation Style
             {selected && animStyle !== "none" && (
               <span className="ml-2 text-gold/70 normal-case tracking-normal font-normal">
-                Â· {ANIM_STYLES.find(a => a.id === animStyle)?.label}
+                · {ANIM_STYLES.find(a => a.id === animStyle)?.label}
               </span>
             )}
           </p>
@@ -913,7 +912,7 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
           </div>
         </div>
 
-        {/* â”€â”€ Gift grid â€” scrollable â”€â”€ */}
+        {/* ── Gift grid — scrollable ── */}
         <div className="overflow-y-auto px-4 py-3 flex-1">
           <div className="grid grid-cols-4 gap-3">
             {GIFTS.map(g => {
@@ -934,7 +933,7 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                   <div style={{ width: 58, height: 58 }}>
                     {g.lottie
                       ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} placeholderSize={24} />
-                      : <span className="text-3xl">ðŸŽ</span>
+                      : <span className="text-3xl">🎁</span>
                     }
                   </div>
                 </button>
@@ -943,14 +942,14 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
           </div>
         </div>
 
-        {/* â”€â”€ Bottom: message + send â€” always visible â”€â”€ */}
+        {/* ── Bottom: message + send — always visible ── */}
         <div className="flex-shrink-0 px-4 py-3" style={{ borderTop: "1px solid rgba(201,168,76,0.08)" }}>
           {selected && (
             <input
               type="text"
               value={message}
               onChange={e => setMessage(e.target.value)}
-              placeholder="Add a message (optional)â€¦"
+              placeholder="Add a message (optional)…"
               maxLength={200}
               data-testid="input-gift-message"
               className="w-full px-4 py-2.5 rounded-2xl text-sm text-cream placeholder-cream/25 outline-none mb-3"
@@ -964,7 +963,7 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
               className="w-full py-2.5 rounded-2xl text-sm font-semibold mb-2 transition-all flex items-center justify-center gap-2"
               style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.3)", color: "#c9a84c" }}
             >
-              <span>â–¶</span> Preview Animation
+              <span>▶</span> Preview Animation
             </button>
           )}
           <button
@@ -987,7 +986,7 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                 style={{ background: "linear-gradient(160deg, rgba(255,255,255,0.2) 0%, transparent 50%)", borderRadius: "inherit" }} />
             )}
             <span className="relative z-10">
-              {isPending ? "Sendingâ€¦" : selected ? `Send ${giftById(selected).name}` : "Select a gift above"}
+              {isPending ? "Sending…" : selected ? `Send ${giftById(selected).name}` : "Select a gift above"}
             </span>
           </button>
         </div>

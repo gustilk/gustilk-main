@@ -1,5 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
-import PeacockLogo from "@/components/PeacockLogo";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -115,8 +114,8 @@ export default function DiscoverPage({ user }: Props) {
 
       <div className="flex items-center justify-between px-5 pt-12 pb-4">
         <div className="flex items-center gap-2.5">
-          <PeacockLogo size={48} />
-          <h1 className="font-serif text-2xl text-gold">GÃ»stÃ®lk</h1>
+          <img src="/gustilk-logo.png?v=4" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
+          <h1 className="font-serif text-2xl text-gold">Gûstîlk</h1>
         </div>
         <button
           onClick={() => setShowFilters(f => !f)}
