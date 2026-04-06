@@ -87,6 +87,7 @@ const PUBLIC_POLICY_ROUTES: Record<string, React.ComponentType> = {
   "/refund-policy": RefundPage,
   "/privacy": PrivacyPage,
   "/privacy-policy": PrivacyPage,
+  "/policy": PrivacyPage,
   "/guidelines": GuidelinesPage,
   "/community-guidelines": GuidelinesPage,
   "/cookie-policy": CookiePolicyPage,
