@@ -22,7 +22,7 @@ export default function TranslationsPage({ user }: { user: User }) {
         {LANGUAGES.map(lang => (
           <div key={lang.code} data-testid={`lang-${lang.code}`}
             className="flex items-center gap-3 p-4 rounded-2xl"
-            style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.07)" }}>
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
             <span className="text-2xl">{lang.flag}</span>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
@@ -35,7 +35,7 @@ export default function TranslationsPage({ user }: { user: User }) {
                   {lang.status}
                 </span>
               </div>
-              <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.14)" }}>
+              <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
                 <div className="h-full rounded-full" style={{ width: `${lang.pct}%`, background: lang.pct === 100 ? "#10b981" : "#fbbf24" }} />
               </div>
             </div>
@@ -44,7 +44,7 @@ export default function TranslationsPage({ user }: { user: User }) {
         ))}
       </div>
 
-      <div className="p-4 rounded-2xl text-cream/40 text-xs" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.12)" }}>
+      <div className="p-4 rounded-2xl text-cream/40 text-xs" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
         Translation strings are managed in code. The AI support assistant responds in all 6 languages. Kurdish support in the UI is partially implemented via AI.
       </div>
     </div>

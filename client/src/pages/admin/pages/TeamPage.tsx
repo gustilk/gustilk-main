@@ -9,11 +9,11 @@ export default function TeamPage({ user }: { user: User }) {
         <p className="text-cream/40 text-xs mt-0.5">Current administrators with full platform access</p>
       </div>
 
-      <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,215,0,0.15)" }}>
+      <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}>
         <h3 className="text-cream text-sm font-semibold mb-3">Administrator</h3>
-        <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.10)" }}>
+        <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.04)" }}>
           <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-gold"
-            style={{ background: "linear-gradient(135deg, #2d0f4a, #A0000A)" }}>
+            style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)" }}>
             {(user.fullName ?? user.email ?? "A").charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
@@ -24,15 +24,15 @@ export default function TeamPage({ user }: { user: User }) {
             </div>
           </div>
           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0"
-            style={{ background: "rgba(255,215,0,0.15)", color: "#FFD700" }}>
+            style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>
             Admin
           </span>
         </div>
       </div>
 
-      <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.07)" }}>
+      <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
         <div className="flex items-start gap-3">
-          <Shield size={16} color="rgba(255,215,0,0.6)" className="mt-0.5 flex-shrink-0" />
+          <Shield size={16} color="rgba(201,168,76,0.6)" className="mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-cream/70 text-xs font-semibold mb-1">Single-administrator platform</p>
             <p className="text-cream/40 text-xs leading-relaxed">

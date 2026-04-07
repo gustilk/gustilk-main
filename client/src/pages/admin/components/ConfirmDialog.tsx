@@ -70,7 +70,7 @@ export default function ConfirmDialog({
         className="w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4"
         style={{
           background: "#130820",
-          border: "1px solid rgba(255,215,0,0.2)",
+          border: "1px solid rgba(201,168,76,0.2)",
           boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
         }}
       >
@@ -95,7 +95,7 @@ export default function ConfirmDialog({
             disabled={isPending}
             data-testid="confirm-dialog-cancel"
             className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-opacity disabled:opacity-40"
-            style={{ background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}
+            style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}
           >
             Cancel
           </button>

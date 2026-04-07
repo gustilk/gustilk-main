@@ -9,7 +9,7 @@ export default function BackupsPage({ user }: { user: User }) {
         <p className="text-cream/40 text-xs mt-0.5">Backup status and restore options</p>
       </div>
 
-      <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(16,185,129,0.15)" }}>
+      <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(16,185,129,0.15)" }}>
         <div className="flex items-center gap-3 mb-3">
           <Database size={18} color="#10b981" />
           <span className="text-green-400 text-sm font-semibold">Neon Automatic Backups</span>
@@ -25,7 +25,7 @@ export default function BackupsPage({ user }: { user: User }) {
             { label: "Backup Status", value: "Active" },
           ].map(item => (
             <div key={item.label} className="flex justify-between text-xs py-1.5"
-              style={{ borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
+              style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
               <span className="text-cream/50">{item.label}</span>
               <span className="text-cream font-medium">{item.value}</span>
             </div>

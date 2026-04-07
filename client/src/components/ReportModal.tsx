@@ -65,13 +65,13 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
     >
       <div
         className="w-full max-w-sm rounded-t-3xl p-6 animate-slide-up"
-        style={{ background: "#150826", border: "1px solid rgba(255,215,0,0.2)" }}
+        style={{ background: "#150826", border: "1px solid rgba(201,168,76,0.2)" }}
       >
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
             {view === "block-confirm"
-              ? <ShieldX size={18} color="#FFD700" />
-              : <Flag size={18} color="#FFD700" />}
+              ? <ShieldX size={18} color="#d4608a" />
+              : <Flag size={18} color="#d4608a" />}
             <h3 className="font-serif text-lg text-cream">
               {view === "menu" && reportedUserName}
               {view === "report" && t("report.reportTitle", { name: reportedUserName })}
@@ -79,7 +79,7 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
             </h3>
           </div>
           <button onClick={onClose} data-testid="button-close-report">
-            <X size={20} color="rgba(255,255,255,0.4)" />
+            <X size={20} color="rgba(253,248,240,0.4)" />
           </button>
         </div>
 
@@ -90,12 +90,12 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
               onClick={() => setView("report")}
               data-testid="button-open-report"
               className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left transition-all"
-              style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.75)" }}
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(253,248,240,0.75)" }}
             >
-              <Flag size={16} color="#FFD700" />
+              <Flag size={16} color="#d4608a" />
               <div>
                 <p className="text-sm font-medium">{t("report.title")}</p>
-                <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>{t("report.menuReportSub")}</p>
+                <p className="text-xs mt-0.5" style={{ color: "rgba(253,248,240,0.35)" }}>{t("report.menuReportSub")}</p>
               </div>
             </button>
 
@@ -103,12 +103,12 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
               onClick={() => setView("block-confirm")}
               data-testid="button-open-block"
               className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left transition-all"
-              style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.75)" }}
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(253,248,240,0.75)" }}
             >
-              <ShieldX size={16} color="#FFD700" />
+              <ShieldX size={16} color="#c9a84c" />
               <div>
                 <p className="text-sm font-medium">{t("report.block")}</p>
-                <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>{t("report.menuBlockSub")}</p>
+                <p className="text-xs mt-0.5" style={{ color: "rgba(253,248,240,0.35)" }}>{t("report.menuBlockSub")}</p>
               </div>
             </button>
           </div>
@@ -126,8 +126,8 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
                   data-testid={`reason-${r.key}`}
                   className="w-full text-left px-4 py-2.5 rounded-xl text-sm transition-all"
                   style={reason === r.key
-                    ? { background: "rgba(255,215,0,0.15)", color: "#FFD700", border: "1px solid rgba(255,215,0,0.3)" }
-                    : { background: "rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.12)" }
+                    ? { background: "rgba(212,96,138,0.15)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.3)" }
+                    : { background: "rgba(255,255,255,0.04)", color: "rgba(253,248,240,0.6)", border: "1px solid rgba(255,255,255,0.06)" }
                   }
                 >
                   {r.label}
@@ -144,12 +144,12 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
                 rows={3}
                 data-testid="input-report-description"
                 className="w-full px-4 py-3 rounded-xl text-sm text-cream placeholder-cream/25 outline-none resize-none"
-                style={{ background: "rgba(255,255,255,0.12)", border: "1.5px solid rgba(255,215,0,0.2)" }}
+                style={{ background: "rgba(255,255,255,0.06)", border: "1.5px solid rgba(201,168,76,0.2)" }}
               />
             </div>
 
             {submitError && (
-              <p className="text-xs mb-3 font-medium text-center" style={{ color: "#FFD700" }}>{submitError}</p>
+              <p className="text-xs mb-3 font-medium text-center" style={{ color: "#d4608a" }}>{submitError}</p>
             )}
             <button
               onClick={() => { setSubmitError(null); reportMutation.mutate(); }}
@@ -169,7 +169,7 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
         {/* ── Block confirm view ── */}
         {view === "block-confirm" && (
           <>
-            <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.55)", lineHeight: 1.6 }}>
+            <p className="text-sm mb-6" style={{ color: "rgba(253,248,240,0.55)", lineHeight: 1.6 }}>
               {t("report.blockWill", { name: reportedUserName })}
             </p>
             <ul className="space-y-2 mb-6">
@@ -178,15 +178,15 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
                 t("report.blockEffect2"),
                 t("report.blockEffect3"),
               ].map(item => (
-                <li key={item} className="flex items-start gap-2 text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
-                  <span className="mt-1 flex-shrink-0 w-1.5 h-1.5 rounded-full" style={{ background: "#FFD700" }} />
+                <li key={item} className="flex items-start gap-2 text-sm" style={{ color: "rgba(253,248,240,0.5)" }}>
+                  <span className="mt-1 flex-shrink-0 w-1.5 h-1.5 rounded-full" style={{ background: "#c9a84c" }} />
                   {item}
                 </li>
               ))}
             </ul>
 
             {submitError && (
-              <p className="text-xs mb-3 font-medium text-center" style={{ color: "#FFD700" }}>{submitError}</p>
+              <p className="text-xs mb-3 font-medium text-center" style={{ color: "#d4608a" }}>{submitError}</p>
             )}
 
             <div className="space-y-2">
@@ -195,7 +195,7 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
                 disabled={blockMutation.isPending}
                 data-testid="button-confirm-block"
                 className="w-full py-3.5 rounded-xl font-bold text-sm disabled:opacity-50 transition-all"
-                style={{ background: "linear-gradient(135deg, #A0000A, #FFD700)", color: "white" }}
+                style={{ background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white" }}
               >
                 {blockMutation.isPending ? t("report.blocking") : t("report.blockConfirm", { name: reportedUserName })}
               </button>
@@ -203,7 +203,7 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
                 onClick={() => setView("menu")}
                 data-testid="button-cancel-block"
                 className="w-full py-3 rounded-xl text-sm font-medium"
-                style={{ color: "rgba(255,255,255,0.4)" }}
+                style={{ color: "rgba(253,248,240,0.4)" }}
               >
                 {t("report.cancel")}
               </button>

@@ -137,8 +137,8 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
               <div key={u.id} data-testid={`approval-card-${u.id}`}
                 className="rounded-2xl overflow-hidden"
                 style={{
-                  background: "rgba(255,255,255,0.10)",
-                  border: isReapplication ? "1px solid rgba(251,191,36,0.4)" : "1px solid rgba(255,215,0,0.2)",
+                  background: "rgba(255,255,255,0.04)",
+                  border: isReapplication ? "1px solid rgba(251,191,36,0.4)" : "1px solid rgba(201,168,76,0.2)",
                 }}>
 
                 {/* ── Reapplication Banner ── */}
@@ -155,11 +155,11 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
                         {appHistory.map((h, i) => (
                           <div key={i} className="flex items-start gap-2 text-xs rounded-lg px-2.5 py-1.5"
                             style={{
-                              background: h.action === "approved" ? "rgba(16,185,129,0.08)" : h.action === "banned" ? "rgba(239,68,68,0.08)" : "rgba(255,215,0,0.08)",
-                              border: h.action === "approved" ? "1px solid rgba(16,185,129,0.2)" : h.action === "banned" ? "1px solid rgba(239,68,68,0.2)" : "1px solid rgba(255,215,0,0.2)",
+                              background: h.action === "approved" ? "rgba(16,185,129,0.08)" : h.action === "banned" ? "rgba(239,68,68,0.08)" : "rgba(212,96,138,0.08)",
+                              border: h.action === "approved" ? "1px solid rgba(16,185,129,0.2)" : h.action === "banned" ? "1px solid rgba(239,68,68,0.2)" : "1px solid rgba(212,96,138,0.2)",
                             }}>
                             <span className="font-bold flex-shrink-0 capitalize"
-                              style={{ color: h.action === "approved" ? "#10b981" : h.action === "banned" ? "#ef4444" : "#FFD700" }}>
+                              style={{ color: h.action === "approved" ? "#10b981" : h.action === "banned" ? "#ef4444" : "#d4608a" }}>
                               {h.action}
                             </span>
                             {h.reason && <span className="text-cream/50">— {h.reason}</span>}
@@ -175,11 +175,11 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
                 )}
 
                 {/* ── Profile Header ── */}
-                <div className="p-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
+                <div className="p-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                   <div className="flex items-start gap-4">
                     <div
                       className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 flex items-center justify-center text-xl font-bold text-gold"
-                      style={{ background: "linear-gradient(135deg, #2d0f4a, #A0000A)" }}
+                      style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)" }}
                     >
                       {profilePhotos[0]
                         ? <img src={profilePhotos[0]} alt="" className="w-full h-full object-cover" />
@@ -189,10 +189,10 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <span className="font-semibold text-cream text-base">{u.fullName ?? u.firstName ?? "Member"}</span>
                         {casteLabel && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(255,215,0,0.15)", color: "#FFD700" }}>{casteLabel}</span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>{casteLabel}</span>
                         )}
                         {u.gender && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(255,215,0,0.12)", color: "#FFD700" }}>{u.gender}</span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(212,96,138,0.12)", color: "#d4608a" }}>{u.gender}</span>
                         )}
                       </div>
                       <p className="text-cream/50 text-xs">{[u.age && `${u.age} yrs`, u.city, u.country].filter(Boolean).join(" · ")}</p>
@@ -207,7 +207,7 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
 
                 {/* ── Profile Photos ── */}
                 {profilePhotos.length > 0 && (
-                  <div className="p-4 pb-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.10)" }}>
+                  <div className="p-4 pb-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                     <p className="text-cream/30 text-[10px] font-semibold uppercase tracking-wider mb-2">Profile Photos</p>
                     <div className="grid grid-cols-3 gap-2">
                       {profilePhotos.map((url, i) => (
@@ -219,7 +219,7 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
                           data-testid={`photo-${u.id}-${i}`}
                         >
                           <img src={url} alt="" className="w-full h-full object-cover hover:scale-105 transition-transform duration-200" />
-                          <div className="absolute inset-0 rounded-xl" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.14)" }} />
+                          <div className="absolute inset-0 rounded-xl" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }} />
                         </div>
                       ))}
                     </div>
@@ -230,7 +230,7 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
                 {selfieUrl ? (
                   <div className="p-4 pb-0">
                     <div className="flex items-center gap-2 mb-2">
-                      <Shield size={12} color="#FFD700" />
+                      <Shield size={12} color="#c9a84c" />
                       <p className="text-cream/30 text-[10px] font-semibold uppercase tracking-wider">Identity Selfie</p>
                     </div>
                     <div
@@ -263,7 +263,7 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
                     onChange={e => { if (e.target.value) setReasons(r => ({ ...r, [u.id]: e.target.value })); }}
                     data-testid={`select-reject-reason-${u.id}`}
                     className="w-full px-3 py-2 rounded-xl text-xs text-cream/70 outline-none"
-                    style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.14)" }}
+                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
                   >
                     <option value="">Quick-fill from presets…</option>
                     {REJECT_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
@@ -276,7 +276,7 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
                     maxLength={300}
                     data-testid={`input-custom-reason-${u.id}`}
                     className="w-full px-3 py-2 rounded-xl text-xs text-cream placeholder-cream/25 outline-none"
-                    style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.14)" }}
+                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
                   />
                 </div>
 

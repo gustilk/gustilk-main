@@ -45,7 +45,7 @@ function Rose({ s }: { s: number }) {
             borderRadius: "50%",
             background: i % 2 === 0
               ? "radial-gradient(ellipse at 40% 40%, #ff7eb3, #e83e6c 55%, #9c1a3e)"
-              : "radial-gradient(ellipse at 40% 40%, #ff9ec9, #FFD700 55%, #8b1a50)",
+              : "radial-gradient(ellipse at 40% 40%, #ff9ec9, #d4608a 55%, #8b1a50)",
             top: "50%", left: "50%",
             transformOrigin: "0% 50%",
             transform: `rotateZ(${a}deg) translateX(${s * 0.04}px)`,
@@ -95,7 +95,7 @@ function Heart({ s }: { s: number }) {
 
 function Bouquet({ s }: { s: number }) {
   const flowers = [
-    { x: 50, y: 30, r: s * 0.22, c1: "#ffb3cc", c2: "#FFD700" },
+    { x: 50, y: 30, r: s * 0.22, c1: "#ffb3cc", c2: "#d4608a" },
     { x: 28, y: 48, r: s * 0.19, c1: "#ffd6e7", c2: "#c9508a" },
     { x: 72, y: 48, r: s * 0.19, c1: "#ff99c8", c2: "#b84080" },
   ];
@@ -140,7 +140,7 @@ function Diamond({ s }: { s: number }) {
         {/* Left facet */}
         <div style={abs({
           width: "46%", height: "70%", top: "30%", left: "5%",
-          background: "linear-gradient(135deg, rgba(255,255,255,0.20), rgba(8,145,178,0.6))",
+          background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(8,145,178,0.6))",
           clipPath: "polygon(0% 0%, 100% 0%, 74% 100%, 0% 100%)",
         })} />
         {/* Right facet shine */}
@@ -162,7 +162,7 @@ function Ring({ s }: { s: number }) {
       <div style={{
         width: r, height: r, borderRadius: "50%",
         border: `${thick}px solid transparent`,
-        background: `linear-gradient(#500004, #500004) padding-box,
+        background: `linear-gradient(#1a0a2e, #1a0a2e) padding-box,
                      linear-gradient(135deg, #e9d5ff, #a855f7, #7c3aed, #c4b5fd, #e9d5ff) border-box`,
         animation: "g-ring 3.5s linear infinite",
         boxShadow: "0 0 12px rgba(168,85,247,0.6), inset 0 0 8px rgba(168,85,247,0.2)",
@@ -299,7 +299,7 @@ function Chocolate({ s }: { s: number }) {
           background: "linear-gradient(180deg, #fb7185, #e11d48 40%, #9f1239)",
           borderRadius: "2px 2px 6px 6px",
           top: top * 0.6,
-          boxShadow: "inset 0 -3px 6px rgba(0,0,0,0.3), inset 3px 0 6px rgba(255,255,255,0.14)",
+          boxShadow: "inset 0 -3px 6px rgba(0,0,0,0.3), inset 3px 0 6px rgba(255,255,255,0.08)",
         })}>
           {/* Heart on box */}
           <div style={{ position: "relative", top: "20%", left: "50%", transform: "translateX(-50%)", width: s * 0.22, height: s * 0.18 }}>
@@ -323,7 +323,7 @@ function Chocolate({ s }: { s: number }) {
 function Kiss({ s }: { s: number }) {
   return (
     <div style={{ width: s, height: s, display: "flex", alignItems: "center", justifyContent: "center", animation: "g-pulse 2s ease-in-out infinite" }}>
-      <div style={{ position: "relative", width: s * 0.78, height: s * 0.52, filter: "drop-shadow(0 4px 8px rgba(255,215,0,0.6))" }}>
+      <div style={{ position: "relative", width: s * 0.78, height: s * 0.52, filter: "drop-shadow(0 4px 8px rgba(201,168,76,0.6))" }}>
         {/* Upper lip */}
         <div style={abs({
           width: "100%", height: "52%",

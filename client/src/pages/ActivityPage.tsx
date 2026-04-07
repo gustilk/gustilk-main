@@ -71,9 +71,9 @@ export default function ActivityPage({ user }: Props) {
   const visitorsCount = visitors?.items?.length ?? 0;
 
   return (
-    <div className="min-h-screen flex flex-col pb-24" style={{ background: "#E30613" }}>
+    <div className="min-h-screen flex flex-col pb-24" style={{ background: "#0d0618" }}>
       {/* Header */}
-      <div className="px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(255,215,0,0.12)" }}>
+      <div className="px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
         <h1 className="font-serif text-2xl text-gold">{t("activity.title")}</h1>
         <p className="text-cream/40 text-xs mt-1">{t("activity.subtitle")}</p>
       </div>
@@ -82,10 +82,10 @@ export default function ActivityPage({ user }: Props) {
       {!isPremium && (
         <div
           className="mx-5 mt-4 px-4 py-3 rounded-2xl flex items-center gap-3"
-          style={{ background: "linear-gradient(135deg, rgba(123,63,160,0.2), rgba(255,215,0,0.12))", border: "1px solid rgba(255,215,0,0.25)" }}
+          style={{ background: "linear-gradient(135deg, rgba(123,63,160,0.2), rgba(201,168,76,0.12))", border: "1px solid rgba(201,168,76,0.25)" }}
           data-testid="banner-premium"
         >
-          <Crown size={18} color="#FFD700" className="flex-shrink-0" />
+          <Crown size={18} color="#c9a84c" className="flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-gold">{t("activity.upgradePremium")}</p>
             <p className="text-cream/50 text-xs">{t("activity.upgradePremiumDesc")}</p>
@@ -94,7 +94,7 @@ export default function ActivityPage({ user }: Props) {
       )}
 
       {/* Tab bar */}
-      <div className="flex mx-5 mt-5 rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,215,0,0.1)" }}>
+      <div className="flex mx-5 mt-5 rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}>
         {tabs.map(({ id, label, icon: Icon, data }) => {
           const count = data?.length ?? 0;
           const isActive = tab === id;
@@ -104,14 +104,14 @@ export default function ActivityPage({ user }: Props) {
               onClick={() => setTab(id)}
               data-testid={`tab-${id}`}
               className="flex-1 flex flex-col items-center py-3 gap-1 transition-all relative"
-              style={{ color: isActive ? "#FFD700" : "rgba(255,255,255,0.35)", background: isActive ? "rgba(255,215,0,0.08)" : "transparent" }}
+              style={{ color: isActive ? "#c9a84c" : "rgba(253,248,240,0.35)", background: isActive ? "rgba(201,168,76,0.08)" : "transparent" }}
             >
               <Icon size={16} strokeWidth={isActive ? 2 : 1.5} />
               <span className="text-[10px] font-semibold uppercase tracking-wider">{label}</span>
               {count > 0 && (
                 <span
                   className="absolute top-1.5 right-3 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center text-[9px] font-bold"
-                  style={{ background: isActive ? "#FFD700" : "rgba(255,215,0,0.4)", color: isActive ? "#E30613" : "rgba(255,255,255,0.8)" }}
+                  style={{ background: isActive ? "#c9a84c" : "rgba(201,168,76,0.4)", color: isActive ? "#0d0618" : "rgba(253,248,240,0.8)" }}
                   data-testid={`count-${id}`}
                 >
                   {count > 99 ? "99+" : count}
@@ -195,7 +195,7 @@ function ActivityCard({ item, isPremium, blurred, tab, onBeforeNavigate, onActed
   return (
     <div
       className="relative rounded-2xl overflow-hidden transition-transform"
-      style={{ aspectRatio: "3/4", background: "#500004" }}
+      style={{ aspectRatio: "3/4", background: "#1a0a2e" }}
       data-testid={`activity-card-${user.id}`}
     >
       {/* Photo â€” tappable area navigates to profile */}
@@ -218,7 +218,7 @@ function ActivityCard({ item, isPremium, blurred, tab, onBeforeNavigate, onActed
         ) : (
           <div
             className="w-full h-full flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #500004, #2d1054)" }}
+            style={{ background: "linear-gradient(135deg, #1a0a2e, #2d1054)" }}
           >
             <span className="text-4xl font-serif text-gold/40">{displayName[0]?.toUpperCase()}</span>
           </div>
@@ -239,11 +239,11 @@ function ActivityCard({ item, isPremium, blurred, tab, onBeforeNavigate, onActed
         >
           <div
             className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(13,6,24,0.8)", border: "1.5px solid rgba(255,215,0,0.4)" }}
+            style={{ background: "rgba(13,6,24,0.8)", border: "1.5px solid rgba(201,168,76,0.4)" }}
           >
-            <Lock size={16} color="#FFD700" />
+            <Lock size={16} color="#c9a84c" />
           </div>
-          <p className="text-[10px] font-bold text-center px-3 leading-tight" style={{ color: "#FFD700" }}>Tap to view</p>
+          <p className="text-[10px] font-bold text-center px-3 leading-tight" style={{ color: "#c9a84c" }}>Tap to view</p>
         </div>
       )}
 
@@ -268,7 +268,7 @@ function ActivityCard({ item, isPremium, blurred, tab, onBeforeNavigate, onActed
               disabled={busy}
               onClick={(e) => { e.stopPropagation(); dislikeMutation.mutate(); }}
               className="flex-1 flex items-center justify-center gap-1 rounded-xl py-2 text-xs font-semibold transition-opacity disabled:opacity-50"
-              style={{ background: "rgba(255,215,0,0.18)", border: "1px solid rgba(255,215,0,0.4)", color: "#FFD700" }}
+              style={{ background: "rgba(212,96,138,0.18)", border: "1px solid rgba(212,96,138,0.4)", color: "#d4608a" }}
             >
               <X size={13} strokeWidth={2.5} />
               Pass
@@ -278,7 +278,7 @@ function ActivityCard({ item, isPremium, blurred, tab, onBeforeNavigate, onActed
               disabled={busy}
               onClick={(e) => { e.stopPropagation(); likeMutation.mutate(); }}
               className="flex-1 flex items-center justify-center gap-1 rounded-xl py-2 text-xs font-semibold transition-opacity disabled:opacity-50"
-              style={{ background: "rgba(255,215,0,0.18)", border: "1px solid rgba(255,215,0,0.5)", color: "#FFD700" }}
+              style={{ background: "rgba(201,168,76,0.18)", border: "1px solid rgba(201,168,76,0.5)", color: "#c9a84c" }}
             >
               <Heart size={13} strokeWidth={2.5} />
               Like
@@ -301,9 +301,9 @@ function EmptyState({ tab }: { tab: Tab }) {
     <div className="flex flex-col items-center justify-center py-20 gap-4">
       <div
         className="w-16 h-16 rounded-full flex items-center justify-center"
-        style={{ background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.2)" }}
+        style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.2)" }}
       >
-        <Icon size={24} color="rgba(255,215,0,0.4)" />
+        <Icon size={24} color="rgba(201,168,76,0.4)" />
       </div>
       <div className="text-center">
         <p className="text-cream/60 font-medium text-sm">{text}</p>

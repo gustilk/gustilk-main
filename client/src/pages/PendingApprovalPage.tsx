@@ -47,7 +47,7 @@ export default function PendingApprovalPage({ user }: Props) {
   if (status === "banned") {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12"
-        style={{ background: "linear-gradient(160deg, #E30613 0%, #500004 60%, #E30613 100%)" }}>
+        style={{ background: "linear-gradient(160deg, #0d0618 0%, #1a0a2e 60%, #0d0618 100%)" }}>
         <div className="w-full max-w-sm text-center">
           <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
             style={{ background: "rgba(239,68,68,0.12)", border: "2px solid rgba(239,68,68,0.35)" }}>
@@ -72,7 +72,7 @@ export default function PendingApprovalPage({ user }: Props) {
             disabled={logoutMutation.isPending}
             data-testid="button-logout"
             className="w-full py-3 rounded-full text-sm font-semibold flex items-center justify-center gap-2"
-            style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.5)" }}
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(253,248,240,0.5)" }}
           >
             <LogOut className="w-4 h-4" /> Sign Out
           </button>
@@ -85,12 +85,12 @@ export default function PendingApprovalPage({ user }: Props) {
   if (status === "rejected") {
     return (
       <div className="min-h-screen flex flex-col px-6 py-12"
-        style={{ background: "linear-gradient(160deg, #E30613 0%, #500004 60%, #E30613 100%)" }}>
+        style={{ background: "linear-gradient(160deg, #0d0618 0%, #1a0a2e 60%, #0d0618 100%)" }}>
         <div className="w-full max-w-sm mx-auto">
           <div className="text-center mb-6">
             <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5"
-              style={{ background: "rgba(255,215,0,0.1)", border: "2px solid rgba(255,215,0,0.35)" }}>
-              <XCircle className="w-10 h-10" color="#FFD700" />
+              style={{ background: "rgba(212,96,138,0.1)", border: "2px solid rgba(212,96,138,0.35)" }}>
+              <XCircle className="w-10 h-10" color="#d4608a" />
             </div>
             <h1 className="text-3xl font-serif font-bold mb-2 text-cream">
               {appCount > 1 ? "Application Not Approved" : "Profile Not Approved"}
@@ -102,29 +102,29 @@ export default function PendingApprovalPage({ user }: Props) {
 
           {reason ? (
             <div className="mb-5 p-4 rounded-2xl"
-              style={{ background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.3)" }}>
-              <p className="text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "#FFD700" }}>Reason</p>
+              style={{ background: "rgba(212,96,138,0.08)", border: "1px solid rgba(212,96,138,0.3)" }}>
+              <p className="text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "#d4608a" }}>Reason</p>
               <p className="text-cream/75 text-sm leading-relaxed">{reason}</p>
             </div>
           ) : (
             <div className="mb-5 p-4 rounded-2xl"
-              style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.14)" }}>
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
               <p className="text-cream/50 text-sm">No specific reason was given. Please review our community guidelines and reapply.</p>
             </div>
           )}
 
           <p className="text-cream/50 text-sm font-semibold mb-3">What you can do:</p>
           <div className="space-y-2 mb-6">
-            <div className="flex items-start gap-3 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.10)" }}>
-              <Edit size={15} color="#FFD700" className="flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.04)" }}>
+              <Edit size={15} color="#c9a84c" className="flex-shrink-0 mt-0.5" />
               <p className="text-cream/65 text-xs leading-relaxed">Update your profile photos to clearer, guideline-compliant images</p>
             </div>
-            <div className="flex items-start gap-3 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.10)" }}>
-              <Camera size={15} color="#A0000A" className="flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.04)" }}>
+              <Camera size={15} color="#7b3fa0" className="flex-shrink-0 mt-0.5" />
               <p className="text-cream/65 text-xs leading-relaxed">Retake your identity selfie — ensure your face is clearly visible in good lighting</p>
             </div>
-            <div className="flex items-start gap-3 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.10)" }}>
-              <Shield size={15} color="#FFD700" className="flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.04)" }}>
+              <Shield size={15} color="#d4608a" className="flex-shrink-0 mt-0.5" />
               <p className="text-cream/65 text-xs leading-relaxed">Make sure your profile accurately represents you and follows our community guidelines</p>
             </div>
           </div>
@@ -136,7 +136,7 @@ export default function PendingApprovalPage({ user }: Props) {
                 onClick={() => setReapplyStep("selfie")}
                 data-testid="button-retake-selfie"
                 className="w-full py-3 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
-                style={{ background: "rgba(123,63,160,0.15)", border: "1px solid rgba(123,63,160,0.4)", color: "#FFD700" }}
+                style={{ background: "rgba(123,63,160,0.15)", border: "1px solid rgba(123,63,160,0.4)", color: "#c9a84c" }}
               >
                 <Camera size={16} /> Retake Identity Selfie
               </button>
@@ -144,7 +144,7 @@ export default function PendingApprovalPage({ user }: Props) {
                 onClick={() => setLocation("/profile/edit")}
                 data-testid="button-edit-profile"
                 className="w-full py-3 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
-                style={{ background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.25)", color: "#FFD700" }}
+                style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.25)", color: "#c9a84c" }}
               >
                 <Edit size={16} /> Edit Profile & Photos
               </button>
@@ -155,16 +155,16 @@ export default function PendingApprovalPage({ user }: Props) {
             <div className="mb-4 p-4 rounded-2xl" style={{ background: "rgba(123,63,160,0.08)", border: "1px solid rgba(123,63,160,0.3)" }}>
               <p className="text-cream/70 text-sm font-semibold mb-3 text-center">Take a new selfie</p>
               <p className="text-cream/40 text-xs text-center mb-3">Face clearly visible, good lighting, no sunglasses</p>
-              {selfieError && <p className="text-sm text-center mb-2" style={{ color: "#FFD700" }}>{selfieError}</p>}
+              {selfieError && <p className="text-sm text-center mb-2" style={{ color: "#d4608a" }}>{selfieError}</p>}
               <button
                 onClick={() => selfieInputRef.current?.click()}
                 data-testid="button-take-selfie"
                 className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
-                style={{ background: "linear-gradient(135deg, #A0000A, #FFD700)", color: "white" }}
+                style={{ background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white" }}
               >
                 <Camera size={16} /> Take / Upload Selfie
               </button>
-              <button onClick={() => setReapplyStep("idle")} className="w-full mt-2 py-2 text-xs text-center" style={{ color: "rgba(255,255,255,0.3)" }}>
+              <button onClick={() => setReapplyStep("idle")} className="w-full mt-2 py-2 text-xs text-center" style={{ color: "rgba(253,248,240,0.3)" }}>
                 Cancel
               </button>
               <input ref={selfieInputRef} type="file" accept="image/*" capture="user" className="hidden" onChange={handleSelfieFile} />
@@ -189,14 +189,14 @@ export default function PendingApprovalPage({ user }: Props) {
             disabled={reapplyMutation.isPending}
             data-testid="button-reapply"
             className="w-full py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 mb-3 disabled:opacity-50"
-            style={{ background: "linear-gradient(135deg, #FFD700, #CC9900)", color: "#500004" }}
+            style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
           >
             {reapplyMutation.isPending ? "Submitting…" : (
               <><RotateCcw size={16} /> Submit for Re-review</>
             )}
           </button>
           {reapplyMutation.isError && (
-            <p className="text-xs text-center mb-3" style={{ color: "#FFD700" }}>
+            <p className="text-xs text-center mb-3" style={{ color: "#d4608a" }}>
               {(reapplyMutation.error as any)?.message ?? "Submission failed. Please try again."}
             </p>
           )}
@@ -206,7 +206,7 @@ export default function PendingApprovalPage({ user }: Props) {
             disabled={logoutMutation.isPending}
             data-testid="button-logout"
             className="w-full py-3 rounded-full text-sm font-semibold flex items-center justify-center gap-2"
-            style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)" }}
+            style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(253,248,240,0.4)" }}
           >
             <LogOut className="w-4 h-4" /> Sign Out
           </button>
@@ -218,16 +218,16 @@ export default function PendingApprovalPage({ user }: Props) {
   // ── PENDING (default) ─────────────────────────────────────────────────────
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12"
-      style={{ background: "linear-gradient(160deg, #E30613 0%, #500004 60%, #E30613 100%)" }}>
+      style={{ background: "linear-gradient(160deg, #0d0618 0%, #1a0a2e 60%, #0d0618 100%)" }}>
       <div className="w-full max-w-sm text-center">
         <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
-          style={{ background: "linear-gradient(135deg, #FFD70022, #A0000A22)", border: "2px solid #FFD70044" }}>
-          <Clock className="w-10 h-10" style={{ color: "#FFD700" }} />
+          style={{ background: "linear-gradient(135deg, #c9a84c22, #7b3fa022)", border: "2px solid #c9a84c44" }}>
+          <Clock className="w-10 h-10" style={{ color: "#c9a84c" }} />
         </div>
         <h1 className="text-3xl font-serif font-bold mb-3 text-cream">Under Review</h1>
         {appCount > 1 && (
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3 text-xs font-bold"
-            style={{ background: "rgba(255,215,0,0.12)", border: "1px solid rgba(255,215,0,0.3)", color: "#FFD700" }}>
+            style={{ background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.3)", color: "#c9a84c" }}>
             Reapplication #{appCount}
           </div>
         )}
@@ -236,15 +236,15 @@ export default function PendingApprovalPage({ user }: Props) {
           You'll be notified once a decision is made.
         </p>
         <div className="space-y-3 mb-8">
-          <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.12)" }}>
+          <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.05)" }}>
             <CheckCircle className="w-5 h-5 flex-shrink-0 text-gold" />
             <p className="text-sm text-left text-cream/70">Profile submitted for review</p>
           </div>
-          <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.12)" }}>
-            <Shield className="w-5 h-5 flex-shrink-0" style={{ color: "#A0000A" }} />
+          <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.05)" }}>
+            <Shield className="w-5 h-5 flex-shrink-0" style={{ color: "#7b3fa0" }} />
             <p className="text-sm text-left text-cream/70">Identity selfie submitted</p>
           </div>
-          <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.12)" }}>
+          <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.05)" }}>
             <Clock className="w-5 h-5 flex-shrink-0 text-gold" />
             <p className="text-sm text-left text-cream/70">Awaiting admin decision</p>
           </div>
@@ -254,7 +254,7 @@ export default function PendingApprovalPage({ user }: Props) {
           disabled={logoutMutation.isPending}
           data-testid="button-logout"
           className="w-full py-3 rounded-full text-sm font-semibold flex items-center justify-center gap-2"
-          style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.20)", color: "rgba(255,255,255,0.45)" }}
+          style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(253,248,240,0.45)" }}
         >
           <LogOut className="w-4 h-4" /> Sign Out
         </button>

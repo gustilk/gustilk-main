@@ -3,7 +3,7 @@ import { ChevronLeft, ShieldAlert, Phone, AlertTriangle, Heart, Eye, Lock, UserX
 const SECTIONS = [
   {
     icon: Eye,
-    color: "#FFD700",
+    color: "#c9a84c",
     title: "Protect Your Personal Information",
     tips: [
       "Never share your full name, home address, workplace, or daily routine with someone you have just met online.",
@@ -14,7 +14,7 @@ const SECTIONS = [
   },
   {
     icon: MessageCircle,
-    color: "#A0000A",
+    color: "#7b3fa0",
     title: "Recognise Red Flags",
     tips: [
       "Be wary of anyone who quickly professes love or an unusually strong emotional connection before meeting you.",
@@ -37,7 +37,7 @@ const SECTIONS = [
   },
   {
     icon: Lock,
-    color: "#FFD700",
+    color: "#d4608a",
     title: "Keep Your Account Secure",
     tips: [
       "Use a strong, unique password for your Gûstîlk account and never share it with anyone.",
@@ -94,20 +94,20 @@ const SECTIONS = [
 
 export default function SafetyTipsPage() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#E30613" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-5 pt-12 pb-4 flex-shrink-0"
-        style={{ borderBottom: "1px solid rgba(255,215,0,0.12)" }}>
+        style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
         <button
           onClick={() => window.history.back()}
           data-testid="button-back-safety-tips"
           className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-          style={{ background: "rgba(255,255,255,0.12)" }}
+          style={{ background: "rgba(255,255,255,0.06)" }}
         >
-          <ChevronLeft size={18} color="rgba(255,255,255,0.7)" />
+          <ChevronLeft size={18} color="rgba(253,248,240,0.7)" />
         </button>
         <div className="flex items-center gap-2">
-          <ShieldAlert size={18} color="#FFD700" />
+          <ShieldAlert size={18} color="#c9a84c" />
           <h1 className="font-serif text-xl text-gold">Safety Tips</h1>
         </div>
       </div>
@@ -131,10 +131,10 @@ export default function SafetyTipsPage() {
           const Icon = section.icon;
           return (
             <div key={section.title} className="rounded-2xl overflow-hidden"
-              style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,215,0,0.1)" }}>
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(201,168,76,0.1)" }}>
               {/* Section header */}
               <div className="flex items-center gap-3 px-4 py-3"
-                style={{ background: `${section.color}10`, borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
+                style={{ background: `${section.color}10`, borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
                 <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ background: `${section.color}18` }}>
                   <Icon size={15} color={section.color} />
@@ -155,7 +155,7 @@ export default function SafetyTipsPage() {
         })}
 
         {/* Emergency contact card */}
-        <div className="rounded-2xl p-4" style={{ background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.2)" }}>
+        <div className="rounded-2xl p-4" style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.2)" }}>
           <p className="text-gold text-sm font-semibold mb-2">Contact Gûstîlk Safety Team</p>
           <p className="text-cream/50 text-xs leading-relaxed">
             Report safety concerns: <span className="text-gold/80">safety@gustilk.com</span>{"\n"}
@@ -164,7 +164,7 @@ export default function SafetyTipsPage() {
           </p>
         </div>
 
-        <p className="text-center text-xs pb-4" style={{ color: "rgba(255,255,255,0.2)" }}>
+        <p className="text-center text-xs pb-4" style={{ color: "rgba(253,248,240,0.2)" }}>
           © 2026 Gûstîlk · www.gustilk.com
         </p>
       </div>

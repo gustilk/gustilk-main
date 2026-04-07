@@ -21,11 +21,11 @@ export default function PaymentsPage({ user }: { user: User }) {
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5">
         {[
-          { label: "Active Subscribers", value: stats?.premiumUsers ?? 0, icon: Crown, color: "#FFD700" },
+          { label: "Active Subscribers", value: stats?.premiumUsers ?? 0, icon: Crown, color: "#c9a84c" },
           { label: "Subscription Rate", value: stats ? `${Math.round((stats.premiumUsers / Math.max(stats.totalUsers, 1)) * 100)}%` : "—", icon: TrendingUp, color: "#10b981" },
           { label: "Total Users", value: stats?.totalUsers ?? 0, icon: CreditCard, color: "#3b82f6" },
         ].map(item => (
-          <div key={item.label} className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.07)" }}>
+          <div key={item.label} className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${item.color}18` }}>
                 <item.icon size={15} color={item.color} />
@@ -37,8 +37,8 @@ export default function PaymentsPage({ user }: { user: User }) {
         ))}
       </div>
 
-      <div className="rounded-2xl p-6 text-center" style={{ background: "rgba(255,255,255,0.10)", border: "1px dashed rgba(255,215,0,0.2)" }}>
-        <CreditCard size={32} color="rgba(255,215,0,0.4)" className="mx-auto mb-3" />
+      <div className="rounded-2xl p-6 text-center" style={{ background: "rgba(255,255,255,0.04)", border: "1px dashed rgba(201,168,76,0.2)" }}>
+        <CreditCard size={32} color="rgba(201,168,76,0.4)" className="mx-auto mb-3" />
         <div className="text-cream/50 text-sm font-medium">Payment Processor Not Connected</div>
         <div className="text-cream/30 text-xs mt-1">
           Connect Stripe to see real-time revenue, transaction history, and refund management.

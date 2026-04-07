@@ -42,8 +42,8 @@ export default function LottieAnimation({ src, loop = true, autoplay = true, cla
             width: sz,
             height: sz,
             borderRadius: "50%",
-            border: "2.5px solid rgba(255,215,0,0.25)",
-            borderTopColor: "#FFD700",
+            border: "2.5px solid rgba(201,168,76,0.25)",
+            borderTopColor: "#c9a84c",
             animation: "lottie-spin 0.9s linear infinite",
           }}
         />
