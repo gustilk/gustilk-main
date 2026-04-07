@@ -230,12 +230,12 @@ export default function SocialSetupPage({ user }: Props) {
         onClose={() => setShowGuidelinesModal(false)}
       />
     )}
-    <div className="min-h-screen flex items-center justify-center px-5 py-8" style={{ background: "#F9F9F9" }}>
+    <div className="min-h-screen flex items-center justify-center px-5 py-8" style={{ background: "#E30613" }}>
       <div className="relative z-10 w-full max-w-sm animate-slide-up">
 
         {/* App name */}
         <div className="text-center mb-5">
-          <span className="font-serif text-2xl font-bold" style={{ color: "#F4C430" }}>Gûstîlk</span>
+          <span className="font-serif text-2xl font-bold" style={{ color: "#FFD700" }}>Gûstîlk</span>
         </div>
 
         {/* Top bar — back button + step indicator */}
@@ -246,9 +246,9 @@ export default function SocialSetupPage({ user }: Props) {
             data-testid="button-signout-setup"
             className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all"
             style={{
-              background: "rgba(0,0,0,0.05)",
+              background: "rgba(255,255,255,0.12)",
               border: "1px solid rgba(255,255,255,0.1)",
-              color: "rgba(51,51,51,0.6)",
+              color: "rgba(255,255,255,0.6)",
             }}
           >
             <LogOut size={13} />
@@ -261,14 +261,14 @@ export default function SocialSetupPage({ user }: Props) {
               <div key={s} className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
                   style={step === s
-                    ? { background: "#F4C430", color: "#0F1F4F" }
+                    ? { background: "#FFD700", color: "#500004" }
                     : step > s
-                      ? { background: "rgba(244,196,48,0.3)", color: "#F4C430" }
+                      ? { background: "rgba(255,215,0,0.3)", color: "#FFD700" }
                       : { background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.3)", border: "1px solid rgba(255,255,255,0.1)" }
                   }>
                   {step > s ? "✓" : s}
                 </div>
-                {s < totalSteps && <div className="w-8 h-px" style={{ background: step > s ? "rgba(244,196,48,0.5)" : "rgba(255,255,255,0.1)" }} />}
+                {s < totalSteps && <div className="w-8 h-px" style={{ background: step > s ? "rgba(255,215,0,0.5)" : "rgba(255,255,255,0.1)" }} />}
               </div>
             ))}
           </div>
@@ -309,7 +309,7 @@ export default function SocialSetupPage({ user }: Props) {
                 <Label>{t("setup.country")}</Label>
                 {geoState === "loading" && (
                   <div className="w-full px-4 py-3 rounded-xl flex items-center gap-3"
-                    style={{ background: "rgba(0,0,0,0.05)", border: "1.5px solid rgba(244,196,48,0.2)" }}>
+                    style={{ background: "rgba(255,255,255,0.12)", border: "1.5px solid rgba(255,215,0,0.2)" }}>
                     <Loader2 size={16} className="animate-spin text-gold" />
                     <span className="text-cream/40 text-sm">{t("setup.detectingLocation")}</span>
                   </div>
@@ -317,11 +317,11 @@ export default function SocialSetupPage({ user }: Props) {
                 {geoState === "detected" && (
                   <>
                     <div data-testid="display-country" className="w-full px-4 py-3 rounded-xl flex items-center gap-3"
-                      style={{ background: "rgba(0,0,0,0.05)", border: "1.5px solid rgba(244,196,48,0.3)" }}>
-                      <MapPin size={15} color="#F4C430" />
+                      style={{ background: "rgba(255,255,255,0.12)", border: "1.5px solid rgba(255,215,0,0.3)" }}>
+                      <MapPin size={15} color="#FFD700" />
                       <span className="text-cream text-sm flex-1">{data.country}</span>
                       <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
-                        style={{ background: "rgba(244,196,48,0.15)", color: "#F4C430" }}>{t("setup.detected")}</span>
+                        style={{ background: "rgba(255,215,0,0.15)", color: "#FFD700" }}>{t("setup.detected")}</span>
                     </div>
                     {detectedCountryName !== data.country && (
                       <p className="text-cream/30 text-xs mt-1 pl-1">{detectedCountryName}</p>
@@ -370,10 +370,10 @@ export default function SocialSetupPage({ user }: Props) {
                   onChange={e => setData(d => ({ ...d, dateOfBirth: e.target.value }))}
                   data-testid="input-date-of-birth"
                   className="w-full px-3 py-3 rounded-xl text-sm text-cream outline-none"
-                  style={{ background: "rgba(255,255,255,0.07)", border: `1.5px solid ${data.dateOfBirth && !isAtLeast18(data.dateOfBirth) ? "rgba(107,191,89,0.6)" : "rgba(244,196,48,0.25)"}`, colorScheme: "dark" }}
+                  style={{ background: "rgba(255,255,255,0.07)", border: `1.5px solid ${data.dateOfBirth && !isAtLeast18(data.dateOfBirth) ? "rgba(255,215,0,0.6)" : "rgba(255,215,0,0.25)"}`, colorScheme: "dark" }}
                 />
                 {data.dateOfBirth && !isAtLeast18(data.dateOfBirth) && (
-                  <p className="text-xs mt-1" style={{ color: "#6BBF59" }}>{t("setup.minAge18")}</p>
+                  <p className="text-xs mt-1" style={{ color: "#FFD700" }}>{t("setup.minAge18")}</p>
                 )}
               </div>
 
@@ -383,7 +383,7 @@ export default function SocialSetupPage({ user }: Props) {
                   onChange={e => setData(d => ({ ...d, city: e.target.value }))}
                   data-testid="input-city"
                   className="w-full px-3 py-3 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
-                  style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(244,196,48,0.25)" }} />
+                  style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(255,215,0,0.25)" }} />
               </div>
 
               <button
@@ -392,26 +392,26 @@ export default function SocialSetupPage({ user }: Props) {
                 data-testid="button-open-guidelines"
                 className="w-full rounded-2xl px-4 py-4 flex items-center gap-3 transition-all active:scale-98"
                 style={agreedGuidelines
-                  ? { background: "rgba(244,196,48,0.1)", border: "1.5px solid rgba(244,196,48,0.5)" }
-                  : { background: "rgba(0,0,0,0.04)", border: "1.5px solid rgba(255,255,255,0.1)" }
+                  ? { background: "rgba(255,215,0,0.1)", border: "1.5px solid rgba(255,215,0,0.5)" }
+                  : { background: "rgba(255,255,255,0.10)", border: "1.5px solid rgba(255,255,255,0.1)" }
                 }
               >
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: agreedGuidelines ? "rgba(244,196,48,0.2)" : "rgba(0,0,0,0.05)" }}>
+                  style={{ background: agreedGuidelines ? "rgba(255,215,0,0.2)" : "rgba(255,255,255,0.12)" }}>
                   {agreedGuidelines
-                    ? <CheckCircle2 size={20} color="#F4C430" />
-                    : <ScrollText size={20} color="rgba(244,196,48,0.5)" />
+                    ? <CheckCircle2 size={20} color="#FFD700" />
+                    : <ScrollText size={20} color="rgba(255,215,0,0.5)" />
                   }
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="text-sm font-semibold" style={{ color: agreedGuidelines ? "#F4C430" : "rgba(51,51,51,0.7)" }}>
+                  <p className="text-sm font-semibold" style={{ color: agreedGuidelines ? "#FFD700" : "rgba(255,255,255,0.7)" }}>
                     {t("agreement.guidelinesButtonTitle")}
                   </p>
-                  <p className="text-xs mt-0.5" style={{ color: agreedGuidelines ? "rgba(244,196,48,0.6)" : "rgba(51,51,51,0.3)" }}>
+                  <p className="text-xs mt-0.5" style={{ color: agreedGuidelines ? "rgba(255,215,0,0.6)" : "rgba(255,255,255,0.3)" }}>
                     {agreedGuidelines ? t("agreement.guidelinesButtonAgreed") : t("agreement.guidelinesButtonRequired")}
                   </p>
                 </div>
-                <ChevronDown size={16} color="rgba(244,196,48,0.4)" />
+                <ChevronDown size={16} color="rgba(255,215,0,0.4)" />
               </button>
 
               <div className="space-y-3">
@@ -425,7 +425,7 @@ export default function SocialSetupPage({ user }: Props) {
                 disabled={!step1Valid || geoState === "loading"}
                 data-testid="button-next-step"
                 className="w-full py-4 rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
-                style={{ background: "linear-gradient(135deg, #F4C430, #D4A017)", color: "#0F1F4F", boxShadow: "0 6px 20px rgba(244,196,48,0.3)" }}
+                style={{ background: "linear-gradient(135deg, #FFD700, #CC9900)", color: "#500004", boxShadow: "0 6px 20px rgba(255,215,0,0.3)" }}
               >
                 {geoState === "loading" ? t("setup.detectingLocation") : t("setup.continueToPhotos")}
                 <ChevronRight size={16} />
@@ -439,8 +439,8 @@ export default function SocialSetupPage({ user }: Props) {
           <>
             <div className="text-center mb-7">
               <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                style={{ background: "rgba(244,196,48,0.12)", border: "2px solid rgba(244,196,48,0.3)" }}>
-                <Shield size={28} color="#F4C430" />
+                style={{ background: "rgba(255,215,0,0.12)", border: "2px solid rgba(255,215,0,0.3)" }}>
+                <Shield size={28} color="#FFD700" />
               </div>
               <h1 className="font-serif text-2xl text-gold mb-1">Your Privacy</h1>
               <p className="text-cream/50 text-sm">Choose how your profile appears to others. You can change these anytime in Settings.</p>
@@ -448,11 +448,11 @@ export default function SocialSetupPage({ user }: Props) {
 
             <div className="space-y-4">
               {/* Photo blur */}
-              <div className="rounded-2xl p-4" style={{ background: "rgba(0,0,0,0.04)", border: "1.5px solid rgba(244,196,48,0.2)" }}>
+              <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.10)", border: "1.5px solid rgba(255,215,0,0.2)" }}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <p className="text-sm font-semibold" style={{ color: "rgba(51,51,51,0.9)" }}>Blur Photos Until Matched</p>
-                    <p className="text-xs mt-1 leading-relaxed" style={{ color: "rgba(51,51,51,0.45)" }}>
+                    <p className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.9)" }}>Blur Photos Until Matched</p>
+                    <p className="text-xs mt-1 leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
                       {privacyData.photosBlurred
                         ? "On — your photos appear blurred to others until you both like each other (match). Matched users always see your photos clearly."
                         : "Off — your photos are visible to everyone who views your profile."}
@@ -462,7 +462,7 @@ export default function SocialSetupPage({ user }: Props) {
                     data-testid="toggle-setup-photos-blurred"
                     onClick={() => setPrivacyData(d => ({ ...d, photosBlurred: !d.photosBlurred }))}
                     className="relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none mt-0.5"
-                    style={{ background: privacyData.photosBlurred ? "#F4C430" : "rgba(0,0,0,0.08)" }}
+                    style={{ background: privacyData.photosBlurred ? "#FFD700" : "rgba(255,255,255,0.18)" }}
                     aria-checked={privacyData.photosBlurred}
                     role="switch"
                   >
@@ -473,9 +473,9 @@ export default function SocialSetupPage({ user }: Props) {
               </div>
 
               <div className="rounded-xl px-4 py-3 flex items-start gap-3"
-                style={{ background: "rgba(244,196,48,0.06)", border: "1px solid rgba(244,196,48,0.15)" }}>
-                <Shield size={14} color="#F4C430" className="flex-shrink-0 mt-0.5" />
-                <p className="text-xs leading-relaxed" style={{ color: "rgba(51,51,51,0.5)" }}>
+                style={{ background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.15)" }}>
+                <Shield size={14} color="#FFD700" className="flex-shrink-0 mt-0.5" />
+                <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
                   These settings can be changed anytime from your Privacy Settings in the app.
                 </p>
               </div>
@@ -486,7 +486,7 @@ export default function SocialSetupPage({ user }: Props) {
                   onClick={() => setStep(1)}
                   data-testid="button-back-privacy-setup"
                   className="px-5 py-4 rounded-xl text-sm font-semibold"
-                  style={{ background: "rgba(0,0,0,0.05)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
+                  style={{ background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
                 >
                   Back
                 </button>
@@ -494,7 +494,7 @@ export default function SocialSetupPage({ user }: Props) {
                   onClick={() => setStep(3)}
                   data-testid="button-next-privacy"
                   className="flex-1 py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
-                  style={{ background: "linear-gradient(135deg, #F4C430, #D4A017)", color: "#0F1F4F", boxShadow: "0 6px 20px rgba(244,196,48,0.3)" }}
+                  style={{ background: "linear-gradient(135deg, #FFD700, #CC9900)", color: "#500004", boxShadow: "0 6px 20px rgba(255,215,0,0.3)" }}
                 >
                   {t("setup.continueToPhotos")}
                   <ChevronRight size={16} />
@@ -509,8 +509,8 @@ export default function SocialSetupPage({ user }: Props) {
           <>
             <div className="text-center mb-7">
               <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                style={{ background: "rgba(244,196,48,0.12)", border: "2px solid rgba(244,196,48,0.3)" }}>
-                <Camera size={28} color="#F4C430" />
+                style={{ background: "rgba(255,215,0,0.12)", border: "2px solid rgba(255,215,0,0.3)" }}>
+                <Camera size={28} color="#FFD700" />
               </div>
               <h1 className="font-serif text-2xl text-gold mb-1">{t("setup.step2Title")}</h1>
               <p className="text-cream/50 text-sm">{t("setup.step2Subtitle")}</p>
@@ -544,14 +544,14 @@ export default function SocialSetupPage({ user }: Props) {
                         data-testid={`button-upload-photo-${idx}`}
                         className="w-full aspect-square rounded-2xl flex flex-col items-center justify-center transition-all relative overflow-hidden"
                         style={photo
-                          ? { border: "2px solid rgba(244,196,48,0.5)" }
-                          : { background: "rgba(0,0,0,0.04)", border: "2px dashed rgba(244,196,48,0.25)" }}
+                          ? { border: "2px solid rgba(255,215,0,0.5)" }
+                          : { background: "rgba(255,255,255,0.10)", border: "2px dashed rgba(255,215,0,0.25)" }}
                       >
                         {photo ? (
                           <img src={photo} className="w-full h-full object-cover rounded-2xl" alt={`Photo ${idx + 1}`} />
                         ) : (
                           <>
-                            <ImagePlus size={22} color="rgba(244,196,48,0.4)" />
+                            <ImagePlus size={22} color="rgba(255,215,0,0.4)" />
                             <span className="text-cream/30 text-xs mt-1">Photo {idx + 1}</span>
                           </>
                         )}
@@ -562,7 +562,7 @@ export default function SocialSetupPage({ user }: Props) {
                           onClick={() => setPhotos(prev => { const next = [...prev]; next[idx] = null; return next; })}
                           data-testid={`button-remove-photo-${idx}`}
                           className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center"
-                          style={{ background: "#6BBF59" }}
+                          style={{ background: "#FFD700" }}
                         >
                           <X size={11} color="white" />
                         </button>
@@ -577,11 +577,11 @@ export default function SocialSetupPage({ user }: Props) {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <Label>Verification Selfie</Label>
-                  <Shield size={12} color="#F4C430" className="-mt-1" />
+                  <Shield size={12} color="#FFD700" className="-mt-1" />
                 </div>
                 <div className="rounded-2xl p-3 mb-3 flex items-start gap-2"
-                  style={{ background: "rgba(244,196,48,0.06)", border: "1px solid rgba(244,196,48,0.18)" }}>
-                  <Shield size={14} color="#F4C430" className="flex-shrink-0 mt-0.5" />
+                  style={{ background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.18)" }}>
+                  <Shield size={14} color="#FFD700" className="flex-shrink-0 mt-0.5" />
                   <p className="text-cream/50 text-xs leading-relaxed">
                     {t("setup.selfieAdminNote")}
                   </p>
@@ -599,14 +599,14 @@ export default function SocialSetupPage({ user }: Props) {
 
                 {selfieChecking ? (
                   <div className="w-full h-36 rounded-2xl flex flex-col items-center justify-center gap-3"
-                    style={{ background: "rgba(244,196,48,0.06)", border: "2px solid rgba(244,196,48,0.25)" }}>
-                    <Loader2 size={28} color="#F4C430" className="animate-spin" />
+                    style={{ background: "rgba(255,215,0,0.06)", border: "2px solid rgba(255,215,0,0.25)" }}>
+                    <Loader2 size={28} color="#FFD700" className="animate-spin" />
                     <span className="text-cream/60 text-sm font-medium">{t("setup.faceChecking")}</span>
                   </div>
                 ) : selfie ? (
                   <div className="relative">
                     <img src={selfie} className="w-full h-48 object-cover rounded-2xl"
-                      style={{ border: "2px solid rgba(244,196,48,0.4)" }} alt="Verification selfie" />
+                      style={{ border: "2px solid rgba(255,215,0,0.4)" }} alt="Verification selfie" />
                     <button
                       type="button"
                       onClick={() => setSelfie(null)}
@@ -618,7 +618,7 @@ export default function SocialSetupPage({ user }: Props) {
                     </button>
                     <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg flex items-center gap-1.5"
                       style={{ background: "rgba(0,0,0,0.6)" }}>
-                      <Shield size={11} color="#F4C430" />
+                      <Shield size={11} color="#FFD700" />
                       <span className="text-xs text-cream/80">{t("setup.adminOnly")}</span>
                     </div>
                   </div>
@@ -635,9 +635,9 @@ export default function SocialSetupPage({ user }: Props) {
                     }}
                     data-testid="button-take-selfie"
                     className="w-full py-10 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all"
-                    style={{ background: "rgba(0,0,0,0.04)", border: "2px dashed rgba(244,196,48,0.3)" }}
+                    style={{ background: "rgba(255,255,255,0.10)", border: "2px dashed rgba(255,215,0,0.3)" }}
                   >
-                    <Camera size={32} color="rgba(244,196,48,0.5)" />
+                    <Camera size={32} color="rgba(255,215,0,0.5)" />
                     <span className="text-cream/40 text-sm">{t("setup.takeSelfie")}</span>
                     <span className="text-cream/25 text-xs">{t("setup.selfieVisible")}</span>
                   </button>
@@ -646,7 +646,7 @@ export default function SocialSetupPage({ user }: Props) {
 
               {/* Progress summary */}
               <div className="rounded-xl px-4 py-3 flex items-center justify-between"
-                style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(244,196,48,0.12)" }}>
+                style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,215,0,0.12)" }}>
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${photos.filter(Boolean).length >= 2 ? "bg-green-400" : "bg-cream/20"}`} />
                   <span className="text-cream/50 text-xs">{photos.filter(Boolean).length}/2 photos</span>
@@ -663,19 +663,19 @@ export default function SocialSetupPage({ user }: Props) {
                   onClick={() => setStep(isFemale ? 2 : 1)}
                   data-testid="button-back-step"
                   className="px-5 py-4 rounded-xl text-sm font-semibold"
-                  style={{ background: "rgba(0,0,0,0.05)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
+                  style={{ background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
                 >
                   {t("common.back")}
                 </button>
                 {saveError && (
-                  <p className="w-full text-xs text-center font-medium mb-1" style={{ color: "#6BBF59" }}>{saveError}</p>
+                  <p className="w-full text-xs text-center font-medium mb-1" style={{ color: "#FFD700" }}>{saveError}</p>
                 )}
                 <button
                   onClick={() => { setSaveError(null); mutation.mutate(); }}
                   disabled={!canSubmit || mutation.isPending}
                   data-testid="button-complete-setup"
                   className="flex-1 py-4 rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
-                  style={{ background: "linear-gradient(135deg, #F4C430, #D4A017)", color: "#0F1F4F", boxShadow: "0 6px 20px rgba(244,196,48,0.3)" }}
+                  style={{ background: "linear-gradient(135deg, #FFD700, #CC9900)", color: "#500004", boxShadow: "0 6px 20px rgba(255,215,0,0.3)" }}
                 >
                   {mutation.isPending
                     ? <><Loader2 size={15} className="animate-spin" /> {t("setup.saving")}</>
@@ -706,7 +706,7 @@ function CommunityGuidelinesModal({ onAgree, onClose }: { onAgree: () => void; o
   const sections = t("agreement.sections", { returnObjects: true }) as Array<{ title: string; body: string }>;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: "#F9F9F9" }}>
+    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: "#E30613" }}>
       <div className="fixed inset-0 pointer-events-none" style={{
         background: "radial-gradient(ellipse 70% 40% at 50% 0%, rgba(74,30,107,0.7) 0%, transparent 70%)",
       }} />
@@ -714,10 +714,10 @@ function CommunityGuidelinesModal({ onAgree, onClose }: { onAgree: () => void; o
       <div className="relative z-10 flex flex-col h-full">
         <div className="flex-shrink-0 px-5 pt-12 pb-6 text-center">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
-            style={{ background: "rgba(244,196,48,0.12)", border: "2px solid rgba(244,196,48,0.3)" }}>
-            <ScrollText size={26} color="#F4C430" />
+            style={{ background: "rgba(255,215,0,0.12)", border: "2px solid rgba(255,215,0,0.3)" }}>
+            <ScrollText size={26} color="#FFD700" />
           </div>
-          <h1 className="font-serif text-2xl font-bold" style={{ color: "#F4C430" }}>{t("agreement.guidelinesTitle")}</h1>
+          <h1 className="font-serif text-2xl font-bold" style={{ color: "#FFD700" }}>{t("agreement.guidelinesTitle")}</h1>
           <p className="text-cream/40 text-sm mt-1">{t("agreement.readCarefully")}</p>
         </div>
 
@@ -728,25 +728,25 @@ function CommunityGuidelinesModal({ onAgree, onClose }: { onAgree: () => void; o
         >
           {Array.isArray(sections) && sections.map((s, i) => (
             <div key={i} className="rounded-2xl p-4"
-              style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(244,196,48,0.12)" }}>
-              <p className="font-serif font-semibold mb-2" style={{ color: "#F4C430" }}>{s.title}</p>
+              style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,215,0,0.12)" }}>
+              <p className="font-serif font-semibold mb-2" style={{ color: "#FFD700" }}>{s.title}</p>
               <p className="text-cream/60 text-sm leading-relaxed">{s.body}</p>
             </div>
           ))}
 
           <div className="rounded-2xl p-4"
-            style={{ background: "rgba(244,196,48,0.06)", border: "1px solid rgba(244,196,48,0.2)" }}>
+            style={{ background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.2)" }}>
             <p className="text-cream/50 text-sm leading-relaxed italic">
               {t("agreement.footerWarning")}
             </p>
-            <p className="text-sm mt-3 font-medium" style={{ color: "#F4C430" }}>
+            <p className="text-sm mt-3 font-medium" style={{ color: "#FFD700" }}>
               {t("agreement.footerHonour")}
             </p>
           </div>
 
           {!hasScrolledToBottom && (
             <div className="flex flex-col items-center gap-1 py-2 opacity-50">
-              <ChevronDown size={18} color="#F4C430" className="animate-bounce" />
+              <ChevronDown size={18} color="#FFD700" className="animate-bounce" />
               <span className="text-xs text-cream/40">{t("agreement.scrollToContinue")}</span>
             </div>
           )}
@@ -755,13 +755,13 @@ function CommunityGuidelinesModal({ onAgree, onClose }: { onAgree: () => void; o
         </div>
 
         <div className="flex-shrink-0 px-5 pb-10 pt-4 space-y-3"
-          style={{ borderTop: "1px solid rgba(0,0,0,0.05)", background: "rgba(13,6,24,0.95)" }}>
+          style={{ borderTop: "1px solid rgba(255,255,255,0.12)", background: "rgba(13,6,24,0.95)" }}>
           <button
             onClick={() => { onAgree(); onClose(); }}
             disabled={!hasScrolledToBottom}
             data-testid="button-agree-guidelines"
             className="w-full py-4 rounded-xl font-bold text-sm transition-all disabled:opacity-40"
-            style={{ background: "linear-gradient(135deg, #F4C430, #D4A017)", color: "#0F1F4F", boxShadow: hasScrolledToBottom ? "0 6px 20px rgba(244,196,48,0.35)" : "none" }}
+            style={{ background: "linear-gradient(135deg, #FFD700, #CC9900)", color: "#500004", boxShadow: hasScrolledToBottom ? "0 6px 20px rgba(255,215,0,0.35)" : "none" }}
           >
             {hasScrolledToBottom ? t("agreement.agreeButton") : t("agreement.readFirst")}
           </button>
@@ -787,8 +787,8 @@ function Checkbox({ checked, onChange, testId, children }: {
         onClick={() => onChange(!checked)}
         className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0 mt-0.5 transition-all"
         style={checked
-          ? { background: "#F4C430" }
-          : { border: "1.5px solid rgba(244,196,48,0.4)", background: "rgba(0,0,0,0.05)" }
+          ? { background: "#FFD700" }
+          : { border: "1.5px solid rgba(255,215,0,0.4)", background: "rgba(255,255,255,0.12)" }
         }
       >
         {checked && <span className="text-ink text-xs font-bold">✓</span>}
@@ -802,7 +802,7 @@ function GoldSelect({ children, ...props }: React.SelectHTMLAttributes<HTMLSelec
   return (
     <select {...props}
       className="w-full px-3 py-3 rounded-xl text-sm text-cream outline-none appearance-none"
-      style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(244,196,48,0.25)" }}>
+      style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(255,215,0,0.25)" }}>
       {children}
     </select>
   );

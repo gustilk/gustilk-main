@@ -141,7 +141,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
             placeholder="Rejection reason (sent to user)…"
             data-testid="input-reject-reason"
             className="flex-1 px-3 py-2 rounded-lg text-xs text-cream placeholder-cream/30 outline-none"
-            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(239,68,68,0.2)" }} />
+            style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(239,68,68,0.2)" }} />
           <button
             onClick={() => setPending({
               title: `Reject ${name}?`,
@@ -162,10 +162,10 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
       )}
 
       {/* Profile header */}
-      <div className="rounded-2xl p-5 mb-4" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(244,196,48,0.15)" }}>
+      <div className="rounded-2xl p-5 mb-4" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,215,0,0.15)" }}>
         <div className="flex items-start gap-4">
           <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center text-xl font-bold text-gold"
-            style={{ background: "linear-gradient(135deg, #2d0f4a, #1E3A8A)" }}>
+            style={{ background: "linear-gradient(135deg, #2d0f4a, #A0000A)" }}>
             {u.mainPhotoUrl
               ? <img src={u.mainPhotoUrl} alt="" className="w-full h-full object-cover" />
               : (u.fullName ?? "U").charAt(0)}
@@ -179,7 +179,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
               </span>
               {u.isPremium && (
                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                  style={{ background: "rgba(244,196,48,0.15)", color: "#F4C430" }}>Premium</span>
+                  style={{ background: "rgba(255,215,0,0.15)", color: "#FFD700" }}>Premium</span>
               )}
             </div>
             <div className="text-cream/50 text-sm mt-1">{u.email} · {u.phone ?? "No phone"}</div>
@@ -195,7 +195,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
           </div>
         </div>
         {u.bio && (
-          <div className="mt-3 pt-3 border-t text-cream/60 text-sm" style={{ borderColor: "rgba(0,0,0,0.06)" }}>
+          <div className="mt-3 pt-3 border-t text-cream/60 text-sm" style={{ borderColor: "rgba(255,255,255,0.14)" }}>
             {u.bio}
           </div>
         )}
@@ -207,7 +207,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
           { label: "Matches", value: data?.stats?.matches },
           { label: "Messages", value: data?.stats?.messages },
         ].map(item => (
-          <div key={item.label} className="rounded-xl p-3 text-center" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.05)" }}>
+          <div key={item.label} className="rounded-xl p-3 text-center" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.12)" }}>
             <div className="text-cream text-lg font-bold">{item.value ?? 0}</div>
             <div className="text-cream/40 text-xs">{item.label}</div>
           </div>
@@ -225,13 +225,13 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
         const allUrls = displaySlots.map(s => s.url);
 
         const badgeStyle: Record<string, { bg: string; color: string; border: string; label: string }> = {
-          pending:  { bg: "rgba(251,191,36,0.92)",  color: "#0F1F4F", border: "none", label: "Pending" },
+          pending:  { bg: "rgba(251,191,36,0.92)",  color: "#500004", border: "none", label: "Pending" },
           approved: { bg: "rgba(16,185,129,0.88)",  color: "#fff",    border: "none", label: "Approved" },
           rejected: { bg: "rgba(239,68,68,0.9)",    color: "#fff",    border: "none", label: "Rejected" },
         };
 
         return (
-          <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(244,196,48,0.1)" }}>
+          <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,215,0,0.1)" }}>
             <h3 className="text-cream text-sm font-semibold mb-3">Photos ({displaySlots.length})</h3>
             <div className="grid grid-cols-3 gap-2">
               {displaySlots.map((slot, i) => {
@@ -279,7 +279,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
                     {isMain && !(u.verificationStatus === "approved" && slot.status === "pending") && (
                       <div
                         className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold"
-                        style={{ background: "rgba(244,196,48,0.9)", color: "#0F1F4F" }}
+                        style={{ background: "rgba(255,215,0,0.9)", color: "#500004" }}
                         data-testid={`badge-photo-${i}-main`}
                       >
                         ★ Main
@@ -295,7 +295,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
             </div>
 
             {/* Legend */}
-            <div className="flex items-center gap-3 mt-3 pt-3 flex-wrap" style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}>
+            <div className="flex items-center gap-3 mt-3 pt-3 flex-wrap" style={{ borderTop: "1px solid rgba(255,255,255,0.12)" }}>
               {[
                 { color: "#fbbf24", label: "Pending approval" },
                 { color: "#10b981", label: "Approved" },
@@ -317,13 +317,13 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
 
       {/* Identity selfie */}
       {u.selfieUrl && (
-        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(244,196,48,0.1)" }}>
+        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,215,0,0.1)" }}>
           <h3 className="text-cream text-sm font-semibold mb-3">Identity Selfie</h3>
           <button
             onClick={() => { setLightboxUrls([u.selfieUrl!]); setLightboxIdx(0); }}
             data-testid="selfie-thumb"
             className="relative max-w-xs rounded-xl overflow-hidden group cursor-zoom-in"
-            style={{ border: "1px solid rgba(244,196,48,0.2)" }}
+            style={{ border: "1px solid rgba(255,215,0,0.2)" }}
           >
             <img src={u.selfieUrl} alt="Identity selfie" className="w-full object-cover transition-transform duration-300 group-hover:scale-105" />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center">
@@ -344,7 +344,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
             onClick={e => { e.stopPropagation(); setLightboxUrls([]); }}
             data-testid="button-lightbox-close"
             className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
-            style={{ border: "1px solid rgba(0,0,0,0.09)" }}
+            style={{ border: "1px solid rgba(255,255,255,0.20)" }}
           >
             <X size={18} className="text-cream" />
           </button>
@@ -355,7 +355,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
                 onClick={e => { e.stopPropagation(); setLightboxIdx(i => (i - 1 + lightboxUrls.length) % lightboxUrls.length); }}
                 data-testid="button-lightbox-prev"
                 className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
-                style={{ border: "1px solid rgba(0,0,0,0.09)" }}
+                style={{ border: "1px solid rgba(255,255,255,0.20)" }}
               >
                 <ChevronLeft size={22} className="text-cream" />
               </button>
@@ -363,7 +363,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
                 onClick={e => { e.stopPropagation(); setLightboxIdx(i => (i + 1) % lightboxUrls.length); }}
                 data-testid="button-lightbox-next"
                 className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
-                style={{ border: "1px solid rgba(0,0,0,0.09)" }}
+                style={{ border: "1px solid rgba(255,255,255,0.20)" }}
               >
                 <ChevronRight size={22} className="text-cream" />
               </button>
@@ -385,7 +385,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
                   key={i}
                   onClick={e => { e.stopPropagation(); setLightboxIdx(i); }}
                   className="w-1.5 h-1.5 rounded-full transition-all"
-                  style={{ background: i === lightboxIdx ? "#F4C430" : "rgba(255,255,255,0.3)" }}
+                  style={{ background: i === lightboxIdx ? "#FFD700" : "rgba(255,255,255,0.3)" }}
                 />
               ))}
             </div>
@@ -394,13 +394,13 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
       )}
 
       {/* Moderation Actions */}
-      <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(244,196,48,0.1)" }}>
+      <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,215,0,0.1)" }}>
         <h3 className="text-cream text-sm font-semibold mb-3">Actions</h3>
         <div className="grid grid-cols-2 gap-2">
           <button onClick={() => updateMutation.mutate({ isPremium: !u.isPremium })}
             data-testid="button-toggle-premium"
             className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold"
-            style={{ background: "rgba(244,196,48,0.12)", color: "#F4C430", border: "1px solid rgba(244,196,48,0.2)" }}>
+            style={{ background: "rgba(255,215,0,0.12)", color: "#FFD700", border: "1px solid rgba(255,215,0,0.2)" }}>
             <Crown size={13} /> {u.isPremium ? "Remove Premium" : "Grant Premium"}
           </button>
           <button onClick={() => setShowWarn(!showWarn)}
@@ -452,7 +452,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
             <input value={warnReason} onChange={e => setWarnReason(e.target.value)}
               placeholder="Warning reason…" data-testid="input-warn-reason"
               className="flex-1 px-3 py-2 rounded-lg text-xs text-cream placeholder-cream/30 outline-none"
-              style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(251,191,36,0.2)" }} />
+              style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(251,191,36,0.2)" }} />
             <button onClick={() => warnReason.trim() && warnMutation.mutate(warnReason)}
               data-testid="button-send-warn"
               className="px-3 py-2 rounded-lg text-xs font-semibold"
@@ -467,7 +467,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
             <input value={suspendReason} onChange={e => setSuspendReason(e.target.value)}
               placeholder="Suspension reason…" data-testid="input-suspend-reason"
               className="flex-1 px-3 py-2 rounded-lg text-xs text-cream placeholder-cream/30 outline-none"
-              style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(249,115,22,0.2)" }} />
+              style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(249,115,22,0.2)" }} />
             <button onClick={() => suspendReason.trim() && suspendMutation.mutate(suspendReason)}
               data-testid="button-confirm-suspend"
               className="px-3 py-2 rounded-lg text-xs font-semibold"
@@ -480,7 +480,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
 
       {/* Bottom approve/reject for pending users */}
       {isPending && (
-        <div className="rounded-2xl p-4" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(244,196,48,0.12)" }}>
+        <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,215,0,0.12)" }}>
           <h3 className="text-cream text-sm font-semibold mb-3">Approval Decision</h3>
           <div className="flex gap-2">
             <button

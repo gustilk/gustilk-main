@@ -20,20 +20,20 @@ export default function PendingVerificationPage({ user }: Props) {
   });
 
   return (
-    <div className="flex flex-col min-h-screen items-center justify-center px-6 text-center" style={{ background: "#F9F9F9" }}>
+    <div className="flex flex-col min-h-screen items-center justify-center px-6 text-center" style={{ background: "#E30613" }}>
       <div className="relative mb-8">
         <div
           className="w-28 h-28 rounded-full flex items-center justify-center"
           style={{
-            background: "rgba(244,196,48,0.08)",
-            border: "2px solid rgba(244,196,48,0.3)",
+            background: "rgba(255,215,0,0.08)",
+            border: "2px solid rgba(255,215,0,0.3)",
           }}
         >
-          <Clock size={52} color="rgba(244,196,48,0.7)" />
+          <Clock size={52} color="rgba(255,215,0,0.7)" />
         </div>
         <div
           className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ background: "rgba(244,196,48,0.15)", border: "2px solid rgba(244,196,48,0.4)" }}
+          style={{ background: "rgba(255,215,0,0.15)", border: "2px solid rgba(255,215,0,0.4)" }}
         >
           <span className="text-gold text-lg">⏳</span>
         </div>
@@ -49,7 +49,7 @@ export default function PendingVerificationPage({ user }: Props) {
 
       <div
         className="w-full max-w-xs rounded-2xl p-5 mb-8 text-left space-y-3"
-        style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(244,196,48,0.15)" }}
+        style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,215,0,0.15)" }}
       >
         <p className="text-cream/50 text-xs uppercase tracking-wider font-semibold">What happens next?</p>
         {[
@@ -69,7 +69,7 @@ export default function PendingVerificationPage({ user }: Props) {
           onClick={() => setLocation("/discover")}
           data-testid="button-browse-anyway"
           className="w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
-          style={{ background: "linear-gradient(135deg, #F4C430, #D4A017)", color: "#0F1F4F" }}
+          style={{ background: "linear-gradient(135deg, #FFD700, #CC9900)", color: "#500004" }}
         >
           Browse in the meantime
           <ArrowRight size={16} />
@@ -79,7 +79,7 @@ export default function PendingVerificationPage({ user }: Props) {
           disabled={logoutMutation.isPending}
           data-testid="button-logout-pending"
           className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-          style={{ color: "rgba(51,51,51,0.35)" }}
+          style={{ color: "rgba(255,255,255,0.35)" }}
         >
           <LogOut size={14} />
           Sign Out

@@ -60,7 +60,7 @@ export default function EventsManagementPage({ user }: { user: User }) {
   const f = (key: keyof typeof form, val: string) => setForm(p => ({ ...p, [key]: val }));
 
   const EventForm = () => (
-    <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(244,196,48,0.2)" }}>
+    <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,215,0,0.2)" }}>
       <div className="flex items-center justify-between mb-3">
         <span className="text-cream text-sm font-semibold">{editId ? "Edit Event" : "New Event"}</span>
         <button onClick={() => { setShowForm(false); setEditId(null); setForm(EMPTY_FORM); }}>
@@ -70,41 +70,41 @@ export default function EventsManagementPage({ user }: { user: User }) {
       <div className="grid grid-cols-1 gap-2">
         <input value={form.title} onChange={e => f("title", e.target.value)} placeholder="Event title…" data-testid="input-event-title"
           className="px-3 py-2 rounded-xl text-sm text-cream placeholder-cream/30 outline-none"
-          style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
+          style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)" }} />
         <textarea value={form.description} onChange={e => f("description", e.target.value)} placeholder="Description…" data-testid="input-event-description" rows={2}
           className="px-3 py-2 rounded-xl text-sm text-cream placeholder-cream/30 outline-none resize-none"
-          style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
+          style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)" }} />
         <div className="grid grid-cols-2 gap-2">
           <select value={form.type} onChange={e => f("type", e.target.value)} data-testid="select-event-type"
             className="px-3 py-2 rounded-xl text-sm text-cream outline-none"
-            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+            style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)" }}>
             <option value="cultural">Cultural</option>
             <option value="meetup">Meetup</option>
             <option value="online">Online</option>
           </select>
           <input type="datetime-local" value={form.date} onChange={e => f("date", e.target.value)} data-testid="input-event-date"
             className="px-3 py-2 rounded-xl text-sm text-cream outline-none"
-            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
+            style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)" }} />
         </div>
         <div className="grid grid-cols-2 gap-2">
           <input value={form.location} onChange={e => f("location", e.target.value)} placeholder="Location / Venue" data-testid="input-event-location"
             className="px-3 py-2 rounded-xl text-sm text-cream placeholder-cream/30 outline-none"
-            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
+            style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)" }} />
           <input value={form.country} onChange={e => f("country", e.target.value)} placeholder="Country" data-testid="input-event-country"
             className="px-3 py-2 rounded-xl text-sm text-cream placeholder-cream/30 outline-none"
-            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
+            style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)" }} />
         </div>
         <input value={form.organizer} onChange={e => f("organizer", e.target.value)} placeholder="Organizer" data-testid="input-event-organizer"
           className="px-3 py-2 rounded-xl text-sm text-cream placeholder-cream/30 outline-none"
-          style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
+          style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)" }} />
         <input value={form.imageUrl} onChange={e => f("imageUrl", e.target.value)} placeholder="Image URL (optional)" data-testid="input-event-image"
           className="px-3 py-2 rounded-xl text-sm text-cream placeholder-cream/30 outline-none"
-          style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
+          style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)" }} />
         <button onClick={() => editId ? updateMutation.mutate() : createMutation.mutate()}
           disabled={createMutation.isPending || updateMutation.isPending}
           data-testid="button-submit-event"
           className="py-2.5 rounded-xl text-xs font-bold"
-          style={{ background: "rgba(244,196,48,0.2)", color: "#F4C430" }}>
+          style={{ background: "rgba(255,215,0,0.2)", color: "#FFD700" }}>
           {editId ? "Save Changes" : "Create Event"}
         </button>
       </div>
@@ -120,7 +120,7 @@ export default function EventsManagementPage({ user }: { user: User }) {
         </div>
         <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm(EMPTY_FORM); }} data-testid="button-create-event"
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold"
-          style={{ background: "rgba(244,196,48,0.15)", color: "#F4C430", border: "1px solid rgba(244,196,48,0.25)" }}>
+          style={{ background: "rgba(255,215,0,0.15)", color: "#FFD700", border: "1px solid rgba(255,215,0,0.25)" }}>
           <Plus size={13} /> Create Event
         </button>
       </div>
@@ -131,7 +131,7 @@ export default function EventsManagementPage({ user }: { user: User }) {
         <div className="flex items-center justify-center h-32 text-cream/40 text-sm">Loading…</div>
       ) : events.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-32 gap-2">
-          <Calendar size={32} color="rgba(244,196,48,0.3)" />
+          <Calendar size={32} color="rgba(255,215,0,0.3)" />
           <p className="text-cream/40 text-sm">No events yet</p>
         </div>
       ) : (
@@ -139,7 +139,7 @@ export default function EventsManagementPage({ user }: { user: User }) {
           {events.map(event => (
             <div key={event.id} data-testid={`event-card-${event.id}`}
               className="flex items-start gap-3 p-4 rounded-2xl"
-              style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.07)" }}>
               {event.imageUrl && (
                 <img src={event.imageUrl} alt="" className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
               )}
@@ -157,7 +157,7 @@ export default function EventsManagementPage({ user }: { user: User }) {
               <div className="flex gap-1.5 flex-shrink-0">
                 <button onClick={() => startEdit(event)} data-testid={`button-edit-event-${event.id}`}
                   className="w-7 h-7 rounded-lg flex items-center justify-center"
-                  style={{ background: "rgba(244,196,48,0.12)", color: "#F4C430" }}>
+                  style={{ background: "rgba(255,215,0,0.12)", color: "#FFD700" }}>
                   <Edit2 size={12} />
                 </button>
                 <button onClick={() => { if (confirm("Delete this event?")) deleteMutation.mutate(event.id); }}

@@ -56,8 +56,8 @@ export default function ReportsPage({ user }: { user: User }) {
               data-testid={`filter-status-${s}`}
               className="px-3 py-1.5 rounded-lg text-xs font-medium capitalize"
               style={{
-                background: status === s ? "rgba(244,196,48,0.2)" : "rgba(0,0,0,0.05)",
-                color: status === s ? "#F4C430" : "rgba(51,51,51,0.5)",
+                background: status === s ? "rgba(255,215,0,0.2)" : "rgba(255,255,255,0.12)",
+                color: status === s ? "#FFD700" : "rgba(255,255,255,0.5)",
               }}>
               {s}
             </button>
@@ -76,7 +76,7 @@ export default function ReportsPage({ user }: { user: User }) {
         <div className="space-y-3">
           {paged.map(report => (
             <div key={report.id} data-testid={`report-card-${report.id}`}
-              className="rounded-2xl p-4" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.07)" }}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(239,68,68,0.15)" }}>
@@ -119,12 +119,12 @@ export default function ReportsPage({ user }: { user: User }) {
           <div className="flex gap-2">
             <button disabled={page === 0} onClick={() => setPage(p => p - 1)}
               className="w-8 h-8 rounded-lg flex items-center justify-center disabled:opacity-30"
-              style={{ background: "rgba(0,0,0,0.05)", color: "#F4C430" }}>
+              style={{ background: "rgba(255,255,255,0.12)", color: "#FFD700" }}>
               <ChevronLeft size={14} />
             </button>
             <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}
               className="w-8 h-8 rounded-lg flex items-center justify-center disabled:opacity-30"
-              style={{ background: "rgba(0,0,0,0.05)", color: "#F4C430" }}>
+              style={{ background: "rgba(255,255,255,0.12)", color: "#FFD700" }}>
               <ChevronRight size={14} />
             </button>
           </div>

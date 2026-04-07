@@ -53,14 +53,14 @@ export default function BlacklistPage({ user }: { user: User }) {
       </div>
 
       {showForm && (
-        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(239,68,68,0.2)" }}>
+        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(239,68,68,0.2)" }}>
           <div className="flex gap-2 mb-3">
             {(["email", "phone", "ip"] as const).map(t => (
               <button key={t} onClick={() => setType(t)} data-testid={`button-type-${t}`}
                 className="px-3 py-1.5 rounded-lg text-xs font-medium uppercase"
                 style={{
-                  background: type === t ? `${typeColor[t]}22` : "rgba(0,0,0,0.05)",
-                  color: type === t ? typeColor[t] : "rgba(51,51,51,0.5)",
+                  background: type === t ? `${typeColor[t]}22` : "rgba(255,255,255,0.12)",
+                  color: type === t ? typeColor[t] : "rgba(255,255,255,0.5)",
                 }}>
                 {t}
               </button>
@@ -69,11 +69,11 @@ export default function BlacklistPage({ user }: { user: User }) {
           <input value={value} onChange={e => setValue(e.target.value)}
             placeholder={`Enter ${type}…`} data-testid="input-blacklist-value"
             className="w-full px-3 py-2 rounded-xl text-sm text-cream placeholder-cream/30 outline-none mb-2"
-            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
+            style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)" }} />
           <input value={reason} onChange={e => setReason(e.target.value)}
             placeholder="Reason (optional)…" data-testid="input-blacklist-reason"
             className="w-full px-3 py-2 rounded-xl text-sm text-cream placeholder-cream/30 outline-none mb-3"
-            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
+            style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)" }} />
           <button onClick={() => value.trim() && addMutation.mutate()} disabled={addMutation.isPending}
             data-testid="button-submit-blacklist"
             className="w-full py-2.5 rounded-xl text-xs font-bold"
@@ -95,7 +95,7 @@ export default function BlacklistPage({ user }: { user: User }) {
           {entries.map(entry => (
             <div key={entry.id} data-testid={`blacklist-entry-${entry.id}`}
               className="flex items-center gap-3 p-3 rounded-xl"
-              style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.07)" }}>
               <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase"
                 style={{ background: `${typeColor[entry.type as keyof typeof typeColor] ?? "#6b7280"}22`, color: typeColor[entry.type as keyof typeof typeColor] ?? "#6b7280" }}>
                 {entry.type}

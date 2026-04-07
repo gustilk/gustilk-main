@@ -56,11 +56,11 @@ export default function EditProfilePage({ user }: Props) {
     setForm(f => ({ ...f, [key]: e.target.value }));
 
   return (
-    <div className="flex flex-col min-h-screen pb-8" style={{ background: "#F9F9F9" }}>
+    <div className="flex flex-col min-h-screen pb-8" style={{ background: "#E30613" }}>
       {/* Header */}
       <div
         className="flex items-center justify-between px-5 pt-12 pb-4"
-        style={{ borderBottom: "1px solid rgba(244,196,48,0.15)" }}
+        style={{ borderBottom: "1px solid rgba(255,215,0,0.15)" }}
       >
         <button onClick={() => setLocation("/profile")} data-testid="button-back" className="text-cream/60">
           <ArrowLeft size={22} />
@@ -71,7 +71,7 @@ export default function EditProfilePage({ user }: Props) {
           disabled={saveMutation.isPending}
           data-testid="button-save"
           className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold disabled:opacity-60"
-          style={{ background: "linear-gradient(135deg, #F4C430, #D4A017)", color: "#0F1F4F" }}
+          style={{ background: "linear-gradient(135deg, #FFD700, #CC9900)", color: "#500004" }}
         >
           <Check size={14} />
           {saveMutation.isPending ? "Saving…" : "Save"}
@@ -81,17 +81,17 @@ export default function EditProfilePage({ user }: Props) {
       {/* Rejection notice — photo re-upload mode */}
       {user.verificationStatus === "rejected" && (
         <div className="flex items-start gap-3 px-4 py-3 mx-4 mt-4 rounded-2xl"
-          style={{ background: "rgba(107,191,89,0.08)", border: "1px solid rgba(107,191,89,0.3)" }}>
-          <XCircle size={16} style={{ color: "#6BBF59", flexShrink: 0, marginTop: 1 }} />
+          style={{ background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.3)" }}>
+          <XCircle size={16} style={{ color: "#FFD700", flexShrink: 0, marginTop: 1 }} />
           <div className="flex-1">
-            <p className="text-xs font-semibold mb-0.5" style={{ color: "#6BBF59" }}>Re-upload mode</p>
-            <p className="text-xs leading-relaxed" style={{ color: "rgba(51,51,51,0.55)" }}>
+            <p className="text-xs font-semibold mb-0.5" style={{ color: "#FFD700" }}>Re-upload mode</p>
+            <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
               Update your photos here, then return to submit your profile for re-review.
             </p>
           </div>
           <button onClick={() => setLocation("/")} data-testid="button-back-to-review"
             className="text-xs font-semibold px-2 py-1 rounded-lg flex-shrink-0"
-            style={{ background: "rgba(107,191,89,0.15)", color: "#6BBF59" }}>
+            style={{ background: "rgba(255,215,0,0.15)", color: "#FFD700" }}>
             ← Back
           </button>
         </div>
@@ -111,14 +111,14 @@ export default function EditProfilePage({ user }: Props) {
         ];
         const pct = checks.reduce((s, c) => s + (c.done ? c.pts : 0), 0);
         const missing = checks.filter(c => !c.done);
-        const color = pct < 40 ? "#6BBF59" : pct < 75 ? "#F4C430" : "#34d399";
+        const color = pct < 40 ? "#FFD700" : pct < 75 ? "#FFD700" : "#34d399";
         return (
           <div className="px-5 pt-4 pb-1" data-testid="profile-completeness">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs text-cream/50 font-medium">Profile completeness</span>
               <span className="text-xs font-bold" style={{ color }}>{pct}%</span>
             </div>
-            <div className="h-2 w-full rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.06)" }}>
+            <div className="h-2 w-full rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.14)" }}>
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${color}, ${color}cc)` }}
@@ -135,7 +135,7 @@ export default function EditProfilePage({ user }: Props) {
 
       {saveError && (
         <div className="px-5 pt-3">
-          <p className="text-xs font-medium text-center py-2 px-4 rounded-xl" style={{ color: "#6BBF59", background: "rgba(107,191,89,0.1)", border: "1px solid rgba(107,191,89,0.25)" }}>{saveError}</p>
+          <p className="text-xs font-medium text-center py-2 px-4 rounded-xl" style={{ color: "#FFD700", background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.25)" }}>{saveError}</p>
         </div>
       )}
       <div className="px-5 py-6 space-y-5 overflow-y-auto">
@@ -151,9 +151,9 @@ export default function EditProfilePage({ user }: Props) {
             rows={4}
             data-testid="input-bio"
             className="w-full px-4 py-3 rounded-xl text-sm text-cream placeholder-cream/25 outline-none resize-none leading-relaxed"
-            style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(244,196,48,0.25)" }}
-            onFocus={e => (e.target.style.borderColor = "#F4C430")}
-            onBlur={e => (e.target.style.borderColor = "rgba(244,196,48,0.25)")}
+            style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(255,215,0,0.25)" }}
+            onFocus={e => (e.target.style.borderColor = "#FFD700")}
+            onBlur={e => (e.target.style.borderColor = "rgba(255,215,0,0.25)")}
           />
         </FieldGroup>
 
@@ -177,7 +177,7 @@ export default function EditProfilePage({ user }: Props) {
               onChange={inp("state")}
               data-testid="select-state"
               className="w-full px-4 py-3 rounded-xl text-sm text-cream outline-none appearance-none"
-              style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(244,196,48,0.25)" }}
+              style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(255,215,0,0.25)" }}
             >
               <option value="">Select state…</option>
               {COUNTRY_STATES[form.country].map(s => <option key={s} value={s}>{s}</option>)}
@@ -189,12 +189,12 @@ export default function EditProfilePage({ user }: Props) {
           <div
             data-testid="display-country"
             className="w-full px-4 py-3 rounded-xl text-sm flex items-center justify-between"
-            style={{ background: "rgba(0,0,0,0.04)", border: "1.5px solid rgba(244,196,48,0.12)", color: "rgba(51,51,51,0.5)" }}
+            style={{ background: "rgba(255,255,255,0.10)", border: "1.5px solid rgba(255,215,0,0.12)", color: "rgba(255,255,255,0.5)" }}
           >
             <span>{user.country ?? "—"}</span>
-            <span className="text-xs" style={{ color: "rgba(244,196,48,0.5)" }}>Locked</span>
+            <span className="text-xs" style={{ color: "rgba(255,215,0,0.5)" }}>Locked</span>
           </div>
-          <p className="text-xs mt-1.5" style={{ color: "rgba(51,51,51,0.3)" }}>Country cannot be changed after signup</p>
+          <p className="text-xs mt-1.5" style={{ color: "rgba(255,255,255,0.3)" }}>Country cannot be changed after signup</p>
         </FieldGroup>
 
         <FieldGroup label="Languages I speak">
@@ -206,8 +206,8 @@ export default function EditProfilePage({ user }: Props) {
                 data-testid={`lang-chip-${lang}`}
                 className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
                 style={form.languages.includes(lang)
-                  ? { background: "#F4C430", color: "#0F1F4F" }
-                  : { background: "rgba(255,255,255,0.07)", border: "1px solid rgba(244,196,48,0.25)", color: "rgba(51,51,51,0.7)" }
+                  ? { background: "#FFD700", color: "#500004" }
+                  : { background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,215,0,0.25)", color: "rgba(255,255,255,0.7)" }
                 }
               >
                 {lang}
@@ -234,9 +234,9 @@ function GoldInput({ ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
     <input
       {...props}
       className="w-full px-4 py-3 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
-      style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(244,196,48,0.25)" }}
-      onFocus={e => (e.target.style.borderColor = "#F4C430")}
-      onBlur={e => (e.target.style.borderColor = "rgba(244,196,48,0.25)")}
+      style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(255,215,0,0.25)" }}
+      onFocus={e => (e.target.style.borderColor = "#FFD700")}
+      onBlur={e => (e.target.style.borderColor = "rgba(255,215,0,0.25)")}
     />
   );
 }

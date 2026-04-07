@@ -121,12 +121,12 @@ export default function ModerationPage({ user }: { user: User }) {
               return (
                 <div key={u.id} data-testid={`moderation-card-${u.id}`}
                   className="rounded-2xl overflow-hidden"
-                  style={{ background: "rgba(0,0,0,0.04)", border: isBeingRejected ? "1px solid rgba(239,68,68,0.35)" : "1px solid rgba(244,196,48,0.12)" }}>
+                  style={{ background: "rgba(255,255,255,0.10)", border: isBeingRejected ? "1px solid rgba(239,68,68,0.35)" : "1px solid rgba(255,215,0,0.12)" }}>
 
                   {/* User header */}
                   <div className="flex items-center gap-3 p-4 pb-3">
                     <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-gold flex-shrink-0"
-                      style={{ background: "linear-gradient(135deg, #2d0f4a, #1E3A8A)" }}>
+                      style={{ background: "linear-gradient(135deg, #2d0f4a, #A0000A)" }}>
                       {(u.fullName ?? "M").charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -213,14 +213,14 @@ export default function ModerationPage({ user }: { user: User }) {
                           style={{
                             background: "rgba(255,255,255,0.07)",
                             border: "1px solid rgba(239,68,68,0.3)",
-                            color: selectedReason ? "rgba(51,51,51,0.9)" : "rgba(51,51,51,0.35)",
+                            color: selectedReason ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.35)",
                           }}
                         >
                           <option value="" disabled>Select a rejection reason…</option>
                           {PRESET_REASONS.map(r => (
-                            <option key={r} value={r} style={{ background: "#1a0b2e", color: "#333333" }}>{r}</option>
+                            <option key={r} value={r} style={{ background: "#1a0b2e", color: "#FFFFFF" }}>{r}</option>
                           ))}
-                          <option value="custom" style={{ background: "#1a0b2e", color: "#F4C430" }}>✏️ Custom reason…</option>
+                          <option value="custom" style={{ background: "#1a0b2e", color: "#FFD700" }}>✏️ Custom reason…</option>
                         </select>
                         <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2" color="rgba(239,68,68,0.6)" />
                       </div>
@@ -258,7 +258,7 @@ export default function ModerationPage({ user }: { user: User }) {
                           onClick={closeRejectPanel}
                           data-testid="button-cancel-reject"
                           className="px-4 py-2 rounded-xl text-xs font-semibold"
-                          style={{ background: "rgba(255,255,255,0.07)", color: "rgba(51,51,51,0.5)" }}
+                          style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.5)" }}
                         >
                           Cancel
                         </button>
@@ -293,9 +293,9 @@ export default function ModerationPage({ user }: { user: User }) {
         >
           {/* Top bar */}
           <div className="flex items-center gap-3 px-4 py-3 flex-shrink-0"
-            style={{ borderBottom: "1px solid rgba(244,196,48,0.12)", background: "rgba(13,6,24,0.7)" }}>
+            style={{ borderBottom: "1px solid rgba(255,215,0,0.12)", background: "rgba(13,6,24,0.7)" }}>
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-gold flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, #2d0f4a, #1E3A8A)" }}>
+              style={{ background: "linear-gradient(135deg, #2d0f4a, #A0000A)" }}>
               {lightbox.userName.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
@@ -312,7 +312,7 @@ export default function ModerationPage({ user }: { user: User }) {
               onClick={closeLightbox}
               data-testid="button-lightbox-close"
               className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors"
-              style={{ background: "rgba(0,0,0,0.06)", color: "rgba(51,51,51,0.6)" }}
+              style={{ background: "rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.6)" }}
               aria-label="Close photo viewer"
             >
               <X size={16} />
@@ -337,13 +337,13 @@ export default function ModerationPage({ user }: { user: User }) {
 
           {/* Bottom action bar */}
           <div className="flex items-center justify-center gap-3 px-4 py-4 flex-shrink-0"
-            style={{ borderTop: "1px solid rgba(244,196,48,0.10)", background: "rgba(13,6,24,0.7)" }}>
+            style={{ borderTop: "1px solid rgba(255,215,0,0.10)", background: "rgba(13,6,24,0.7)" }}>
 
             <button
               onClick={closeLightbox}
               data-testid="button-lightbox-dismiss"
               className="px-5 py-2.5 rounded-xl text-sm font-medium transition-colors"
-              style={{ background: "rgba(255,255,255,0.07)", color: "rgba(51,51,51,0.5)" }}
+              style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.5)" }}
             >
               Close
             </button>

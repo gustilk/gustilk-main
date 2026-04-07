@@ -15,7 +15,7 @@ function StatCard({ icon: Icon, label, value, color, sub, onClick }: {
   return (
     <div onClick={onClick} data-testid={`stat-card-${label.toLowerCase().replace(/ /g, "-")}`}
       className={`rounded-2xl p-4 flex flex-col gap-2 ${onClick ? "cursor-pointer hover:opacity-90 transition-opacity" : ""}`}
-      style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}>
+      style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.14)" }}>
       <div className="flex items-center justify-between">
         <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${color}22` }}>
           <Icon size={18} color={color} />
@@ -90,13 +90,13 @@ export default function DashboardPage({ user }: { user: User }) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <StatCard icon={Users} label="Total Users" value={stats?.totalUsers} color="#3b82f6" onClick={() => setLocation("/admin/users")} />
         <StatCard icon={TrendingUp} label="New This Week" value={stats?.newThisWeek} color="#10b981" sub="Last 7 days" />
-        <StatCard icon={Crown} label="Premium" value={stats?.premiumUsers} color="#F4C430" onClick={() => setLocation("/admin/payments")} />
+        <StatCard icon={Crown} label="Premium" value={stats?.premiumUsers} color="#FFD700" onClick={() => setLocation("/admin/payments")} />
         <StatCard icon={Shield} label="Verified" value={stats?.verifiedUsers} color="#8b5cf6" />
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <StatCard icon={Ban} label="Banned" value={stats?.bannedUsers} color="#ef4444" />
-        <StatCard icon={Heart} label="Matches" value={stats?.totalMatches} color="#6BBF59" />
+        <StatCard icon={Heart} label="Matches" value={stats?.totalMatches} color="#FFD700" />
         <StatCard icon={MessageSquare} label="Messages" value={stats?.totalMessages} color="#06b6d4" />
         <StatCard icon={Calendar} label="Events" value={stats?.totalEvents} color="#f97316" onClick={() => setLocation("/admin/events")} />
       </div>

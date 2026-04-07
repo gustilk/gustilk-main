@@ -19,58 +19,58 @@ interface Props {
 // ─── Gift catalogue ────────────────────────────────────────────────────────
 export const GIFTS = [
   { id: "rose",         lottie: "/lottie/rose.json",              name: "Rose",         color: "#e83e6c" },
-  { id: "butterfly",    lottie: "/lottie/butterfly.json",          name: "Butterfly",    color: "#1E3A8A" },
+  { id: "butterfly",    lottie: "/lottie/butterfly.json",          name: "Butterfly",    color: "#A0000A" },
   { id: "diamond",      lottie: "/lottie/add-to-favorites.json",  name: "Favourite",    color: "#f59e0b" },
-  { id: "crown",        lottie: "/lottie/valentines.json",         name: "Valentine",    color: "#F4C430" },
+  { id: "crown",        lottie: "/lottie/valentines.json",         name: "Valentine",    color: "#FFD700" },
   { id: "balloon",      lottie: "/lottie/butterfly-hearts.json",   name: "Butterfly ♥", color: "#f97316" },
-  { id: "sparkle",      lottie: "/lottie/celebration.json",        name: "Celebrate",   color: "#F4C430" },
+  { id: "sparkle",      lottie: "/lottie/celebration.json",        name: "Celebrate",   color: "#FFD700" },
   { id: "birds",        lottie: "/lottie/bird-pair.json",          name: "Birds",       color: "#67e8f9" },
   { id: "garden",       lottie: "/lottie/couple-garden.json",      name: "Garden",      color: "#22c55e" },
   { id: "ring",         lottie: "/lottie/rose2.json",              name: "Rose ♥",      color: "#a855f7" },
-  { id: "unbox",        lottie: "/lottie/gift-unbox.json",         name: "Surprise",    color: "#F4C430" },
+  { id: "unbox",        lottie: "/lottie/gift-unbox.json",         name: "Surprise",    color: "#FFD700" },
   { id: "heart-pulse",  lottie: "/lottie/heart-pulse.json",        name: "Heart",       color: "#ef4444" },
   { id: "filling-heart",lottie: "/lottie/filling-heart.json",      name: "Full Heart",  color: "#e83e6c" },
-  { id: "heart-kiss",   lottie: "/lottie/heart-kiss.json",         name: "Flying Kiss", color: "#6BBF59" },
-  { id: "heart-cry",    lottie: "/lottie/heart-crying.json",       name: "Heart Cry",   color: "#1E3A8A" },
+  { id: "heart-kiss",   lottie: "/lottie/heart-kiss.json",         name: "Flying Kiss", color: "#FFD700" },
+  { id: "heart-cry",    lottie: "/lottie/heart-crying.json",       name: "Heart Cry",   color: "#A0000A" },
   { id: "broken-heart", lottie: "/lottie/broken-heart-2.json",     name: "Broken",      color: "#6366f1" },
   { id: "cute-broken",  lottie: "/lottie/cute-broken-heart.json",  name: "Oops",        color: "#a855f7" },
   { id: "diamond-gem",  lottie: "/lottie/diamond-gem.json",        name: "Diamond",     color: "#67e8f9" },
-  { id: "engagement",   lottie: "/lottie/engagement-ring.json",    name: "Ring",        color: "#F4C430" },
+  { id: "engagement",   lottie: "/lottie/engagement-ring.json",    name: "Ring",        color: "#FFD700" },
   { id: "flower-grow",  lottie: "/lottie/flower-growing.json",     name: "Flower",      color: "#22c55e" },
-  { id: "girl-face",    lottie: "/lottie/girl-face.json",          name: "Wink",        color: "#6BBF59" },
-  { id: "love-energy",  lottie: "/lottie/love-energy-2.json",      name: "Love",        color: "#F4C430" },
+  { id: "girl-face",    lottie: "/lottie/girl-face.json",          name: "Wink",        color: "#FFD700" },
+  { id: "love-energy",  lottie: "/lottie/love-energy-2.json",      name: "Love",        color: "#FFD700" },
   { id: "love-letter",  lottie: "/lottie/love-letter.json",        name: "Letter",      color: "#e83e6c" },
-  { id: "pink-gift",    lottie: "/lottie/pink-gift-box.json",      name: "Gift Box",    color: "#6BBF59" },
+  { id: "pink-gift",    lottie: "/lottie/pink-gift-box.json",      name: "Gift Box",    color: "#FFD700" },
   { id: "val-kiss",     lottie: "/lottie/valentines-kiss-2.json",  name: "Kiss",        color: "#ef4444" },
   { id: "rose-v3",        lottie: "/lottie/rose-v3.json",            name: "Red Rose",       color: "#e83e6c" },
   { id: "daisy",          lottie: "/lottie/daisy.json",              name: "Daisy",          color: "#f59e0b" },
   { id: "finger-heart",   lottie: "/lottie/finger-heart.json",       name: "Finger Heart",   color: "#e83e6c" },
   { id: "fox-hello",      lottie: "/lottie/fox-hello.json",          name: "Fox Hello",      color: "#f97316" },
   { id: "give-bouquet",   lottie: "/lottie/give-bouquet.json",       name: "Give Bouquet",   color: "#22c55e" },
-  { id: "gold-crown",     lottie: "/lottie/gold-crown.json",         name: "Gold Crown",     color: "#F4C430" },
-  { id: "hello",          lottie: "/lottie/hello.json",              name: "Hello!",         color: "#6BBF59" },
+  { id: "gold-crown",     lottie: "/lottie/gold-crown.json",         name: "Gold Crown",     color: "#FFD700" },
+  { id: "hello",          lottie: "/lottie/hello.json",              name: "Hello!",         color: "#FFD700" },
   { id: "multi-bouquet",  lottie: "/lottie/multi-bouquet.json",      name: "Rainbow Bouquet",color: "#a855f7" },
   { id: "heart-face",     lottie: "/lottie/heart-face.json",         name: "Heart Face",     color: "#f59e0b" },
   { id: "rose-leafs",     lottie: "/lottie/rose-leafs.json",         name: "Rose & Leaves",  color: "#e83e6c" },
-  { id: "rose-wrapped",   lottie: "/lottie/rose-wrapped.json",       name: "Wrapped Rose",   color: "#6BBF59" },
+  { id: "rose-wrapped",   lottie: "/lottie/rose-wrapped.json",       name: "Wrapped Rose",   color: "#FFD700" },
   { id: "yellow-bear",    lottie: "/lottie/yellow-bear.json",        name: "Bear Hello",     color: "#f59e0b" },
   { id: "bird-sticker",   lottie: "/lottie/bird-sticker.json",       name: "Bird",           color: "#67e8f9" },
   { id: "blue-pink-bouquet",lottie:"/lottie/blue-pink-bouquet.json", name: "Pink Bouquet",   color: "#a855f7" },
   { id: "blue-bear",      lottie: "/lottie/blue-bear.json",          name: "Blue Bear",      color: "#6366f1" },
   { id: "blue-gift-box",  lottie: "/lottie/blue-gift-box.json",      name: "Blue Gift",      color: "#4488ff" },
-  { id: "blonde-lady",    lottie: "/lottie/blonde-lady.json",        name: "Lady Wave",      color: "#F4C430" },
-  { id: "bouquet",        lottie: "/lottie/bouquet.json",            name: "Bouquet",        color: "#6BBF59" },
+  { id: "blonde-lady",    lottie: "/lottie/blonde-lady.json",        name: "Lady Wave",      color: "#FFD700" },
+  { id: "bouquet",        lottie: "/lottie/bouquet.json",            name: "Bouquet",        color: "#FFD700" },
   { id: "bouquet-hearts", lottie: "/lottie/bouquet-hearts.json",     name: "Heart Bouquet",  color: "#ef4444" },
-  { id: "brunette-lady",  lottie: "/lottie/brunette-lady.json",      name: "Lady Wave ♥",   color: "#6BBF59" },
-  { id: "cat",            lottie: "/lottie/cat.json",                name: "Cat",            color: "#1E3A8A" },
-  { id: "pink-lady",      lottie: "/lottie/pink-lady.json",          name: "Lady Wave 💗",   color: "#6BBF59" },
+  { id: "brunette-lady",  lottie: "/lottie/brunette-lady.json",      name: "Lady Wave ♥",   color: "#FFD700" },
+  { id: "cat",            lottie: "/lottie/cat.json",                name: "Cat",            color: "#A0000A" },
+  { id: "pink-lady",      lottie: "/lottie/pink-lady.json",          name: "Lady Wave 💗",   color: "#FFD700" },
   { id: "pink-heart",     lottie: "/lottie/pink-heart.json",         name: "Pink Heart",     color: "#e83e6c" },
-  { id: "pink-rose",      lottie: "/lottie/pink-rose.json",          name: "Pink Rose",      color: "#6BBF59" },
+  { id: "pink-rose",      lottie: "/lottie/pink-rose.json",          name: "Pink Rose",      color: "#FFD700" },
   { id: "red-rose-sticker",lottie:"/lottie/red-rose-sticker.json",   name: "Red Rose 🌹",    color: "#e83e6c" },
 ];
 
 function giftById(id: string) {
-  return GIFTS.find(g => g.id === id) ?? { id, lottie: null as string | null, name: "Gift", color: "#F4C430" };
+  return GIFTS.find(g => g.id === id) ?? { id, lottie: null as string | null, name: "Gift", color: "#FFD700" };
 }
 
 // ─── Merged timeline item ─────────────────────────────────────────────────
@@ -191,18 +191,18 @@ export default function ChatPage({ user, matchId }: Props) {
 
   if (!user.isPremium && !isSupportChat && !matchLoading && !matchFetching) {
     return (
-      <div className="flex flex-col h-screen" style={{ background: "#F9F9F9" }}>
+      <div className="flex flex-col h-screen" style={{ background: "#E30613" }}>
         <div className="flex items-center gap-3 px-4 pt-12 pb-3"
-          style={{ background: "rgba(13,6,24,0.97)", borderBottom: "1px solid rgba(244,196,48,0.15)" }}>
+          style={{ background: "rgba(13,6,24,0.97)", borderBottom: "1px solid rgba(255,215,0,0.15)" }}>
           <button onClick={() => setLocation(backTo)} data-testid="button-back" className="text-cream/60">
             <ArrowLeft size={22} />
           </button>
           <div className="relative w-10 h-10 flex-shrink-0">
             <div className="w-10 h-10 rounded-full overflow-hidden"
-              style={{ background: "linear-gradient(135deg, #2d0f4a, #1E3A8A)", filter: "blur(4px)", border: "2px solid rgba(244,196,48,0.2)" }}>
+              style={{ background: "linear-gradient(135deg, #2d0f4a, #A0000A)", filter: "blur(4px)", border: "2px solid rgba(255,215,0,0.2)" }}>
               {otherUser?.photos?.[0] && <ProtectedPhoto src={otherUser.photos[0]} alt="" className="w-full h-full object-cover" />}
             </div>
-            <div className="absolute inset-0 rounded-full flex items-center justify-center"><Lock size={13} color="#F4C430" /></div>
+            <div className="absolute inset-0 rounded-full flex items-center justify-center"><Lock size={13} color="#FFD700" /></div>
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="text-cream/30 font-semibold text-sm" data-testid="text-chat-name">{t("chat.hiddenMember")}</h2>
@@ -211,8 +211,8 @@ export default function ChatPage({ user, matchId }: Props) {
         </div>
         <div className="flex-1 flex flex-col items-center justify-center px-6 text-center gap-6">
           <div className="w-24 h-24 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(244,196,48,0.08)", border: "2px solid rgba(244,196,48,0.25)" }}>
-            <Lock size={36} color="#F4C430" />
+            style={{ background: "rgba(255,215,0,0.08)", border: "2px solid rgba(255,215,0,0.25)" }}>
+            <Lock size={36} color="#FFD700" />
           </div>
           <div>
             <h3 className="font-serif text-2xl text-gold mb-2">{t("chat.locked")}</h3>
@@ -221,16 +221,16 @@ export default function ChatPage({ user, matchId }: Props) {
           <div className="w-full max-w-xs space-y-2">
             {[t("chat.benefitMessages"), t("chat.benefitMatches"), t("chat.benefitCalls")].map((b, i) => (
               <div key={i} className="flex items-center gap-3 px-4 py-2.5 rounded-xl"
-                style={{ background: "rgba(244,196,48,0.06)", border: "1px solid rgba(244,196,48,0.12)" }}>
-                <Star size={13} fill="#F4C430" color="#F4C430" className="flex-shrink-0" />
+                style={{ background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.12)" }}>
+                <Star size={13} fill="#FFD700" color="#FFD700" className="flex-shrink-0" />
                 <span className="text-cream/60 text-xs">{b}</span>
               </div>
             ))}
           </div>
           <button onClick={() => setLocation("/premium")} data-testid="button-upgrade-chat"
             className="flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-sm"
-            style={{ background: "linear-gradient(135deg, #F4C430, #D4A017)", color: "#0F1F4F", boxShadow: "0 8px 24px rgba(244,196,48,0.3)" }}>
-            <Star size={17} fill="#0F1F4F" color="#0F1F4F" />
+            style={{ background: "linear-gradient(135deg, #FFD700, #CC9900)", color: "#500004", boxShadow: "0 8px 24px rgba(255,215,0,0.3)" }}>
+            <Star size={17} fill="#500004" color="#500004" />
             {t("chat.upgradeButton")}
           </button>
           <button onClick={() => setLocation(backTo)} className="text-cream/35 text-sm">{t("chat.backToMatches")}</button>
@@ -240,10 +240,10 @@ export default function ChatPage({ user, matchId }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: "#F9F9F9" }}>
+    <div className="flex flex-col h-screen" style={{ background: "#E30613" }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-12 pb-3"
-        style={{ background: "rgba(13,6,24,0.97)", borderBottom: "1px solid rgba(244,196,48,0.15)" }}>
+        style={{ background: "rgba(13,6,24,0.97)", borderBottom: "1px solid rgba(255,215,0,0.15)" }}>
         <button onClick={() => setLocation(backTo)} data-testid="button-back" className="text-cream/60">
           <ArrowLeft size={22} />
         </button>
@@ -252,11 +252,11 @@ export default function ChatPage({ user, matchId }: Props) {
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="relative w-10 h-10 flex-shrink-0">
               <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #0F1F4F, #2d0f4a)", border: "2px solid rgba(244,196,48,0.4)" }}>
+                style={{ background: "linear-gradient(135deg, #500004, #2d0f4a)", border: "2px solid rgba(255,215,0,0.4)" }}>
                 <img src="/gustilk-logo.png?v=4" alt="Support" className="w-7 h-7 object-contain" />
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
-                style={{ background: "#10b981", border: "1.5px solid #F9F9F9" }}>
+                style={{ background: "#10b981", border: "1.5px solid #E30613" }}>
                 <Bot size={9} color="white" />
               </span>
             </div>
@@ -282,7 +282,7 @@ export default function ChatPage({ user, matchId }: Props) {
             disabled={!otherUser}
           >
             <div className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-serif text-lg font-bold text-gold overflow-hidden"
-              style={{ background: "linear-gradient(135deg, #2d0f4a, #1E3A8A)", border: "2px solid rgba(244,196,48,0.3)" }}>
+              style={{ background: "linear-gradient(135deg, #2d0f4a, #A0000A)", border: "2px solid rgba(255,215,0,0.3)" }}>
               {otherUser?.photos && otherUser.photos.length > 0
                 ? <ProtectedPhoto src={otherUser.photos[0]} alt={otherUser.firstName ?? ""} className="w-full h-full object-cover" />
                 : (otherUser?.firstName ?? otherUser?.fullName?.split(" ")[0] ?? "M").charAt(0)
@@ -311,11 +311,11 @@ export default function ChatPage({ user, matchId }: Props) {
               user.photos?.[0] ?? null,
             )} disabled={callState !== "idle"} data-testid="button-start-video-call"
               className="p-2 rounded-xl disabled:opacity-40 transition-all"
-              style={{ color: callState !== "idle" ? "rgba(244,196,48,0.4)" : "rgba(244,196,48,0.8)" }}>
+              style={{ color: callState !== "idle" ? "rgba(255,215,0,0.4)" : "rgba(255,215,0,0.8)" }}>
               <Video size={20} />
             </button>
             <button onClick={() => setShowReport(true)} data-testid="button-report-user-main"
-              className="p-2 rounded-xl" style={{ color: "rgba(51,51,51,0.35)" }}>
+              className="p-2 rounded-xl" style={{ color: "rgba(255,255,255,0.35)" }}>
               <Flag size={18} />
             </button>
           </div>
@@ -333,7 +333,7 @@ export default function ChatPage({ user, matchId }: Props) {
             {isSupportChat ? (
               <>
                 <div className="w-16 h-16 rounded-full flex items-center justify-center"
-                  style={{ background: "linear-gradient(135deg, #0F1F4F, #2d0f4a)", border: "2px solid rgba(244,196,48,0.4)" }}>
+                  style={{ background: "linear-gradient(135deg, #500004, #2d0f4a)", border: "2px solid rgba(255,215,0,0.4)" }}>
                   <img src="/gustilk-logo.png?v=4" alt="" className="w-10 h-10 object-contain" />
                 </div>
                 <div>
@@ -357,7 +357,7 @@ export default function ChatPage({ user, matchId }: Props) {
               </>
             ) : (
               <>
-                <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ border: "2px solid rgba(244,196,48,0.3)" }}>
+                <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ border: "2px solid rgba(255,215,0,0.3)" }}>
                   <span className="text-2xl text-gold font-serif">✦</span>
                 </div>
                 <div>
@@ -381,9 +381,9 @@ export default function ChatPage({ user, matchId }: Props) {
                       disabled={sendMutation.isPending}
                       className="px-3 py-2 rounded-full text-xs font-medium transition-all disabled:opacity-50"
                       style={{
-                        background: "rgba(244,196,48,0.1)",
-                        border: "1px solid rgba(244,196,48,0.3)",
-                        color: "rgba(51,51,51,0.75)",
+                        background: "rgba(255,215,0,0.1)",
+                        border: "1px solid rgba(255,215,0,0.3)",
+                        color: "rgba(255,255,255,0.75)",
                       }}
                     >
                       {msg}
@@ -405,7 +405,7 @@ export default function ChatPage({ user, matchId }: Props) {
 
       {/* Input bar */}
       <div className="flex items-end gap-2 px-4 py-3"
-        style={{ background: "rgba(13,6,24,0.97)", borderTop: "1px solid rgba(244,196,48,0.15)" }}>
+        style={{ background: "rgba(13,6,24,0.97)", borderTop: "1px solid rgba(255,215,0,0.15)" }}>
         {/* Gift button — premium only, hidden in support chat */}
         {!isSupportChat && (
           <div className="relative flex-shrink-0">
@@ -413,7 +413,7 @@ export default function ChatPage({ user, matchId }: Props) {
               onClick={() => setShowGiftPicker(true)}
               data-testid="button-open-gift-picker"
               className="w-11 h-11 rounded-full flex items-center justify-center transition-all"
-              style={{ background: "rgba(244,196,48,0.1)", border: "1.5px solid rgba(244,196,48,0.25)", color: "#F4C430" }}
+              style={{ background: "rgba(255,215,0,0.1)", border: "1.5px solid rgba(255,215,0,0.25)", color: "#FFD700" }}
               title="Send a gift (Premium)"
             >
               <Gift size={18} />
@@ -423,7 +423,7 @@ export default function ChatPage({ user, matchId }: Props) {
         )}
 
         <div className="flex-1 rounded-2xl px-4 py-2.5 flex items-end"
-          style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(244,196,48,0.2)" }}>
+          style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(255,215,0,0.2)" }}>
           <textarea
             value={text}
             onChange={e => setText(e.target.value)}
@@ -445,7 +445,7 @@ export default function ChatPage({ user, matchId }: Props) {
           disabled={!text.trim() || sendMutation.isPending}
           data-testid="button-send"
           className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 transition-all disabled:opacity-50"
-          style={{ background: "linear-gradient(135deg, #1E3A8A, #6BBF59)" }}
+          style={{ background: "linear-gradient(135deg, #A0000A, #FFD700)" }}
         >
           <Send size={18} color="white" />
         </button>
@@ -501,7 +501,7 @@ function MessageBubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
       <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
         <div
           className="px-3 py-1.5 rounded-xl text-xs italic"
-          style={{ color: "rgba(51,51,51,0.22)", background: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.05)" }}
+          style={{ color: "rgba(255,255,255,0.22)", background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.12)" }}
           data-testid={`message-expired-${msg.id}`}
         >
           Message expired
@@ -516,20 +516,20 @@ function MessageBubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
     <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
       <div className="max-w-[72%] px-4 py-2.5 rounded-2xl"
         style={isMine
-          ? { background: "linear-gradient(135deg, #5a2080, #1E3A8A)", borderBottomRightRadius: "4px" }
-          : { background: "rgba(255,255,255,0.07)", border: "1px solid rgba(244,196,48,0.15)", borderBottomLeftRadius: "4px" }
+          ? { background: "linear-gradient(135deg, #5a2080, #A0000A)", borderBottomRightRadius: "4px" }
+          : { background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,215,0,0.15)", borderBottomLeftRadius: "4px" }
         }
         data-testid={`message-bubble-${msg.id}`}>
         <p className="text-cream text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
         <div className="flex items-center justify-between mt-1 gap-2">
           <span className="text-[10px] opacity-50"
-            style={{ color: isMine ? "rgba(51,51,51,0.6)" : "rgba(51,51,51,0.4)" }}>
+            style={{ color: isMine ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.4)" }}>
             {timeLabel}
           </span>
           {countdown && (
             <span
               className="flex items-center gap-0.5 text-[9px] font-medium"
-              style={{ color: isMine ? "rgba(51,51,51,0.3)" : "rgba(51,51,51,0.2)" }}
+              style={{ color: isMine ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.2)" }}
               data-testid={`message-countdown-${msg.id}`}
             >
               <Clock size={7} />
@@ -566,7 +566,7 @@ function injectRevealCSS() {
   document.head.appendChild(s);
 }
 
-const CONFETTI_COLORS = ["#ff4444","#ff8800","#ffdd00","#44dd44","#4488ff","#aa44ff","#ff44aa","#F4C430","#ff6600","#00ccff"];
+const CONFETTI_COLORS = ["#ff4444","#ff8800","#ffdd00","#44dd44","#4488ff","#aa44ff","#ff44aa","#FFD700","#ff6600","#00ccff"];
 const SPARKLE_CHARS = ["✨","⭐","✦","★","💫","✷","✸"];
 const HEART_CHARS = ["❤️","💕","💖","💗","💓","💝","🩷","♥"];
 const FLOWER_CHARS = ["🌸","🌺","🌼","🌷","🌻","💐"];
@@ -744,7 +744,7 @@ function GiftRevealOverlay({ gift, onClose, isPreview = false }: { gift: GiftTyp
       {isPreview && (
         <div
           className="absolute top-12 flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase"
-          style={{ background: "rgba(244,196,48,0.18)", border: "1px solid rgba(244,196,48,0.4)", color: "#F4C430" }}
+          style={{ background: "rgba(255,215,0,0.18)", border: "1px solid rgba(255,215,0,0.4)", color: "#FFD700" }}
         >
           <span>✦</span> Preview <span>✦</span>
         </div>
@@ -804,7 +804,7 @@ function GiftBubble({ gift, isMine, viewerId }: { gift: GiftType; isMine: boolea
               <div
                 className="flex flex-col items-center gap-1 px-4 py-3 rounded-2xl"
                 style={{
-                  background: "#F9F9F9",
+                  background: "#E30613",
                   border: `1px solid ${g.color}44`,
                   boxShadow: `0 0 16px ${g.color}22`,
                 }}
@@ -882,10 +882,10 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
       onClick={e => e.target === e.currentTarget && onClose()}
       data-testid="gift-picker"
     >
-      <div className="w-full max-w-sm flex flex-col rounded-t-3xl" style={{ background: "#130820", border: "1px solid rgba(244,196,48,0.2)", maxHeight: "82vh" }}>
+      <div className="w-full max-w-sm flex flex-col rounded-t-3xl" style={{ background: "#130820", border: "1px solid rgba(255,215,0,0.2)", maxHeight: "82vh" }}>
 
         {/* ── Header ── */}
-        <div className="flex items-center justify-between px-5 py-4 flex-shrink-0" style={{ borderBottom: "1px solid rgba(244,196,48,0.1)" }}>
+        <div className="flex items-center justify-between px-5 py-4 flex-shrink-0" style={{ borderBottom: "1px solid rgba(255,215,0,0.1)" }}>
           <div>
             <h3 className="font-serif text-lg text-gold">Send a Gift</h3>
             <p className="text-cream/40 text-xs mt-0.5">to {recipientName}</p>
@@ -894,7 +894,7 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
         </div>
 
         {/* ── Animation style strip — always visible ── */}
-        <div className="flex-shrink-0 px-4 pt-3 pb-2" style={{ borderBottom: "1px solid rgba(244,196,48,0.08)" }}>
+        <div className="flex-shrink-0 px-4 pt-3 pb-2" style={{ borderBottom: "1px solid rgba(255,215,0,0.08)" }}>
           <p className="text-cream/35 text-[10px] font-semibold uppercase tracking-wider mb-2">
             Animation Style
             {selected && animStyle !== "none" && (
@@ -911,9 +911,9 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                 data-testid={`anim-style-${a.id}`}
                 className="flex items-center gap-1 flex-shrink-0 px-3 py-1.5 rounded-xl text-xs transition-all"
                 style={{
-                  background: animStyle === a.id ? "rgba(244,196,48,0.18)" : "rgba(0,0,0,0.04)",
-                  border: animStyle === a.id ? "1.5px solid rgba(244,196,48,0.6)" : "1.5px solid rgba(255,255,255,0.07)",
-                  color: animStyle === a.id ? "#F4C430" : "rgba(51,51,51,0.4)",
+                  background: animStyle === a.id ? "rgba(255,215,0,0.18)" : "rgba(255,255,255,0.10)",
+                  border: animStyle === a.id ? "1.5px solid rgba(255,215,0,0.6)" : "1.5px solid rgba(255,255,255,0.07)",
+                  color: animStyle === a.id ? "#FFD700" : "rgba(255,255,255,0.4)",
                   fontWeight: animStyle === a.id ? 600 : 400,
                 }}
               >
@@ -955,7 +955,7 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
         </div>
 
         {/* ── Bottom: message + send — always visible ── */}
-        <div className="flex-shrink-0 px-4 py-3" style={{ borderTop: "1px solid rgba(244,196,48,0.08)" }}>
+        <div className="flex-shrink-0 px-4 py-3" style={{ borderTop: "1px solid rgba(255,215,0,0.08)" }}>
           {selected && (
             <input
               type="text"
@@ -965,7 +965,7 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
               maxLength={200}
               data-testid="input-gift-message"
               className="w-full px-4 py-2.5 rounded-2xl text-sm text-cream placeholder-cream/25 outline-none mb-3"
-              style={{ background: "rgba(0,0,0,0.05)", border: "1.5px solid rgba(244,196,48,0.15)" }}
+              style={{ background: "rgba(255,255,255,0.12)", border: "1.5px solid rgba(255,215,0,0.15)" }}
             />
           )}
           {selected && animStyle !== "none" && (
@@ -973,7 +973,7 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
               onClick={() => setShowPreview(true)}
               data-testid="button-preview-gift"
               className="w-full py-2.5 rounded-2xl text-sm font-semibold mb-2 transition-all flex items-center justify-center gap-2"
-              style={{ background: "rgba(244,196,48,0.1)", border: "1px solid rgba(244,196,48,0.3)", color: "#F4C430" }}
+              style={{ background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.3)", color: "#FFD700" }}
             >
               <span>▶</span> Preview Animation
             </button>
@@ -988,9 +988,9 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
               color: "white",
               boxShadow: `0 6px 20px ${giftById(selected!).color}55, 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(0,0,0,0.25)`,
             } : {
-              background: "rgba(0,0,0,0.05)",
-              color: "rgba(51,51,51,0.3)",
-              border: "1px solid rgba(0,0,0,0.06)",
+              background: "rgba(255,255,255,0.12)",
+              color: "rgba(255,255,255,0.3)",
+              border: "1px solid rgba(255,255,255,0.14)",
             }}
           >
             {selected && (

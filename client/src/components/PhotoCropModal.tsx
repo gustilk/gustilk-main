@@ -254,8 +254,8 @@ export function PhotoCropModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.92)" }}>
-      <div className="w-full max-w-sm rounded-2xl overflow-hidden" style={{ background: "#0F1F4F", border: "1px solid rgba(244,196,48,0.35)" }}>
-        <div className="px-4 py-3 text-center" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+      <div className="w-full max-w-sm rounded-2xl overflow-hidden" style={{ background: "#500004", border: "1px solid rgba(255,215,0,0.35)" }}>
+        <div className="px-4 py-3 text-center" style={{ borderBottom: "1px solid rgba(255,255,255,0.14)" }}>
           <p className="text-gold font-serif font-semibold">Position your photo</p>
           <p className="text-cream/40 text-xs mt-0.5">Drag to reposition · Pinch to zoom</p>
         </div>
@@ -290,18 +290,18 @@ export function PhotoCropModal({
 
           {/* Rule-of-thirds grid */}
           <div className="absolute inset-0 pointer-events-none" style={{
-            backgroundImage: "linear-gradient(rgba(244,196,48,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(244,196,48,0.1) 1px, transparent 1px)",
+            backgroundImage: "linear-gradient(rgba(255,215,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,215,0,0.1) 1px, transparent 1px)",
             backgroundSize: "33.33% 33.33%",
           }} />
           {/* Border */}
-          <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 0 2px rgba(244,196,48,0.5)" }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 0 2px rgba(255,215,0,0.5)" }} />
         </div>
 
         <div className="flex gap-2 px-4 py-4">
           <button
             onClick={onCancel}
             className="flex-1 py-3 rounded-xl text-sm font-medium"
-            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(51,51,51,0.6)" }}
+            style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)" }}
           >
             Cancel
           </button>
@@ -309,7 +309,7 @@ export function PhotoCropModal({
             onClick={handleConfirm}
             data-testid="button-crop-confirm"
             className="flex-1 py-3 rounded-xl text-sm font-bold"
-            style={{ background: "linear-gradient(135deg, #F4C430, #D4A017)", color: "#0F1F4F" }}
+            style={{ background: "linear-gradient(135deg, #FFD700, #CC9900)", color: "#500004" }}
           >
             Use Photo
           </button>

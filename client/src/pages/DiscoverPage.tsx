@@ -189,7 +189,7 @@ export default function DiscoverPage({ user }: Props) {
   })();
 
   return (
-    <div className="flex flex-col min-h-screen pb-20" style={{ background: "#F9F9F9" }}>
+    <div className="flex flex-col min-h-screen pb-20" style={{ background: "#E30613" }}>
       {/* Like / dislike Lottie overlay */}
       {swipeAnim && (
         <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
@@ -204,14 +204,14 @@ export default function DiscoverPage({ user }: Props) {
 
       <div className="flex items-center justify-between px-5 pt-12 pb-4">
         <div className="flex items-center gap-2.5">
-          <img src="/gustilk-logo.png?v=4" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(244,196,48,0.6))" }} />
+          <img src="/gustilk-logo.png?v=4" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(255,215,0,0.6))" }} />
           <h1 className="font-serif text-2xl text-gold">Gûstîlk</h1>
         </div>
         <button
           onClick={() => setShowFilters(f => !f)}
           data-testid="button-filters"
           className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold transition-all"
-          style={{ border: "1.5px solid rgba(244,196,48,0.25)", background: "rgba(0,0,0,0.05)", color: "rgba(51,51,51,0.6)" }}
+          style={{ border: "1.5px solid rgba(255,215,0,0.25)", background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.6)" }}
         >
           <SlidersHorizontal size={14} />
           {t("discover.filters")}
@@ -221,7 +221,7 @@ export default function DiscoverPage({ user }: Props) {
       {showFilters && (
         <div
           className="mx-5 mb-4 p-4 rounded-2xl animate-slide-up"
-          style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(244,196,48,0.2)" }}
+          style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,215,0,0.2)" }}
         >
           <div>
             <div className="flex justify-between text-xs text-cream/50 uppercase tracking-wider mb-3 font-semibold">
@@ -235,7 +235,7 @@ export default function DiscoverPage({ user }: Props) {
               value={[pendingMin, pendingMax]}
               onValueChange={([min, max]) => { setPendingMin(min); setPendingMax(max); }}
               data-testid="filter-age-range"
-              className="[&_[role=slider]]:bg-[#F4C430] [&_[role=slider]]:border-[#F4C430] [&_.relative]:bg-white/10 [&_[data-orientation=horizontal]]:h-1.5 [&_.absolute]:bg-[#F4C430]"
+              className="[&_[role=slider]]:bg-[#FFD700] [&_[role=slider]]:border-[#FFD700] [&_.relative]:bg-white/10 [&_[data-orientation=horizontal]]:h-1.5 [&_.absolute]:bg-[#FFD700]"
             />
             <div className="flex justify-between text-xs text-cream/30 mt-1.5">
               <span>18</span>
@@ -246,7 +246,7 @@ export default function DiscoverPage({ user }: Props) {
             onClick={handleRefresh}
             data-testid="button-apply-filters"
             className="w-full mt-3 py-2.5 rounded-xl text-sm font-bold"
-            style={{ background: "linear-gradient(135deg, #F4C430, #D4A017)", color: "#0F1F4F" }}
+            style={{ background: "linear-gradient(135deg, #FFD700, #CC9900)", color: "#500004" }}
           >
             {t("discover.applyFilters")}
           </button>
@@ -263,9 +263,9 @@ export default function DiscoverPage({ user }: Props) {
           <div className="flex flex-col items-center justify-center h-96 gap-4 text-center px-6">
             <div
               className="w-20 h-20 rounded-full flex items-center justify-center"
-              style={{ border: "2px solid rgba(244,196,48,0.3)" }}
+              style={{ border: "2px solid rgba(255,215,0,0.3)" }}
             >
-              <Heart size={32} color="rgba(244,196,48,0.5)" />
+              <Heart size={32} color="rgba(255,215,0,0.5)" />
             </div>
             <h3 className="font-serif text-xl text-gold">{t("discover.noMore")}</h3>
             <p className="text-cream/40 text-sm">{t("discover.noMoreSub")}</p>
@@ -273,7 +273,7 @@ export default function DiscoverPage({ user }: Props) {
               onClick={handleRefresh}
               data-testid="button-refresh"
               className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold mt-2"
-              style={{ border: "1.5px solid rgba(244,196,48,0.4)", color: "#F4C430" }}
+              style={{ border: "1.5px solid rgba(255,215,0,0.4)", color: "#FFD700" }}
             >
               <RefreshCw size={15} />
               {t("discover.refresh")}
@@ -284,7 +284,7 @@ export default function DiscoverPage({ user }: Props) {
             <div
               className="relative rounded-3xl overflow-hidden"
               style={{
-                border: "1.5px solid rgba(244,196,48,0.2)",
+                border: "1.5px solid rgba(255,215,0,0.2)",
                 boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(74,30,107,0.3)",
                 transform: cardTransform,
                 opacity: swipeDir ? 0 : 1,
@@ -294,7 +294,7 @@ export default function DiscoverPage({ user }: Props) {
             >
               <div
                 className="relative flex items-center justify-center"
-                style={{ height: "min(420px, 52vh)", background: "linear-gradient(135deg, #2d0f4a, #152C6E, #1E3A8A)" }}
+                style={{ height: "min(420px, 52vh)", background: "linear-gradient(135deg, #2d0f4a, #7A0007, #A0000A)" }}
               >
                 {current.photos && current.photos.length > 0 ? (
                   <ProtectedPhoto
@@ -306,7 +306,7 @@ export default function DiscoverPage({ user }: Props) {
                 ) : (
                   <div
                     className="w-28 h-28 rounded-full flex items-center justify-center text-5xl font-serif text-gold"
-                    style={{ background: "rgba(244,196,48,0.12)", border: "2px solid rgba(244,196,48,0.25)" }}
+                    style={{ background: "rgba(255,215,0,0.12)", border: "2px solid rgba(255,215,0,0.25)" }}
                   >
                     {(current.fullName ?? current.firstName ?? "M").charAt(0)}
                   </div>
@@ -314,7 +314,7 @@ export default function DiscoverPage({ user }: Props) {
 
                 <div
                   className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold"
-                  style={{ background: "rgba(244,196,48,0.9)", color: "#0F1F4F" }}
+                  style={{ background: "rgba(255,215,0,0.9)", color: "#500004" }}
                   data-testid={`badge-caste-${current.id}`}
                 >
                   {casteLabel(current.caste ?? "murid")}
@@ -329,10 +329,10 @@ export default function DiscoverPage({ user }: Props) {
                   }}
                   data-testid={`button-view-profile-${current.id}`}
                   className="absolute top-3 left-3 w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95"
-                  style={{ background: "rgba(13,6,24,0.75)", border: "1.5px solid rgba(244,196,48,0.4)", backdropFilter: "blur(4px)" }}
+                  style={{ background: "rgba(13,6,24,0.75)", border: "1.5px solid rgba(255,215,0,0.4)", backdropFilter: "blur(4px)" }}
                   title="View full profile"
                 >
-                  <Info size={17} color="#F4C430" />
+                  <Info size={17} color="#FFD700" />
                 </button>
 
                 <div className="absolute bottom-0 left-0 right-0 h-52" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.98), transparent)" }} />
@@ -351,7 +351,7 @@ export default function DiscoverPage({ user }: Props) {
                   })()}
                   </h2>
                   <div className="flex items-center gap-1.5 mt-1.5">
-                    <MapPin size={13} color="rgba(244,196,48,0.8)" />
+                    <MapPin size={13} color="rgba(255,215,0,0.8)" />
                     <p className="text-white/60 text-sm">{current.city}{current.state ? `, ${current.state}` : ""}, {current.country}</p>
                   </div>
                   {getActiveLabel(current.activitySeenAt) && (
@@ -369,7 +369,7 @@ export default function DiscoverPage({ user }: Props) {
                         <span
                           key={lang}
                           className="px-2 py-0.5 rounded-full text-[11px]"
-                          style={{ background: "rgba(244,196,48,0.15)", color: "rgba(244,196,48,0.9)", border: "1px solid rgba(244,196,48,0.2)" }}
+                          style={{ background: "rgba(255,215,0,0.15)", color: "rgba(255,215,0,0.9)", border: "1px solid rgba(255,215,0,0.2)" }}
                         >
                           {lang}
                         </span>
@@ -401,8 +401,8 @@ export default function DiscoverPage({ user }: Props) {
                 className="relative flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold overflow-hidden"
                 style={{
                   background: "rgba(13,6,24,0.9)",
-                  border: "1.5px solid rgba(244,196,48,0.6)",
-                  color: "#F4C430",
+                  border: "1.5px solid rgba(255,215,0,0.6)",
+                  color: "#FFD700",
                   backdropFilter: "blur(8px)",
                 }}
               >
@@ -410,7 +410,7 @@ export default function DiscoverPage({ user }: Props) {
                 <span
                   className="absolute inset-0 rounded-full"
                   style={{
-                    background: "rgba(244,196,48,0.12)",
+                    background: "rgba(255,215,0,0.12)",
                     transformOrigin: "left center",
                     transform: `scaleX(${undoProgress / 100})`,
                     transition: "transform 0.05s linear",
@@ -430,16 +430,16 @@ export default function DiscoverPage({ user }: Props) {
                 disabled={dislikeMutation.isPending || likeMutation.isPending}
                 data-testid="button-dislike"
                 className="w-16 h-16 rounded-full flex items-center justify-center transition-all"
-                style={{ background: "rgba(255,255,255,0.07)", border: "2px solid rgba(0,0,0,0.08)" }}
+                style={{ background: "rgba(255,255,255,0.07)", border: "2px solid rgba(255,255,255,0.18)" }}
               >
-                <X size={24} color="rgba(51,51,51,0.6)" />
+                <X size={24} color="rgba(255,255,255,0.6)" />
               </button>
               <button
                 onClick={() => likeMutation.mutate(current.id)}
                 disabled={likeMutation.isPending || dislikeMutation.isPending}
                 data-testid="button-like"
                 className="w-16 h-16 rounded-full flex items-center justify-center transition-all"
-                style={{ background: "linear-gradient(135deg, #1E3A8A, #6BBF59)", boxShadow: "0 8px 24px rgba(107,191,89,0.4)" }}
+                style={{ background: "linear-gradient(135deg, #A0000A, #FFD700)", boxShadow: "0 8px 24px rgba(255,215,0,0.4)" }}
               >
                 <Heart size={26} fill="white" color="white" />
               </button>

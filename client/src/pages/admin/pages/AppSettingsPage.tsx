@@ -34,7 +34,7 @@ export default function AppSettingsPage({ user }: { user: User }) {
   };
 
   const FieldRow = ({ label, k, type = "text", hint }: { label: string; k: string; type?: string; hint?: string }) => (
-    <div className="flex items-center justify-between py-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
+    <div className="flex items-center justify-between py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
       <div>
         <div className="text-cream text-sm">{label}</div>
         {hint && <div className="text-cream/40 text-xs">{hint}</div>}
@@ -53,7 +53,7 @@ export default function AppSettingsPage({ user }: { user: User }) {
         <input type={type} value={settings[k] ?? ""} onChange={e => set(k, e.target.value)}
           data-testid={`input-setting-${k}`}
           className="px-3 py-1.5 rounded-lg text-sm text-cream outline-none text-right"
-          style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.06)", width: "120px" }} />
+          style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.14)", width: "120px" }} />
       )}
     </div>
   );
@@ -71,7 +71,7 @@ export default function AppSettingsPage({ user }: { user: User }) {
           <button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}
             data-testid="button-save-settings"
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold"
-            style={{ background: "rgba(244,196,48,0.2)", color: "#F4C430", border: "1px solid rgba(244,196,48,0.3)" }}>
+            style={{ background: "rgba(255,215,0,0.2)", color: "#FFD700", border: "1px solid rgba(255,215,0,0.3)" }}>
             <Save size={12} /> Save Changes
           </button>
         )}
@@ -108,7 +108,7 @@ export default function AppSettingsPage({ user }: { user: User }) {
           ],
         },
       ].map(section => (
-        <div key={section.title} className="rounded-2xl p-4 mb-4" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(244,196,48,0.1)" }}>
+        <div key={section.title} className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,215,0,0.1)" }}>
           <h3 className="text-cream/60 text-xs font-bold uppercase tracking-wide mb-2">{section.title}</h3>
           {section.fields.map(f => (
             <FieldRow key={f.k} label={f.label} k={f.k} type={f.type as any} hint={f.hint} />
@@ -117,19 +117,19 @@ export default function AppSettingsPage({ user }: { user: User }) {
       ))}
 
       {/* Community Guidelines */}
-      <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(244,196,48,0.1)" }}>
+      <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,215,0,0.1)" }}>
         <h3 className="text-cream/60 text-xs font-bold uppercase tracking-wide mb-3">Community Guidelines</h3>
         <textarea value={settings.guidelines ?? ""} onChange={e => set("guidelines", e.target.value)}
           rows={5} data-testid="textarea-guidelines"
           className="w-full px-3 py-2 rounded-xl text-sm text-cream placeholder-cream/30 outline-none resize-none"
-          style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.06)" }} />
+          style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.14)" }} />
       </div>
 
       {dirty && (
         <button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}
           data-testid="button-save-settings-bottom"
           className="w-full py-3 rounded-xl text-sm font-bold"
-          style={{ background: "rgba(244,196,48,0.2)", color: "#F4C430", border: "1px solid rgba(244,196,48,0.3)" }}>
+          style={{ background: "rgba(255,215,0,0.2)", color: "#FFD700", border: "1px solid rgba(255,215,0,0.3)" }}>
           <Save size={14} className="inline mr-2" /> Save All Changes
         </button>
       )}

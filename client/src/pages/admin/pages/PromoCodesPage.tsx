@@ -57,20 +57,20 @@ export default function PromoCodesPage({ user }: { user: User }) {
         </div>
         <button onClick={() => setShowForm(!showForm)} data-testid="button-create-promo"
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold"
-          style={{ background: "rgba(244,196,48,0.15)", color: "#F4C430", border: "1px solid rgba(244,196,48,0.25)" }}>
+          style={{ background: "rgba(255,215,0,0.15)", color: "#FFD700", border: "1px solid rgba(255,215,0,0.25)" }}>
           <Plus size={13} /> Create Code
         </button>
       </div>
 
       {showForm && (
-        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(244,196,48,0.2)" }}>
+        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,215,0,0.2)" }}>
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
               <label className="text-cream/50 text-xs mb-1 block">Code</label>
               <input value={form.code} onChange={e => setForm(f => ({ ...f, code: e.target.value.toUpperCase() }))}
                 placeholder="WELCOME50" data-testid="input-promo-code"
                 className="w-full px-3 py-2 rounded-xl text-sm text-cream placeholder-cream/30 outline-none uppercase"
-                style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
+                style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)" }} />
             </div>
             <div>
               <label className="text-cream/50 text-xs mb-1 block">Discount %</label>
@@ -78,13 +78,13 @@ export default function PromoCodesPage({ user }: { user: User }) {
                 onChange={e => setForm(f => ({ ...f, discountPercent: Number(e.target.value) }))}
                 data-testid="input-promo-discount"
                 className="w-full px-3 py-2 rounded-xl text-sm text-cream outline-none"
-                style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
+                style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)" }} />
             </div>
           </div>
           <input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
             placeholder="Description…" data-testid="input-promo-description"
             className="w-full px-3 py-2 rounded-xl text-sm text-cream placeholder-cream/30 outline-none mb-3"
-            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
+            style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)" }} />
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
               <label className="text-cream/50 text-xs mb-1 block">Max Uses (0 = unlimited)</label>
@@ -92,20 +92,20 @@ export default function PromoCodesPage({ user }: { user: User }) {
                 onChange={e => setForm(f => ({ ...f, maxUses: Number(e.target.value) }))}
                 data-testid="input-promo-max-uses"
                 className="w-full px-3 py-2 rounded-xl text-sm text-cream outline-none"
-                style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
+                style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)" }} />
             </div>
             <div>
               <label className="text-cream/50 text-xs mb-1 block">Expires At (optional)</label>
               <input type="date" value={form.expiresAt} onChange={e => setForm(f => ({ ...f, expiresAt: e.target.value }))}
                 data-testid="input-promo-expires"
                 className="w-full px-3 py-2 rounded-xl text-sm text-cream outline-none"
-                style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
+                style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.1)" }} />
             </div>
           </div>
           <button onClick={() => form.code.trim() && createMutation.mutate()} disabled={createMutation.isPending}
             data-testid="button-submit-promo"
             className="w-full py-2.5 rounded-xl text-xs font-bold"
-            style={{ background: "rgba(244,196,48,0.2)", color: "#F4C430" }}>
+            style={{ background: "rgba(255,215,0,0.2)", color: "#FFD700" }}>
             Create Promo Code
           </button>
         </div>
@@ -115,7 +115,7 @@ export default function PromoCodesPage({ user }: { user: User }) {
         <div className="flex items-center justify-center h-32 text-cream/40 text-sm">Loading…</div>
       ) : codes.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-32 gap-2">
-          <Tag size={32} color="rgba(244,196,48,0.3)" />
+          <Tag size={32} color="rgba(255,215,0,0.3)" />
           <p className="text-cream/40 text-sm">No promo codes yet</p>
         </div>
       ) : (
@@ -123,12 +123,12 @@ export default function PromoCodesPage({ user }: { user: User }) {
           {codes.map(code => (
             <div key={code.id} data-testid={`promo-code-${code.id}`}
               className="flex items-center gap-3 p-3.5 rounded-xl"
-              style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.07)", opacity: code.active ? 1 : 0.5 }}>
+              style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.07)", opacity: code.active ? 1 : 0.5 }}>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-cream font-bold font-mono text-sm">{code.code}</span>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold"
-                    style={{ background: "rgba(244,196,48,0.15)", color: "#F4C430" }}>
+                    style={{ background: "rgba(255,215,0,0.15)", color: "#FFD700" }}>
                     {code.discountPercent}% off
                   </span>
                   {!code.active && (
@@ -146,7 +146,7 @@ export default function PromoCodesPage({ user }: { user: User }) {
                 <button onClick={() => toggleMutation.mutate({ id: code.id, active: !code.active })}
                   data-testid={`button-toggle-promo-${code.id}`}
                   className="w-7 h-7 rounded-lg flex items-center justify-center"
-                  style={{ background: "rgba(0,0,0,0.05)", color: code.active ? "#10b981" : "#6b7280" }}>
+                  style={{ background: "rgba(255,255,255,0.12)", color: code.active ? "#10b981" : "#6b7280" }}>
                   {code.active ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
                 </button>
                 <button onClick={() => { if (confirm("Delete this promo code?")) deleteMutation.mutate(code.id); }}

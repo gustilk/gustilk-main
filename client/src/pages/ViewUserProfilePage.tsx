@@ -88,7 +88,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen" style={{ background: "#F9F9F9" }}>
+      <div className="flex items-center justify-center h-screen" style={{ background: "#E30613" }}>
         <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -96,7 +96,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
 
   if (!profile) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen gap-4" style={{ background: "#F9F9F9" }}>
+      <div className="flex flex-col items-center justify-center h-screen gap-4" style={{ background: "#E30613" }}>
         <p className="text-cream/50">Profile not found.</p>
         <button onClick={goBack} className="text-gold text-sm">Go back</button>
       </div>
@@ -130,7 +130,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#F9F9F9" }}>
+    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#E30613" }}>
 
       {/* ── Photos ─────────────────────────────────────────── */}
       <div className="relative" style={{ height: "65vw", maxHeight: 400, minHeight: 280 }}>
@@ -154,7 +154,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
           </div>
         ) : (
           <div className="w-full h-full flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #0F1F4F, #2d1054)" }}>
+            style={{ background: "linear-gradient(135deg, #500004, #2d1054)" }}>
             <span className="text-8xl font-serif text-gold/20">{displayName[0]?.toUpperCase()}</span>
           </div>
         )}
@@ -169,7 +169,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
             {allPhotos.map((_, i) => (
               <button key={i} onClick={() => setPhotoIdx(i)}
                 className="flex-1 h-[3px] rounded-full transition-all"
-                style={{ background: i === photoIdx ? "rgba(244,196,48,0.9)" : "rgba(255,255,255,0.3)" }} />
+                style={{ background: i === photoIdx ? "rgba(255,215,0,0.9)" : "rgba(255,255,255,0.3)" }} />
             ))}
           </div>
         )}
@@ -178,13 +178,13 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
         {!isPremium && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 pt-16">
             <div className="w-14 h-14 rounded-full flex items-center justify-center"
-              style={{ background: "rgba(13,6,24,0.85)", border: "2px solid rgba(244,196,48,0.5)" }}>
-              <Lock size={22} color="#F4C430" />
+              style={{ background: "rgba(13,6,24,0.85)", border: "2px solid rgba(255,215,0,0.5)" }}>
+              <Lock size={22} color="#FFD700" />
             </div>
             <p className="text-cream/70 text-sm font-semibold">Photos locked</p>
             <button onClick={() => setLocation("/premium")} data-testid="button-unlock-photos"
               className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold"
-              style={{ background: "linear-gradient(135deg, #F4C430, #D4A017)", color: "#0F1F4F" }}>
+              style={{ background: "linear-gradient(135deg, #FFD700, #CC9900)", color: "#500004" }}>
               <Crown size={14} /> Unlock with Premium
             </button>
           </div>
@@ -193,15 +193,15 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
         {/* Back button */}
         <button onClick={goBack} data-testid="button-back-profile"
           className="absolute top-12 left-4 w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ background: "rgba(13,6,24,0.7)", border: "1px solid rgba(0,0,0,0.09)", zIndex: 30 }}>
-          <ArrowLeft size={18} color="rgba(51,51,51,0.85)" />
+          style={{ background: "rgba(13,6,24,0.7)", border: "1px solid rgba(255,255,255,0.20)", zIndex: 30 }}>
+          <ArrowLeft size={18} color="rgba(255,255,255,0.85)" />
         </button>
 
         {/* Report button */}
         <button onClick={() => setShowReport(true)} data-testid="button-report-profile"
           className="absolute top-12 right-4 w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ background: "rgba(13,6,24,0.7)", border: "1px solid rgba(0,0,0,0.09)", zIndex: 30 }}>
-          <Flag size={16} color="rgba(51,51,51,0.5)" />
+          style={{ background: "rgba(13,6,24,0.7)", border: "1px solid rgba(255,255,255,0.20)", zIndex: 30 }}>
+          <Flag size={16} color="rgba(255,255,255,0.5)" />
         </button>
 
         {/* Tap zones for photo browsing — premium */}
@@ -225,7 +225,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
             <div className="flex items-center gap-2 mt-1 flex-wrap">
               {profile.caste && (
                 <span className="text-xs px-2.5 py-1 rounded-full font-semibold"
-                  style={{ background: "rgba(244,196,48,0.12)", color: "#F4C430", border: "1px solid rgba(244,196,48,0.25)" }}>
+                  style={{ background: "rgba(255,215,0,0.12)", color: "#FFD700", border: "1px solid rgba(255,215,0,0.25)" }}>
                   {casteLabel(profile.caste)}
                 </span>
               )}
@@ -239,8 +239,8 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
           </div>
           {profile.isPremium && (
             <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ background: "rgba(244,196,48,0.1)", border: "1.5px solid rgba(244,196,48,0.3)" }}>
-              <Star size={18} fill="#F4C430" color="#F4C430" />
+              style={{ background: "rgba(255,215,0,0.1)", border: "1.5px solid rgba(255,215,0,0.3)" }}>
+              <Star size={18} fill="#FFD700" color="#FFD700" />
             </div>
           )}
         </div>
@@ -256,7 +256,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
         {/* Bio */}
         {profile.bio && (
           <div className="px-4 py-3.5 rounded-2xl"
-            style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(244,196,48,0.1)" }}>
+            style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,215,0,0.1)" }}>
             <p className="text-cream/70 text-sm leading-relaxed" data-testid="text-profile-bio">
               {profile.bio}
             </p>
@@ -271,7 +271,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
               disabled={dislikeMutation.isPending || likeMutation.isPending}
               data-testid="button-pass-from-likes"
               className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all active:scale-95 disabled:opacity-50"
-              style={{ background: "rgba(107,191,89,0.12)", border: "1.5px solid rgba(107,191,89,0.45)", color: "#6BBF59" }}
+              style={{ background: "rgba(255,215,0,0.12)", border: "1.5px solid rgba(255,215,0,0.45)", color: "#FFD700" }}
             >
               <X size={18} strokeWidth={2.5} />
               Pass
@@ -281,7 +281,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
               disabled={likeMutation.isPending || dislikeMutation.isPending}
               data-testid="button-like-from-likes"
               className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all active:scale-95 disabled:opacity-50"
-              style={{ background: "rgba(244,196,48,0.12)", border: "1.5px solid rgba(244,196,48,0.5)", color: "#F4C430" }}
+              style={{ background: "rgba(255,215,0,0.12)", border: "1.5px solid rgba(255,215,0,0.5)", color: "#FFD700" }}
             >
               <Heart size={18} strokeWidth={2.5} />
               Like Back
@@ -290,7 +290,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
         )}
 
         {/* ── Divider ── */}
-        <div style={{ height: 1, background: "rgba(244,196,48,0.08)" }} />
+        <div style={{ height: 1, background: "rgba(255,215,0,0.08)" }} />
 
         {/* ── Action buttons ────────────────────────────── */}
         <div className="grid grid-cols-2 gap-3">
@@ -301,10 +301,10 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
             data-testid="button-message-user"
             className="flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all"
             style={isPremium && match
-              ? { background: "linear-gradient(135deg, #1E3A8A, #6BBF59)", color: "white", boxShadow: "0 4px 16px rgba(123,63,160,0.3)" }
+              ? { background: "linear-gradient(135deg, #A0000A, #FFD700)", color: "white", boxShadow: "0 4px 16px rgba(123,63,160,0.3)" }
               : isPremium && !match
-                ? { background: "rgba(0,0,0,0.05)", color: "rgba(51,51,51,0.4)", border: "1px solid rgba(255,255,255,0.1)", cursor: "default" }
-                : { background: "rgba(244,196,48,0.08)", color: "#F4C430", border: "1.5px solid rgba(244,196,48,0.3)" }
+                ? { background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.1)", cursor: "default" }
+                : { background: "rgba(255,215,0,0.08)", color: "#FFD700", border: "1.5px solid rgba(255,215,0,0.3)" }
             }
           >
             {isPremium ? <MessageCircle size={18} /> : <Lock size={16} />}
@@ -318,10 +318,10 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
             disabled={isPremium && (!match || callState !== "idle")}
             className="flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all disabled:opacity-40"
             style={isPremium && match
-              ? { background: "rgba(244,196,48,0.1)", color: "#F4C430", border: "1.5px solid rgba(244,196,48,0.3)" }
+              ? { background: "rgba(255,215,0,0.1)", color: "#FFD700", border: "1.5px solid rgba(255,215,0,0.3)" }
               : !isPremium
-                ? { background: "rgba(244,196,48,0.08)", color: "#F4C430", border: "1.5px solid rgba(244,196,48,0.3)" }
-                : { background: "rgba(0,0,0,0.04)", color: "rgba(51,51,51,0.3)", border: "1px solid rgba(0,0,0,0.06)" }
+                ? { background: "rgba(255,215,0,0.08)", color: "#FFD700", border: "1.5px solid rgba(255,215,0,0.3)" }
+                : { background: "rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.3)", border: "1px solid rgba(255,255,255,0.14)" }
             }
           >
             {isPremium ? <Video size={18} /> : <Lock size={16} />}
@@ -335,7 +335,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
             onClick={() => setLocation("/premium")}
             data-testid="button-upgrade-profile"
             className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-sm"
-            style={{ background: "linear-gradient(135deg, #F4C430, #D4A017)", color: "#0F1F4F", boxShadow: "0 6px 20px rgba(244,196,48,0.25)" }}
+            style={{ background: "linear-gradient(135deg, #FFD700, #CC9900)", color: "#500004", boxShadow: "0 6px 20px rgba(255,215,0,0.25)" }}
           >
             <Crown size={16} />
             Upgrade to see photos &amp; message
@@ -350,7 +350,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
               {allPhotos.map((p, i) => (
                 <button key={i} onClick={() => setPhotoIdx(i)} data-testid={`thumb-photo-${i}`}
                   className="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden transition-all"
-                  style={{ border: i === photoIdx ? "2px solid #F4C430" : "2px solid transparent", opacity: i === photoIdx ? 1 : 0.65 }}>
+                  style={{ border: i === photoIdx ? "2px solid #FFD700" : "2px solid transparent", opacity: i === photoIdx ? 1 : 0.65 }}>
                   <ProtectedPhoto src={p} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" blurred={shouldBlurPhotos} />
                 </button>
               ))}

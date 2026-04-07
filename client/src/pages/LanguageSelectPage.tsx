@@ -19,12 +19,12 @@ export default function LanguageSelectPage({ onSelect }: Props) {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center px-5 py-12"
-      style={{ background: "linear-gradient(160deg, #F9F9F9 0%, #0F1F4F 60%, #F9F9F9 100%)" }}
+      style={{ background: "linear-gradient(160deg, #E30613 0%, #500004 60%, #E30613 100%)" }}
     >
       <div className="w-full max-w-sm flex flex-col items-center">
         <div className="relative inline-flex items-center justify-center mb-6">
           <div className="absolute inset-0" style={{
-            background: "radial-gradient(circle, rgba(244,196,48,0.25) 0%, transparent 65%)",
+            background: "radial-gradient(circle, rgba(255,215,0,0.25) 0%, transparent 65%)",
             filter: "blur(16px)",
             transform: "scale(1.3)",
           }} />
@@ -44,11 +44,11 @@ export default function LanguageSelectPage({ onSelect }: Props) {
 
         <h1
           className="font-serif text-3xl font-bold text-center mb-2"
-          style={{ color: "#F4C430" }}
+          style={{ color: "#FFD700" }}
         >
           Gûstîlk
         </h1>
-        <p className="text-center text-sm mb-8" style={{ color: "rgba(51,51,51,0.45)" }}>
+        <p className="text-center text-sm mb-8" style={{ color: "rgba(255,255,255,0.45)" }}>
           Choose your language · اختر لغتك · Zimanê xwe hilbijêre
         </p>
 
@@ -65,10 +65,10 @@ export default function LanguageSelectPage({ onSelect }: Props) {
                 className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-left transition-all duration-150"
                 style={{
                   background: isActive
-                    ? "rgba(244,196,48,0.15)"
-                    : "rgba(0,0,0,0.04)",
+                    ? "rgba(255,215,0,0.15)"
+                    : "rgba(255,255,255,0.10)",
                   border: isActive
-                    ? "1px solid rgba(244,196,48,0.45)"
+                    ? "1px solid rgba(255,215,0,0.45)"
                     : "1px solid rgba(255,255,255,0.07)",
                   transform: isActive ? "scale(1.02)" : "scale(1)",
                 }}
@@ -80,7 +80,7 @@ export default function LanguageSelectPage({ onSelect }: Props) {
                 )}
                 <span
                   className="text-sm font-medium truncate"
-                  style={{ color: isActive ? "#F4C430" : "rgba(51,51,51,0.75)" }}
+                  style={{ color: isActive ? "#FFD700" : "rgba(255,255,255,0.75)" }}
                 >
                   {native}
                 </span>
@@ -89,7 +89,7 @@ export default function LanguageSelectPage({ onSelect }: Props) {
           })}
         </div>
 
-        <p className="mt-8 text-xs text-center" style={{ color: "rgba(51,51,51,0.25)" }}>
+        <p className="mt-8 text-xs text-center" style={{ color: "rgba(255,255,255,0.25)" }}>
           You can change this later in your profile settings.
         </p>
       </div>
