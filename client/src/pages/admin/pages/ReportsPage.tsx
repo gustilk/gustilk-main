@@ -56,8 +56,8 @@ export default function ReportsPage({ user }: { user: User }) {
               data-testid={`filter-status-${s}`}
               className="px-3 py-1.5 rounded-lg text-xs font-medium capitalize"
               style={{
-                background: status === s ? "rgba(201,168,76,0.2)" : "rgba(255,255,255,0.06)",
-                color: status === s ? "#c9a84c" : "rgba(253,248,240,0.5)",
+                background: status === s ? "rgba(200,0,14,0.2)" : "rgba(255,255,255,0.06)",
+                color: status === s ? "#c8000e" : "rgba(253,248,240,0.5)",
               }}>
               {s}
             </button>
@@ -119,12 +119,12 @@ export default function ReportsPage({ user }: { user: User }) {
           <div className="flex gap-2">
             <button disabled={page === 0} onClick={() => setPage(p => p - 1)}
               className="w-8 h-8 rounded-lg flex items-center justify-center disabled:opacity-30"
-              style={{ background: "rgba(255,255,255,0.06)", color: "#c9a84c" }}>
+              style={{ background: "rgba(255,255,255,0.06)", color: "#c8000e" }}>
               <ChevronLeft size={14} />
             </button>
             <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}
               className="w-8 h-8 rounded-lg flex items-center justify-center disabled:opacity-30"
-              style={{ background: "rgba(255,255,255,0.06)", color: "#c9a84c" }}>
+              style={{ background: "rgba(255,255,255,0.06)", color: "#c8000e" }}>
               <ChevronRight size={14} />
             </button>
           </div>

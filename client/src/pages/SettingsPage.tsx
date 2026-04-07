@@ -197,8 +197,8 @@ export default function SettingsPage({ user }: Props) {
 
   if (subScreen === "guidelines") {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
-        <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
+      <div className="min-h-screen flex flex-col" style={{ background: "#0d0002" }}>
+        <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(200,0,14,0.12)" }}>
           <button
             onClick={() => setSubScreen(null)}
             data-testid="button-back-guidelines"
@@ -214,7 +214,7 @@ export default function SettingsPage({ user }: Props) {
             {t("settings.guidelinesIntro")}
           </p>
           {guidelineSections.map((g, i) => (
-            <div key={i} className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(201,168,76,0.1)" }}>
+            <div key={i} className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,0,14,0.1)" }}>
               <p className="text-gold text-sm font-semibold mb-1.5">{g.title}</p>
               <p className="text-cream/60 text-sm leading-relaxed">{g.body}</p>
             </div>
@@ -234,8 +234,8 @@ export default function SettingsPage({ user }: Props) {
     };
 
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
-        <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
+      <div className="min-h-screen flex flex-col" style={{ background: "#0d0002" }}>
+        <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(200,0,14,0.12)" }}>
           <button
             onClick={() => setSubScreen(null)}
             data-testid="button-back-privacy"
@@ -252,11 +252,11 @@ export default function SettingsPage({ user }: Props) {
           {isFemale && (
             <div>
               <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.photoPrivacy")}</p>
-              <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.15)", background: "rgba(255,255,255,0.03)" }}>
+              <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,0,14,0.15)", background: "rgba(255,255,255,0.03)" }}>
                 {/* Photo blur toggle */}
                 <div className="flex items-center gap-4 px-4 py-3.5">
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,168,76,0.1)" }}>
-                    <ImageOff size={16} color="#c9a84c" />
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(200,0,14,0.1)" }}>
+                    <ImageOff size={16} color="#c8000e" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium" style={{ color: "rgba(253,248,240,0.85)" }}>{t("settings.blurPhotos")}</p>
@@ -269,7 +269,7 @@ export default function SettingsPage({ user }: Props) {
                     onClick={() => handlePhotosBlurredToggle(!photosBlurred)}
                     disabled={privacyMutation.isPending}
                     className="relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none disabled:opacity-50"
-                    style={{ background: photosBlurred ? "#c9a84c" : "rgba(255,255,255,0.12)" }}
+                    style={{ background: photosBlurred ? "#c8000e" : "rgba(255,255,255,0.12)" }}
                     aria-checked={photosBlurred}
                     role="switch"
                   >
@@ -288,7 +288,7 @@ export default function SettingsPage({ user }: Props) {
             {t("settings.privacyIntro")}
           </p>
           {privacySections.map((p, i) => (
-            <div key={i} className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(201,168,76,0.1)" }}>
+            <div key={i} className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,0,14,0.1)" }}>
               <p className="text-gold text-sm font-semibold mb-1.5">{p.title}</p>
               <p className="text-cream/60 text-sm leading-relaxed">{p.body}</p>
             </div>
@@ -300,8 +300,8 @@ export default function SettingsPage({ user }: Props) {
 
   if (subScreen === "language") {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
-        <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
+      <div className="min-h-screen flex flex-col" style={{ background: "#0d0002" }}>
+        <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(200,0,14,0.12)" }}>
           <button
             onClick={() => setSubScreen(null)}
             data-testid="button-back-language"
@@ -324,15 +324,15 @@ export default function SettingsPage({ user }: Props) {
                   onClick={() => { setLanguage(code as LangCode); setSubScreen(null); }}
                   className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-left"
                   style={{
-                    background: isActive ? "rgba(201,168,76,0.15)" : "rgba(255,255,255,0.04)",
-                    border: isActive ? "1.5px solid rgba(201,168,76,0.5)" : "1px solid rgba(255,255,255,0.07)",
+                    background: isActive ? "rgba(200,0,14,0.15)" : "rgba(255,255,255,0.04)",
+                    border: isActive ? "1.5px solid rgba(200,0,14,0.5)" : "1px solid rgba(255,255,255,0.07)",
                   }}
                 >
                   {isImage
                     ? <img src={flag} alt={code} className="w-7 h-5 object-cover rounded flex-shrink-0" />
                     : <span className="text-2xl flex-shrink-0">{flag}</span>
                   }
-                  <span className="text-sm font-medium truncate" style={{ color: isActive ? "#c9a84c" : "rgba(253,248,240,0.75)" }}>
+                  <span className="text-sm font-medium truncate" style={{ color: isActive ? "#c8000e" : "rgba(253,248,240,0.75)" }}>
                     {native}
                   </span>
                 </button>
@@ -347,8 +347,8 @@ export default function SettingsPage({ user }: Props) {
   if (subScreen === "notifications") {
     const pushBlocked = pushPermission === "denied";
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
-        <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
+      <div className="min-h-screen flex flex-col" style={{ background: "#0d0002" }}>
+        <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(200,0,14,0.12)" }}>
           <button
             onClick={() => setSubScreen(null)}
             data-testid="button-back-notifications"
@@ -364,7 +364,7 @@ export default function SettingsPage({ user }: Props) {
 
           <div>
             <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.pushSection")}</p>
-            <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
+            <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,0,14,0.1)", background: "rgba(255,255,255,0.03)" }}>
               <NotifToggleRow
                 icon={Smartphone}
                 label={t("settings.pushEnable")}
@@ -384,7 +384,7 @@ export default function SettingsPage({ user }: Props) {
 
           <div>
             <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.alertTypesSection")}</p>
-            <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
+            <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,0,14,0.1)", background: "rgba(255,255,255,0.03)" }}>
               <NotifToggleRow
                 icon={Heart}
                 label={t("settings.newMatches")}
@@ -476,8 +476,8 @@ export default function SettingsPage({ user }: Props) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col pb-24" style={{ background: "#0d0618" }}>
-      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
+    <div className="min-h-screen flex flex-col pb-24" style={{ background: "#0d0002" }}>
+      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(200,0,14,0.12)" }}>
         <button
           onClick={() => setLocation("/profile")}
           data-testid="button-back-settings"
@@ -494,7 +494,7 @@ export default function SettingsPage({ user }: Props) {
         {/* â”€â”€ PREFERENCES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div>
           <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.preferencesSection")}</p>
-          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,0,14,0.1)", background: "rgba(255,255,255,0.03)" }}>
             <Row icon={Globe} label={t("profile.language")} sub={`${currentLang.flag} ${currentLang.native}`} onClick={() => setSubScreen("language")} testId="button-settings-language" />
             <Divider />
             <Row icon={Bell} label={t("settings.notifMenuItem")} sub={t("settings.notifMenuSub")} onClick={() => setSubScreen("notifications")} testId="button-settings-notifications" />
@@ -504,7 +504,7 @@ export default function SettingsPage({ user }: Props) {
         {/* â”€â”€ ACCOUNT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div>
           <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.accountSection")}</p>
-          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,0,14,0.1)", background: "rgba(255,255,255,0.03)" }}>
             <Row icon={Mail} label={t("settings.editEmail")} sub={user.email ? t("settings.editEmailSubSet", { email: user.email }) : t("settings.editEmailSubNotSet")} onClick={() => setSubScreen("account")} testId="button-settings-email" />
             <Divider />
             <Row icon={KeyRound} label={t("settings.editPassword")} sub={t("settings.editPasswordSub")} onClick={() => setSubScreen("account")} testId="button-settings-password" />
@@ -516,7 +516,7 @@ export default function SettingsPage({ user }: Props) {
         {/* â”€â”€ CONTACT US â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div>
           <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.contactUsSection")}</p>
-          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,0,14,0.1)", background: "rgba(255,255,255,0.03)" }}>
             <Row icon={LifeBuoy} label={t("settings.helpSupport")} sub={t("settings.helpSupportSub")} onClick={openSupportChat} testId="button-settings-support" />
             <Divider />
             <Row icon={Lightbulb} label={t("settings.featureRequest")} sub={t("settings.featureRequestSub")} onClick={() => setSubScreen("feature-request")} testId="button-settings-feature-request" />
@@ -530,7 +530,7 @@ export default function SettingsPage({ user }: Props) {
         {/* â”€â”€ SUBSCRIPTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div>
           <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.subscriptionSection")}</p>
-          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,0,14,0.1)", background: "rgba(255,255,255,0.03)" }}>
             <Row icon={ScrollText} label={t("settings.subscriptionTerms")} sub={t("settings.subscriptionTermsSub")} onClick={() => setSubScreen("subscription-terms")} testId="button-settings-sub-terms" />
             <Divider />
             <Row
@@ -564,7 +564,7 @@ export default function SettingsPage({ user }: Props) {
         {/* â”€â”€ LEGAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div>
           <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.legalSection")}</p>
-          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,0,14,0.1)", background: "rgba(255,255,255,0.03)" }}>
             <Row icon={Lock} label={t("settings.privacyMenuItem")} sub={t("settings.privacyMenuSub")} onClick={() => setSubScreen("privacy")} testId="button-settings-privacy" />
             <Divider />
             <Row icon={FileText} label={t("settings.termsOfUse")} sub={t("settings.termsOfUseSub")} onClick={() => setSubScreen("guidelines")} testId="button-settings-terms" />
@@ -582,7 +582,7 @@ export default function SettingsPage({ user }: Props) {
         {user.isAdmin && (
           <div>
             <p className="text-xs text-cream/35 uppercase tracking-wider font-semibold mb-2 pl-1">{t("settings.adminSection")}</p>
-            <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
+            <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,0,14,0.1)", background: "rgba(255,255,255,0.03)" }}>
               <Row icon={Shield} label={t("settings.adminPanelItem")} sub={t("settings.adminPanelSub")} onClick={() => setLocation("/admin")} testId="button-settings-admin" />
             </div>
           </div>
@@ -625,9 +625,9 @@ export default function SettingsPage({ user }: Props) {
                 </div>
                 {user.isPremium && (
                   <div className="flex items-start gap-2 mb-3 px-3 py-2.5 rounded-lg"
-                    style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.25)" }}>
-                    <Star size={13} color="#c9a84c" className="flex-shrink-0 mt-0.5" />
-                    <p className="text-xs" style={{ color: "rgba(201,168,76,0.85)" }}>
+                    style={{ background: "rgba(200,0,14,0.1)", border: "1px solid rgba(200,0,14,0.25)" }}>
+                    <Star size={13} color="#c8000e" className="flex-shrink-0 mt-0.5" />
+                    <p className="text-xs" style={{ color: "rgba(200,0,14,0.85)" }}>
                       {t("settings.premiumDeleteWarning")}
                     </p>
                   </div>
@@ -703,17 +703,17 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
 
   const inputStyle = {
     background: "rgba(255,255,255,0.07)",
-    border: "1.5px solid rgba(201,168,76,0.25)",
+    border: "1.5px solid rgba(200,0,14,0.25)",
     color: "#fdf8f0",
   };
   const inputClass = "w-full px-4 py-3 rounded-xl text-sm placeholder-cream/25 outline-none";
   const labelClass = "block text-cream/50 text-xs font-semibold mb-1.5 uppercase tracking-wider";
   const errorClass = "text-xs mt-1.5 font-medium";
-  const sectionStyle = { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(201,168,76,0.1)" };
+  const sectionStyle = { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,0,14,0.1)" };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
-      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#0d0002" }}>
+      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(200,0,14,0.12)" }}>
         <button onClick={onBack} data-testid="button-back-account" className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,0.06)" }}>
           <ChevronLeft size={18} color="rgba(253,248,240,0.7)" />
         </button>
@@ -725,7 +725,7 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
         {/* Change Email */}
         <div className="rounded-2xl p-4 space-y-3" style={sectionStyle}>
           <div className="flex items-center gap-2 mb-1">
-            <Mail size={16} color="#c9a84c" />
+            <Mail size={16} color="#c8000e" />
             <p className="text-sm font-semibold text-gold">{t("settings.changeEmail")}</p>
           </div>
           <p className="text-xs text-cream/40 -mt-1">{user.email ? t("settings.changeEmailCurrent", { value: user.email }) : t("settings.notSet")}</p>
@@ -745,10 +745,10 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
                 <input type="password" value={emailForm.currentPassword} onChange={e => { setEmailForm(f => ({ ...f, currentPassword: e.target.value })); setEmailError(null); }}
                   placeholder="Confirm with your password" data-testid="input-email-current-password" className={inputClass} style={inputStyle} />
               </div>
-              {emailError && <p className={errorClass} style={{ color: "#d4608a" }}>{emailError}</p>}
+              {emailError && <p className={errorClass} style={{ color: "#e03050" }}>{emailError}</p>}
               <button onClick={() => emailMutation.mutate()} disabled={!emailForm.newEmail || !emailForm.currentPassword || emailMutation.isPending}
                 data-testid="button-save-email" className="w-full py-3 rounded-xl text-sm font-bold disabled:opacity-50"
-                style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
+                style={{ background: "linear-gradient(135deg, #c8000e, #e83535)", color: "#1a0005" }}>
                 {emailMutation.isPending ? t("settings.savingEllipsis") : t("settings.updateEmail")}
               </button>
             </>
@@ -758,7 +758,7 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
         {/* Change Password */}
         <div className="rounded-2xl p-4 space-y-3" style={sectionStyle}>
           <div className="flex items-center gap-2 mb-1">
-            <KeyRound size={16} color="#c9a84c" />
+            <KeyRound size={16} color="#c8000e" />
             <p className="text-sm font-semibold text-gold">{t("settings.changePassword")}</p>
           </div>
           {pwDone ? (
@@ -792,17 +792,17 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
                 <input type="password" value={pwForm.confirmPassword} onChange={e => setPwForm(f => ({ ...f, confirmPassword: e.target.value }))}
                   placeholder="Repeat new password" data-testid="input-confirm-new-password" className={inputClass} style={{
                     ...inputStyle,
-                    border: pwForm.confirmPassword && pwForm.confirmPassword !== pwForm.newPassword ? "1.5px solid rgba(212,96,138,0.7)" : inputStyle.border
+                    border: pwForm.confirmPassword && pwForm.confirmPassword !== pwForm.newPassword ? "1.5px solid rgba(224,48,80,0.7)" : inputStyle.border
                   }} />
                 {pwForm.confirmPassword && pwForm.confirmPassword !== pwForm.newPassword && (
-                  <p className={errorClass} style={{ color: "#d4608a" }}>{t("settings.passwordsDoNotMatch")}</p>
+                  <p className={errorClass} style={{ color: "#e03050" }}>{t("settings.passwordsDoNotMatch")}</p>
                 )}
               </div>
-              {pwError && <p className={errorClass} style={{ color: "#d4608a" }}>{pwError}</p>}
+              {pwError && <p className={errorClass} style={{ color: "#e03050" }}>{pwError}</p>}
               <button onClick={() => pwMutation.mutate()}
                 disabled={!pwForm.currentPassword || !pwForm.newPassword || pwForm.newPassword !== pwForm.confirmPassword || pwMutation.isPending}
                 data-testid="button-save-password" className="w-full py-3 rounded-xl text-sm font-bold disabled:opacity-50"
-                style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
+                style={{ background: "linear-gradient(135deg, #c8000e, #e83535)", color: "#1a0005" }}>
                 {pwMutation.isPending ? t("settings.savingEllipsis") : t("settings.updatePassword")}
               </button>
             </>
@@ -812,7 +812,7 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
         {/* Change Phone */}
         <div className="rounded-2xl p-4 space-y-3" style={sectionStyle}>
           <div className="flex items-center gap-2 mb-1">
-            <Phone size={16} color="#c9a84c" />
+            <Phone size={16} color="#c8000e" />
             <p className="text-sm font-semibold text-gold">{t("settings.changePhone")}</p>
           </div>
           <p className="text-xs text-cream/40 -mt-1">{user.phone ? t("settings.changeEmailCurrent", { value: user.phone }) : t("settings.notSet")}</p>
@@ -827,10 +827,10 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
                 <input type="tel" value={phoneForm.newPhone} onChange={e => { setPhoneForm({ newPhone: e.target.value }); setPhoneError(null); }}
                   placeholder="+1 555 000 0000" data-testid="input-new-phone" className={inputClass} style={inputStyle} />
               </div>
-              {phoneError && <p className={errorClass} style={{ color: "#d4608a" }}>{phoneError}</p>}
+              {phoneError && <p className={errorClass} style={{ color: "#e03050" }}>{phoneError}</p>}
               <button onClick={() => phoneMutation.mutate()} disabled={!phoneForm.newPhone || phoneMutation.isPending}
                 data-testid="button-save-phone" className="w-full py-3 rounded-xl text-sm font-bold disabled:opacity-50"
-                style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
+                style={{ background: "linear-gradient(135deg, #c8000e, #e83535)", color: "#1a0005" }}>
                 {phoneMutation.isPending ? t("settings.savingEllipsis") : t("settings.updatePhone")}
               </button>
             </>
@@ -844,8 +844,8 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
 
 function SubScreenShell({ title, onBack, testId, children }: { title: string; onBack: () => void; testId: string; children: ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
-      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#0d0002" }}>
+      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(200,0,14,0.12)" }}>
         <button onClick={onBack} data-testid={testId} className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,0.06)" }}>
           <ChevronLeft size={18} color="rgba(253,248,240,0.7)" />
         </button>
@@ -867,7 +867,7 @@ function FaqSubScreen({ onBack }: { onBack: () => void }) {
     <SubScreenShell title={t("settings.faq")} onBack={onBack} testId="button-back-faq">
       <div className="flex-1 overflow-y-auto px-5 py-5 pb-16 space-y-3">
         {faqs.map((item, i) => (
-          <div key={i} className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}>
+          <div key={i} className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,0,14,0.1)", background: "rgba(255,255,255,0.03)" }}>
             <button
               data-testid={`faq-item-${i}`}
               className="w-full flex items-center gap-3 px-4 py-4 text-left"
@@ -925,8 +925,8 @@ function FeedbackSubScreen({ title, icon: Icon, placeholder, messagePrefix, supp
   return (
     <SubScreenShell title={title} onBack={onBack} testId={`button-back-${title.toLowerCase().replace(/ /g, "-")}`}>
       <div className="flex-1 overflow-y-auto px-5 py-5 pb-16 flex flex-col gap-4">
-        <div className="rounded-2xl p-4 flex items-start gap-3" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.15)" }}>
-          <Icon size={18} color="#c9a84c" className="flex-shrink-0 mt-0.5" />
+        <div className="rounded-2xl p-4 flex items-start gap-3" style={{ background: "rgba(200,0,14,0.07)", border: "1px solid rgba(200,0,14,0.15)" }}>
+          <Icon size={18} color="#c8000e" className="flex-shrink-0 mt-0.5" />
           <p className="text-sm text-cream/60 leading-relaxed">{placeholder}</p>
         </div>
         <textarea
@@ -936,14 +936,14 @@ function FeedbackSubScreen({ title, icon: Icon, placeholder, messagePrefix, supp
           placeholder={t("settings.feedbackPlaceholder")}
           rows={7}
           className="w-full px-4 py-3.5 rounded-2xl text-sm placeholder-cream/20 outline-none resize-none"
-          style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(201,168,76,0.2)", color: "#fdf8f0" }}
+          style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(200,0,14,0.2)", color: "#fdf8f0" }}
         />
         <button
           data-testid="button-send-feedback"
           onClick={() => sendMutation.mutate()}
           disabled={!text.trim() || sendMutation.isPending}
           className="w-full py-3.5 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-40"
-          style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
+          style={{ background: "linear-gradient(135deg, #c8000e, #e83535)", color: "#1a0005" }}
         >
           <Send size={15} />
           {sendMutation.isPending ? t("settings.feedbackSending") : t("settings.feedbackSend")}
@@ -971,7 +971,7 @@ function SubscriptionTermsSubScreen({ onBack }: { onBack: () => void }) {
           { title: "Iraq Free Premium", body: "Users connecting from Iraq are eligible for a complimentary Premium membership while this promotion is active. This offer is subject to change and is verified by server-side IP geolocation to prevent abuse." },
           { title: "Contact", body: "For billing questions or disputes, open Help & Support in Settings and our team will assist you as quickly as possible." },
         ].map((s, i) => (
-          <div key={i} className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(201,168,76,0.1)" }}>
+          <div key={i} className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,0,14,0.1)" }}>
             <p className="text-gold text-sm font-semibold mb-1.5">{s.title}</p>
             <p className="text-cream/55 text-sm leading-relaxed">{s.body}</p>
           </div>
@@ -998,8 +998,8 @@ function Row({ icon: Icon, label, sub, onClick, testId }: {
       data-testid={testId}
       className="w-full flex items-center gap-4 px-4 py-3.5 transition-all text-left"
     >
-      <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,168,76,0.1)" }}>
-        <Icon size={16} color="#c9a84c" />
+      <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(200,0,14,0.1)" }}>
+        <Icon size={16} color="#c8000e" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium" style={{ color: "rgba(253,248,240,0.85)" }}>{label}</p>
@@ -1016,8 +1016,8 @@ function NotifToggleRow({ icon: Icon, label, sub, checked, onChange, testId, dis
 }) {
   return (
     <div className="flex items-center gap-4 px-4 py-3.5">
-      <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,168,76,0.1)" }}>
-        <Icon size={16} color={disabled ? "rgba(201,168,76,0.3)" : "#c9a84c"} />
+      <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(200,0,14,0.1)" }}>
+        <Icon size={16} color={disabled ? "rgba(200,0,14,0.3)" : "#c8000e"} />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium" style={{ color: disabled ? "rgba(253,248,240,0.35)" : "rgba(253,248,240,0.85)" }}>{label}</p>
@@ -1028,7 +1028,7 @@ function NotifToggleRow({ icon: Icon, label, sub, checked, onChange, testId, dis
         disabled={disabled}
         onClick={() => !disabled && onChange(!checked)}
         className="relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none disabled:opacity-40"
-        style={{ background: checked && !disabled ? "#c9a84c" : "rgba(255,255,255,0.12)" }}
+        style={{ background: checked && !disabled ? "#c8000e" : "rgba(255,255,255,0.12)" }}
         aria-checked={checked}
         role="switch"
       >
@@ -1062,8 +1062,8 @@ function BlockedUsersScreen({ onBack }: { onBack: () => void }) {
   const blockedUsers = data?.users ?? [];
 
   return (
-    <div className="min-h-screen flex flex-col pb-24" style={{ background: "#0d0618" }}>
-      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
+    <div className="min-h-screen flex flex-col pb-24" style={{ background: "#0d0002" }}>
+      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(200,0,14,0.12)" }}>
         <button
           onClick={onBack}
           data-testid="button-back-blocked"
@@ -1089,9 +1089,9 @@ function BlockedUsersScreen({ onBack }: { onBack: () => void }) {
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center"
-              style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.2)" }}
+              style={{ background: "rgba(200,0,14,0.08)", border: "1px solid rgba(200,0,14,0.2)" }}
             >
-              <ShieldX size={24} color="rgba(201,168,76,0.4)" />
+              <ShieldX size={24} color="rgba(200,0,14,0.4)" />
             </div>
             <p className="text-cream/40 text-sm text-center">{t("settings.noneBlocked")}</p>
           </div>
@@ -1102,7 +1102,7 @@ function BlockedUsersScreen({ onBack }: { onBack: () => void }) {
                 key={u.id}
                 data-testid={`blocked-user-${u.id}`}
                 className="flex items-center gap-3 px-4 py-3 rounded-2xl"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(201,168,76,0.08)" }}
+                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,0,14,0.08)" }}
               >
                 <div className="relative flex-shrink-0">
                   <div
@@ -1125,7 +1125,7 @@ function BlockedUsersScreen({ onBack }: { onBack: () => void }) {
                   disabled={unblockMutation.isPending}
                   data-testid={`button-unblock-${u.id}`}
                   className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-50"
-                  style={{ background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}
+                  style={{ background: "rgba(200,0,14,0.12)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.2)" }}
                 >
                   {t("settings.unblock")}
                 </button>

@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const EXPORTS = [
   { type: "users", label: "User Data", description: "All user profiles, status, and metadata", icon: Users, color: "#3b82f6" },
-  { type: "matches", label: "Match Data", description: "All matches between users", icon: Heart, color: "#d4608a" },
+  { type: "matches", label: "Match Data", description: "All matches between users", icon: Heart, color: "#e03050" },
   { type: "reports", label: "Report Data", description: "All flagged content and user reports", icon: Flag, color: "#ef4444" },
 ];
 

@@ -43,10 +43,10 @@ function PendingReviewBanner() {
   if (dismissed) return null;
   return (
     <div className="flex items-center gap-3 px-4 py-2.5"
-      style={{ background: "linear-gradient(90deg, rgba(201,168,76,0.13) 0%, rgba(123,63,160,0.1) 100%)", borderBottom: "1px solid rgba(201,168,76,0.2)" }}>
-      <Clock size={14} style={{ color: "#c9a84c", flexShrink: 0 }} />
+      style={{ background: "linear-gradient(90deg, rgba(200,0,14,0.13) 0%, rgba(123,63,160,0.1) 100%)", borderBottom: "1px solid rgba(200,0,14,0.2)" }}>
+      <Clock size={14} style={{ color: "#c8000e", flexShrink: 0 }} />
       <p className="text-xs flex-1 leading-snug" style={{ color: "rgba(253,248,240,0.7)" }}>
-        Your profile is <span style={{ color: "#c9a84c", fontWeight: 600 }}>under review</span> — you can browse freely while we check your account. You'll be notified once approved.
+        Your profile is <span style={{ color: "#c8000e", fontWeight: 600 }}>under review</span> — you can browse freely while we check your account. You'll be notified once approved.
       </p>
       <button onClick={() => setDismissed(true)} data-testid="button-dismiss-review-banner"
         className="flex-shrink-0 p-0.5 rounded" style={{ color: "rgba(253,248,240,0.3)" }}>
@@ -73,8 +73,8 @@ function AdminRoute({ user }: { user: User }) {
 
 function AdminSpinner() {
   return (
-    <div className="flex items-center justify-center min-h-screen" style={{ background: "#0d0618" }}>
-      <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "rgba(201,168,76,0.6) transparent transparent transparent" }} />
+    <div className="flex items-center justify-center min-h-screen" style={{ background: "#0d0002" }}>
+      <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "rgba(200,0,14,0.6) transparent transparent transparent" }} />
     </div>
   );
 }
@@ -171,7 +171,7 @@ function AppShell({ user }: { user: User }) {
 
   return (
     <VideoCallContext.Provider value={callCtx}>
-      <div className="flex flex-col min-h-screen" style={{ background: "#0d0618", fontFamily: "'Open Sans', sans-serif" }}>
+      <div className="flex flex-col min-h-screen" style={{ background: "#0d0002", fontFamily: "'Open Sans', sans-serif" }}>
         {isPending && !isAdminRoute && !isInCall && <PendingReviewBanner />}
         {callCtx.incomingCall && !isInCall && <IncomingCallBanner />}
         {isInCall && <VideoCallPage />}
@@ -180,7 +180,7 @@ function AppShell({ user }: { user: User }) {
             routing context that strips /admin from useLocation/useRoute */}
         {isAdminRoute && <AdminRoute user={user} />}
 
-        <main className="flex-1 overflow-hidden" style={{ background: "#0d0618" }}>
+        <main className="flex-1 overflow-hidden" style={{ background: "#0d0002" }}>
           {!isAdminRoute && (
             <Switch>
               <Route path="/discover" component={() => <DiscoverPage user={user} />} />
@@ -216,7 +216,7 @@ function Router() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen" style={{ background: "#0d0618" }}>
+      <div className="flex items-center justify-center min-h-screen" style={{ background: "#0d0002" }}>
         <div className="text-center">
           <div className="font-serif text-4xl text-gold mb-3">Gûstîlk</div>
           <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin mx-auto" />

@@ -57,13 +57,13 @@ export default function PromoCodesPage({ user }: { user: User }) {
         </div>
         <button onClick={() => setShowForm(!showForm)} data-testid="button-create-promo"
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold"
-          style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.25)" }}>
+          style={{ background: "rgba(200,0,14,0.15)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.25)" }}>
           <Plus size={13} /> Create Code
         </button>
       </div>
 
       {showForm && (
-        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.2)" }}>
+        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,0,14,0.2)" }}>
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
               <label className="text-cream/50 text-xs mb-1 block">Code</label>
@@ -105,7 +105,7 @@ export default function PromoCodesPage({ user }: { user: User }) {
           <button onClick={() => form.code.trim() && createMutation.mutate()} disabled={createMutation.isPending}
             data-testid="button-submit-promo"
             className="w-full py-2.5 rounded-xl text-xs font-bold"
-            style={{ background: "rgba(201,168,76,0.2)", color: "#c9a84c" }}>
+            style={{ background: "rgba(200,0,14,0.2)", color: "#c8000e" }}>
             Create Promo Code
           </button>
         </div>
@@ -115,7 +115,7 @@ export default function PromoCodesPage({ user }: { user: User }) {
         <div className="flex items-center justify-center h-32 text-cream/40 text-sm">Loading…</div>
       ) : codes.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-32 gap-2">
-          <Tag size={32} color="rgba(201,168,76,0.3)" />
+          <Tag size={32} color="rgba(200,0,14,0.3)" />
           <p className="text-cream/40 text-sm">No promo codes yet</p>
         </div>
       ) : (
@@ -128,7 +128,7 @@ export default function PromoCodesPage({ user }: { user: User }) {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-cream font-bold font-mono text-sm">{code.code}</span>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold"
-                    style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>
+                    style={{ background: "rgba(200,0,14,0.15)", color: "#c8000e" }}>
                     {code.discountPercent}% off
                   </span>
                   {!code.active && (

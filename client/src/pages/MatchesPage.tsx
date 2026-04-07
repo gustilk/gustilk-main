@@ -33,9 +33,9 @@ export default function MatchesPage({ user }: Props) {
   const conversations = regularMatches.filter(m => !!m.lastMessage);
 
   return (
-    <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
+    <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0002" }}>
       <div className="pt-12 pb-2 px-5 flex items-center gap-2.5">
-        <img src="/gustilk-logo.png?v=4" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
+        <img src="/gustilk-logo.png?v=4" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(200,0,14,0.6))" }} />
         <h1 className="font-serif text-2xl text-gold">{t("matches.title")}</h1>
       </div>
 
@@ -46,8 +46,8 @@ export default function MatchesPage({ user }: Props) {
       ) : regularMatches.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-48 gap-4 text-center px-8">
           <div className="w-16 h-16 rounded-full flex items-center justify-center"
-            style={{ border: "2px solid rgba(201,168,76,0.3)" }}>
-            <MessageCircle size={28} color="rgba(201,168,76,0.5)" />
+            style={{ border: "2px solid rgba(200,0,14,0.3)" }}>
+            <MessageCircle size={28} color="rgba(200,0,14,0.5)" />
           </div>
           <h3 className="font-serif text-xl text-gold">{t("matches.noMatches")}</h3>
           <p className="text-cream/40 text-sm">{t("matches.noMatchesSub")}</p>
@@ -57,11 +57,11 @@ export default function MatchesPage({ user }: Props) {
           {/* Premium upsell banner */}
           {!isPremium && regularMatches.length > 0 && (
             <div className="mx-4 mb-4 mt-2 rounded-2xl p-4"
-              style={{ background: "linear-gradient(135deg, rgba(201,168,76,0.1), rgba(123,63,160,0.1))", border: "1px solid rgba(201,168,76,0.3)" }}>
+              style={{ background: "linear-gradient(135deg, rgba(200,0,14,0.1), rgba(123,63,160,0.1))", border: "1px solid rgba(200,0,14,0.3)" }}>
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)" }}>
-                  <Lock size={16} color="#1a0a2e" />
+                  style={{ background: "linear-gradient(135deg, #c8000e, #e83535)" }}>
+                  <Lock size={16} color="#1a0005" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-cream font-semibold text-sm">
@@ -75,7 +75,7 @@ export default function MatchesPage({ user }: Props) {
                   onClick={() => setLocation("/premium")}
                   data-testid="button-upgrade-matches"
                   className="px-3 py-1.5 rounded-xl text-xs font-bold flex-shrink-0"
-                  style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
+                  style={{ background: "linear-gradient(135deg, #c8000e, #e83535)", color: "#1a0005" }}
                 >
                   {t("matches.upgradeBtn")}
                 </button>
@@ -87,7 +87,7 @@ export default function MatchesPage({ user }: Props) {
             <div className="mb-2">
               <div className="px-5 mb-3">
                 <span className="text-[11px] font-bold uppercase tracking-widest"
-                  style={{ color: "rgba(201,168,76,0.6)" }}>
+                  style={{ color: "rgba(200,0,14,0.6)" }}>
                   {isPremium ? t("matches.newMatches") : t("matches.newMatchesHidden")}
                 </span>
               </div>
@@ -115,7 +115,7 @@ export default function MatchesPage({ user }: Props) {
             <div>
               <div className="px-5 mb-2 mt-4">
                 <span className="text-[11px] font-bold uppercase tracking-widest"
-                  style={{ color: "rgba(201,168,76,0.6)" }}>
+                  style={{ color: "rgba(200,0,14,0.6)" }}>
                   {t("matches.messages")}
                 </span>
               </div>
@@ -155,9 +155,9 @@ function NewMatchBubble({ match, isPremium, onClick }: {
         <div
           className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center font-serif text-xl font-bold text-gold"
           style={{
-            background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)",
-            border: isPremium ? "2.5px solid rgba(201,168,76,0.5)" : "2.5px solid rgba(201,168,76,0.2)",
-            boxShadow: isPremium ? "0 0 16px rgba(201,168,76,0.2)" : "none",
+            background: "linear-gradient(135deg, #2d0f4a, #9b0010)",
+            border: isPremium ? "2.5px solid rgba(200,0,14,0.5)" : "2.5px solid rgba(200,0,14,0.2)",
+            boxShadow: isPremium ? "0 0 16px rgba(200,0,14,0.2)" : "none",
             filter: isPremium ? "none" : "blur(5px)",
           }}
         >
@@ -170,12 +170,12 @@ function NewMatchBubble({ match, isPremium, onClick }: {
         {!isPremium && (
           <div className="absolute inset-0 rounded-full flex items-center justify-center"
             style={{ background: "rgba(13,6,24,0.5)" }}>
-            <Lock size={18} color="#c9a84c" />
+            <Lock size={18} color="#c8000e" />
           </div>
         )}
         {isPremium && getActiveLabel(other.activitySeenAt) && (
           <span className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 bg-emerald-400"
-            style={{ borderColor: "#0d0618", boxShadow: "0 0 5px #34d399" }} />
+            style={{ borderColor: "#0d0002", boxShadow: "0 0 5px #34d399" }} />
         )}
       </div>
       <span className="text-[11px] text-cream/60 font-medium max-w-[60px] truncate">
@@ -215,7 +215,7 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
       onClick={onClick}
       data-testid={`match-item-${match.id}`}
       className="w-full flex items-center gap-4 p-4 rounded-2xl transition-all text-left"
-      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}
+      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,0,14,0.1)" }}
     >
       <div
         className="relative flex-shrink-0"
@@ -226,8 +226,8 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
         <div
           className="w-14 h-14 rounded-full flex items-center justify-center font-serif text-xl font-bold text-gold overflow-hidden transition-opacity"
           style={{
-            background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)",
-            border: isPremium ? "2px solid rgba(201,168,76,0.5)" : "2px solid rgba(201,168,76,0.3)",
+            background: "linear-gradient(135deg, #2d0f4a, #9b0010)",
+            border: isPremium ? "2px solid rgba(200,0,14,0.5)" : "2px solid rgba(200,0,14,0.3)",
             filter: isPremium ? "none" : "blur(6px)",
           }}
         >
@@ -239,18 +239,18 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
         </div>
         {!isPremium && (
           <div className="absolute inset-0 rounded-full flex items-center justify-center">
-            <Lock size={16} color="#c9a84c" />
+            <Lock size={16} color="#c8000e" />
           </div>
         )}
         {hasUnread && isPremium && (
           <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
-            style={{ background: "#d4608a", color: "white" }}>
+            style={{ background: "#e03050", color: "white" }}>
             {(match.unreadCount || 0) > 9 ? "9+" : match.unreadCount}
           </span>
         )}
         {isPremium && !hasUnread && getActiveLabel(other.activitySeenAt) && (
           <span className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 bg-emerald-400"
-            style={{ borderColor: "#0d0618", boxShadow: "0 0 5px #34d399" }} />
+            style={{ borderColor: "#0d0002", boxShadow: "0 0 5px #34d399" }} />
         )}
       </div>
 
@@ -276,8 +276,8 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
           </div>
         )}
         <div className="flex items-center gap-1.5">
-          <Lock size={11} color="rgba(201,168,76,0.7)" />
-          <p className="text-xs" style={{ color: isPremium ? "rgba(253,248,240,0.4)" : "rgba(201,168,76,0.7)" }}>
+          <Lock size={11} color="rgba(200,0,14,0.7)" />
+          <p className="text-xs" style={{ color: isPremium ? "rgba(253,248,240,0.4)" : "rgba(200,0,14,0.7)" }}>
             {isPremium
               ? (lastMsg
                   ? (lastMsg.senderId === currentUserId ? t("matches.youPrefix") : "") + lastMsg.text

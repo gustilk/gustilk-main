@@ -48,16 +48,16 @@ export default function LandingPage() {
   const currentLang = LANGUAGE_LIST.find(l => l.code === i18n.language) ?? LANGUAGE_LIST[0];
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ background: "#0d0618" }}>
+    <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ background: "#0d0002" }}>
 
       <button
         onClick={triggerLangPicker}
         data-testid="button-change-language"
         className="absolute top-5 right-5 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
         style={{
-          background: "rgba(201,168,76,0.1)",
-          border: "1px solid rgba(201,168,76,0.25)",
-          color: "rgba(201,168,76,0.8)",
+          background: "rgba(200,0,14,0.1)",
+          border: "1px solid rgba(200,0,14,0.25)",
+          color: "rgba(200,0,14,0.8)",
         }}
       >
         <Globe size={13} />
@@ -121,9 +121,9 @@ function HomeScreen({ onEmail, onPhone }: { onEmail: () => void; onPhone: () => 
   const { t } = useTranslation();
 
   const features = [
-    { icon: <Heart size={20} color="#c9a84c" />, title: t("landing.feature1Title"), desc: t("landing.feature1Desc") },
-    { icon: <Shield size={20} color="#c9a84c" />, title: t("landing.feature2Title"), desc: t("landing.feature2Desc") },
-    { icon: <Users size={20} color="#c9a84c" />, title: t("landing.feature3Title"), desc: t("landing.feature3Desc") },
+    { icon: <Heart size={20} color="#c8000e" />, title: t("landing.feature1Title"), desc: t("landing.feature1Desc") },
+    { icon: <Shield size={20} color="#c8000e" />, title: t("landing.feature2Title"), desc: t("landing.feature2Desc") },
+    { icon: <Users size={20} color="#c8000e" />, title: t("landing.feature3Title"), desc: t("landing.feature3Desc") },
   ];
 
   return (
@@ -139,7 +139,7 @@ function HomeScreen({ onEmail, onPhone }: { onEmail: () => void; onPhone: () => 
           onClick={onEmail}
           data-testid="button-email-auth"
           className="flex items-center justify-center gap-3 w-full py-4 rounded-2xl font-bold text-base transition-all"
-          style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 8px 32px rgba(201,168,76,0.4)" }}
+          style={{ background: "linear-gradient(135deg, #c8000e, #e83535)", color: "#1a0005", boxShadow: "0 8px 32px rgba(200,0,14,0.4)" }}
         >
           <Mail size={20} />
           {t("auth.continueEmail")}
@@ -149,7 +149,7 @@ function HomeScreen({ onEmail, onPhone }: { onEmail: () => void; onPhone: () => 
           onClick={onPhone}
           data-testid="button-phone-auth"
           className="flex items-center justify-center gap-3 w-full py-4 rounded-2xl font-bold text-base transition-all"
-          style={{ background: "rgba(255,255,255,0.07)", color: "#fdf8f0", border: "1.5px solid rgba(201,168,76,0.3)" }}
+          style={{ background: "rgba(255,255,255,0.07)", color: "#fdf8f0", border: "1.5px solid rgba(200,0,14,0.3)" }}
         >
           <Phone size={20} />
           {t("auth.continuePhone")}
@@ -159,9 +159,9 @@ function HomeScreen({ onEmail, onPhone }: { onEmail: () => void; onPhone: () => 
       <div className="space-y-2.5">
         {features.map((f, i) => (
           <div key={i} className="flex items-start gap-3 text-left p-3.5 rounded-2xl"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.12)" }}>
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,0,14,0.12)" }}>
             <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: "rgba(201,168,76,0.1)" }}>
+              style={{ background: "rgba(200,0,14,0.1)" }}>
               {f.icon}
             </div>
             <div>
@@ -176,8 +176,8 @@ function HomeScreen({ onEmail, onPhone }: { onEmail: () => void; onPhone: () => 
 }
 
 function GoldInput({ label, error, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { label: string; error?: boolean }) {
-  const normalBorder = error ? "rgba(212,96,138,0.7)" : "rgba(201,168,76,0.25)";
-  const focusBorder = error ? "rgba(212,96,138,0.9)" : "#c9a84c";
+  const normalBorder = error ? "rgba(224,48,80,0.7)" : "rgba(200,0,14,0.25)";
+  const focusBorder = error ? "rgba(224,48,80,0.9)" : "#c8000e";
   return (
     <div>
       <label className="block text-cream/60 text-xs font-semibold mb-1.5 uppercase tracking-wider">{label}</label>
@@ -200,7 +200,7 @@ function SubmitButton({ loading, loadingText, disabled, onClick, "data-testid": 
       data-testid={testId ?? "button-submit"}
       onClick={onClick}
       className="w-full py-4 rounded-2xl font-bold text-base disabled:opacity-60"
-      style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 8px 32px rgba(201,168,76,0.4)" }}
+      style={{ background: "linear-gradient(135deg, #c8000e, #e83535)", color: "#1a0005", boxShadow: "0 8px 32px rgba(200,0,14,0.4)" }}
     >
       {loading ? (loadingText ?? "Please wait…") : children}
     </button>
@@ -369,7 +369,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
       {/* ── Email activation screen ─────────────────────────────────────────── */}
       {mode === "activate" && (
         <div className="animate-slide-up" data-testid="section-activate">
-          <div className="rounded-2xl p-5 text-center mb-6" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.2)" }}>
+          <div className="rounded-2xl p-5 text-center mb-6" style={{ background: "rgba(200,0,14,0.07)", border: "1px solid rgba(200,0,14,0.2)" }}>
             <div className="text-3xl mb-2">✉️</div>
             <h2 className="font-serif text-lg text-gold mb-1.5" data-testid="text-activate-title">Check your inbox</h2>
             <p className="text-cream/55 text-sm leading-relaxed">
@@ -397,12 +397,12 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
                     className="w-12 h-14 text-center text-2xl font-bold rounded-xl outline-none transition-all"
                     style={{
                       background: "rgba(255,255,255,0.07)",
-                      border: `2px solid ${digit ? "rgba(201,168,76,0.6)" : "rgba(201,168,76,0.2)"}`,
+                      border: `2px solid ${digit ? "rgba(200,0,14,0.6)" : "rgba(200,0,14,0.2)"}`,
                       color: "#fdf8f0",
-                      caretColor: "#c9a84c",
+                      caretColor: "#c8000e",
                     }}
-                    onFocus={e => (e.currentTarget.style.borderColor = "#c9a84c")}
-                    onBlur={e => (e.currentTarget.style.borderColor = digit ? "rgba(201,168,76,0.6)" : "rgba(201,168,76,0.2)")}
+                    onFocus={e => (e.currentTarget.style.borderColor = "#c8000e")}
+                    onBlur={e => (e.currentTarget.style.borderColor = digit ? "rgba(200,0,14,0.6)" : "rgba(200,0,14,0.2)")}
                     onChange={e => {
                       const val = e.target.value.replace(/\D/g, "").slice(-1);
                       const next = [...otpDigits];
@@ -430,7 +430,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
                 ))}
               </div>
               {activationError && (
-                <p className="text-xs mt-3 text-center font-medium" style={{ color: "#d4608a" }} data-testid="text-activation-error">
+                <p className="text-xs mt-3 text-center font-medium" style={{ color: "#e03050" }} data-testid="text-activation-error">
                   {activationError}
                 </p>
               )}
@@ -459,7 +459,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
                 disabled={resendState === "sending"}
                 data-testid="button-resend-code"
                 className="text-xs font-medium disabled:opacity-50"
-                style={{ color: "rgba(201,168,76,0.6)" }}
+                style={{ color: "rgba(200,0,14,0.6)" }}
               >
                 {resendState === "sending" ? "Sending…" : "Didn't get it? Resend code"}
               </button>
@@ -485,7 +485,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
             data-testid={`tab-${m}`}
             className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
             style={mode === m
-              ? { background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }
+              ? { background: "linear-gradient(135deg, #c8000e, #e83535)", color: "#1a0005" }
               : { color: "rgba(253,248,240,0.4)" }
             }
           >
@@ -496,7 +496,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
 
       {mode !== "activate" && mode === "register" && ageStatus === "unchecked" && (
         <div className="animate-slide-up space-y-5">
-          <div className="rounded-2xl p-5 text-center" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.2)" }}>
+          <div className="rounded-2xl p-5 text-center" style={{ background: "rgba(200,0,14,0.07)", border: "1px solid rgba(200,0,14,0.2)" }}>
             <div className="text-3xl mb-3">🔞</div>
             <h2 className="font-serif text-lg text-gold mb-2" data-testid="text-age-gate-title">{t("ageGate.title")}</h2>
             <p className="text-cream/55 text-sm leading-relaxed">{t("ageGate.body")}</p>
@@ -506,7 +506,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
             onClick={() => setAgeStatus("confirmed")}
             data-testid="button-age-yes"
             className="w-full py-3.5 rounded-2xl font-bold text-base"
-            style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
+            style={{ background: "linear-gradient(135deg, #c8000e, #e83535)", color: "#1a0005" }}
           >
             {t("ageGate.confirmYes")}
           </button>
@@ -584,10 +584,10 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
             required
           />
           {email.length > 3 && !emailValid && !emailError && (
-            <p className="text-xs mt-1.5 font-medium" style={{ color: "#d4608a" }}>{t("auth.invalidEmail")}</p>
+            <p className="text-xs mt-1.5 font-medium" style={{ color: "#e03050" }}>{t("auth.invalidEmail")}</p>
           )}
           {emailError && (
-            <p className="text-xs mt-1.5 font-medium" style={{ color: "#d4608a" }}>{emailError}</p>
+            <p className="text-xs mt-1.5 font-medium" style={{ color: "#e03050" }}>{emailError}</p>
           )}
         </div>
 
@@ -606,10 +606,10 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
               className="w-full px-4 py-3 pr-11 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
               style={{
                 background: "rgba(255,255,255,0.07)",
-                border: `1.5px solid ${passwordError ? "rgba(212,96,138,0.7)" : "rgba(201,168,76,0.25)"}`,
+                border: `1.5px solid ${passwordError ? "rgba(224,48,80,0.7)" : "rgba(200,0,14,0.25)"}`,
               }}
-              onFocus={e => (e.currentTarget.style.borderColor = passwordError ? "rgba(212,96,138,0.9)" : "#c9a84c")}
-              onBlur={e => (e.currentTarget.style.borderColor = passwordError ? "rgba(212,96,138,0.7)" : "rgba(201,168,76,0.25)")}
+              onFocus={e => (e.currentTarget.style.borderColor = passwordError ? "rgba(224,48,80,0.9)" : "#c8000e")}
+              onBlur={e => (e.currentTarget.style.borderColor = passwordError ? "rgba(224,48,80,0.7)" : "rgba(200,0,14,0.25)")}
             />
             <button
               type="button"
@@ -621,7 +621,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
             </button>
           </div>
           {passwordError && (
-            <p className="text-xs mt-1.5 font-medium" style={{ color: "#d4608a" }}>{passwordError}</p>
+            <p className="text-xs mt-1.5 font-medium" style={{ color: "#e03050" }}>{passwordError}</p>
           )}
 
           {/* ── Password strength indicator (register only) ── */}
@@ -676,10 +676,10 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
                 className="w-full px-4 py-3 pr-11 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
                 style={{
                   background: "rgba(255,255,255,0.07)",
-                  border: `1.5px solid ${passwordMismatch ? "rgba(212,96,138,0.7)" : "rgba(201,168,76,0.25)"}`,
+                  border: `1.5px solid ${passwordMismatch ? "rgba(224,48,80,0.7)" : "rgba(200,0,14,0.25)"}`,
                 }}
-                onFocus={e => (e.currentTarget.style.borderColor = passwordMismatch ? "rgba(212,96,138,0.7)" : "#c9a84c")}
-                onBlur={e => (e.currentTarget.style.borderColor = passwordMismatch ? "rgba(212,96,138,0.7)" : "rgba(201,168,76,0.25)")}
+                onFocus={e => (e.currentTarget.style.borderColor = passwordMismatch ? "rgba(224,48,80,0.7)" : "#c8000e")}
+                onBlur={e => (e.currentTarget.style.borderColor = passwordMismatch ? "rgba(224,48,80,0.7)" : "rgba(200,0,14,0.25)")}
               />
               <button
                 type="button"
@@ -691,7 +691,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
               </button>
             </div>
             {passwordMismatch && (
-              <p className="text-xs mt-1.5 font-medium" style={{ color: "#d4608a" }}>{t("auth.passwordMismatch")}</p>
+              <p className="text-xs mt-1.5 font-medium" style={{ color: "#e03050" }}>{t("auth.passwordMismatch")}</p>
             )}
           </div>
         )}
@@ -708,13 +708,13 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
               onClick={() => { setForgotState("form"); setForgotEmail(email.trim()); setForgotError(null); }}
               data-testid="button-forgot-password"
               className="text-xs font-medium"
-              style={{ color: "rgba(201,168,76,0.6)" }}
+              style={{ color: "rgba(200,0,14,0.6)" }}
             >
               Forgot password?
             </button>
           )}
           {(forgotState === "form" || forgotState === "sending" || forgotState === "error") && (
-            <div className="rounded-xl px-4 py-3 text-left" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.2)" }}>
+            <div className="rounded-xl px-4 py-3 text-left" style={{ background: "rgba(200,0,14,0.07)", border: "1px solid rgba(200,0,14,0.2)" }}>
               <p className="text-xs font-semibold text-gold mb-2">Sign in with a magic link</p>
               <p className="text-xs mb-3" style={{ color: "rgba(253,248,240,0.5)" }}>
                 We'll email you a one-click sign-in link that expires in 15 minutes.
@@ -729,7 +729,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
                   data-testid="input-forgot-email"
                   autoComplete="email"
                   className="w-full px-3 py-2 rounded-lg text-sm text-cream placeholder-cream/30 outline-none"
-                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(201,168,76,0.25)" }}
+                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(200,0,14,0.25)" }}
                   disabled={forgotState === "sending"}
                   autoFocus
                 />
@@ -742,7 +742,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
                     disabled={forgotState === "sending"}
                     data-testid="button-send-magic-link"
                     className="flex-1 py-2 rounded-lg text-xs font-bold disabled:opacity-60"
-                    style={{ background: "linear-gradient(135deg,#c9a84c,#e8c97a)", color: "#1a0a2e" }}
+                    style={{ background: "linear-gradient(135deg,#c8000e,#e83535)", color: "#1a0005" }}
                   >
                     {forgotState === "sending" ? "Sending…" : "Send magic link"}
                   </button>
@@ -805,7 +805,7 @@ function CountryPicker({
     <div className="fixed inset-0 z-[60] flex items-end justify-center" style={{ background: "rgba(0,0,0,0.75)" }} onClick={onClose}>
       <div
         className="w-full max-w-sm rounded-t-2xl flex flex-col"
-        style={{ background: "#120920", border: "1px solid rgba(201,168,76,0.2)", maxHeight: "80vh" }}
+        style={{ background: "#120920", border: "1px solid rgba(200,0,14,0.2)", maxHeight: "80vh" }}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
@@ -824,7 +824,7 @@ function CountryPicker({
               placeholder={t("auth.searchCountry")}
               data-testid="input-country-search"
               className="w-full pl-8 pr-3 py-2.5 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
-              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(201,168,76,0.2)" }}
+              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(200,0,14,0.2)" }}
             />
           </div>
         </div>
@@ -837,9 +837,9 @@ function CountryPicker({
               onClick={() => { onSelect(c); onClose(); }}
               data-testid={`country-option-${c.iso}`}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all"
-              style={selected.iso === c.iso ? { background: "rgba(201,168,76,0.12)" } : {}}
+              style={selected.iso === c.iso ? { background: "rgba(200,0,14,0.12)" } : {}}
               onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
-              onMouseLeave={e => (e.currentTarget.style.background = selected.iso === c.iso ? "rgba(201,168,76,0.12)" : "")}
+              onMouseLeave={e => (e.currentTarget.style.background = selected.iso === c.iso ? "rgba(200,0,14,0.12)" : "")}
             >
               <span className="text-xl leading-none">{c.flag}</span>
               <span className="flex-1 text-cream text-sm">{c.name}</span>
@@ -942,12 +942,12 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
               className="flex items-center gap-1.5 px-3 py-3 rounded-xl text-sm font-medium shrink-0 transition-all"
               style={{
                 background: "rgba(255,255,255,0.07)",
-                border: "1.5px solid rgba(201,168,76,0.25)",
+                border: "1.5px solid rgba(200,0,14,0.25)",
                 color: "#fdf8f0",
                 minWidth: "96px",
               }}
-              onFocus={e => (e.currentTarget.style.borderColor = "#c9a84c")}
-              onBlur={e => (e.currentTarget.style.borderColor = "rgba(201,168,76,0.25)")}
+              onFocus={e => (e.currentTarget.style.borderColor = "#c8000e")}
+              onBlur={e => (e.currentTarget.style.borderColor = "rgba(200,0,14,0.25)")}
             >
               <span className="text-lg leading-none">{country.flag}</span>
               <span className="text-cream/70 font-mono text-xs">{country.dial}</span>
@@ -961,9 +961,9 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
               data-testid="input-phone"
               required
               className="flex-1 px-4 py-3 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
-              style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.25)" }}
-              onFocus={e => (e.currentTarget.style.borderColor = "#c9a84c")}
-              onBlur={e => (e.currentTarget.style.borderColor = "rgba(201,168,76,0.25)")}
+              style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(200,0,14,0.25)" }}
+              onFocus={e => (e.currentTarget.style.borderColor = "#c8000e")}
+              onBlur={e => (e.currentTarget.style.borderColor = "rgba(200,0,14,0.25)")}
             />
           </div>
           <p className="text-cream/30 text-xs mt-1.5 text-center">
@@ -971,13 +971,13 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
           </p>
         </div>
 
-        <div className="flex items-start gap-2.5 px-3 py-2.5 rounded-xl" style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.15)" }}>
+        <div className="flex items-start gap-2.5 px-3 py-2.5 rounded-xl" style={{ background: "rgba(200,0,14,0.06)", border: "1px solid rgba(200,0,14,0.15)" }}>
           <Fingerprint size={18} className="text-gold shrink-0 mt-0.5" />
           <p className="text-cream/50 text-xs leading-relaxed">{t("auth.biometricInfo")}</p>
         </div>
 
         {biometricError && (
-          <p className="text-xs text-center font-medium" style={{ color: "#d4608a" }}>{biometricError}</p>
+          <p className="text-xs text-center font-medium" style={{ color: "#e03050" }}>{biometricError}</p>
         )}
         <SubmitButton loading={loading} loadingText={t("auth.pleaseWait")} data-testid="button-biometric-submit" onClick={() => setBiometricError(null)}>
           {t("auth.biometricCta")}
@@ -990,12 +990,12 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
             onClick={() => setShowLostDeviceMsg(true)}
             data-testid="button-lost-device"
             className="text-xs font-medium"
-            style={{ color: "rgba(201,168,76,0.6)" }}
+            style={{ color: "rgba(200,0,14,0.6)" }}
           >
             Lost access to your device?
           </button>
         ) : (
-          <div className="rounded-xl px-4 py-3 text-left" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.2)" }}>
+          <div className="rounded-xl px-4 py-3 text-left" style={{ background: "rgba(200,0,14,0.07)", border: "1px solid rgba(200,0,14,0.2)" }}>
             <p className="text-xs font-semibold text-gold mb-1">Account recovery</p>
             <p className="text-xs leading-relaxed" style={{ color: "rgba(253,248,240,0.55)" }}>
               Email us at{" "}
@@ -1003,7 +1003,7 @@ function PhoneScreen({ onBack }: { onBack: () => void }) {
                 href="mailto:support@gustilk.com"
                 data-testid="link-support-email-device"
                 className="font-semibold underline"
-                style={{ color: "#c9a84c" }}
+                style={{ color: "#c8000e" }}
               >
                 support@gustilk.com
               </a>{" "}

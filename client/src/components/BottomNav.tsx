@@ -88,7 +88,7 @@ export default function BottomNav() {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 flex"
-      style={{ background: "rgba(13,6,24,0.97)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(201,168,76,0.15)", paddingBottom: "env(safe-area-inset-bottom)" }}
+      style={{ background: "rgba(13,6,24,0.97)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(200,0,14,0.15)", paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       {NAV_ITEMS.map(({ href, icon: Icon, tKey, id }) => {
         const isActive = location === href || (href === "/discover" && location === "/");
@@ -100,7 +100,7 @@ export default function BottomNav() {
             href={href}
             onClick={() => handleNavClick(id)}
             className="flex-1 flex flex-col items-center justify-center py-3 gap-0.5 transition-all relative"
-            style={{ color: isActive ? "#c9a84c" : "rgba(253,248,240,0.3)" }}
+            style={{ color: isActive ? "#c8000e" : "rgba(253,248,240,0.3)" }}
             data-testid={`nav-${id}`}
           >
             <div className="relative">
@@ -108,7 +108,7 @@ export default function BottomNav() {
               {isMatches && unreadCount > 0 && (
                 <span
                   className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
-                  style={{ background: "#d4608a", color: "white" }}
+                  style={{ background: "#e03050", color: "white" }}
                   data-testid="badge-unread"
                 >
                   {unreadCount > 9 ? "9+" : unreadCount}
@@ -117,7 +117,7 @@ export default function BottomNav() {
               {isActivity && likesCount > 0 && (
                 <span
                   className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
-                  style={{ background: "#c9a84c", color: "#0d0618" }}
+                  style={{ background: "#c8000e", color: "#0d0002" }}
                   data-testid="badge-activity"
                 >
                   {likesCount > 9 ? "9+" : likesCount}

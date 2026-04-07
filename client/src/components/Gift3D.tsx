@@ -45,7 +45,7 @@ function Rose({ s }: { s: number }) {
             borderRadius: "50%",
             background: i % 2 === 0
               ? "radial-gradient(ellipse at 40% 40%, #ff7eb3, #e83e6c 55%, #9c1a3e)"
-              : "radial-gradient(ellipse at 40% 40%, #ff9ec9, #d4608a 55%, #8b1a50)",
+              : "radial-gradient(ellipse at 40% 40%, #ff9ec9, #e03050 55%, #8b1a50)",
             top: "50%", left: "50%",
             transformOrigin: "0% 50%",
             transform: `rotateZ(${a}deg) translateX(${s * 0.04}px)`,
@@ -95,7 +95,7 @@ function Heart({ s }: { s: number }) {
 
 function Bouquet({ s }: { s: number }) {
   const flowers = [
-    { x: 50, y: 30, r: s * 0.22, c1: "#ffb3cc", c2: "#d4608a" },
+    { x: 50, y: 30, r: s * 0.22, c1: "#ffb3cc", c2: "#e03050" },
     { x: 28, y: 48, r: s * 0.19, c1: "#ffd6e7", c2: "#c9508a" },
     { x: 72, y: 48, r: s * 0.19, c1: "#ff99c8", c2: "#b84080" },
   ];
@@ -162,7 +162,7 @@ function Ring({ s }: { s: number }) {
       <div style={{
         width: r, height: r, borderRadius: "50%",
         border: `${thick}px solid transparent`,
-        background: `linear-gradient(#1a0a2e, #1a0a2e) padding-box,
+        background: `linear-gradient(#1a0005, #1a0005) padding-box,
                      linear-gradient(135deg, #e9d5ff, #a855f7, #7c3aed, #c4b5fd, #e9d5ff) border-box`,
         animation: "g-ring 3.5s linear infinite",
         boxShadow: "0 0 12px rgba(168,85,247,0.6), inset 0 0 8px rgba(168,85,247,0.2)",
@@ -323,7 +323,7 @@ function Chocolate({ s }: { s: number }) {
 function Kiss({ s }: { s: number }) {
   return (
     <div style={{ width: s, height: s, display: "flex", alignItems: "center", justifyContent: "center", animation: "g-pulse 2s ease-in-out infinite" }}>
-      <div style={{ position: "relative", width: s * 0.78, height: s * 0.52, filter: "drop-shadow(0 4px 8px rgba(201,168,76,0.6))" }}>
+      <div style={{ position: "relative", width: s * 0.78, height: s * 0.52, filter: "drop-shadow(0 4px 8px rgba(200,0,14,0.6))" }}>
         {/* Upper lip */}
         <div style={abs({
           width: "100%", height: "52%",

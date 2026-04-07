@@ -40,9 +40,9 @@ function SortablePhotoItem({
           onClick={() => onAdd(idx)}
           data-testid={`button-add-photo-${idx}`}
           className="w-full rounded-2xl flex flex-col items-center justify-center gap-1"
-          style={{ aspectRatio: "1 / 1", background: "rgba(255,255,255,0.03)", border: "2px dashed rgba(201,168,76,0.18)" }}
+          style={{ aspectRatio: "1 / 1", background: "rgba(255,255,255,0.03)", border: "2px dashed rgba(200,0,14,0.18)" }}
         >
-          <ImagePlus size={20} color="rgba(201,168,76,0.28)" />
+          <ImagePlus size={20} color="rgba(200,0,14,0.28)" />
           <span className="text-xs" style={{ color: "rgba(253,248,240,0.18)" }}>Photo {idx + 1}</span>
         </button>
       </div>
@@ -69,14 +69,14 @@ function SortablePhotoItem({
         <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.55) 0%, transparent 55%)" }} />
         {slot.status === "new" && (
           <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold"
-            style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}>
+            style={{ background: "rgba(200,0,14,0.9)", color: "#1a0005" }}>
             Pending
           </div>
         )}
         {idx === 0 && (
           <div className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded flex items-center gap-1 text-[10px] font-bold"
-            style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}>
-            <Star size={8} fill="#1a0a2e" color="#1a0a2e" /> Cover
+            style={{ background: "rgba(200,0,14,0.9)", color: "#1a0005" }}>
+            <Star size={8} fill="#1a0005" color="#1a0005" /> Cover
           </div>
         )}
         <div className="absolute top-1.5 right-1.5 rounded-full p-0.5" style={{ background: "rgba(13,6,24,0.5)" }}>
@@ -125,7 +125,7 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
     >
       <div className="flex items-center justify-between px-5 pt-12 pb-3 shrink-0">
         <div className="flex items-center gap-2">
-          <Eye size={16} color="#c9a84c" />
+          <Eye size={16} color="#c8000e" />
           <span className="text-gold text-sm font-semibold">{t("profile.howOthersSeeYou")}</span>
         </div>
         <button
@@ -142,13 +142,13 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
         <div
           className="rounded-3xl overflow-hidden"
           style={{
-            border: "1.5px solid rgba(201,168,76,0.2)",
+            border: "1.5px solid rgba(200,0,14,0.2)",
             boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(74,30,107,0.3)",
           }}
         >
           <div
             className="relative flex items-center justify-center"
-            style={{ height: "min(440px, 55vh)", background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}
+            style={{ height: "min(440px, 55vh)", background: "linear-gradient(135deg, #2d0f4a, #5a0008, #9b0010)" }}
           >
             {photos.length > 0 ? (
               <img
@@ -160,7 +160,7 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
             ) : (
               <div
                 className="w-28 h-28 rounded-full flex items-center justify-center text-5xl font-serif text-gold"
-                style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.25)" }}
+                style={{ background: "rgba(200,0,14,0.12)", border: "2px solid rgba(200,0,14,0.25)" }}
               >
                 {(user.fullName ?? user.firstName ?? "M").charAt(0)}
               </div>
@@ -196,7 +196,7 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
                       style={{
                         width: i === photoIdx ? "18px" : "6px",
                         height: "6px",
-                        background: i === photoIdx ? "#c9a84c" : "rgba(255,255,255,0.35)",
+                        background: i === photoIdx ? "#c8000e" : "rgba(255,255,255,0.35)",
                       }}
                     />
                   ))}
@@ -206,7 +206,7 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
 
             <div
               className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold"
-              style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
+              style={{ background: "rgba(200,0,14,0.9)", color: "#1a0005" }}
               data-testid="preview-badge-caste"
             >
               {casteLabel(user.caste ?? "murid")}
@@ -219,7 +219,7 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
               </h2>
               {(user.city || user.country) && (
                 <div className="flex items-center gap-1.5 mt-1.5">
-                  <MapPin size={13} color="rgba(201,168,76,0.8)" />
+                  <MapPin size={13} color="rgba(200,0,14,0.8)" />
                   <p className="text-white/60 text-sm">{user.city}{user.state ? `, ${user.state}` : ""}{user.country ? `, ${user.country}` : ""}</p>
                 </div>
               )}
@@ -232,7 +232,7 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
                     <span
                       key={lang}
                       className="px-2 py-0.5 rounded-full text-[11px]"
-                      style={{ background: "rgba(201,168,76,0.15)", color: "rgba(201,168,76,0.9)", border: "1px solid rgba(201,168,76,0.2)" }}
+                      style={{ background: "rgba(200,0,14,0.15)", color: "rgba(200,0,14,0.9)", border: "1px solid rgba(200,0,14,0.2)" }}
                     >
                       {lang}
                     </span>
@@ -257,7 +257,7 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
                     <span
                       key={lang}
                       className="px-3 py-1 rounded-full text-xs"
-                      style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}
+                      style={{ background: "rgba(200,0,14,0.1)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.2)" }}
                     >
                       {lang}
                     </span>
@@ -455,10 +455,10 @@ export default function ProfilePage({ user }: Props) {
     {previewOpen && (
       <ProfilePreviewModal user={me} onClose={() => setPreviewOpen(false)} />
     )}
-    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
+    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0002" }}>
       <div className="pt-12 pb-2 px-5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <img src="/gustilk-logo.png?v=4" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
+          <img src="/gustilk-logo.png?v=4" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(200,0,14,0.6))" }} />
           <h1 className="font-serif text-2xl text-gold">{t("profile.title")}</h1>
         </div>
         <div className="flex items-center gap-2">
@@ -466,7 +466,7 @@ export default function ProfilePage({ user }: Props) {
             onClick={() => setPreviewOpen(true)}
             data-testid="button-preview-profile"
             className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold"
-            style={{ border: "1.5px solid rgba(201,168,76,0.2)", color: "rgba(201,168,76,0.6)" }}
+            style={{ border: "1.5px solid rgba(200,0,14,0.2)", color: "rgba(200,0,14,0.6)" }}
           >
             <Eye size={13} />
             {t("profile.preview")}
@@ -475,7 +475,7 @@ export default function ProfilePage({ user }: Props) {
             onClick={() => setLocation("/profile/edit")}
             data-testid="button-edit-profile"
             className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold"
-            style={{ border: "1.5px solid rgba(201,168,76,0.35)", color: "#c9a84c" }}
+            style={{ border: "1.5px solid rgba(200,0,14,0.35)", color: "#c8000e" }}
           >
             <Edit2 size={13} />
             {t("profile.edit")}
@@ -486,17 +486,17 @@ export default function ProfilePage({ user }: Props) {
       {/* Rejection re-upload banner */}
       {me.verificationStatus === "rejected" && (
         <div className="flex items-start gap-3 px-4 py-3 mx-5 mt-3 rounded-2xl"
-          style={{ background: "rgba(212,96,138,0.08)", border: "1px solid rgba(212,96,138,0.3)" }}>
-          <XCircle size={15} style={{ color: "#d4608a", flexShrink: 0, marginTop: 1 }} />
+          style={{ background: "rgba(224,48,80,0.08)", border: "1px solid rgba(224,48,80,0.3)" }}>
+          <XCircle size={15} style={{ color: "#e03050", flexShrink: 0, marginTop: 1 }} />
           <div className="flex-1">
-            <p className="text-xs font-semibold mb-0.5" style={{ color: "#d4608a" }}>Profile not approved</p>
+            <p className="text-xs font-semibold mb-0.5" style={{ color: "#e03050" }}>Profile not approved</p>
             <p className="text-xs leading-relaxed" style={{ color: "rgba(253,248,240,0.55)" }}>
               Update your photos, then return to submit for re-review.
             </p>
           </div>
           <button onClick={() => setLocation("/")} data-testid="button-back-to-review"
             className="text-xs font-semibold px-2 py-1 rounded-lg flex-shrink-0"
-            style={{ background: "rgba(212,96,138,0.15)", color: "#d4608a" }}>
+            style={{ background: "rgba(224,48,80,0.15)", color: "#e03050" }}>
             Re-apply →
           </button>
         </div>
@@ -505,18 +505,18 @@ export default function ProfilePage({ user }: Props) {
       <div className="px-5 pt-4">
         <div
           className="rounded-3xl overflow-hidden"
-          style={{ border: "1px solid rgba(201,168,76,0.2)", background: "rgba(255,255,255,0.03)" }}
+          style={{ border: "1px solid rgba(200,0,14,0.2)", background: "rgba(255,255,255,0.03)" }}
         >
           <div
             className="h-52 relative flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}
+            style={{ background: "linear-gradient(135deg, #2d0f4a, #5a0008, #9b0010)" }}
           >
             {me.photos && me.photos.length > 0 ? (
               <img src={me.photos[0]} alt={me.fullName ?? ""} className="w-full h-full object-cover" />
             ) : (
               <div
                 className="w-24 h-24 rounded-full flex items-center justify-center font-serif text-4xl font-bold text-gold"
-                style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.3)" }}
+                style={{ background: "rgba(200,0,14,0.12)", border: "2px solid rgba(200,0,14,0.3)" }}
                 data-testid="avatar-placeholder"
               >
                 {(me.fullName ?? me.firstName ?? "M").charAt(0)}
@@ -538,7 +538,7 @@ export default function ProfilePage({ user }: Props) {
                 </div>
                 <div
                   className="px-3 py-1 rounded-full text-xs font-bold"
-                  style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
+                  style={{ background: "rgba(200,0,14,0.9)", color: "#1a0005" }}
                   data-testid="badge-caste"
                 >
                   {casteLabel(me.caste ?? "murid")}
@@ -571,7 +571,7 @@ export default function ProfilePage({ user }: Props) {
               ) : (
                 <span
                   className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold"
-                  style={{ background: "rgba(201,168,76,0.1)", color: "rgba(201,168,76,0.7)", border: "1px solid rgba(201,168,76,0.2)" }}
+                  style={{ background: "rgba(200,0,14,0.1)", color: "rgba(200,0,14,0.7)", border: "1px solid rgba(200,0,14,0.2)" }}
                   data-testid="badge-unverified"
                 >
                   <Clock size={11} />
@@ -608,7 +608,7 @@ export default function ProfilePage({ user }: Props) {
                     <span
                       key={lang}
                       className="px-3 py-1 rounded-full text-xs"
-                      style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}
+                      style={{ background: "rgba(200,0,14,0.1)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.2)" }}
                       data-testid={`badge-lang-${lang}`}
                     >
                       {lang}
@@ -631,14 +631,14 @@ export default function ProfilePage({ user }: Props) {
               disabled={savePhotosMutation.isPending}
               data-testid="button-save-photos"
               className="px-4 py-1.5 rounded-full text-xs font-bold disabled:opacity-50"
-              style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
+              style={{ background: "linear-gradient(135deg, #c8000e, #e83535)", color: "#1a0005" }}
             >
               {savePhotosMutation.isPending ? t("profile.savingPhotos") : t("profile.savePhotos")}
             </button>
           )}
         </div>
         {photoError && (
-          <p className="text-xs mt-2 font-medium" style={{ color: "#d4608a" }}>{photoError}</p>
+          <p className="text-xs mt-2 font-medium" style={{ color: "#e03050" }}>{photoError}</p>
         )}
 
         {/* Approved + new upload slots — drag to reorder, tap for options */}
@@ -669,7 +669,7 @@ export default function ProfilePage({ user }: Props) {
           >
             <div
               className="w-full rounded-t-3xl px-5 pt-3 pb-10"
-              style={{ background: "#1a0a2e", border: "1px solid rgba(201,168,76,0.15)" }}
+              style={{ background: "#1a0005", border: "1px solid rgba(200,0,14,0.15)" }}
               onClick={e => e.stopPropagation()}
             >
               <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: "rgba(255,255,255,0.12)" }} />
@@ -682,9 +682,9 @@ export default function ProfilePage({ user }: Props) {
                     data-testid="button-set-cover"
                     onClick={() => { setAsMain(selectedPhotoIdx!); setSelectedPhotoIdx(null); }}
                     className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.98]"
-                    style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}
+                    style={{ background: "rgba(200,0,14,0.1)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.2)" }}
                   >
-                    <Star size={16} color="#c9a84c" />
+                    <Star size={16} color="#c8000e" />
                     Set as Cover Photo
                   </button>
                 )}
@@ -692,9 +692,9 @@ export default function ProfilePage({ user }: Props) {
                   data-testid="button-delete-photo"
                   onClick={() => { removePhoto(selectedPhotoIdx!); setSelectedPhotoIdx(null); }}
                   className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.98]"
-                  style={{ background: "rgba(212,96,138,0.1)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.2)" }}
+                  style={{ background: "rgba(224,48,80,0.1)", color: "#e03050", border: "1px solid rgba(224,48,80,0.2)" }}
                 >
-                  <Trash2 size={16} color="#d4608a" />
+                  <Trash2 size={16} color="#e03050" />
                   Delete Photo
                 </button>
                 <button
@@ -714,8 +714,8 @@ export default function ProfilePage({ user }: Props) {
         {pendingSlots.length > 0 && (
           <div className="mt-4">
             <div className="flex items-center gap-2 mb-2">
-              <Clock size={12} color="rgba(201,168,76,0.6)" />
-              <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(201,168,76,0.6)" }}>
+              <Clock size={12} color="rgba(200,0,14,0.6)" />
+              <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(200,0,14,0.6)" }}>
                 Pending Admin Review
               </span>
             </div>
@@ -724,15 +724,15 @@ export default function ProfilePage({ user }: Props) {
                 <div key={idx} className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
                   <img src={slot.url} alt={`Pending ${idx + 1}`} className="w-full h-full object-cover" style={{ filter: "brightness(0.6)" }} />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="px-2 py-1 rounded-full text-center" style={{ background: "rgba(201,168,76,0.85)" }}>
-                      <Clock size={10} color="#1a0a2e" />
-                      <p className="text-[9px] font-bold mt-0.5" style={{ color: "#1a0a2e" }}>Pending</p>
+                    <div className="px-2 py-1 rounded-full text-center" style={{ background: "rgba(200,0,14,0.85)" }}>
+                      <Clock size={10} color="#1a0005" />
+                      <p className="text-[9px] font-bold mt-0.5" style={{ color: "#1a0005" }}>Pending</p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-            <p className="text-xs mt-1.5" style={{ color: "rgba(201,168,76,0.4)" }}>
+            <p className="text-xs mt-1.5" style={{ color: "rgba(200,0,14,0.4)" }}>
               These photos are under review and will appear after admin approval.
             </p>
           </div>
@@ -742,8 +742,8 @@ export default function ProfilePage({ user }: Props) {
         {rejectedSlots.length > 0 && (
           <div className="mt-4">
             <div className="flex items-center gap-2 mb-2">
-              <XCircle size={12} color="#d4608a" />
-              <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#d4608a" }}>
+              <XCircle size={12} color="#e03050" />
+              <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#e03050" }}>
                 Rejected Photos
               </span>
             </div>
@@ -752,7 +752,7 @@ export default function ProfilePage({ user }: Props) {
                 const timeLeft = formatTimeLeft(slot.rejectedAt);
                 return (
                   <div key={idx} data-testid={`rejected-photo-${idx}`}>
-                    <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1 / 1", border: "1.5px solid rgba(212,96,138,0.4)" }}>
+                    <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1 / 1", border: "1.5px solid rgba(224,48,80,0.4)" }}>
                       <img
                         src={slot.url}
                         alt={`Rejected ${idx + 1}`}
@@ -760,15 +760,15 @@ export default function ProfilePage({ user }: Props) {
                         style={{ filter: "brightness(0.4) saturate(0.2)" }}
                       />
                       <div className="absolute inset-0 flex items-center justify-center"
-                        style={{ background: "rgba(212,96,138,0.18)" }}>
-                        <XCircle size={22} color="rgba(212,96,138,0.9)" />
+                        style={{ background: "rgba(224,48,80,0.18)" }}>
+                        <XCircle size={22} color="rgba(224,48,80,0.9)" />
                       </div>
                     </div>
                     {slot.reason && (
                       <p
                         className="text-[9px] text-center mt-1 leading-snug px-0.5 font-medium"
                         data-testid={`text-rejection-reason-${idx}`}
-                        style={{ color: "rgba(212,96,138,0.8)" }}
+                        style={{ color: "rgba(224,48,80,0.8)" }}
                       >
                         {slot.reason}
                       </p>
@@ -777,7 +777,7 @@ export default function ProfilePage({ user }: Props) {
                       <p
                         className="flex items-center justify-center gap-0.5 text-[9px] mt-0.5 font-medium"
                         data-testid={`text-rejection-timer-${idx}`}
-                        style={{ color: "rgba(212,96,138,0.5)" }}
+                        style={{ color: "rgba(224,48,80,0.5)" }}
                       >
                         <Clock size={8} />
                         {timeLeft}
@@ -787,7 +787,7 @@ export default function ProfilePage({ user }: Props) {
                 );
               })}
             </div>
-            <p className="text-xs mt-2" style={{ color: "rgba(212,96,138,0.5)" }}>
+            <p className="text-xs mt-2" style={{ color: "rgba(224,48,80,0.5)" }}>
               These photos were removed by our admin. Use the empty slots above to upload replacements.
             </p>
           </div>
@@ -809,9 +809,9 @@ export default function ProfilePage({ user }: Props) {
             onClick={() => setLocation("/premium")}
             data-testid="button-go-premium"
             className="w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
-            style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
+            style={{ background: "linear-gradient(135deg, #c8000e, #e83535)", color: "#1a0005" }}
           >
-            <Star size={16} fill="#1a0a2e" />
+            <Star size={16} fill="#1a0005" />
             {t("premium.subscribe")}
           </button>
         )}
@@ -824,7 +824,7 @@ export default function ProfilePage({ user }: Props) {
             style={{ border: "1px solid rgba(123,63,160,0.3)", background: "rgba(123,63,160,0.1)" }}
           >
             <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(123,63,160,0.2)" }}>
-              <Shield size={16} color="#7b3fa0" />
+              <Shield size={16} color="#9b0010" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium" style={{ color: "rgba(253,248,240,0.85)" }}>Admin Panel</p>
@@ -838,10 +838,10 @@ export default function ProfilePage({ user }: Props) {
           onClick={() => setLocation("/settings")}
           data-testid="button-open-settings"
           className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all text-left"
-          style={{ border: "1px solid rgba(201,168,76,0.1)", background: "rgba(255,255,255,0.03)" }}
+          style={{ border: "1px solid rgba(200,0,14,0.1)", background: "rgba(255,255,255,0.03)" }}
         >
-          <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(201,168,76,0.1)" }}>
-            <Settings size={16} color="#c9a84c" />
+          <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(200,0,14,0.1)" }}>
+            <Settings size={16} color="#c8000e" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium" style={{ color: "rgba(253,248,240,0.85)" }}>Settings</p>

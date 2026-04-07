@@ -78,22 +78,22 @@ export default function CookieConsentBanner() {
         className="max-w-lg mx-auto rounded-2xl p-4"
         style={{
           background: "#130820",
-          border: "1px solid rgba(201,168,76,0.3)",
-          boxShadow: "0 -4px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.08)",
+          border: "1px solid rgba(200,0,14,0.3)",
+          boxShadow: "0 -4px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(200,0,14,0.08)",
         }}
       >
         {/* Header row */}
         <div className="flex items-start gap-3 mb-3">
           <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ background: "rgba(201,168,76,0.12)" }}>
-            <Cookie size={15} color="#c9a84c" />
+            style={{ background: "rgba(200,0,14,0.12)" }}>
+            <Cookie size={15} color="#c8000e" />
           </div>
           <div className="flex-1">
             <p className="text-cream text-sm font-semibold">We use cookies</p>
             <p className="text-cream/45 text-xs mt-0.5 leading-relaxed">
               Gûstîlk uses cookies to improve your experience, analyse performance, and show relevant content.
               Essential cookies are always active.{" "}
-              <a href="/cookie-policy" className="underline" style={{ color: "rgba(201,168,76,0.7)" }}>
+              <a href="/cookie-policy" className="underline" style={{ color: "rgba(200,0,14,0.7)" }}>
                 Cookie Policy
               </a>
             </p>
@@ -148,14 +148,14 @@ export default function CookieConsentBanner() {
                       data-testid={`cookie-toggle-${item.key}`}
                       className="relative w-9 h-5 rounded-full flex-shrink-0 transition-all"
                       style={{
-                        background: item.checked ? "rgba(201,168,76,0.8)" : "rgba(255,255,255,0.1)",
+                        background: item.checked ? "rgba(200,0,14,0.8)" : "rgba(255,255,255,0.1)",
                         border: "1px solid rgba(255,255,255,0.12)",
                       }}
                     >
                       <span
                         className="absolute top-0.5 w-4 h-4 rounded-full transition-all"
                         style={{
-                          background: item.checked ? "#1a0a2e" : "rgba(255,255,255,0.4)",
+                          background: item.checked ? "#1a0005" : "rgba(255,255,255,0.4)",
                           left: item.checked ? "calc(100% - 18px)" : "2px",
                         }}
                       />
@@ -176,8 +176,8 @@ export default function CookieConsentBanner() {
               data-testid="button-accept-all-cookies"
               className="flex-1 py-2.5 rounded-xl text-xs font-bold transition-opacity"
               style={{
-                background: "linear-gradient(135deg, #c9a84c, #e8c97a)",
-                color: "#1a0a2e",
+                background: "linear-gradient(135deg, #c8000e, #e83535)",
+                color: "#1a0005",
               }}
             >
               Accept All
@@ -204,7 +204,7 @@ export default function CookieConsentBanner() {
               onClick={acceptSelected}
               data-testid="button-save-cookie-preferences"
               className="w-full py-2.5 rounded-xl text-xs font-semibold"
-              style={{ background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.25)" }}
+              style={{ background: "rgba(200,0,14,0.12)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.25)" }}
             >
               Save My Preferences
             </button>

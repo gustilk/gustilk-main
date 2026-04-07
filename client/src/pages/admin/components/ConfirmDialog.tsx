@@ -70,7 +70,7 @@ export default function ConfirmDialog({
         className="w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4"
         style={{
           background: "#130820",
-          border: "1px solid rgba(201,168,76,0.2)",
+          border: "1px solid rgba(200,0,14,0.2)",
           boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
         }}
       >

@@ -162,10 +162,10 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
       )}
 
       {/* Profile header */}
-      <div className="rounded-2xl p-5 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}>
+      <div className="rounded-2xl p-5 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,0,14,0.15)" }}>
         <div className="flex items-start gap-4">
           <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center text-xl font-bold text-gold"
-            style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)" }}>
+            style={{ background: "linear-gradient(135deg, #2d0f4a, #9b0010)" }}>
             {u.mainPhotoUrl
               ? <img src={u.mainPhotoUrl} alt="" className="w-full h-full object-cover" />
               : (u.fullName ?? "U").charAt(0)}
@@ -179,7 +179,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
               </span>
               {u.isPremium && (
                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                  style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>Premium</span>
+                  style={{ background: "rgba(200,0,14,0.15)", color: "#c8000e" }}>Premium</span>
               )}
             </div>
             <div className="text-cream/50 text-sm mt-1">{u.email} · {u.phone ?? "No phone"}</div>
@@ -225,13 +225,13 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
         const allUrls = displaySlots.map(s => s.url);
 
         const badgeStyle: Record<string, { bg: string; color: string; border: string; label: string }> = {
-          pending:  { bg: "rgba(251,191,36,0.92)",  color: "#1a0a2e", border: "none", label: "Pending" },
+          pending:  { bg: "rgba(251,191,36,0.92)",  color: "#1a0005", border: "none", label: "Pending" },
           approved: { bg: "rgba(16,185,129,0.88)",  color: "#fff",    border: "none", label: "Approved" },
           rejected: { bg: "rgba(239,68,68,0.9)",    color: "#fff",    border: "none", label: "Rejected" },
         };
 
         return (
-          <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}>
+          <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,0,14,0.1)" }}>
             <h3 className="text-cream text-sm font-semibold mb-3">Photos ({displaySlots.length})</h3>
             <div className="grid grid-cols-3 gap-2">
               {displaySlots.map((slot, i) => {
@@ -279,7 +279,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
                     {isMain && !(u.verificationStatus === "approved" && slot.status === "pending") && (
                       <div
                         className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold"
-                        style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
+                        style={{ background: "rgba(200,0,14,0.9)", color: "#1a0005" }}
                         data-testid={`badge-photo-${i}-main`}
                       >
                         ★ Main
@@ -317,13 +317,13 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
 
       {/* Identity selfie */}
       {u.selfieUrl && (
-        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}>
+        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,0,14,0.1)" }}>
           <h3 className="text-cream text-sm font-semibold mb-3">Identity Selfie</h3>
           <button
             onClick={() => { setLightboxUrls([u.selfieUrl!]); setLightboxIdx(0); }}
             data-testid="selfie-thumb"
             className="relative max-w-xs rounded-xl overflow-hidden group cursor-zoom-in"
-            style={{ border: "1px solid rgba(201,168,76,0.2)" }}
+            style={{ border: "1px solid rgba(200,0,14,0.2)" }}
           >
             <img src={u.selfieUrl} alt="Identity selfie" className="w-full object-cover transition-transform duration-300 group-hover:scale-105" />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center">
@@ -385,7 +385,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
                   key={i}
                   onClick={e => { e.stopPropagation(); setLightboxIdx(i); }}
                   className="w-1.5 h-1.5 rounded-full transition-all"
-                  style={{ background: i === lightboxIdx ? "#c9a84c" : "rgba(255,255,255,0.3)" }}
+                  style={{ background: i === lightboxIdx ? "#c8000e" : "rgba(255,255,255,0.3)" }}
                 />
               ))}
             </div>
@@ -394,13 +394,13 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
       )}
 
       {/* Moderation Actions */}
-      <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}>
+      <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,0,14,0.1)" }}>
         <h3 className="text-cream text-sm font-semibold mb-3">Actions</h3>
         <div className="grid grid-cols-2 gap-2">
           <button onClick={() => updateMutation.mutate({ isPremium: !u.isPremium })}
             data-testid="button-toggle-premium"
             className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold"
-            style={{ background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}>
+            style={{ background: "rgba(200,0,14,0.12)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.2)" }}>
             <Crown size={13} /> {u.isPremium ? "Remove Premium" : "Grant Premium"}
           </button>
           <button onClick={() => setShowWarn(!showWarn)}
@@ -480,7 +480,7 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
 
       {/* Bottom approve/reject for pending users */}
       {isPending && (
-        <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.12)" }}>
+        <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,0,14,0.12)" }}>
           <h3 className="text-cream text-sm font-semibold mb-3">Approval Decision</h3>
           <div className="flex gap-2">
             <button

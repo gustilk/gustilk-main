@@ -14,8 +14,8 @@ export default function GuidelinesPage() {
   const allSections = [...(Array.isArray(agreementSections) ? agreementSections : []), section8, sectionContact];
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
-      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#0d0002" }}>
+      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(200,0,14,0.12)" }}>
         <button
           onClick={() => setLocation("/")}
           data-testid="button-back-policy"
@@ -30,7 +30,7 @@ export default function GuidelinesPage() {
         <p className="text-cream/30 text-xs mb-1">{t("settings.guidelinesLastUpdated")}</p>
         <p className="text-cream/50 text-sm leading-relaxed">{t("settings.guidelinesIntro")}</p>
         {allSections.map((s, i) => (
-          <div key={i} className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(201,168,76,0.1)" }}>
+          <div key={i} className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,0,14,0.1)" }}>
             <p className="text-gold text-sm font-semibold mb-1.5">{s.title}</p>
             <p className="text-cream/60 text-sm leading-relaxed whitespace-pre-line">{s.body}</p>
           </div>

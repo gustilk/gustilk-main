@@ -138,7 +138,7 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
                 className="rounded-2xl overflow-hidden"
                 style={{
                   background: "rgba(255,255,255,0.04)",
-                  border: isReapplication ? "1px solid rgba(251,191,36,0.4)" : "1px solid rgba(201,168,76,0.2)",
+                  border: isReapplication ? "1px solid rgba(251,191,36,0.4)" : "1px solid rgba(200,0,14,0.2)",
                 }}>
 
                 {/* ── Reapplication Banner ── */}
@@ -155,11 +155,11 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
                         {appHistory.map((h, i) => (
                           <div key={i} className="flex items-start gap-2 text-xs rounded-lg px-2.5 py-1.5"
                             style={{
-                              background: h.action === "approved" ? "rgba(16,185,129,0.08)" : h.action === "banned" ? "rgba(239,68,68,0.08)" : "rgba(212,96,138,0.08)",
-                              border: h.action === "approved" ? "1px solid rgba(16,185,129,0.2)" : h.action === "banned" ? "1px solid rgba(239,68,68,0.2)" : "1px solid rgba(212,96,138,0.2)",
+                              background: h.action === "approved" ? "rgba(16,185,129,0.08)" : h.action === "banned" ? "rgba(239,68,68,0.08)" : "rgba(224,48,80,0.08)",
+                              border: h.action === "approved" ? "1px solid rgba(16,185,129,0.2)" : h.action === "banned" ? "1px solid rgba(239,68,68,0.2)" : "1px solid rgba(224,48,80,0.2)",
                             }}>
                             <span className="font-bold flex-shrink-0 capitalize"
-                              style={{ color: h.action === "approved" ? "#10b981" : h.action === "banned" ? "#ef4444" : "#d4608a" }}>
+                              style={{ color: h.action === "approved" ? "#10b981" : h.action === "banned" ? "#ef4444" : "#e03050" }}>
                               {h.action}
                             </span>
                             {h.reason && <span className="text-cream/50">— {h.reason}</span>}
@@ -179,7 +179,7 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
                   <div className="flex items-start gap-4">
                     <div
                       className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 flex items-center justify-center text-xl font-bold text-gold"
-                      style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)" }}
+                      style={{ background: "linear-gradient(135deg, #2d0f4a, #9b0010)" }}
                     >
                       {profilePhotos[0]
                         ? <img src={profilePhotos[0]} alt="" className="w-full h-full object-cover" />
@@ -189,10 +189,10 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <span className="font-semibold text-cream text-base">{u.fullName ?? u.firstName ?? "Member"}</span>
                         {casteLabel && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>{casteLabel}</span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(200,0,14,0.15)", color: "#c8000e" }}>{casteLabel}</span>
                         )}
                         {u.gender && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(212,96,138,0.12)", color: "#d4608a" }}>{u.gender}</span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(224,48,80,0.12)", color: "#e03050" }}>{u.gender}</span>
                         )}
                       </div>
                       <p className="text-cream/50 text-xs">{[u.age && `${u.age} yrs`, u.city, u.country].filter(Boolean).join(" · ")}</p>
@@ -230,7 +230,7 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
                 {selfieUrl ? (
                   <div className="p-4 pb-0">
                     <div className="flex items-center gap-2 mb-2">
-                      <Shield size={12} color="#c9a84c" />
+                      <Shield size={12} color="#c8000e" />
                       <p className="text-cream/30 text-[10px] font-semibold uppercase tracking-wider">Identity Selfie</p>
                     </div>
                     <div

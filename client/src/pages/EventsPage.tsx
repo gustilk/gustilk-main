@@ -10,15 +10,15 @@ import type { SafeUser, EventWithAttendance } from "@shared/schema";
 interface Props { user: SafeUser }
 
 const TYPE_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  cultural: { bg: "rgba(201,168,76,0.12)", text: "#c9a84c", border: "rgba(201,168,76,0.25)" },
-  meetup: { bg: "rgba(212,96,138,0.12)", text: "#d4608a", border: "rgba(212,96,138,0.25)" },
+  cultural: { bg: "rgba(200,0,14,0.12)", text: "#c8000e", border: "rgba(200,0,14,0.25)" },
+  meetup: { bg: "rgba(224,48,80,0.12)", text: "#e03050", border: "rgba(224,48,80,0.25)" },
   online: { bg: "rgba(123,63,160,0.15)", text: "#9b6bd4", border: "rgba(123,63,160,0.3)" },
 };
 
 const TYPE_BG: Record<string, string> = {
-  cultural: "linear-gradient(135deg, #3d1f00, #8b5a00)",
-  meetup: "linear-gradient(135deg, #3d0020, #8b0044)",
-  online: "linear-gradient(135deg, #1a0a3e, #3d1f7a)",
+  cultural: "linear-gradient(135deg, #1a0001, #7a0004)",
+  meetup: "linear-gradient(135deg, #1a0002, #8b0008)",
+  online: "linear-gradient(135deg, #0d0005, #5a0008)",
 };
 
 const TYPE_EMOJI: Record<string, string> = {
@@ -121,11 +121,11 @@ export default function EventsPage({ user }: Props) {
   }
 
   return (
-    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
+    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0002" }}>
       <div className="pt-12 pb-4 px-5">
         <div className="flex items-center justify-between mb-0.5">
           <div className="flex items-center gap-2.5">
-            <img src="/gustilk-logo.png?v=4" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
+            <img src="/gustilk-logo.png?v=4" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(200,0,14,0.6))" }} />
             <h1 className="font-serif text-2xl text-gold">{t("events.title")}</h1>
           </div>
           {(user.isAdmin || user.isPremium) && (
@@ -133,7 +133,7 @@ export default function EventsPage({ user }: Props) {
               onClick={() => setFormView("create")}
               data-testid="button-create-event"
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all"
-              style={{ background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white" }}
+              style={{ background: "linear-gradient(135deg, #9b0010, #e03050)", color: "white" }}
             >
               <Plus size={14} />
               Create
@@ -151,8 +151,8 @@ export default function EventsPage({ user }: Props) {
             data-testid={`filter-${tab.id}`}
             className="px-4 py-1.5 rounded-full text-xs font-bold flex-shrink-0 transition-all"
             style={activeType === tab.id
-              ? { background: "#c9a84c", color: "#1a0a2e" }
-              : { background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.45)", border: "1px solid rgba(201,168,76,0.15)" }
+              ? { background: "#c8000e", color: "#1a0005" }
+              : { background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.45)", border: "1px solid rgba(200,0,14,0.15)" }
             }
           >
             {tab.label}
@@ -166,7 +166,7 @@ export default function EventsPage({ user }: Props) {
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-48 gap-3 text-center px-8">
-          <CalendarDays size={36} color="rgba(201,168,76,0.4)" />
+          <CalendarDays size={36} color="rgba(200,0,14,0.4)" />
           <p className="text-cream/40 text-sm">{t("events.noEventsFilter")}</p>
         </div>
       ) : (
@@ -208,28 +208,28 @@ function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
 
   const inputStyle = {
     background: "rgba(255,255,255,0.06)",
-    border: "1.5px solid rgba(201,168,76,0.2)",
+    border: "1.5px solid rgba(200,0,14,0.2)",
     color: "#fdf8f0",
   };
   const inputCls = "w-full px-4 py-3 rounded-2xl text-sm outline-none placeholder-cream/20 transition-all";
   const labelCls = "block text-cream/50 text-xs font-semibold mb-2 uppercase tracking-widest";
   const sectionCls = "rounded-2xl overflow-hidden mb-4" as string;
-  const sectionStyle = { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(201,168,76,0.1)" };
+  const sectionStyle = { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,0,14,0.1)" };
   const rowCls = "px-4 py-3 flex flex-col gap-1";
-  const dividerStyle = { height: "1px", background: "rgba(201,168,76,0.08)", margin: "0 16px" };
+  const dividerStyle = { height: "1px", background: "rgba(200,0,14,0.08)", margin: "0 16px" };
 
   const typeOptions: { value: FormData["type"]; label: string; emoji: string; color: string }[] = [
-    { value: "meetup", label: "Meetup", emoji: "🤝", color: "#d4608a" },
-    { value: "cultural", label: "Cultural", emoji: "🏛", color: "#c9a84c" },
+    { value: "meetup", label: "Meetup", emoji: "🤝", color: "#e03050" },
+    { value: "cultural", label: "Cultural", emoji: "🏛", color: "#c8000e" },
     { value: "online", label: "Online", emoji: "💻", color: "#9b6bd4" },
   ];
 
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col" style={{ background: "#0d0618" }}>
+    <div className="fixed inset-0 z-[60] flex flex-col" style={{ background: "#0d0002" }}>
       {/* Native-style nav bar */}
       <div
         className="flex items-center justify-between px-4 flex-shrink-0"
-        style={{ paddingTop: "calc(env(safe-area-inset-top) + 48px)", paddingBottom: "12px", borderBottom: "1px solid rgba(201,168,76,0.12)" }}
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 48px)", paddingBottom: "12px", borderBottom: "1px solid rgba(200,0,14,0.12)" }}
       >
         <button
           onClick={onBack}
@@ -248,7 +248,7 @@ function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
           disabled={!isValid || isPending}
           data-testid="button-submit-event"
           className="text-sm font-bold transition-all disabled:opacity-30"
-          style={{ color: isValid && !isPending ? "#c9a84c" : "rgba(201,168,76,0.3)" }}
+          style={{ color: isValid && !isPending ? "#c8000e" : "rgba(200,0,14,0.3)" }}
         >
           {isPending ? "Saving…" : isEditing ? "Save" : "Create"}
         </button>
@@ -368,7 +368,7 @@ function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
           disabled={!isValid || isPending}
           data-testid="button-submit-event-bottom"
           className="w-full py-4 rounded-2xl font-bold text-sm transition-all disabled:opacity-40"
-          style={{ background: isValid ? "linear-gradient(135deg, #7b3fa0, #d4608a)" : "rgba(255,255,255,0.06)", color: "white" }}
+          style={{ background: isValid ? "linear-gradient(135deg, #9b0010, #e03050)" : "rgba(255,255,255,0.06)", color: "white" }}
         >
           {isPending ? "Saving…" : isEditing ? "Save Changes" : "Create Event"}
         </button>
@@ -403,7 +403,7 @@ function EventCard({ event, user, onAttend, onOpen, onEdit, onDelete, isPending 
   return (
     <div
       className="rounded-2xl overflow-hidden"
-      style={{ border: "1px solid rgba(201,168,76,0.12)", background: "rgba(255,255,255,0.03)" }}
+      style={{ border: "1px solid rgba(200,0,14,0.12)", background: "rgba(255,255,255,0.03)" }}
       data-testid={`event-card-${event.id}`}
     >
       <button onClick={onOpen} className="w-full text-left">
@@ -430,11 +430,11 @@ function EventCard({ event, user, onAttend, onOpen, onEdit, onDelete, isPending 
         <div className="p-4 pb-3">
           <h3 className="font-serif text-base text-cream font-semibold leading-snug mb-2">{event.title}</h3>
           <div className="flex items-center gap-1.5 mb-1">
-            <CalendarDays size={11} color="rgba(201,168,76,0.7)" />
+            <CalendarDays size={11} color="rgba(200,0,14,0.7)" />
             <span className="text-cream/50 text-xs">{dateLabel}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <MapPin size={11} color="rgba(201,168,76,0.7)" />
+            <MapPin size={11} color="rgba(200,0,14,0.7)" />
             <span className="text-cream/50 text-xs truncate">{event.location} · {event.country}</span>
           </div>
         </div>
@@ -447,8 +447,8 @@ function EventCard({ event, user, onAttend, onOpen, onEdit, onDelete, isPending 
           data-testid={`button-attend-${event.id}`}
           className="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
           style={event.isAttending
-            ? { background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.3)" }
-            : { background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white" }
+            ? { background: "rgba(200,0,14,0.12)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.3)" }
+            : { background: "linear-gradient(135deg, #9b0010, #e03050)", color: "white" }
           }
         >
           {event.isAttending ? `✓ ${t("events.attending")}` : t("events.attend")}
@@ -467,7 +467,7 @@ function EventCard({ event, user, onAttend, onOpen, onEdit, onDelete, isPending 
               onClick={onEdit}
               data-testid={`button-edit-${event.id}`}
               className="p-2.5 rounded-xl transition-all"
-              style={{ background: "rgba(255,255,255,0.05)", color: "rgba(201,168,76,0.5)" }}
+              style={{ background: "rgba(255,255,255,0.05)", color: "rgba(200,0,14,0.5)" }}
             >
               <Edit2 size={14} />
             </button>

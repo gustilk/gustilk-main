@@ -18,7 +18,7 @@ export default function AppStorePage({ user }: { user: User }) {
             <div className="text-3xl mb-2">{s.icon}</div>
             <div className="text-cream text-sm font-semibold">{s.store}</div>
             <div className="flex items-center justify-center gap-1 mt-2">
-              {[1,2,3,4,5].map(i => <Star key={i} size={14} color="rgba(201,168,76,0.3)" fill="rgba(201,168,76,0.3)" />)}
+              {[1,2,3,4,5].map(i => <Star key={i} size={14} color="rgba(200,0,14,0.3)" fill="rgba(200,0,14,0.3)" />)}
             </div>
             <div className="text-cream/40 text-xs mt-1">Not yet listed</div>
           </div>

@@ -8,9 +8,9 @@ import type { SafeUser, EventWithAttendance } from "@shared/schema";
 interface Props { user: SafeUser; eventId: string }
 
 const TYPE_BG: Record<string, string> = {
-  cultural: "linear-gradient(135deg, #3d1f00, #8b5a00)",
-  meetup: "linear-gradient(135deg, #3d0020, #8b0044)",
-  online: "linear-gradient(135deg, #1a0a3e, #3d1f7a)",
+  cultural: "linear-gradient(135deg, #1a0001, #7a0004)",
+  meetup: "linear-gradient(135deg, #1a0002, #8b0008)",
+  online: "linear-gradient(135deg, #0d0005, #5a0008)",
 };
 
 const TYPE_EMOJI: Record<string, string> = {
@@ -50,7 +50,7 @@ export default function EventDetailPage({ user, eventId }: Props) {
   const emoji = event ? TYPE_EMOJI[event.type] ?? "📅" : "📅";
 
   return (
-    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
+    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0002" }}>
       <div
         className="absolute top-0 left-0 right-0 z-10 flex items-center px-4 pt-12 pb-3"
         style={{ background: "linear-gradient(to bottom, rgba(13,6,24,0.85), transparent)" }}
@@ -91,7 +91,7 @@ export default function EventDetailPage({ user, eventId }: Props) {
           <div className="px-5 -mt-4 relative z-10">
             <div
               className="inline-block px-3 py-1 rounded-full text-xs font-bold capitalize mb-3"
-              style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.3)" }}
+              style={{ background: "rgba(200,0,14,0.15)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.3)" }}
             >
               {event.type}
             </div>
@@ -101,8 +101,8 @@ export default function EventDetailPage({ user, eventId }: Props) {
 
             <div className="space-y-3 mb-6">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(201,168,76,0.1)" }}>
-                  <CalendarDays size={15} color="#c9a84c" />
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(200,0,14,0.1)" }}>
+                  <CalendarDays size={15} color="#c8000e" />
                 </div>
                 <div>
                   <p className="text-cream/40 text-xs uppercase tracking-wider font-semibold">Date & Time</p>
@@ -110,8 +110,8 @@ export default function EventDetailPage({ user, eventId }: Props) {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(201,168,76,0.1)" }}>
-                  <MapPin size={15} color="#c9a84c" />
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(200,0,14,0.1)" }}>
+                  <MapPin size={15} color="#c8000e" />
                 </div>
                 <div>
                   <p className="text-cream/40 text-xs uppercase tracking-wider font-semibold">Location</p>
@@ -119,8 +119,8 @@ export default function EventDetailPage({ user, eventId }: Props) {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(201,168,76,0.1)" }}>
-                  <Globe size={15} color="#c9a84c" />
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(200,0,14,0.1)" }}>
+                  <Globe size={15} color="#c8000e" />
                 </div>
                 <div>
                   <p className="text-cream/40 text-xs uppercase tracking-wider font-semibold">Organizer</p>
@@ -128,8 +128,8 @@ export default function EventDetailPage({ user, eventId }: Props) {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(201,168,76,0.1)" }}>
-                  <Users size={15} color="#c9a84c" />
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(200,0,14,0.1)" }}>
+                  <Users size={15} color="#c8000e" />
                 </div>
                 <div>
                   <p className="text-cream/40 text-xs uppercase tracking-wider font-semibold">Attendees</p>
@@ -149,8 +149,8 @@ export default function EventDetailPage({ user, eventId }: Props) {
               data-testid="button-rsvp"
               className="w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-60"
               style={event.isAttending
-                ? { background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "2px solid rgba(201,168,76,0.4)" }
-                : { background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white", boxShadow: "0 8px 24px rgba(212,96,138,0.3)" }
+                ? { background: "rgba(200,0,14,0.12)", color: "#c8000e", border: "2px solid rgba(200,0,14,0.4)" }
+                : { background: "linear-gradient(135deg, #9b0010, #e03050)", color: "white", boxShadow: "0 8px 24px rgba(224,48,80,0.3)" }
               }
             >
               {attendMutation.isPending ? "…" : event.isAttending ? "✓ You're attending — Cancel RSVP" : "RSVP — I'm attending!"}

@@ -2,7 +2,7 @@ import { Hash } from "lucide-react";
 import type { User } from "@shared/schema";
 
 const CASTES = [
-  { name: "Sheikh", description: "Religious leaders and their descendants. Highest spiritual authority in the Yezidi hierarchy.", color: "#c9a84c", count: "—" },
+  { name: "Sheikh", description: "Religious leaders and their descendants. Highest spiritual authority in the Yezidi hierarchy.", color: "#c8000e", count: "—" },
   { name: "Pir", description: "Spiritual guides who serve as intermediaries. Middle tier of the religious hierarchy.", color: "#8b5cf6", count: "—" },
   { name: "Mirid", description: "The largest caste, comprising the majority of Yezidi community members.", color: "#10b981", count: "—" },
 ];
@@ -41,12 +41,12 @@ export default function CastePage({ user }: { user: User }) {
       </div>
 
       {/* Compatibility rules */}
-      <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}>
+      <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,0,14,0.15)" }}>
         <h3 className="text-cream text-sm font-semibold mb-3">Marriage Compatibility Rules</h3>
         <div className="space-y-2">
           {RULES.map((rule, i) => (
             <div key={i} className="flex items-start gap-2.5">
-              <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: "#c9a84c" }} />
+              <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: "#c8000e" }} />
               <span className="text-cream/60 text-xs">{rule}</span>
             </div>
           ))}

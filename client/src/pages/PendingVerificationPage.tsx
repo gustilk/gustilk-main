@@ -20,20 +20,20 @@ export default function PendingVerificationPage({ user }: Props) {
   });
 
   return (
-    <div className="flex flex-col min-h-screen items-center justify-center px-6 text-center" style={{ background: "#0d0618" }}>
+    <div className="flex flex-col min-h-screen items-center justify-center px-6 text-center" style={{ background: "#0d0002" }}>
       <div className="relative mb-8">
         <div
           className="w-28 h-28 rounded-full flex items-center justify-center"
           style={{
-            background: "rgba(201,168,76,0.08)",
-            border: "2px solid rgba(201,168,76,0.3)",
+            background: "rgba(200,0,14,0.08)",
+            border: "2px solid rgba(200,0,14,0.3)",
           }}
         >
-          <Clock size={52} color="rgba(201,168,76,0.7)" />
+          <Clock size={52} color="rgba(200,0,14,0.7)" />
         </div>
         <div
           className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ background: "rgba(201,168,76,0.15)", border: "2px solid rgba(201,168,76,0.4)" }}
+          style={{ background: "rgba(200,0,14,0.15)", border: "2px solid rgba(200,0,14,0.4)" }}
         >
           <span className="text-gold text-lg">⏳</span>
         </div>
@@ -49,7 +49,7 @@ export default function PendingVerificationPage({ user }: Props) {
 
       <div
         className="w-full max-w-xs rounded-2xl p-5 mb-8 text-left space-y-3"
-        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}
+        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,0,14,0.15)" }}
       >
         <p className="text-cream/50 text-xs uppercase tracking-wider font-semibold">What happens next?</p>
         {[
@@ -69,7 +69,7 @@ export default function PendingVerificationPage({ user }: Props) {
           onClick={() => setLocation("/discover")}
           data-testid="button-browse-anyway"
           className="w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
-          style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
+          style={{ background: "linear-gradient(135deg, #c8000e, #e83535)", color: "#1a0005" }}
         >
           Browse in the meantime
           <ArrowRight size={16} />

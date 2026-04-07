@@ -19,12 +19,12 @@ export default function LanguageSelectPage({ onSelect }: Props) {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center px-5 py-12"
-      style={{ background: "linear-gradient(160deg, #0d0618 0%, #1a0a2e 60%, #0d0618 100%)" }}
+      style={{ background: "linear-gradient(160deg, #0d0002 0%, #1a0005 60%, #0d0002 100%)" }}
     >
       <div className="w-full max-w-sm flex flex-col items-center">
         <div className="relative inline-flex items-center justify-center mb-6">
           <div className="absolute inset-0" style={{
-            background: "radial-gradient(circle, rgba(201,168,76,0.25) 0%, transparent 65%)",
+            background: "radial-gradient(circle, rgba(200,0,14,0.25) 0%, transparent 65%)",
             filter: "blur(16px)",
             transform: "scale(1.3)",
           }} />
@@ -44,7 +44,7 @@ export default function LanguageSelectPage({ onSelect }: Props) {
 
         <h1
           className="font-serif text-3xl font-bold text-center mb-2"
-          style={{ color: "#c9a84c" }}
+          style={{ color: "#c8000e" }}
         >
           Gûstîlk
         </h1>
@@ -65,10 +65,10 @@ export default function LanguageSelectPage({ onSelect }: Props) {
                 className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-left transition-all duration-150"
                 style={{
                   background: isActive
-                    ? "rgba(201,168,76,0.15)"
+                    ? "rgba(200,0,14,0.15)"
                     : "rgba(255,255,255,0.04)",
                   border: isActive
-                    ? "1px solid rgba(201,168,76,0.45)"
+                    ? "1px solid rgba(200,0,14,0.45)"
                     : "1px solid rgba(255,255,255,0.07)",
                   transform: isActive ? "scale(1.02)" : "scale(1)",
                 }}
@@ -80,7 +80,7 @@ export default function LanguageSelectPage({ onSelect }: Props) {
                 )}
                 <span
                   className="text-sm font-medium truncate"
-                  style={{ color: isActive ? "#c9a84c" : "rgba(253,248,240,0.75)" }}
+                  style={{ color: isActive ? "#c8000e" : "rgba(253,248,240,0.75)" }}
                 >
                   {native}
                 </span>

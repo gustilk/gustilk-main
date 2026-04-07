@@ -60,7 +60,7 @@ export default function EventsManagementPage({ user }: { user: User }) {
   const f = (key: keyof typeof form, val: string) => setForm(p => ({ ...p, [key]: val }));
 
   const EventForm = () => (
-    <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.2)" }}>
+    <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,0,14,0.2)" }}>
       <div className="flex items-center justify-between mb-3">
         <span className="text-cream text-sm font-semibold">{editId ? "Edit Event" : "New Event"}</span>
         <button onClick={() => { setShowForm(false); setEditId(null); setForm(EMPTY_FORM); }}>
@@ -104,7 +104,7 @@ export default function EventsManagementPage({ user }: { user: User }) {
           disabled={createMutation.isPending || updateMutation.isPending}
           data-testid="button-submit-event"
           className="py-2.5 rounded-xl text-xs font-bold"
-          style={{ background: "rgba(201,168,76,0.2)", color: "#c9a84c" }}>
+          style={{ background: "rgba(200,0,14,0.2)", color: "#c8000e" }}>
           {editId ? "Save Changes" : "Create Event"}
         </button>
       </div>
@@ -120,7 +120,7 @@ export default function EventsManagementPage({ user }: { user: User }) {
         </div>
         <button onClick={() => { setShowForm(!showForm); setEditId(null); setForm(EMPTY_FORM); }} data-testid="button-create-event"
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold"
-          style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.25)" }}>
+          style={{ background: "rgba(200,0,14,0.15)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.25)" }}>
           <Plus size={13} /> Create Event
         </button>
       </div>
@@ -131,7 +131,7 @@ export default function EventsManagementPage({ user }: { user: User }) {
         <div className="flex items-center justify-center h-32 text-cream/40 text-sm">Loading…</div>
       ) : events.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-32 gap-2">
-          <Calendar size={32} color="rgba(201,168,76,0.3)" />
+          <Calendar size={32} color="rgba(200,0,14,0.3)" />
           <p className="text-cream/40 text-sm">No events yet</p>
         </div>
       ) : (
@@ -157,7 +157,7 @@ export default function EventsManagementPage({ user }: { user: User }) {
               <div className="flex gap-1.5 flex-shrink-0">
                 <button onClick={() => startEdit(event)} data-testid={`button-edit-event-${event.id}`}
                   className="w-7 h-7 rounded-lg flex items-center justify-center"
-                  style={{ background: "rgba(201,168,76,0.12)", color: "#c9a84c" }}>
+                  style={{ background: "rgba(200,0,14,0.12)", color: "#c8000e" }}>
                   <Edit2 size={12} />
                 </button>
                 <button onClick={() => { if (confirm("Delete this event?")) deleteMutation.mutate(event.id); }}

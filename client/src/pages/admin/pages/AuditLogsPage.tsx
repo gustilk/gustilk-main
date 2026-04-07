@@ -74,12 +74,12 @@ export default function AuditLogsPage({ user }: { user: User }) {
           <div className="flex gap-2">
             <button disabled={page === 0} onClick={() => setPage(p => p - 1)}
               className="w-8 h-8 rounded-lg flex items-center justify-center disabled:opacity-30"
-              style={{ background: "rgba(255,255,255,0.06)", color: "#c9a84c" }}>
+              style={{ background: "rgba(255,255,255,0.06)", color: "#c8000e" }}>
               <ChevronLeft size={14} />
             </button>
             <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}
               className="w-8 h-8 rounded-lg flex items-center justify-center disabled:opacity-30"
-              style={{ background: "rgba(255,255,255,0.06)", color: "#c9a84c" }}>
+              style={{ background: "rgba(255,255,255,0.06)", color: "#c8000e" }}>
               <ChevronRight size={14} />
             </button>
           </div>

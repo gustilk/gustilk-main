@@ -90,13 +90,13 @@ export default function DashboardPage({ user }: { user: User }) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <StatCard icon={Users} label="Total Users" value={stats?.totalUsers} color="#3b82f6" onClick={() => setLocation("/admin/users")} />
         <StatCard icon={TrendingUp} label="New This Week" value={stats?.newThisWeek} color="#10b981" sub="Last 7 days" />
-        <StatCard icon={Crown} label="Premium" value={stats?.premiumUsers} color="#c9a84c" onClick={() => setLocation("/admin/payments")} />
+        <StatCard icon={Crown} label="Premium" value={stats?.premiumUsers} color="#c8000e" onClick={() => setLocation("/admin/payments")} />
         <StatCard icon={Shield} label="Verified" value={stats?.verifiedUsers} color="#8b5cf6" />
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <StatCard icon={Ban} label="Banned" value={stats?.bannedUsers} color="#ef4444" />
-        <StatCard icon={Heart} label="Matches" value={stats?.totalMatches} color="#d4608a" />
+        <StatCard icon={Heart} label="Matches" value={stats?.totalMatches} color="#e03050" />
         <StatCard icon={MessageSquare} label="Messages" value={stats?.totalMessages} color="#06b6d4" />
         <StatCard icon={Calendar} label="Events" value={stats?.totalEvents} color="#f97316" onClick={() => setLocation("/admin/events")} />
       </div>

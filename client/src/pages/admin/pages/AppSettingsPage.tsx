@@ -71,7 +71,7 @@ export default function AppSettingsPage({ user }: { user: User }) {
           <button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}
             data-testid="button-save-settings"
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold"
-            style={{ background: "rgba(201,168,76,0.2)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.3)" }}>
+            style={{ background: "rgba(200,0,14,0.2)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.3)" }}>
             <Save size={12} /> Save Changes
           </button>
         )}
@@ -108,7 +108,7 @@ export default function AppSettingsPage({ user }: { user: User }) {
           ],
         },
       ].map(section => (
-        <div key={section.title} className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}>
+        <div key={section.title} className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,0,14,0.1)" }}>
           <h3 className="text-cream/60 text-xs font-bold uppercase tracking-wide mb-2">{section.title}</h3>
           {section.fields.map(f => (
             <FieldRow key={f.k} label={f.label} k={f.k} type={f.type as any} hint={f.hint} />
@@ -117,7 +117,7 @@ export default function AppSettingsPage({ user }: { user: User }) {
       ))}
 
       {/* Community Guidelines */}
-      <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}>
+      <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,0,14,0.1)" }}>
         <h3 className="text-cream/60 text-xs font-bold uppercase tracking-wide mb-3">Community Guidelines</h3>
         <textarea value={settings.guidelines ?? ""} onChange={e => set("guidelines", e.target.value)}
           rows={5} data-testid="textarea-guidelines"
@@ -129,7 +129,7 @@ export default function AppSettingsPage({ user }: { user: User }) {
         <button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}
           data-testid="button-save-settings-bottom"
           className="w-full py-3 rounded-xl text-sm font-bold"
-          style={{ background: "rgba(201,168,76,0.2)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.3)" }}>
+          style={{ background: "rgba(200,0,14,0.2)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.3)" }}>
           <Save size={14} className="inline mr-2" /> Save All Changes
         </button>
       )}

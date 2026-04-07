@@ -51,13 +51,13 @@ export default function AnnouncementsPage({ user }: { user: User }) {
         </div>
         <button onClick={() => setShowForm(!showForm)} data-testid="button-create-announcement"
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold"
-          style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.25)" }}>
+          style={{ background: "rgba(200,0,14,0.15)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.25)" }}>
           <Plus size={13} /> New
         </button>
       </div>
 
       {showForm && (
-        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.2)" }}>
+        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,0,14,0.2)" }}>
           <input value={title} onChange={e => setTitle(e.target.value)}
             placeholder="Announcement title…" data-testid="input-announcement-title"
             className="w-full px-3 py-2 rounded-xl text-sm text-cream placeholder-cream/30 outline-none mb-2"
@@ -70,7 +70,7 @@ export default function AnnouncementsPage({ user }: { user: User }) {
           <button onClick={() => title.trim() && content.trim() && createMutation.mutate()}
             disabled={createMutation.isPending} data-testid="button-submit-announcement"
             className="w-full py-2.5 rounded-xl text-xs font-bold"
-            style={{ background: "rgba(201,168,76,0.2)", color: "#c9a84c" }}>
+            style={{ background: "rgba(200,0,14,0.2)", color: "#c8000e" }}>
             Publish Announcement
           </button>
         </div>
@@ -80,7 +80,7 @@ export default function AnnouncementsPage({ user }: { user: User }) {
         <div className="flex items-center justify-center h-32 text-cream/40 text-sm">Loading…</div>
       ) : items.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-32 gap-2">
-          <Megaphone size={32} color="rgba(201,168,76,0.3)" />
+          <Megaphone size={32} color="rgba(200,0,14,0.3)" />
           <p className="text-cream/40 text-sm">No announcements yet</p>
         </div>
       ) : (
@@ -88,7 +88,7 @@ export default function AnnouncementsPage({ user }: { user: User }) {
           {items.map(item => (
             <div key={item.id} data-testid={`announcement-${item.id}`}
               className="rounded-2xl p-4"
-              style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${item.active ? "rgba(201,168,76,0.2)" : "rgba(255,255,255,0.07)"}`, opacity: item.active ? 1 : 0.6 }}>
+              style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${item.active ? "rgba(200,0,14,0.2)" : "rgba(255,255,255,0.07)"}`, opacity: item.active ? 1 : 0.6 }}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">

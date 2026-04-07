@@ -18,8 +18,8 @@ export default function PolicyPage({ titleKey, introKey, sectionsKey, backTo = "
   const sections = t(sectionsKey, { returnObjects: true }) as Section[];
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
-      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#0d0002" }}>
+      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(200,0,14,0.12)" }}>
         <button
           onClick={() => setLocation(backTo)}
           data-testid="button-back-policy"
@@ -33,7 +33,7 @@ export default function PolicyPage({ titleKey, introKey, sectionsKey, backTo = "
       <div className="flex-1 overflow-y-auto px-5 py-5 pb-16 space-y-4 max-w-lg mx-auto w-full">
         <p className="text-cream/50 text-sm leading-relaxed">{t(introKey)}</p>
         {Array.isArray(sections) && sections.map((s, i) => (
-          <div key={i} className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(201,168,76,0.1)" }}>
+          <div key={i} className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(200,0,14,0.1)" }}>
             <p className="text-gold text-sm font-semibold mb-1.5">{s.title}</p>
             <p className="text-cream/60 text-sm leading-relaxed">{s.body}</p>
           </div>
