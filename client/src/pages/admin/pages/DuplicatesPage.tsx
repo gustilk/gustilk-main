@@ -31,11 +31,11 @@ export default function DuplicatesPage({ user }: { user: User }) {
         <div className="space-y-3">
           {dupes.map((dupe, idx) => (
             <div key={idx} data-testid={`duplicate-pair-${idx}`}
-              className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(251,191,36,0.15)" }}>
+              className="rounded-2xl p-4" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(251,191,36,0.15)" }}>
               <div className="text-yellow-400 text-xs font-semibold mb-3">Possible Duplicate Pair</div>
               <div className="grid grid-cols-2 gap-4">
                 {[{ id: dupe.id1, email: dupe.email1, name: dupe.name1 }, { id: dupe.id2, email: dupe.email2, name: dupe.name2 }].map((u, i) => (
-                  <div key={i} className="p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.03)" }}>
+                  <div key={i} className="p-3 rounded-xl" style={{ background: "rgba(0,0,0,0.04)" }}>
                     <div className="text-cream text-sm font-medium">{u.name ?? "Member"}</div>
                     <div className="text-cream/40 text-xs">{u.email}</div>
                     <div className="text-cream/30 text-[10px] mt-1">Age: {dupe.age} · {dupe.city}</div>

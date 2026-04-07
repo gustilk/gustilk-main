@@ -26,7 +26,7 @@ export default function VideoCallPage() {
     "Connected";
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: "#0d0002" }}>
+    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: "#F9F9F9" }}>
       {/* Remote video — full background */}
       <video
         ref={remoteEl}
@@ -42,7 +42,7 @@ export default function VideoCallPage() {
           style={{ background: "rgba(13,6,24,0.92)" }}>
           {/* Avatar */}
           <div className="w-28 h-28 rounded-full overflow-hidden flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #2d0f4a, #9b0010)", border: "3px solid rgba(200,0,14,0.4)" }}>
+            style={{ background: "linear-gradient(135deg, #2d0f4a, #1E3A8A)", border: "3px solid rgba(244,196,48,0.4)" }}>
             {callPartnerPhoto ? (
               <ProtectedPhoto src={callPartnerPhoto} className="w-full h-full object-cover" alt={callPartnerName} />
             ) : (
@@ -58,14 +58,14 @@ export default function VideoCallPage() {
           {/* Pulsing ring */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="w-36 h-36 rounded-full animate-ping opacity-10"
-              style={{ background: "rgba(200,0,14,0.3)" }} />
+              style={{ background: "rgba(244,196,48,0.3)" }} />
           </div>
         </div>
       )}
 
       {/* Local video — picture-in-picture corner */}
       <div className="absolute top-16 right-4 w-28 h-40 rounded-2xl overflow-hidden shadow-xl z-10"
-        style={{ border: "2px solid rgba(200,0,14,0.3)" }}
+        style={{ border: "2px solid rgba(244,196,48,0.3)" }}
         data-testid="video-local-container">
         <video
           ref={localEl}
@@ -79,7 +79,7 @@ export default function VideoCallPage() {
         {isCamOff && (
           <div className="absolute inset-0 flex items-center justify-center"
             style={{ background: "rgba(13,6,24,0.85)" }}>
-            <VideoOff size={22} color="rgba(253,248,240,0.4)" />
+            <VideoOff size={22} color="rgba(51,51,51,0.4)" />
           </div>
         )}
       </div>
@@ -110,7 +110,7 @@ export default function VideoCallPage() {
           onClick={endCall}
           data-testid="button-end-call"
           className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg"
-          style={{ background: "#e03050" }}
+          style={{ background: "#6BBF59" }}
         >
           <PhoneOff size={26} color="white" />
         </button>
@@ -142,8 +142,8 @@ function CallButton({ children, label, active, onClick, testId }: {
       title={label}
       className="w-12 h-12 rounded-full flex items-center justify-center transition-all"
       style={active
-        ? { background: "rgba(253,248,240,0.15)", color: "#c8000e", border: "1.5px solid rgba(200,0,14,0.4)" }
-        : { background: "rgba(255,255,255,0.1)", color: "rgba(253,248,240,0.8)" }
+        ? { background: "rgba(51,51,51,0.15)", color: "#F4C430", border: "1.5px solid rgba(244,196,48,0.4)" }
+        : { background: "rgba(255,255,255,0.1)", color: "rgba(51,51,51,0.8)" }
       }
     >
       {children}
@@ -157,16 +157,16 @@ export function IncomingCallBanner() {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 px-4 pt-12 pb-4 flex items-start gap-4"
-      style={{ background: "rgba(13,6,24,0.96)", borderBottom: "1px solid rgba(200,0,14,0.3)" }}
+      style={{ background: "rgba(13,6,24,0.96)", borderBottom: "1px solid rgba(244,196,48,0.3)" }}
       data-testid="incoming-call-banner">
 
       <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
-        style={{ border: "2px solid rgba(200,0,14,0.5)" }}>
+        style={{ border: "2px solid rgba(244,196,48,0.5)" }}>
         {incomingCall.fromPhoto ? (
           <ProtectedPhoto src={incomingCall.fromPhoto} className="w-full h-full object-cover" alt={incomingCall.fromName} />
         ) : (
           <div className="w-full h-full flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #2d0f4a, #9b0010)" }}>
+            style={{ background: "linear-gradient(135deg, #2d0f4a, #1E3A8A)" }}>
             <span className="text-gold font-serif text-xl">{incomingCall.fromName.charAt(0)}</span>
           </div>
         )}
@@ -182,9 +182,9 @@ export function IncomingCallBanner() {
           onClick={rejectCall}
           data-testid="button-reject-call"
           className="w-11 h-11 rounded-full flex items-center justify-center"
-          style={{ background: "rgba(224,48,80,0.2)", border: "1px solid rgba(224,48,80,0.5)" }}
+          style={{ background: "rgba(107,191,89,0.2)", border: "1px solid rgba(107,191,89,0.5)" }}
         >
-          <PhoneOff size={18} color="#e03050" />
+          <PhoneOff size={18} color="#6BBF59" />
         </button>
         <button
           onClick={acceptCall}

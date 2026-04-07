@@ -145,8 +145,8 @@ export default function AdminPage({ user }: Props) {
 
   if (!user.isAdmin) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-6 text-center" style={{ background: "#0d0002" }}>
-        <Shield size={48} color="rgba(200,0,14,0.3)" />
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-6 text-center" style={{ background: "#F9F9F9" }}>
+        <Shield size={48} color="rgba(244,196,48,0.3)" />
         <h2 className="font-serif text-xl text-gold">Access Denied</h2>
         <p className="text-cream/40 text-sm">You do not have admin access.</p>
         <button onClick={() => setLocation("/profile")} className="text-gold text-sm underline">Back to Profile</button>
@@ -166,13 +166,13 @@ export default function AdminPage({ user }: Props) {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0002" }}>
-      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(200,0,14,0.15)" }}>
+    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#F9F9F9" }}>
+      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(244,196,48,0.15)" }}>
         <button onClick={() => setLocation("/profile")} data-testid="button-back" className="text-cream/60">
           <ArrowLeft size={22} />
         </button>
         <div className="flex items-center gap-2">
-          <Shield size={18} color="#c8000e" />
+          <Shield size={18} color="#F4C430" />
           <h1 className="font-serif text-xl text-gold">Admin Panel</h1>
         </div>
       </div>
@@ -185,15 +185,15 @@ export default function AdminPage({ user }: Props) {
             data-testid={`tab-${id}`}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap relative flex-shrink-0"
             style={activeTab === id
-              ? { background: "rgba(200,0,14,0.15)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.3)" }
-              : { background: "rgba(255,255,255,0.04)", color: "rgba(253,248,240,0.4)", border: "1px solid rgba(255,255,255,0.06)" }
+              ? { background: "rgba(244,196,48,0.15)", color: "#F4C430", border: "1px solid rgba(244,196,48,0.3)" }
+              : { background: "rgba(0,0,0,0.04)", color: "rgba(51,51,51,0.4)", border: "1px solid rgba(0,0,0,0.05)" }
             }
           >
             <Icon size={12} />
             {label}
             {badge != null && badge > 0 && (
               <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold leading-none"
-                style={{ background: id === "reports" ? "#e03050" : "#9b0010", color: "white" }}>
+                style={{ background: id === "reports" ? "#6BBF59" : "#1E3A8A", color: "white" }}>
                 {badge}
               </span>
             )}
@@ -250,7 +250,7 @@ export default function AdminPage({ user }: Props) {
 
 function StatCard({ icon: Icon, label, value, color }: { icon: any; label: string; value: number | undefined; color: string }) {
   return (
-    <div className="rounded-2xl p-4 flex flex-col gap-2" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+    <div className="rounded-2xl p-4 flex flex-col gap-2" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
       <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${color}22` }}>
         <Icon size={16} color={color} />
       </div>
@@ -267,11 +267,11 @@ function OverviewTab({ stats }: { stats: Stats | undefined }) {
     <div className="space-y-3 pt-1">
       <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold px-1">Platform Overview</p>
       <div className="grid grid-cols-2 gap-2.5">
-        <StatCard icon={Users} label="Total Users" value={stats?.totalUsers} color="#c8000e" />
+        <StatCard icon={Users} label="Total Users" value={stats?.totalUsers} color="#F4C430" />
         <StatCard icon={TrendingUp} label="New This Week" value={stats?.newThisWeek} color="#10b981" />
-        <StatCard icon={Crown} label="Premium Users" value={stats?.premiumUsers} color="#9b0010" />
+        <StatCard icon={Crown} label="Premium Users" value={stats?.premiumUsers} color="#1E3A8A" />
         <StatCard icon={UserCheck} label="Verified Users" value={stats?.verifiedUsers} color="#3b82f6" />
-        <StatCard icon={Heart} label="Total Matches" value={stats?.totalMatches} color="#e03050" />
+        <StatCard icon={Heart} label="Total Matches" value={stats?.totalMatches} color="#6BBF59" />
         <StatCard icon={MessageSquare} label="Messages Sent" value={stats?.totalMessages} color="#f59e0b" />
         <StatCard icon={Calendar} label="Events" value={stats?.totalEvents} color="#06b6d4" />
         <StatCard icon={AlertTriangle} label="Banned Users" value={stats?.bannedUsers} color="#ef4444" />
@@ -295,11 +295,11 @@ function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onToggleAp
     <>
       <div data-testid={`user-card-${u.id}`}
         className="rounded-2xl p-3.5"
-        style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${isBanned ? "rgba(239,68,68,0.2)" : u.isAdmin ? "rgba(200,0,14,0.15)" : "rgba(255,255,255,0.07)"}` }}
+        style={{ background: "rgba(0,0,0,0.04)", border: `1px solid ${isBanned ? "rgba(239,68,68,0.2)" : u.isAdmin ? "rgba(244,196,48,0.15)" : "rgba(255,255,255,0.07)"}` }}
       >
         <div className="flex items-center gap-3 mb-2.5">
           <div className="w-10 h-10 rounded-full flex items-center justify-center font-serif font-bold text-gold flex-shrink-0 overflow-hidden"
-            style={{ background: "linear-gradient(135deg,#2d0f4a,#9b0010)", border: "2px solid rgba(200,0,14,0.25)" }}>
+            style={{ background: "linear-gradient(135deg,#2d0f4a,#1E3A8A)", border: "2px solid rgba(244,196,48,0.25)" }}>
             {u.photos && u.photos.length > 0
               ? <img src={u.photos[0]} alt={u.fullName ?? ""} className="w-full h-full object-cover" />
               : (u.fullName ?? u.firstName ?? "?").charAt(0)}
@@ -307,10 +307,10 @@ function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onToggleAp
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-sm font-semibold text-cream">{u.fullName ?? u.firstName ?? "—"}</span>
-              {u.isPremium && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(123,63,160,0.2)", color: "#9b0010" }}>Premium</span>}
+              {u.isPremium && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(123,63,160,0.2)", color: "#1E3A8A" }}>Premium</span>}
               {u.isVerified && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(59,130,246,0.15)", color: "#3b82f6" }}>Verified</span>}
               {isBanned && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}>Banned</span>}
-              {u.isAdmin && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(200,0,14,0.15)", color: "#c8000e" }}>Admin</span>}
+              {u.isAdmin && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(244,196,48,0.15)", color: "#F4C430" }}>Admin</span>}
               {!u.isAdmin && !isApproved && !isBanned && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(251,146,60,0.15)", color: "#fb923c" }}>Pending</span>}
             </div>
             <p className="text-cream/35 text-xs truncate">{u.email}</p>
@@ -333,7 +333,7 @@ function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onToggleAp
             )}
             <button onClick={() => onTogglePremium(u.id, !u.isPremium)} disabled={isPending} data-testid={`button-premium-${u.id}`}
               className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50 transition-all"
-              style={u.isPremium ? { background: "rgba(123,63,160,0.2)", color: "#9b0010", border: "1px solid rgba(123,63,160,0.3)" } : { background: "rgba(255,255,255,0.05)", color: "rgba(253,248,240,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}>
+              style={u.isPremium ? { background: "rgba(123,63,160,0.2)", color: "#1E3A8A", border: "1px solid rgba(123,63,160,0.3)" } : { background: "rgba(0,0,0,0.05)", color: "rgba(51,51,51,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}>
               <Crown size={11} />{u.isPremium ? "Revoke Premium" : "Grant Premium"}
             </button>
             <button onClick={() => onToggleBan(u.id, !isBanned)} disabled={isPending} data-testid={`button-ban-${u.id}`}
@@ -352,11 +352,11 @@ function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onToggleAp
       </div>
       {confirmDelete && (
         <div className="fixed inset-0 flex items-end justify-center z-50 pb-8 px-4" style={{ background: "rgba(0,0,0,0.7)" }}>
-          <div className="w-full max-w-sm rounded-2xl p-6 space-y-4" style={{ background: "#1a0005", border: "1px solid rgba(239,68,68,0.3)" }}>
+          <div className="w-full max-w-sm rounded-2xl p-6 space-y-4" style={{ background: "#0F1F4F", border: "1px solid rgba(239,68,68,0.3)" }}>
             <h3 className="font-serif text-lg text-cream">Delete user?</h3>
             <p className="text-cream/50 text-sm">This will permanently delete the account and all associated data.</p>
             <div className="flex gap-2">
-              <button onClick={() => setConfirmDelete(false)} className="flex-1 py-2.5 rounded-xl text-sm font-semibold" style={{ background: "rgba(255,255,255,0.07)", color: "rgba(253,248,240,0.6)" }}>Cancel</button>
+              <button onClick={() => setConfirmDelete(false)} className="flex-1 py-2.5 rounded-xl text-sm font-semibold" style={{ background: "rgba(255,255,255,0.07)", color: "rgba(51,51,51,0.6)" }}>Cancel</button>
               <button onClick={() => { onDelete(u.id); setConfirmDelete(false); }} data-testid="button-confirm-delete"
                 className="flex-1 py-2.5 rounded-xl text-sm font-bold" style={{ background: "rgba(239,68,68,0.2)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }}>Delete</button>
             </div>
@@ -401,7 +401,7 @@ function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBa
 
   if (isLoading) return <Spinner />;
 
-  const selectStyle = { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(253,248,240,0.7)" };
+  const selectStyle = { background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(51,51,51,0.7)" };
 
   const cardProps = { isPending, onTogglePremium, onToggleBan, onToggleApprove, onDelete, onMessage };
 
@@ -414,7 +414,7 @@ function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBa
           <input type="text" placeholder="Search by name, email, city…" value={search} onChange={e => setSearch(e.target.value)}
             data-testid="input-user-search"
             className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-cream placeholder-cream/30 outline-none"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }} />
+            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
         </div>
         <div className="flex gap-2">
           <select value={countryFilter} onChange={e => { setCountryFilter(e.target.value); setCityFilter(""); }}
@@ -437,7 +437,7 @@ function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBa
       {/* Admins section */}
       {admins.length > 0 && (
         <div>
-          <SectionHeader icon="🛡️" label="Admins" count={admins.length} color="#c8000e" />
+          <SectionHeader icon="🛡️" label="Admins" count={admins.length} color="#F4C430" />
           <div className="space-y-2">
             {admins.map(u => (
               <UserCard key={u.id} u={u} isMe={u.id === currentUserId} {...cardProps} />
@@ -449,7 +449,7 @@ function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBa
       {/* Premium members */}
       {premiumMembers.length > 0 && (
         <div>
-          <SectionHeader icon="👑" label="Premium Members" count={premiumMembers.length} color="#9b0010" />
+          <SectionHeader icon="👑" label="Premium Members" count={premiumMembers.length} color="#1E3A8A" />
           <div className="space-y-2">
             {premiumMembers.map(u => (
               <UserCard key={u.id} u={u} isMe={u.id === currentUserId} {...cardProps} />
@@ -460,7 +460,7 @@ function UsersTab({ users, isLoading, currentUserId, onTogglePremium, onToggleBa
 
       {/* Standard members */}
       <div>
-        <SectionHeader icon="👤" label="Standard Members" count={standardMembers.length} color="rgba(253,248,240,0.3)" />
+        <SectionHeader icon="👤" label="Standard Members" count={standardMembers.length} color="rgba(51,51,51,0.3)" />
         <div className="space-y-2">
           {standardMembers.map(u => (
             <UserCard key={u.id} u={u} isMe={u.id === currentUserId} {...cardProps} />
@@ -479,7 +479,7 @@ function SectionHeader({ icon, label, count, color }: { icon: string; label: str
     <div className="flex items-center gap-2 px-1 mb-2 mt-1">
       <span className="text-sm">{icon}</span>
       <p className="text-xs uppercase tracking-wider font-semibold" style={{ color }}>{label}</p>
-      <span className="text-xs px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.4)" }}>{count}</span>
+      <span className="text-xs px-1.5 py-0.5 rounded-full font-bold" style={{ background: "rgba(0,0,0,0.05)", color: "rgba(51,51,51,0.4)" }}>{count}</span>
     </div>
   );
 }
@@ -528,7 +528,7 @@ function ReportsTab({ reports, isLoading, onResolve, isPending }: {
   if (isLoading) return <Spinner />;
   if (reports.length === 0) return (
     <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
-      <Flag size={48} color="rgba(200,0,14,0.3)" />
+      <Flag size={48} color="rgba(244,196,48,0.3)" />
       <h3 className="font-serif text-xl text-gold">No reports</h3>
       <p className="text-cream/40 text-sm">No user reports have been filed.</p>
     </div>
@@ -586,7 +586,7 @@ function EventsTab({ events, isLoading, onCreate, onUpdate, onDelete, isPending 
         onClick={openCreate}
         data-testid="button-create-event"
         className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-sm font-semibold transition-all"
-        style={{ background: "rgba(200,0,14,0.12)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.25)" }}
+        style={{ background: "rgba(244,196,48,0.12)", color: "#F4C430", border: "1px solid rgba(244,196,48,0.25)" }}
       >
         <Plus size={16} />
         Create New Event
@@ -594,7 +594,7 @@ function EventsTab({ events, isLoading, onCreate, onUpdate, onDelete, isPending 
 
       {events.length === 0 && !showForm && (
         <div className="flex flex-col items-center justify-center h-48 gap-3 text-center">
-          <Calendar size={40} color="rgba(200,0,14,0.3)" />
+          <Calendar size={40} color="rgba(244,196,48,0.3)" />
           <p className="text-cream/40 text-sm">No events yet.</p>
         </div>
       )}
@@ -603,7 +603,7 @@ function EventsTab({ events, isLoading, onCreate, onUpdate, onDelete, isPending 
         {events.map(ev => (
           <div key={ev.id} data-testid={`event-card-${ev.id}`}
             className="rounded-2xl p-3.5"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
+            style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
           >
             <div className="flex items-start justify-between gap-2 mb-1">
               <div className="flex-1 min-w-0">
@@ -611,7 +611,7 @@ function EventsTab({ events, isLoading, onCreate, onUpdate, onDelete, isPending 
                 <p className="text-cream/35 text-xs mt-0.5">{format(new Date(ev.date), "dd MMM yyyy, HH:mm")} · {ev.location}</p>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold capitalize"
-                    style={{ background: ev.type === "cultural" ? "rgba(200,0,14,0.15)" : ev.type === "meetup" ? "rgba(224,48,80,0.15)" : "rgba(59,130,246,0.15)", color: ev.type === "cultural" ? "#c8000e" : ev.type === "meetup" ? "#e03050" : "#3b82f6" }}>
+                    style={{ background: ev.type === "cultural" ? "rgba(244,196,48,0.15)" : ev.type === "meetup" ? "rgba(107,191,89,0.15)" : "rgba(59,130,246,0.15)", color: ev.type === "cultural" ? "#F4C430" : ev.type === "meetup" ? "#6BBF59" : "#3b82f6" }}>
                     {ev.type}
                   </span>
                   <span className="text-cream/25 text-xs">{ev.attendeeCount} attending</span>
@@ -620,8 +620,8 @@ function EventsTab({ events, isLoading, onCreate, onUpdate, onDelete, isPending 
               <div className="flex gap-1.5 flex-shrink-0">
                 <button onClick={() => openEdit(ev)} data-testid={`button-edit-event-${ev.id}`}
                   className="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
-                  style={{ background: "rgba(200,0,14,0.1)", border: "1px solid rgba(200,0,14,0.2)" }}>
-                  <Edit2 size={13} color="#c8000e" />
+                  style={{ background: "rgba(244,196,48,0.1)", border: "1px solid rgba(244,196,48,0.2)" }}>
+                  <Edit2 size={13} color="#F4C430" />
                 </button>
                 <button onClick={() => setConfirmDelete(ev.id)} data-testid={`button-delete-event-${ev.id}`}
                   className="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
@@ -636,7 +636,7 @@ function EventsTab({ events, isLoading, onCreate, onUpdate, onDelete, isPending 
 
       {showForm && (
         <div className="fixed inset-0 flex items-end justify-center z-50" style={{ background: "rgba(0,0,0,0.75)" }}>
-          <div className="w-full max-w-lg rounded-t-3xl pb-8 overflow-y-auto max-h-[90vh]" style={{ background: "#130826", border: "1px solid rgba(200,0,14,0.2)" }}>
+          <div className="w-full max-w-lg rounded-t-3xl pb-8 overflow-y-auto max-h-[90vh]" style={{ background: "#130826", border: "1px solid rgba(244,196,48,0.2)" }}>
             <div className="sticky top-0 flex items-center justify-between px-5 py-4" style={{ background: "#130826", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
               <h3 className="font-serif text-lg text-gold">{editEvent ? "Edit Event" : "New Event"}</h3>
               <button onClick={() => setShowForm(false)} className="text-cream/40"><X size={20} /></button>
@@ -658,7 +658,7 @@ function EventsTab({ events, isLoading, onCreate, onUpdate, onDelete, isPending 
                     onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
                     data-testid={`input-event-${key}`}
                     className="w-full px-3 py-2.5 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
-                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+                    style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
                   />
                 </div>
               ))}
@@ -670,7 +670,7 @@ function EventsTab({ events, isLoading, onCreate, onUpdate, onDelete, isPending 
                   onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
                   data-testid="input-event-date"
                   className="w-full px-3 py-2.5 rounded-xl text-sm text-cream outline-none"
-                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", colorScheme: "dark" }}
+                  style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)", colorScheme: "dark" }}
                 />
               </div>
               <div>
@@ -680,7 +680,7 @@ function EventsTab({ events, isLoading, onCreate, onUpdate, onDelete, isPending 
                   onChange={e => setForm(f => ({ ...f, type: e.target.value as any }))}
                   data-testid="select-event-type"
                   className="w-full px-3 py-2.5 rounded-xl text-sm text-cream outline-none"
-                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+                  style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
                 >
                   <option value="cultural">Cultural</option>
                   <option value="meetup">Meetup</option>
@@ -696,7 +696,7 @@ function EventsTab({ events, isLoading, onCreate, onUpdate, onDelete, isPending 
                   onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                   data-testid="textarea-event-description"
                   className="w-full px-3 py-2.5 rounded-xl text-sm text-cream placeholder-cream/25 outline-none resize-none"
-                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+                  style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
                 />
               </div>
               <button
@@ -704,7 +704,7 @@ function EventsTab({ events, isLoading, onCreate, onUpdate, onDelete, isPending 
                 disabled={isPending}
                 data-testid="button-save-event"
                 className="w-full py-3 rounded-xl text-sm font-bold mt-2 disabled:opacity-50"
-                style={{ background: "rgba(200,0,14,0.2)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.35)" }}
+                style={{ background: "rgba(244,196,48,0.2)", color: "#F4C430", border: "1px solid rgba(244,196,48,0.35)" }}
               >
                 {isPending ? "Saving…" : editEvent ? "Save Changes" : "Create Event"}
               </button>
@@ -715,13 +715,13 @@ function EventsTab({ events, isLoading, onCreate, onUpdate, onDelete, isPending 
 
       {confirmDelete && (
         <div className="fixed inset-0 flex items-end justify-center z-50 pb-8 px-4" style={{ background: "rgba(0,0,0,0.7)" }}>
-          <div className="w-full max-w-sm rounded-2xl p-6 space-y-4" style={{ background: "#1a0005", border: "1px solid rgba(239,68,68,0.3)" }}>
+          <div className="w-full max-w-sm rounded-2xl p-6 space-y-4" style={{ background: "#0F1F4F", border: "1px solid rgba(239,68,68,0.3)" }}>
             <h3 className="font-serif text-lg text-cream">Delete event?</h3>
             <p className="text-cream/50 text-sm">This will permanently remove the event and all RSVPs.</p>
             <div className="flex gap-2">
               <button onClick={() => setConfirmDelete(null)}
                 className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
-                style={{ background: "rgba(255,255,255,0.07)", color: "rgba(253,248,240,0.6)" }}>
+                style={{ background: "rgba(255,255,255,0.07)", color: "rgba(51,51,51,0.6)" }}>
                 Cancel
               </button>
               <button onClick={() => { onDelete(confirmDelete); setConfirmDelete(null); }}
@@ -752,13 +752,13 @@ function ReportCard({ report, onResolve, isPending, resolved }: {
   const timeLabel = report.createdAt ? formatDistanceToNow(new Date(report.createdAt), { addSuffix: true }) : "";
   return (
     <div className="rounded-2xl p-4 mb-2"
-      style={{ background: resolved ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.04)", border: `1px solid ${resolved ? "rgba(255,255,255,0.06)" : "rgba(224,48,80,0.2)"}`, opacity: resolved ? 0.6 : 1 }}
+      style={{ background: resolved ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.04)", border: `1px solid ${resolved ? "rgba(0,0,0,0.05)" : "rgba(107,191,89,0.2)"}`, opacity: resolved ? 0.6 : 1 }}
       data-testid={`report-card-${report.id}`}
     >
       <div className="flex items-start justify-between gap-3 mb-2">
         <div>
           <div className="flex items-center gap-2 mb-0.5">
-            <Flag size={12} color={resolved ? "rgba(253,248,240,0.3)" : "#e03050"} />
+            <Flag size={12} color={resolved ? "rgba(51,51,51,0.3)" : "#6BBF59"} />
             <span className="text-cream text-sm font-semibold">{report.reason}</span>
           </div>
           <p className="text-cream/35 text-xs">{timeLabel}</p>
@@ -798,12 +798,12 @@ function VerificationCard({ user, onApprove, onReject, onBan, onPhotoAction, onV
   const slots = ((user as any).photoSlots ?? []) as PhotoSlot[];
 
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,0,14,0.15)" }} data-testid={`verification-card-${user.id}`}>
+    <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(244,196,48,0.15)" }} data-testid={`verification-card-${user.id}`}>
 
       {/* Header */}
       <div className="flex items-center gap-3 p-4 pb-3">
         <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center font-serif text-lg font-bold text-gold flex-shrink-0"
-          style={{ background: "linear-gradient(135deg, #2d0f4a, #9b0010)", border: "2px solid rgba(200,0,14,0.3)" }}>
+          style={{ background: "linear-gradient(135deg, #2d0f4a, #1E3A8A)", border: "2px solid rgba(244,196,48,0.3)" }}>
           {user.photos && user.photos.length > 0
             ? <img src={user.photos[0]} alt={user.fullName ?? ""} className="w-full h-full object-cover" />
             : (user.fullName ?? user.firstName ?? "M").charAt(0)}
@@ -811,8 +811,8 @@ function VerificationCard({ user, onApprove, onReject, onBan, onPhotoAction, onV
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-cream text-sm" data-testid={`text-admin-name-${user.id}`}>{user.fullName ?? user.firstName ?? "Member"}</span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(200,0,14,0.15)", color: "#c8000e" }}>{casteLabel}</span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(224,48,80,0.12)", color: "#e03050" }}>{user.gender}</span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(244,196,48,0.15)", color: "#F4C430" }}>{casteLabel}</span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: "rgba(107,191,89,0.12)", color: "#6BBF59" }}>{user.gender}</span>
           </div>
           <p className="text-cream/40 text-xs mt-0.5">{user.city}{user.state ? `, ${user.state}` : ""}, {user.country} · {user.age} yrs</p>
           {user.occupation && <p className="text-cream/30 text-xs">{user.occupation}</p>}
@@ -820,7 +820,7 @@ function VerificationCard({ user, onApprove, onReject, onBan, onPhotoAction, onV
         </div>
         <button onClick={onViewProfile} data-testid={`button-view-profile-${user.id}`}
           className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold flex-shrink-0"
-          style={{ background: "rgba(200,0,14,0.1)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.2)" }}>
+          style={{ background: "rgba(244,196,48,0.1)", color: "#F4C430", border: "1px solid rgba(244,196,48,0.2)" }}>
           <Eye size={11} /> Profile
         </button>
       </div>
@@ -836,7 +836,7 @@ function VerificationCard({ user, onApprove, onReject, onBan, onPhotoAction, onV
       {user.languages && user.languages.length > 0 && (
         <div className="px-4 pb-3 flex flex-wrap gap-1">
           {user.languages.map(l => (
-            <span key={l} className="px-2 py-0.5 rounded-full text-[10px]" style={{ background: "rgba(255,255,255,0.07)", color: "rgba(253,248,240,0.5)" }}>{l}</span>
+            <span key={l} className="px-2 py-0.5 rounded-full text-[10px]" style={{ background: "rgba(255,255,255,0.07)", color: "rgba(51,51,51,0.5)" }}>{l}</span>
           ))}
         </div>
       )}
@@ -867,7 +867,7 @@ function VerificationCard({ user, onApprove, onReject, onBan, onPhotoAction, onV
                         onChange={e => setPhotoRejectReasons(prev => ({ ...prev, [idx]: e.target.value }))}
                         data-testid={`input-photo-reject-reason-${user.id}-${idx}`}
                         className="w-full rounded px-2 py-1 text-[10px] outline-none"
-                        style={{ background: "rgba(255,255,255,0.07)", color: "#fdf8f0", border: "1px solid rgba(255,255,255,0.1)" }}
+                        style={{ background: "rgba(255,255,255,0.07)", color: "#333333", border: "1px solid rgba(255,255,255,0.1)" }}
                       />
                       <div className="flex gap-1">
                         <button onClick={() => onPhotoAction(idx, "approve")} disabled={isPending}
@@ -913,12 +913,12 @@ function VerificationCard({ user, onApprove, onReject, onBan, onPhotoAction, onV
           rows={2}
           data-testid={`input-rejection-reason-${user.id}`}
           className="w-full rounded-xl px-3 py-2 text-xs outline-none resize-none leading-relaxed"
-          style={{ background: "rgba(255,255,255,0.05)", color: "#fdf8f0", border: "1px solid rgba(255,255,255,0.1)", placeholder: "rgba(253,248,240,0.3)" }}
+          style={{ background: "rgba(0,0,0,0.05)", color: "#333333", border: "1px solid rgba(255,255,255,0.1)", placeholder: "rgba(51,51,51,0.3)" }}
         />
       </div>
 
       {/* Action buttons */}
-      <div className="flex gap-2 px-4 pb-4" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+      <div className="flex gap-2 px-4 pb-4" style={{ borderTop: "1px solid rgba(0,0,0,0.04)" }}>
         <button onClick={onApprove} disabled={isPending} data-testid={`button-approve-${user.id}`}
           className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50 mt-3"
           style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.3)" }}>

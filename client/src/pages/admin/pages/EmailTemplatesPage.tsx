@@ -21,7 +21,7 @@ export default function EmailTemplatesPage({ user }: { user: User }) {
         {TEMPLATES.map(t => (
           <div key={t.name} data-testid={`template-${t.name.toLowerCase().replace(/ /g, "-")}`}
             className="flex items-center gap-3 p-4 rounded-2xl"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+            style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
             <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{ background: "rgba(59,130,246,0.15)" }}>
               <Mail size={14} color="#3b82f6" />
@@ -31,7 +31,7 @@ export default function EmailTemplatesPage({ user }: { user: User }) {
               <div className="text-cream/40 text-xs">{t.description}</div>
             </div>
             <span className="text-cream/40 text-[10px] px-2 py-1 rounded-lg"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
               {t.trigger}
             </span>
           </div>

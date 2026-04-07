@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const EXPORTS = [
   { type: "users", label: "User Data", description: "All user profiles, status, and metadata", icon: Users, color: "#3b82f6" },
-  { type: "matches", label: "Match Data", description: "All matches between users", icon: Heart, color: "#e03050" },
+  { type: "matches", label: "Match Data", description: "All matches between users", icon: Heart, color: "#6BBF59" },
   { type: "reports", label: "Report Data", description: "All flagged content and user reports", icon: Flag, color: "#ef4444" },
 ];
 
@@ -37,7 +37,7 @@ export default function ExportPage({ user }: { user: User }) {
         {EXPORTS.map(exp => (
           <div key={exp.type} data-testid={`export-card-${exp.type}`}
             className="flex items-center gap-4 p-4 rounded-2xl"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+            style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
               style={{ background: `${exp.color}18` }}>
               <exp.icon size={18} color={exp.color} />
@@ -55,7 +55,7 @@ export default function ExportPage({ user }: { user: User }) {
         ))}
       </div>
 
-      <div className="mt-6 p-4 rounded-2xl text-cream/40 text-xs" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+      <div className="mt-6 p-4 rounded-2xl text-cream/40 text-xs" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(0,0,0,0.05)" }}>
         All exports are in CSV format. Exports are logged in the audit trail. Handle exported data according to your privacy policy and GDPR obligations.
       </div>
     </div>

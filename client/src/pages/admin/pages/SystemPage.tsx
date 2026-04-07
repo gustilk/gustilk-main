@@ -29,7 +29,7 @@ export default function SystemPage({ user }: { user: User }) {
           <CheckCircle size={18} color="#10b981" />
           <span className="text-green-400 text-sm font-semibold">All Systems Operational</span>
         </div>
-        <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+        <div className="divide-y" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
           {checks.map(check => (
             <div key={check.label} data-testid={`system-check-${check.label.toLowerCase().replace(/ /g, "-")}`}
               className="flex items-center justify-between px-4 py-3">
@@ -46,11 +46,11 @@ export default function SystemPage({ user }: { user: User }) {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="rounded-xl p-4" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
           <div className="text-cream/40 text-xs mb-1">Environment</div>
           <div className="text-cream text-sm font-semibold">Production</div>
         </div>
-        <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="rounded-xl p-4" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
           <div className="text-cream/40 text-xs mb-1">Database</div>
           <div className="text-cream text-sm font-semibold">Neon PostgreSQL</div>
         </div>

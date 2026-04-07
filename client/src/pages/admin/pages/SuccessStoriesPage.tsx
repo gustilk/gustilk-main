@@ -50,30 +50,30 @@ export default function SuccessStoriesPage({ user }: { user: User }) {
         </div>
         <button onClick={() => setShowForm(!showForm)} data-testid="button-add-story"
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold"
-          style={{ background: "rgba(224,48,80,0.15)", color: "#e03050", border: "1px solid rgba(224,48,80,0.25)" }}>
+          style={{ background: "rgba(107,191,89,0.15)", color: "#6BBF59", border: "1px solid rgba(107,191,89,0.25)" }}>
           <Plus size={13} /> Add Story
         </button>
       </div>
 
       {showForm && (
-        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(224,48,80,0.2)" }}>
+        <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(107,191,89,0.2)" }}>
           <input value={form.names} onChange={e => setForm(f => ({ ...f, names: e.target.value }))}
             placeholder="Names (e.g. Dilva & Renas)" data-testid="input-story-names"
             className="w-full px-3 py-2 rounded-xl text-sm text-cream placeholder-cream/30 outline-none mb-2"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }} />
+            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
           <textarea value={form.story} onChange={e => setForm(f => ({ ...f, story: e.target.value }))}
             placeholder="Their story…" data-testid="input-story-text"
             rows={4}
             className="w-full px-3 py-2 rounded-xl text-sm text-cream placeholder-cream/30 outline-none resize-none mb-2"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }} />
+            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
           <input value={form.photoUrl} onChange={e => setForm(f => ({ ...f, photoUrl: e.target.value }))}
             placeholder="Photo URL (optional)" data-testid="input-story-photo"
             className="w-full px-3 py-2 rounded-xl text-sm text-cream placeholder-cream/30 outline-none mb-3"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }} />
+            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
           <button onClick={() => form.names.trim() && form.story.trim() && createMutation.mutate()}
             disabled={createMutation.isPending} data-testid="button-submit-story"
             className="w-full py-2.5 rounded-xl text-xs font-bold"
-            style={{ background: "rgba(224,48,80,0.2)", color: "#e03050" }}>
+            style={{ background: "rgba(107,191,89,0.2)", color: "#6BBF59" }}>
             Publish Story
           </button>
         </div>
@@ -83,7 +83,7 @@ export default function SuccessStoriesPage({ user }: { user: User }) {
         <div className="flex items-center justify-center h-32 text-cream/40 text-sm">Loading…</div>
       ) : stories.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-32 gap-2">
-          <Heart size={32} color="rgba(224,48,80,0.3)" />
+          <Heart size={32} color="rgba(107,191,89,0.3)" />
           <p className="text-cream/40 text-sm">No success stories yet</p>
         </div>
       ) : (
@@ -91,7 +91,7 @@ export default function SuccessStoriesPage({ user }: { user: User }) {
           {stories.map(story => (
             <div key={story.id} data-testid={`story-${story.id}`}
               className="rounded-2xl p-4"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(224,48,80,0.12)", opacity: story.visible ? 1 : 0.6 }}>
+              style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(107,191,89,0.12)", opacity: story.visible ? 1 : 0.6 }}>
               <div className="flex items-start gap-3">
                 {story.photoUrl && <img src={story.photoUrl} alt="" className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />}
                 <div className="flex-1 min-w-0">
@@ -102,7 +102,7 @@ export default function SuccessStoriesPage({ user }: { user: User }) {
                   <button onClick={() => toggleMutation.mutate({ id: story.id, visible: !story.visible })}
                     data-testid={`button-toggle-story-${story.id}`}
                     className="w-7 h-7 rounded-lg flex items-center justify-center"
-                    style={{ background: "rgba(255,255,255,0.06)", color: story.visible ? "#10b981" : "#6b7280" }}>
+                    style={{ background: "rgba(0,0,0,0.05)", color: story.visible ? "#10b981" : "#6b7280" }}>
                     {story.visible ? <Eye size={12} /> : <EyeOff size={12} />}
                   </button>
                   <button onClick={() => { if (confirm("Delete this story?")) deleteMutation.mutate(story.id); }}

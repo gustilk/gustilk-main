@@ -78,22 +78,22 @@ export default function CookieConsentBanner() {
         className="max-w-lg mx-auto rounded-2xl p-4"
         style={{
           background: "#130820",
-          border: "1px solid rgba(200,0,14,0.3)",
-          boxShadow: "0 -4px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(200,0,14,0.08)",
+          border: "1px solid rgba(244,196,48,0.3)",
+          boxShadow: "0 -4px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(244,196,48,0.08)",
         }}
       >
         {/* Header row */}
         <div className="flex items-start gap-3 mb-3">
           <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ background: "rgba(200,0,14,0.12)" }}>
-            <Cookie size={15} color="#c8000e" />
+            style={{ background: "rgba(244,196,48,0.12)" }}>
+            <Cookie size={15} color="#F4C430" />
           </div>
           <div className="flex-1">
             <p className="text-cream text-sm font-semibold">We use cookies</p>
             <p className="text-cream/45 text-xs mt-0.5 leading-relaxed">
               Gûstîlk uses cookies to improve your experience, analyse performance, and show relevant content.
               Essential cookies are always active.{" "}
-              <a href="/cookie-policy" className="underline" style={{ color: "rgba(200,0,14,0.7)" }}>
+              <a href="/cookie-policy" className="underline" style={{ color: "rgba(244,196,48,0.7)" }}>
                 Cookie Policy
               </a>
             </p>
@@ -102,7 +102,7 @@ export default function CookieConsentBanner() {
 
         {/* Expandable preferences */}
         {expanded && (
-          <div className="mb-3 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
+          <div className="mb-3 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.06)" }}>
             {[
               {
                 key: "essential" as const,
@@ -148,21 +148,21 @@ export default function CookieConsentBanner() {
                       data-testid={`cookie-toggle-${item.key}`}
                       className="relative w-9 h-5 rounded-full flex-shrink-0 transition-all"
                       style={{
-                        background: item.checked ? "rgba(200,0,14,0.8)" : "rgba(255,255,255,0.1)",
-                        border: "1px solid rgba(255,255,255,0.12)",
+                        background: item.checked ? "rgba(244,196,48,0.8)" : "rgba(255,255,255,0.1)",
+                        border: "1px solid rgba(0,0,0,0.08)",
                       }}
                     >
                       <span
                         className="absolute top-0.5 w-4 h-4 rounded-full transition-all"
                         style={{
-                          background: item.checked ? "#1a0005" : "rgba(255,255,255,0.4)",
+                          background: item.checked ? "#0F1F4F" : "rgba(255,255,255,0.4)",
                           left: item.checked ? "calc(100% - 18px)" : "2px",
                         }}
                       />
                     </button>
                   )}
                 </div>
-                {i < arr.length - 1 && <div style={{ height: 1, background: "rgba(255,255,255,0.05)" }} />}
+                {i < arr.length - 1 && <div style={{ height: 1, background: "rgba(0,0,0,0.05)" }} />}
               </div>
             ))}
           </div>
@@ -176,8 +176,8 @@ export default function CookieConsentBanner() {
               data-testid="button-accept-all-cookies"
               className="flex-1 py-2.5 rounded-xl text-xs font-bold transition-opacity"
               style={{
-                background: "linear-gradient(135deg, #c8000e, #e83535)",
-                color: "#1a0005",
+                background: "linear-gradient(135deg, #F4C430, #D4A017)",
+                color: "#0F1F4F",
               }}
             >
               Accept All
@@ -186,7 +186,7 @@ export default function CookieConsentBanner() {
               onClick={rejectNonEssential}
               data-testid="button-reject-cookies"
               className="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-opacity"
-              style={{ background: "rgba(255,255,255,0.07)", color: "rgba(253,248,240,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}
+              style={{ background: "rgba(255,255,255,0.07)", color: "rgba(51,51,51,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}
             >
               Essential Only
             </button>
@@ -194,7 +194,7 @@ export default function CookieConsentBanner() {
               onClick={() => setExpanded(e => !e)}
               data-testid="button-cookie-preferences"
               className="w-10 py-2.5 rounded-xl flex items-center justify-center"
-              style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.4)", border: "1px solid rgba(255,255,255,0.08)" }}
+              style={{ background: "rgba(0,0,0,0.05)", color: "rgba(51,51,51,0.4)", border: "1px solid rgba(0,0,0,0.06)" }}
             >
               {expanded ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
             </button>
@@ -204,7 +204,7 @@ export default function CookieConsentBanner() {
               onClick={acceptSelected}
               data-testid="button-save-cookie-preferences"
               className="w-full py-2.5 rounded-xl text-xs font-semibold"
-              style={{ background: "rgba(200,0,14,0.12)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.25)" }}
+              style={{ background: "rgba(244,196,48,0.12)", color: "#F4C430", border: "1px solid rgba(244,196,48,0.25)" }}
             >
               Save My Preferences
             </button>

@@ -147,7 +147,7 @@ export default function VerificationPage({ user }: Props) {
 
   if (step === "done") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center" style={{ background: "#0d0002" }}>
+      <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center" style={{ background: "#F9F9F9" }}>
         <div className="w-24 h-24 rounded-full flex items-center justify-center mb-6"
           style={{ background: "rgba(16,185,129,0.15)", border: "2px solid rgba(16,185,129,0.4)" }}>
           <CheckCircle size={44} color="#10b981" />
@@ -157,7 +157,7 @@ export default function VerificationPage({ user }: Props) {
         <p className="text-cream/40 text-sm mb-8">Our team will review it within 24–48 hours. You'll be notified once verified.</p>
         <button onClick={() => setLocation("/discover")} data-testid="button-continue"
           className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold text-sm"
-          style={{ background: "linear-gradient(135deg, #c8000e, #e83535)", color: "#1a0005" }}>
+          style={{ background: "linear-gradient(135deg, #F4C430, #D4A017)", color: "#0F1F4F" }}>
           Continue to App <ArrowRight size={17} />
         </button>
       </div>
@@ -166,7 +166,7 @@ export default function VerificationPage({ user }: Props) {
 
   if (step === "checking") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-5" style={{ background: "#0d0002" }}>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-5" style={{ background: "#F9F9F9" }}>
         <div className="w-14 h-14 border-2 border-gold border-t-transparent rounded-full animate-spin" />
         <p className="text-cream/60 text-sm">Checking your selfie…</p>
       </div>
@@ -175,22 +175,22 @@ export default function VerificationPage({ user }: Props) {
 
   if (step === "preview" && selfieData) {
     return (
-      <div className="flex flex-col min-h-screen px-5" style={{ background: "#0d0002" }}>
+      <div className="flex flex-col min-h-screen px-5" style={{ background: "#F9F9F9" }}>
         <div className="pt-14 pb-6 text-center">
           <h2 className="font-serif text-2xl text-gold mb-1">Looks good?</h2>
           <p className="text-cream/50 text-sm">Make sure your face is clearly visible</p>
         </div>
         <div className="flex-1 flex flex-col items-center gap-6">
           <div className="w-64 h-64 rounded-full overflow-hidden"
-            style={{ border: "3px solid rgba(200,0,14,0.5)", boxShadow: "0 0 40px rgba(200,0,14,0.2)" }}>
+            style={{ border: "3px solid rgba(244,196,48,0.5)", boxShadow: "0 0 40px rgba(244,196,48,0.2)" }}>
             <img src={selfieData} alt="Selfie preview" className="w-full h-full object-cover" />
           </div>
 
           {submitError && (
             <div className="w-full rounded-2xl px-4 py-3 flex items-start gap-3"
-              style={{ background: "rgba(224,48,80,0.12)", border: "1px solid rgba(224,48,80,0.3)" }}>
-              <AlertCircle size={18} className="flex-shrink-0 mt-0.5" color="#e03050" />
-              <p className="text-sm" style={{ color: "#e03050" }}>{submitError}</p>
+              style={{ background: "rgba(107,191,89,0.12)", border: "1px solid rgba(107,191,89,0.3)" }}>
+              <AlertCircle size={18} className="flex-shrink-0 mt-0.5" color="#6BBF59" />
+              <p className="text-sm" style={{ color: "#6BBF59" }}>{submitError}</p>
             </div>
           )}
 
@@ -199,13 +199,13 @@ export default function VerificationPage({ user }: Props) {
               disabled={submitMutation.isPending}
               data-testid="button-submit-selfie"
               className="w-full py-4 rounded-xl font-bold text-sm disabled:opacity-60"
-              style={{ background: "linear-gradient(135deg, #c8000e, #e83535)", color: "#1a0005" }}>
+              style={{ background: "linear-gradient(135deg, #F4C430, #D4A017)", color: "#0F1F4F" }}>
               {submitMutation.isPending ? "Checking & submitting…" : "Submit for Verification"}
             </button>
             <button onClick={() => { setSelfieData(null); setSubmitError(null); setStep("camera"); }}
               data-testid="button-retake"
               className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-              style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}>
+              style={{ background: "rgba(0,0,0,0.05)", color: "rgba(51,51,51,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}>
               <RotateCcw size={15} /> Retake
             </button>
           </div>
@@ -216,7 +216,7 @@ export default function VerificationPage({ user }: Props) {
 
   if (step === "camera") {
     return (
-      <div className="flex flex-col min-h-screen" style={{ background: "#0d0002" }}>
+      <div className="flex flex-col min-h-screen" style={{ background: "#F9F9F9" }}>
         <div className="pt-12 pb-4 text-center px-5">
           <h2 className="font-serif text-2xl text-gold mb-1">Take a Selfie</h2>
           <p className="text-cream/50 text-sm">Centre your face in the oval and tap Capture</p>
@@ -234,28 +234,28 @@ export default function VerificationPage({ user }: Props) {
                 className="w-full h-full object-cover rounded-full"
                 style={{
                   transform: "scaleX(-1)",
-                  border: "3px solid rgba(200,0,14,0.5)",
-                  background: "#1a0005",
-                  boxShadow: "0 0 40px rgba(200,0,14,0.15)",
+                  border: "3px solid rgba(244,196,48,0.5)",
+                  background: "#0F1F4F",
+                  boxShadow: "0 0 40px rgba(244,196,48,0.15)",
                 }}
               />
               <div className="absolute inset-0 rounded-full pointer-events-none"
-                style={{ border: "2px dashed rgba(200,0,14,0.4)" }} />
+                style={{ border: "2px dashed rgba(244,196,48,0.4)" }} />
             </div>
           )}
 
           {cameraError && (
             <div className="w-full rounded-2xl px-4 py-3 flex items-start gap-3"
-              style={{ background: "rgba(224,48,80,0.12)", border: "1px solid rgba(224,48,80,0.3)" }}>
-              <AlertCircle size={18} className="flex-shrink-0 mt-0.5" color="#e03050" />
-              <p className="text-sm" style={{ color: "#e03050" }}>{cameraError}</p>
+              style={{ background: "rgba(107,191,89,0.12)", border: "1px solid rgba(107,191,89,0.3)" }}>
+              <AlertCircle size={18} className="flex-shrink-0 mt-0.5" color="#6BBF59" />
+              <p className="text-sm" style={{ color: "#6BBF59" }}>{cameraError}</p>
             </div>
           )}
 
           {brightnessWarn && (
             <div className="w-full rounded-2xl px-4 py-3 flex items-start gap-3"
-              style={{ background: "rgba(200,0,14,0.1)", border: "1px solid rgba(200,0,14,0.3)" }}>
-              <Sun size={18} className="flex-shrink-0 mt-0.5" color="#c8000e" />
+              style={{ background: "rgba(244,196,48,0.1)", border: "1px solid rgba(244,196,48,0.3)" }}>
+              <Sun size={18} className="flex-shrink-0 mt-0.5" color="#F4C430" />
               <p className="text-sm text-gold">Too dark — move to a brighter area and try again.</p>
             </div>
           )}
@@ -264,14 +264,14 @@ export default function VerificationPage({ user }: Props) {
             {!useFallback ? (
               <button onClick={capturePhoto} data-testid="button-capture"
                 className="w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
-                style={{ background: "linear-gradient(135deg, #9b0010, #e03050)", color: "white" }}>
+                style={{ background: "linear-gradient(135deg, #1E3A8A, #6BBF59)", color: "white" }}>
                 <Camera size={18} /> Capture Photo
               </button>
             ) : (
               <button onClick={() => fileInputRef.current?.click()}
                 data-testid="button-upload-selfie"
                 className="w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
-                style={{ background: "linear-gradient(135deg, #9b0010, #e03050)", color: "white" }}>
+                style={{ background: "linear-gradient(135deg, #1E3A8A, #6BBF59)", color: "white" }}>
                 <Upload size={18} /> Upload a Photo
               </button>
             )}
@@ -280,7 +280,7 @@ export default function VerificationPage({ user }: Props) {
               <button onClick={() => { stopStream(); setUseFallback(true); }}
                 data-testid="button-use-upload"
                 className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-                style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                style={{ background: "rgba(0,0,0,0.05)", color: "rgba(51,51,51,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}>
                 <Upload size={14} /> Upload from gallery instead
               </button>
             )}
@@ -299,11 +299,11 @@ export default function VerificationPage({ user }: Props) {
   }
 
   return (
-    <div className="flex flex-col min-h-screen px-5" style={{ background: "#0d0002" }}>
+    <div className="flex flex-col min-h-screen px-5" style={{ background: "#F9F9F9" }}>
       <div className="pt-14 pb-2 text-center">
         <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5"
-          style={{ background: "rgba(200,0,14,0.1)", border: "2px solid rgba(200,0,14,0.3)" }}>
-          <Shield size={36} color="#c8000e" />
+          style={{ background: "rgba(244,196,48,0.1)", border: "2px solid rgba(244,196,48,0.3)" }}>
+          <Shield size={36} color="#F4C430" />
         </div>
         <h1 className="font-serif text-3xl text-gold mb-2">Verify Your Identity</h1>
         <p className="text-cream/55 text-sm leading-relaxed">
@@ -319,7 +319,7 @@ export default function VerificationPage({ user }: Props) {
         ].map(s => (
           <div key={s.num} className="flex items-start gap-4 px-1">
             <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm"
-              style={{ background: "rgba(200,0,14,0.15)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.3)" }}>
+              style={{ background: "rgba(244,196,48,0.15)", color: "#F4C430", border: "1px solid rgba(244,196,48,0.3)" }}>
               {s.num}
             </div>
             <div>
@@ -333,12 +333,12 @@ export default function VerificationPage({ user }: Props) {
       <div className="mt-auto pb-10 pt-8 space-y-3">
         <button onClick={() => setStep("camera")} data-testid="button-start-verification"
           className="w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
-          style={{ background: "linear-gradient(135deg, #c8000e, #e83535)", color: "#1a0005" }}>
+          style={{ background: "linear-gradient(135deg, #F4C430, #D4A017)", color: "#0F1F4F" }}>
           <Camera size={18} /> Start Verification
         </button>
         <button onClick={() => setLocation("/discover")} data-testid="button-skip-verification"
           className="w-full py-3 rounded-xl text-sm font-semibold"
-          style={{ color: "rgba(253,248,240,0.35)" }}>
+          style={{ color: "rgba(51,51,51,0.35)" }}>
           Skip for now
         </button>
       </div>

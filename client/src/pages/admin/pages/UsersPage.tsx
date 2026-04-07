@@ -106,7 +106,7 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
           placeholder="Search by name, email, city…"
           data-testid="input-user-search"
           className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-cream placeholder-cream/30 outline-none"
-          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(200,0,14,0.15)" }} />
+          style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(244,196,48,0.15)" }} />
       </div>
 
       {/* Filters */}
@@ -120,9 +120,9 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
             data-testid={`filter-${val}`}
             className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all"
             style={{
-              background: filterPremium === val ? "rgba(200,0,14,0.2)" : "rgba(255,255,255,0.05)",
-              border: filterPremium === val ? "1px solid rgba(200,0,14,0.55)" : "1px solid rgba(255,255,255,0.08)",
-              color: filterPremium === val ? "#c8000e" : "rgba(253,248,240,0.45)",
+              background: filterPremium === val ? "rgba(244,196,48,0.2)" : "rgba(0,0,0,0.05)",
+              border: filterPremium === val ? "1px solid rgba(244,196,48,0.55)" : "1px solid rgba(0,0,0,0.06)",
+              color: filterPremium === val ? "#F4C430" : "rgba(51,51,51,0.45)",
             }}
           >
             <Crown size={11} />
@@ -143,9 +143,9 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
             data-testid={`filter-caste-${val}`}
             className="px-3 py-1 rounded-full text-xs font-semibold transition-all"
             style={{
-              background: filterCaste === val ? "rgba(123,63,160,0.2)" : "rgba(255,255,255,0.05)",
-              border: filterCaste === val ? "1px solid rgba(123,63,160,0.55)" : "1px solid rgba(255,255,255,0.08)",
-              color: filterCaste === val ? "#c8000e" : "rgba(253,248,240,0.45)",
+              background: filterCaste === val ? "rgba(123,63,160,0.2)" : "rgba(0,0,0,0.05)",
+              border: filterCaste === val ? "1px solid rgba(123,63,160,0.55)" : "1px solid rgba(0,0,0,0.06)",
+              color: filterCaste === val ? "#F4C430" : "rgba(51,51,51,0.45)",
             }}
           >
             {label}
@@ -165,7 +165,7 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,0,14,0.12)" }}>
+      <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(244,196,48,0.12)" }}>
         {isLoading ? (
           <div className="flex items-center justify-center h-32 text-cream/40 text-sm">Loading…</div>
         ) : users.length === 0 ? (
@@ -174,7 +174,7 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr style={{ background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(200,0,14,0.1)" }}>
+                <tr style={{ background: "rgba(0,0,0,0.04)", borderBottom: "1px solid rgba(244,196,48,0.1)" }}>
                   <th className="text-left px-4 py-3 text-cream/50 font-medium text-xs">User</th>
                   <th className="text-left px-4 py-3 text-cream/50 font-medium text-xs hidden sm:table-cell">Caste / Gender</th>
                   <th className="text-left px-4 py-3 text-cream/50 font-medium text-xs hidden md:table-cell">Location</th>
@@ -186,11 +186,11 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
               <tbody>
                 {users.map((u, idx) => (
                   <tr key={u.id} data-testid={`row-user-${u.id}`}
-                    style={{ borderBottom: "1px solid rgba(255,255,255,0.04)", background: idx % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)" }}>
+                    style={{ borderBottom: "1px solid rgba(0,0,0,0.04)", background: idx % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)" }}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-xs font-bold text-gold"
-                          style={{ background: "linear-gradient(135deg, #2d0f4a, #9b0010)" }}>
+                          style={{ background: "linear-gradient(135deg, #2d0f4a, #1E3A8A)" }}>
                           {u.mainPhotoUrl
                             ? <img src={u.mainPhotoUrl} alt="" className="w-full h-full object-cover" />
                             : (u.fullName ?? u.email ?? "U").charAt(0).toUpperCase()}
@@ -216,7 +216,7 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
                         </span>
                         {u.isPremium && (
                           <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                            style={{ background: "rgba(200,0,14,0.15)", color: "#c8000e" }}>
+                            style={{ background: "rgba(244,196,48,0.15)", color: "#F4C430" }}>
                             Premium
                           </span>
                         )}
@@ -246,7 +246,7 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
                               data-testid={`button-toggle-premium-${u.id}`}
                               title={u.isPremium ? "Remove premium" : "Grant premium"}
                               className="w-7 h-7 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity"
-                              style={{ background: "rgba(200,0,14,0.15)", color: "#c8000e" }}>
+                              style={{ background: "rgba(244,196,48,0.15)", color: "#F4C430" }}>
                               <Crown size={12} />
                             </button>
                             <button
@@ -299,13 +299,13 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
             <button disabled={page === 0} onClick={() => setPage(p => p - 1)}
               data-testid="button-prev-page"
               className="w-8 h-8 rounded-lg flex items-center justify-center disabled:opacity-30"
-              style={{ background: "rgba(255,255,255,0.06)", color: "#c8000e" }}>
+              style={{ background: "rgba(0,0,0,0.05)", color: "#F4C430" }}>
               <ChevronLeft size={14} />
             </button>
             <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}
               data-testid="button-next-page"
               className="w-8 h-8 rounded-lg flex items-center justify-center disabled:opacity-30"
-              style={{ background: "rgba(255,255,255,0.06)", color: "#c8000e" }}>
+              style={{ background: "rgba(0,0,0,0.05)", color: "#F4C430" }}>
               <ChevronRight size={14} />
             </button>
           </div>

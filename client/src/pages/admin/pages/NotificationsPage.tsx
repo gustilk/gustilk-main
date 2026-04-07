@@ -32,7 +32,7 @@ export default function NotificationsPage({ user }: { user: User }) {
         <p className="text-cream/40 text-xs mt-0.5">Send in-app notifications to user segments</p>
       </div>
 
-      <div className="rounded-2xl p-5 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(200,0,14,0.15)" }}>
+      <div className="rounded-2xl p-5 mb-4" style={{ background: "rgba(0,0,0,0.04)", border: "1px solid rgba(244,196,48,0.15)" }}>
         <div className="mb-4">
           <label className="text-cream/60 text-xs font-semibold mb-1.5 block">Target Segment</label>
           <div className="flex gap-2">
@@ -41,8 +41,8 @@ export default function NotificationsPage({ user }: { user: User }) {
                 data-testid={`segment-${s.value}`}
                 className="px-3 py-1.5 rounded-lg text-xs font-medium"
                 style={{
-                  background: segment === s.value ? "rgba(200,0,14,0.2)" : "rgba(255,255,255,0.06)",
-                  color: segment === s.value ? "#c8000e" : "rgba(253,248,240,0.5)",
+                  background: segment === s.value ? "rgba(244,196,48,0.2)" : "rgba(0,0,0,0.05)",
+                  color: segment === s.value ? "#F4C430" : "rgba(51,51,51,0.5)",
                 }}>
                 {s.label}
               </button>
@@ -54,7 +54,7 @@ export default function NotificationsPage({ user }: { user: User }) {
           <input value={title} onChange={e => setTitle(e.target.value)}
             placeholder="Notification title…" data-testid="input-notification-title"
             className="w-full px-3 py-2.5 rounded-xl text-sm text-cream placeholder-cream/30 outline-none"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }} />
+            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
         </div>
         <div className="mb-4">
           <label className="text-cream/60 text-xs font-semibold mb-1.5 block">Message</label>
@@ -62,18 +62,18 @@ export default function NotificationsPage({ user }: { user: User }) {
             placeholder="Notification body…" data-testid="input-notification-body"
             rows={4}
             className="w-full px-3 py-2.5 rounded-xl text-sm text-cream placeholder-cream/30 outline-none resize-none"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }} />
+            style={{ background: "rgba(0,0,0,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
         </div>
         <button onClick={() => title.trim() && body.trim() && sendMutation.mutate()}
           disabled={sendMutation.isPending || !title.trim() || !body.trim()}
           data-testid="button-send-notification"
           className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-40"
-          style={{ background: "rgba(200,0,14,0.2)", color: "#c8000e", border: "1px solid rgba(200,0,14,0.3)" }}>
+          style={{ background: "rgba(244,196,48,0.2)", color: "#F4C430", border: "1px solid rgba(244,196,48,0.3)" }}>
           <Send size={14} /> Send Notification
         </button>
       </div>
 
-      <div className="p-4 rounded-2xl text-cream/40 text-xs" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+      <div className="p-4 rounded-2xl text-cream/40 text-xs" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(0,0,0,0.05)" }}>
         Push notification delivery requires a connected push service (Firebase/OneSignal). Currently notifications are logged in the audit trail only.
       </div>
     </div>

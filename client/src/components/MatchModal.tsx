@@ -12,8 +12,8 @@ interface MatchModalProps {
 }
 
 const CONFETTI_COLORS = [
-  "#c8000e", "#e83535", "#9b0010", "#e03050",
-  "#10b981", "#fdf8f0", "#ff6b6b", "#4ecdc4", "#ffe066", "#a78bfa",
+  "#F4C430", "#D4A017", "#1E3A8A", "#6BBF59",
+  "#10b981", "#333333", "#ff6b6b", "#4ecdc4", "#ffe066", "#a78bfa",
 ];
 
 function ConfettiCanvas() {
@@ -193,8 +193,8 @@ function GlowAvatar({ user }: { user: SafeUser }) {
         className="absolute inset-0 rounded-full"
         style={{
           background: "transparent",
-          border: "3px solid #c8000e",
-          boxShadow: "0 0 0 0 rgba(200,0,14,0.7)",
+          border: "3px solid #F4C430",
+          boxShadow: "0 0 0 0 rgba(244,196,48,0.7)",
           animation: "glow-pulse 1.8s ease-in-out infinite",
           borderRadius: "50%",
         }}
@@ -204,9 +204,9 @@ function GlowAvatar({ user }: { user: SafeUser }) {
         className="absolute rounded-full overflow-hidden flex items-center justify-center font-serif text-3xl font-bold text-gold"
         style={{
           inset: 3,
-          background: "linear-gradient(135deg, #2d0f4a, #9b0010)",
-          border: "2.5px solid rgba(200,0,14,0.9)",
-          boxShadow: "0 0 20px rgba(200,0,14,0.55), 0 0 40px rgba(200,0,14,0.25)",
+          background: "linear-gradient(135deg, #2d0f4a, #1E3A8A)",
+          border: "2.5px solid rgba(244,196,48,0.9)",
+          boxShadow: "0 0 20px rgba(244,196,48,0.55), 0 0 40px rgba(244,196,48,0.25)",
         }}
       >
         {user.photos && user.photos.length > 0 ? (
@@ -236,9 +236,9 @@ export default function MatchModal({ matchedUser, currentUser, matchId, onClose 
       {/* Keyframe injection */}
       <style>{`
         @keyframes glow-pulse {
-          0%   { box-shadow: 0 0 0 0 rgba(200,0,14,0.8), 0 0 12px rgba(200,0,14,0.5); }
-          50%  { box-shadow: 0 0 0 10px rgba(200,0,14,0), 0 0 30px rgba(200,0,14,0.6); }
-          100% { box-shadow: 0 0 0 0 rgba(200,0,14,0.0), 0 0 12px rgba(200,0,14,0.5); }
+          0%   { box-shadow: 0 0 0 0 rgba(244,196,48,0.8), 0 0 12px rgba(244,196,48,0.5); }
+          50%  { box-shadow: 0 0 0 10px rgba(244,196,48,0), 0 0 30px rgba(244,196,48,0.6); }
+          100% { box-shadow: 0 0 0 0 rgba(244,196,48,0.0), 0 0 12px rgba(244,196,48,0.5); }
         }
         @keyframes logo-bounce {
           0%, 100% { transform: scale(1) translateY(0); }
@@ -256,9 +256,9 @@ export default function MatchModal({ matchedUser, currentUser, matchId, onClose 
       <div
         className="relative w-full max-w-sm rounded-3xl p-8 text-center"
         style={{
-          background: "linear-gradient(160deg, #2d0f4a, #1a0005)",
-          border: "1px solid rgba(200,0,14,0.35)",
-          boxShadow: "0 0 60px rgba(123,63,160,0.5), 0 0 120px rgba(200,0,14,0.15)",
+          background: "linear-gradient(160deg, #2d0f4a, #0F1F4F)",
+          border: "1px solid rgba(244,196,48,0.35)",
+          boxShadow: "0 0 60px rgba(123,63,160,0.5), 0 0 120px rgba(244,196,48,0.15)",
           zIndex: 2,
         }}
       >
@@ -266,7 +266,7 @@ export default function MatchModal({ matchedUser, currentUser, matchId, onClose 
           onClick={onClose}
           data-testid="button-close-modal"
           className="absolute top-4 right-4 z-10"
-          style={{ color: "rgba(253,248,240,0.4)" }}
+          style={{ color: "rgba(51,51,51,0.4)" }}
         >
           <X size={20} />
         </button>
@@ -286,7 +286,7 @@ export default function MatchModal({ matchedUser, currentUser, matchId, onClose 
               style={{
                 width: 48,
                 height: 48,
-                filter: "drop-shadow(0 0 10px rgba(200,0,14,0.9)) drop-shadow(0 0 24px rgba(200,0,14,0.5))",
+                filter: "drop-shadow(0 0 10px rgba(244,196,48,0.9)) drop-shadow(0 0 24px rgba(244,196,48,0.5))",
               }}
             />
           </div>
@@ -294,7 +294,7 @@ export default function MatchModal({ matchedUser, currentUser, matchId, onClose 
           <GlowAvatar user={matchedUser} />
         </div>
 
-        <h2 className="font-serif text-3xl font-bold text-gold mb-2" style={{ textShadow: "0 0 20px rgba(200,0,14,0.5)" }}>
+        <h2 className="font-serif text-3xl font-bold text-gold mb-2" style={{ textShadow: "0 0 20px rgba(244,196,48,0.5)" }}>
           It's a Match!
         </h2>
         <p className="text-cream/60 text-sm mb-6">
@@ -310,7 +310,7 @@ export default function MatchModal({ matchedUser, currentUser, matchId, onClose 
             onClick={handleChat}
             data-testid="button-send-message"
             className="flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-sm"
-            style={{ background: "linear-gradient(135deg, #c8000e, #e83535)", color: "#1a0005" }}
+            style={{ background: "linear-gradient(135deg, #F4C430, #D4A017)", color: "#0F1F4F" }}
           >
             <MessageCircle size={18} />
             Send a Message
@@ -319,7 +319,7 @@ export default function MatchModal({ matchedUser, currentUser, matchId, onClose 
             onClick={onClose}
             data-testid="button-keep-swiping"
             className="py-3 rounded-xl text-sm font-semibold"
-            style={{ background: "rgba(255,255,255,0.07)", color: "rgba(253,248,240,0.6)", border: "1px solid rgba(200,0,14,0.2)" }}
+            style={{ background: "rgba(255,255,255,0.07)", color: "rgba(51,51,51,0.6)", border: "1px solid rgba(244,196,48,0.2)" }}
           >
             Keep Discovering
           </button>

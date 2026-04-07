@@ -210,11 +210,11 @@ export default function AdminLayout({ user }: { user: User }) {
   };
 
   const sidebar = (
-    <div className="flex flex-col h-full" style={{ background: "linear-gradient(180deg, #1a0b2e 0%, #0d0002 100%)" }}>
+    <div className="flex flex-col h-full" style={{ background: "linear-gradient(180deg, #1a0b2e 0%, #F9F9F9 100%)" }}>
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b" style={{ borderColor: "rgba(200,0,14,0.15)" }}>
+      <div className="flex items-center gap-3 px-4 py-5 border-b" style={{ borderColor: "rgba(244,196,48,0.15)" }}>
         <div className="w-8 h-8 rounded-lg flex items-center justify-center font-serif text-sm font-bold text-gold"
-          style={{ background: "linear-gradient(135deg, #9b0010, #c8000e)" }}>G</div>
+          style={{ background: "linear-gradient(135deg, #1E3A8A, #F4C430)" }}>G</div>
         <div>
           <div className="font-serif text-gold text-sm font-bold leading-none">Gûstîlk</div>
           <div className="text-cream/40 text-[10px] mt-0.5">Admin Panel</div>
@@ -225,7 +225,7 @@ export default function AdminLayout({ user }: { user: User }) {
       <nav className="flex-1 overflow-y-auto py-3 px-2">
         {NAV.map(group => (
           <div key={group.title} className="mb-4">
-            <div className="text-[9px] font-bold uppercase tracking-widest px-3 py-1 mb-1" style={{ color: "rgba(200,0,14,0.4)" }}>
+            <div className="text-[9px] font-bold uppercase tracking-widest px-3 py-1 mb-1" style={{ color: "rgba(244,196,48,0.4)" }}>
               {group.title}
             </div>
             {group.items.map(item => {
@@ -237,8 +237,8 @@ export default function AdminLayout({ user }: { user: User }) {
                   data-testid={`nav-admin-${item.path.replace("/admin/", "").replace("/admin", "dashboard")}`}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-lg mb-0.5 text-[13px] font-medium transition-all"
                   style={{
-                    color: active ? "#c8000e" : "rgba(253,248,240,0.6)",
-                    background: active ? "rgba(200,0,14,0.12)" : "transparent",
+                    color: active ? "#F4C430" : "rgba(51,51,51,0.6)",
+                    background: active ? "rgba(244,196,48,0.12)" : "transparent",
                   }}>
                   <item.icon size={14} />
                   <span className="flex-1 truncate">{item.label}</span>
@@ -260,10 +260,10 @@ export default function AdminLayout({ user }: { user: User }) {
       </nav>
 
       {/* User info */}
-      <div className="px-3 py-3 border-t" style={{ borderColor: "rgba(200,0,14,0.15)" }}>
+      <div className="px-3 py-3 border-t" style={{ borderColor: "rgba(244,196,48,0.15)" }}>
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold text-gold"
-            style={{ background: "linear-gradient(135deg, #2d0f4a, #9b0010)" }}>
+            style={{ background: "linear-gradient(135deg, #2d0f4a, #1E3A8A)" }}>
             {(user.fullName ?? user.email ?? "A").charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
@@ -279,16 +279,16 @@ export default function AdminLayout({ user }: { user: User }) {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "#0d0002" }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: "#F9F9F9" }}>
       {/* Desktop sidebar */}
-      <div className="hidden md:flex flex-col w-52 flex-shrink-0 border-r" style={{ borderColor: "rgba(200,0,14,0.15)" }}>
+      <div className="hidden md:flex flex-col w-52 flex-shrink-0 border-r" style={{ borderColor: "rgba(244,196,48,0.15)" }}>
         {sidebar}
       </div>
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex">
-          <div className="w-56 flex flex-col flex-shrink-0 border-r" style={{ borderColor: "rgba(200,0,14,0.15)" }}>
+          <div className="w-56 flex flex-col flex-shrink-0 border-r" style={{ borderColor: "rgba(244,196,48,0.15)" }}>
             {sidebar}
           </div>
           <div className="flex-1 bg-black/60" onClick={() => setSidebarOpen(false)} />
@@ -298,7 +298,7 @@ export default function AdminLayout({ user }: { user: User }) {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Mobile top bar */}
-        <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b" style={{ borderColor: "rgba(200,0,14,0.15)" }}>
+        <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b" style={{ borderColor: "rgba(244,196,48,0.15)" }}>
           <button onClick={() => setSidebarOpen(true)} className="text-cream/60 hover:text-cream" data-testid="button-admin-menu">
             <Menu size={20} />
           </button>
