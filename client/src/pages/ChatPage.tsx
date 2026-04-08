@@ -102,7 +102,8 @@ export default function ChatPage({ user, matchId }: Props) {
   const { startCall, callState } = useVideoCallContext();
 
   const [location] = useLocation();
-  const _qs = new URLSearchParams(location.split("?")[1] ?? "");
+  // wouter v3 useLocation() strips query params — use window.location.search instead
+  const _qs = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
   const isSupportChatFromUrl = _qs.get("support") === "1";
   const backTo = _qs.get("from") === "settings" ? "/settings" : "/matches";
 
