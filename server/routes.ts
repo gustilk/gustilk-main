@@ -39,9 +39,9 @@ async function getOrCreateSupportAccount(): Promise<typeof users.$inferSelect> {
     id,
     email: SUPPORT_ACCOUNT_EMAIL,
     passwordHash: supportHash,
-    firstName: "GÃ»stÃ®lk",
+    firstName: "Gûstîlk",
     lastName: "Support",
-    fullName: "GÃ»stÃ®lk Support",
+    fullName: "Gûstîlk Support",
     isSystemAccount: true,
     isAdmin: false,
     isVerified: true,
@@ -51,7 +51,7 @@ async function getOrCreateSupportAccount(): Promise<typeof users.$inferSelect> {
     gender: null,
     caste: null,
     mainPhotoUrl: "/gustilk-logo.svg",
-    bio: "Official GÃ»stÃ®lk Support Assistant â€” here to help you 24/7.",
+    bio: "Official Gûstîlk Support Assistant — here to help you 24/7.",
   } as any).returning();
   console.log("[system] Created support account:", created.id);
   return created;
@@ -84,51 +84,51 @@ type SupportRule = { keywords: RegExp; reply: string };
 const SUPPORT_RULES: SupportRule[] = [
   {
     keywords: /match|how.*work|discover|like|swipe|heart|caste|sheikh|pir|mirid|murid/i,
-    reply: `Great question! Here's how matching works on GÃ»stÃ®lk:\n\nâ€¢ Profiles are matched strictly within your caste (Sheikh, Pir, or Mirid) with members of the opposite gender.\nâ€¢ Tap the heart on a profile to like them â€” they'll disappear from your Discover feed and appear in their "Likes You" inbox.\nâ€¢ If they like you back, you both match and can start messaging (Premium required to send messages).\nâ€¢ Disliking someone removes them from your feed permanently.\n\nNeed anything else? ðŸ˜Š`,
+    reply: `Great question! Here's how matching works on Gûstîlk:\n\n• Profiles are matched strictly within your caste (Sheikh, Pir, or Mirid) with members of the opposite gender.\n• Tap the heart on a profile to like them — they'll disappear from your Discover feed and appear in their "Likes You" inbox.\n• If they like you back, you both match and can start messaging (Premium required to send messages).\n• Disliking someone removes them from your feed permanently.\n\nNeed anything else? 😊`,
   },
   {
     keywords: /premium|subscri|paid|unlock|upgrade|price|cost|pay/i,
-    reply: `GÃ»stÃ®lk Premium unlocks the full experience:\n\nâœ… Send messages to your matches\nâœ… See who liked you in the Activity tab\nâœ… Video calls with matches\nâœ… Send virtual gifts\n\nFree accounts can still like profiles and receive matches â€” you just need Premium to chat.\n\nTo upgrade, go to the **Premium** tab or tap the crown icon on your profile. If you have trouble with a payment, email support@gustilk.com and we'll sort it out.`,
+    reply: `Gûstîlk Premium unlocks the full experience:\n\n✅ Send messages to your matches\n✅ See who liked you in the Activity tab\n✅ Video calls with matches\n✅ Send virtual gifts\n\nFree accounts can still like profiles and receive matches — you just need Premium to chat.\n\nTo upgrade, go to the **Premium** tab or tap the crown icon on your profile. If you have trouble with a payment, email support@gustilk.com and we'll sort it out.`,
   },
   {
     keywords: /verif|selfie|photo|approv|pending|reject|banned|reapply|re-apply|visible|profile.*not show/i,
-    reply: `Profile verification on GÃ»stÃ®lk:\n\nâ€¢ Upload a clear selfie â€” our admin team reviews it within 24â€“48 hours.\nâ€¢ You'll get an email once approved (or if changes are needed).\nâ€¢ While your application is pending, your profile isn't visible in Discover yet.\nâ€¢ If your profile was declined, correct the issue and tap **Re-apply for Verification** in your profile settings.\n\nFor photos: each photo is individually reviewed. Approved photos appear on your profile; rejected ones are flagged with a reason.\n\nStill waiting? Email support@gustilk.com with your registered email and we'll check your status.`,
+    reply: `Profile verification on Gûstîlk:\n\n• Upload a clear selfie — our admin team reviews it within 24–48 hours.\n• You'll get an email once approved (or if changes are needed).\n• While your application is pending, your profile isn't visible in Discover yet.\n• If your profile was declined, correct the issue and tap **Re-apply for Verification** in your profile settings.\n\nFor photos: each photo is individually reviewed. Approved photos appear on your profile; rejected ones are flagged with a reason.\n\nStill waiting? Email support@gustilk.com with your registered email and we'll check your status.`,
   },
   {
     keywords: /messag|chat|send.*message|can.*message|cannot message|message.*not work/i,
-    reply: `Messaging on GÃ»stÃ®lk requires a **Premium subscription**.\n\nOnce you're Premium:\nâ€¢ Open the **Matches** tab to see all your conversations.\nâ€¢ Tap any match to open the chat.\nâ€¢ You can also send virtual gifts from the chat screen.\n\nIf you're Premium and still can't message, try logging out and back in. If the issue persists, email support@gustilk.com.`,
+    reply: `Messaging on Gûstîlk requires a **Premium subscription**.\n\nOnce you're Premium:\n• Open the **Matches** tab to see all your conversations.\n• Tap any match to open the chat.\n• You can also send virtual gifts from the chat screen.\n\nIf you're Premium and still can't message, try logging out and back in. If the issue persists, email support@gustilk.com.`,
   },
   {
     keywords: /activity|likes you|who liked|visitor|likes sent/i,
-    reply: `The **Activity** tab has three sections:\n\nðŸ‘ **Likes** â€” Everyone who has liked your profile. Premium users can Accept (like back) or Pass directly from here.\nðŸ‘ **Visitors** â€” Recent profile views.\nâ¤ï¸ **Likes Sent** â€” Profiles you've already liked.\n\nPremium is required to act on incoming likes from the Activity tab.`,
+    reply: `The **Activity** tab has three sections:\n\n👍 **Likes** — Everyone who has liked your profile. Premium users can Accept (like back) or Pass directly from here.\n👁 **Visitors** — Recent profile views.\n❤️ **Likes Sent** — Profiles you've already liked.\n\nPremium is required to act on incoming likes from the Activity tab.`,
   },
   {
     keywords: /event|community|rsvp|attend/i,
-    reply: `GÃ»stÃ®lk features a **Community Events** tab where you can:\n\nâ€¢ Browse upcoming Yezidi community events.\nâ€¢ RSVP to events you're interested in.\nâ€¢ See other members who are attending.\n\nEvents are added by the GÃ»stÃ®lk team and community organizers. If you'd like to list an event, email support@gustilk.com.`,
+    reply: `Gûstîlk features a **Community Events** tab where you can:\n\n• Browse upcoming Yezidi community events.\n• RSVP to events you're interested in.\n• See other members who are attending.\n\nEvents are added by the Gûstîlk team and community organizers. If you'd like to list an event, email support@gustilk.com.`,
   },
   {
     keywords: /password|forgot|login|sign in|can.*log|reset|magic link|passkey|biometric/i,
-    reply: `Having trouble logging in? Here are your options:\n\nðŸ”‘ **Forgot password** â€” On the login screen, tap **"Magic Link"** and enter your email. You'll receive a one-click sign-in link.\nðŸ“± **Passkey / biometric login** â€” Available after your first successful login. Set it up in Account Settings.\n\nIf you're locked out and the magic link isn't arriving, check your spam folder or email support@gustilk.com with your registered email address.`,
+    reply: `Having trouble logging in? Here are your options:\n\n🔑 **Forgot password** — On the login screen, tap **"Magic Link"** and enter your email. You'll receive a one-click sign-in link.\n📱 **Passkey / biometric login** — Available after your first successful login. Set it up in Account Settings.\n\nIf you're locked out and the magic link isn't arriving, check your spam folder or email support@gustilk.com with your registered email address.`,
   },
   {
     keywords: /report|block|harass|abuse|fake|spam|unsafe|danger|threat|impersonat/i,
-    reply: `Your safety is our top priority. Here's what to do:\n\nðŸš© **Report a user** â€” Tap the flag icon on their profile to report harassment, fake accounts, or abuse. Our team reviews all reports.\nðŸš« **Block a user** â€” Blocking prevents them from seeing your profile or contacting you.\n\nIf you feel you're in immediate danger, please contact local authorities.\n\nI'm flagging your message for our admin team to review. You can also reach us directly at support@gustilk.com.`,
+    reply: `Your safety is our top priority. Here's what to do:\n\n🚩 **Report a user** — Tap the flag icon on their profile to report harassment, fake accounts, or abuse. Our team reviews all reports.\n🚫 **Block a user** — Blocking prevents them from seeing your profile or contacting you.\n\nIf you feel you're in immediate danger, please contact local authorities.\n\nI'm flagging your message for our admin team to review. You can also reach us directly at support@gustilk.com.`,
   },
   {
     keywords: /language|english|arabic|german|armenian|russian|kurdish|kurmanji/i,
-    reply: `GÃ»stÃ®lk supports **6 languages**: English, Arabic, German, Armenian, Russian, and Kurdish (Kurmanji).\n\nTo change your display language:\n1. Go to **Profile â†’ Settings**.\n2. Tap **Language**.\n3. Select your preferred language.\n\nThe app will update immediately. If your language isn't listed, let us know at support@gustilk.com â€” we're always working to expand.`,
+    reply: `Gûstîlk supports **6 languages**: English, Arabic, German, Armenian, Russian, and Kurdish (Kurmanji).\n\nTo change your display language:\n1. Go to **Profile → Settings**.\n2. Tap **Language**.\n3. Select your preferred language.\n\nThe app will update immediately. If your language isn't listed, let us know at support@gustilk.com — we're always working to expand.`,
   },
   {
     keywords: /delete.*account|account.*delete|remove.*account|close.*account/i,
-    reply: `We're sorry to see you go! To delete your account:\n\n1. Go to **Profile â†’ Settings â†’ Account**.\n2. Tap **Delete Account** and confirm.\n\nâš ï¸ This is permanent â€” all your matches, messages, and profile data will be removed and cannot be recovered.\n\nIf you're leaving because of an issue we can fix, please let us know at support@gustilk.com â€” we'd love the chance to help first.`,
+    reply: `We're sorry to see you go! To delete your account:\n\n1. Go to **Profile → Settings → Account**.\n2. Tap **Delete Account** and confirm.\n\n⚠️ This is permanent — all your matches, messages, and profile data will be removed and cannot be recovered.\n\nIf you're leaving because of an issue we can fix, please let us know at support@gustilk.com — we'd love the chance to help first.`,
   },
   {
     keywords: /human|real person|agent|staff|team|not.*robot|not.*bot|speak.*person|talk.*person/i,
-    reply: `Totally understood! I'm an automated support assistant, but a real member of our team is here to help.\n\nðŸ“§ Email us at **support@gustilk.com** and a human will respond within 24 hours.\n\nPlease include your registered email address in your message so we can look up your account quickly.`,
+    reply: `Totally understood! I'm an automated support assistant, but a real member of our team is here to help.\n\n📧 Email us at **support@gustilk.com** and a human will respond within 24 hours.\n\nPlease include your registered email address in your message so we can look up your account quickly.`,
   },
   {
     keywords: /gift|virtual gift|send.*gift/i,
-    reply: `Virtual gifts are a fun Premium feature! ðŸŽ\n\nTo send a gift:\n1. Open a chat with one of your matches.\n2. Tap the **gift icon** in the chat toolbar.\n3. Pick an animated gift and send it.\n\nGifts are visible to both of you in the chat. Premium subscription is required to send gifts.`,
+    reply: `Virtual gifts are a fun Premium feature! 🎁\n\nTo send a gift:\n1. Open a chat with one of your matches.\n2. Tap the **gift icon** in the chat toolbar.\n3. Pick an animated gift and send it.\n\nGifts are visible to both of you in the chat. Premium subscription is required to send gifts.`,
   },
   {
     keywords: /video.*call|call.*video|voice call/i,
@@ -136,53 +136,53 @@ const SUPPORT_RULES: SupportRule[] = [
   },
 ];
 
-const SUPPORT_FALLBACK = `Thanks for reaching out to GÃ»stÃ®lk Support! ðŸ˜Š\n\nI'm the automated support assistant. I'm not sure I fully understood your question â€” could you give me a bit more detail?\n\nOr if you'd prefer to speak with a human, email us at **support@gustilk.com** and our team will get back to you within 24 hours.`;
+const SUPPORT_FALLBACK = `Thanks for reaching out to Gûstîlk Support! 😊\n\nI'm the automated support assistant. I'm not sure I fully understood your question — could you give me a bit more detail?\n\nOr if you'd prefer to speak with a human, email us at **support@gustilk.com** and our team will get back to you within 24 hours.`;
 
-const SUPPORT_AI_SYSTEM_PROMPT = `You are the Official GÃ»stÃ®lk Support Assistant â€” a warm, knowledgeable AI for the GÃ»stÃ®lk app, a Yezidi community dating platform. You have deep knowledge of every feature and policy.
+const SUPPORT_AI_SYSTEM_PROMPT = `You are the Official Gûstîlk Support Assistant — a warm, knowledgeable AI for the Gûstîlk app, a Yezidi community dating platform. You have deep knowledge of every feature and policy.
 
 MATCHING & DISCOVERY
-â€¢ Members are matched strictly within their caste (Sheikh, Pir, or Mirid) with members of the opposite gender
-â€¢ Swipe right (heart) to like someone â€” they disappear from your Discover feed
-â€¢ If they also like you back from their "Likes You" inbox, you match and can message each other
-â€¢ Liked profiles move to the other person's "Likes You" tab (Activity page) â€” not your Discover feed
-â€¢ Disliking someone removes them from your feed permanently
+• Members are matched strictly within their caste (Sheikh, Pir, or Mirid) with members of the opposite gender
+• Swipe right (heart) to like someone — they disappear from your Discover feed
+• If they also like you back from their "Likes You" inbox, you match and can message each other
+• Liked profiles move to the other person's "Likes You" tab (Activity page) — not your Discover feed
+• Disliking someone removes them from your feed permanently
 
 PROFILE & VERIFICATION
-â€¢ Complete your profile: add a bio, occupation, city, caste, date of birth, and up to 6 approved photos
-â€¢ A verification selfie is required â€” the admin team reviews it within 24â€“48 hours
-â€¢ You will receive an email once your profile is approved or if changes are needed
-â€¢ While pending, your profile is not visible in Discover
-â€¢ You can re-apply for verification after making corrections
+• Complete your profile: add a bio, occupation, city, caste, date of birth, and up to 6 approved photos
+• A verification selfie is required — the admin team reviews it within 24–48 hours
+• You will receive an email once your profile is approved or if changes are needed
+• While pending, your profile is not visible in Discover
+• You can re-apply for verification after making corrections
 
 PREMIUM SUBSCRIPTION
-â€¢ Free users can like and match but cannot send messages
-â€¢ Premium unlocks: messaging matches, seeing who liked you in Activity, video calls, sending virtual gifts
-â€¢ Upgrade from the Premium tab or the profile page
+• Free users can like and match but cannot send messages
+• Premium unlocks: messaging matches, seeing who liked you in Activity, video calls, sending virtual gifts
+• Upgrade from the Premium tab or the profile page
 
 MESSAGING & CHAT
-â€¢ Only premium members can send messages to their matches
-â€¢ The Matches page shows all your conversations and the GÃ»stÃ®lk Support chat
-â€¢ You can view a match's full profile by tapping their avatar in the chat header
-â€¢ Virtual gifts (animated) can be sent from the chat screen (premium only)
+• Only premium members can send messages to their matches
+• The Matches page shows all your conversations and the Gûstîlk Support chat
+• You can view a match's full profile by tapping their avatar in the chat header
+• Virtual gifts (animated) can be sent from the chat screen (premium only)
 
 ACTIVITY TAB
-â€¢ "Likes" shows everyone who has liked you â€” premium users can Accept (like back) or Pass (decline) directly
-â€¢ "Visitors" shows recent profile views
-â€¢ "Likes Sent" shows profiles you have already liked
+• "Likes" shows everyone who has liked you — premium users can Accept (like back) or Pass (decline) directly
+• "Visitors" shows recent profile views
+• "Likes Sent" shows profiles you have already liked
 
 COMMUNITY EVENTS
-â€¢ Browse Yezidi community events in the Events tab
-â€¢ RSVP to events and see who else is attending
+• Browse Yezidi community events in the Events tab
+• RSVP to events and see who else is attending
 
 ACCOUNT & SETTINGS
-â€¢ Change display language: English, Arabic, German, Armenian, Russian, Kurdish (Kurmanji)
-â€¢ Enable/disable notifications, manage privacy settings, block or report users
-â€¢ Forgot password? Use the Magic Link option on the login screen â€” a one-click link is sent to your email
-â€¢ Biometric / passkey login is available after your first login with phone number verification
+• Change display language: English, Arabic, German, Armenian, Russian, Kurdish (Kurmanji)
+• Enable/disable notifications, manage privacy settings, block or report users
+• Forgot password? Use the Magic Link option on the login screen — a one-click link is sent to your email
+• Biometric / passkey login is available after your first login with phone number verification
 
 SAFETY & REPORTING
-â€¢ Use the flag icon on any profile to report harassment, fake accounts, or abuse
-â€¢ Blocked users cannot see your profile or contact you
+• Use the flag icon on any profile to report harassment, fake accounts, or abuse
+• Blocked users cannot see your profile or contact you
 
 If the user describes harassment, abuse, impersonation, or a safety threat, respond with empathy, confirm you are flagging it for the admin team, and remind them to use the in-app Report button on the offending profile.
 
@@ -190,8 +190,8 @@ IMPORTANT RULES
 - Always be transparent that you are an AI assistant, not a human
 - If a user explicitly requests a human agent, tell them to email support@gustilk.com and that a human will respond within 24 hours
 - Be warm, empathetic, and concise (aim for under 120 words per reply unless a detailed explanation is genuinely needed)
-- Never make up information â€” if you are unsure, say so and direct them to support@gustilk.com
-- Respond in the user's language if it is one of the six supported languages (English, Arabic, German, Armenian, Russian, Kurdish) â€” otherwise respond in English`;
+- Never make up information — if you are unsure, say so and direct them to support@gustilk.com
+- Respond in the user's language if it is one of the six supported languages (English, Arabic, German, Armenian, Russian, Kurdish) — otherwise respond in English`;
 
 async function generateSupportAiReply(matchId: string, supportAccountId: string): Promise<void> {
   try {
@@ -245,7 +245,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // Ensure support account exists on startup
   getOrCreateSupportAccount().catch(e => console.error("[startup] support account error:", e));
 
-  // â”€â”€â”€ GEO DETECT (public â€” used on login screen) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â”€â”€â”€ GEO DETECT (public — used on login screen) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   app.get("/api/geo/detect", async (req, res) => {
     try {
       const ip = getClientIp(req);
@@ -328,7 +328,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       return res.json(result);
     } catch (err: any) {
       console.error("[check-face] error:", err?.message ?? err);
-      return res.status(500).json({ faceDetected: false, reason: "Face scan failed â€” please try again" });
+      return res.status(500).json({ faceDetected: false, reason: "Face scan failed — please try again" });
     }
   });
 
@@ -339,18 +339,18 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const parsed = profileUpdateSchema.parse(req.body);
       const user = await storage.getUserById(userId);
 
-      // Country is locked once set â€” ignore any country update if the user already has one
+      // Country is locked once set — ignore any country update if the user already has one
       const { country: _ignored, ...rest } = parsed as any;
 
       let grantIraqPremium = false;
       if (!user?.country && (parsed as any).country) {
-        // First time setting country â€” verify server-side that the IP matches
+        // First time setting country — verify server-side that the IP matches
         const claimedCountry: string = (parsed as any).country;
         const geoCheck = await verifyCountryFromRequest(req, claimedCountry);
         if (!geoCheck.allowed) {
           return res.status(403).json({ error: geoCheck.reason ?? "Location verification failed." });
         }
-        // Iraq is always free â€” grant permanent premium right now so they never need to visit the Premium page
+        // Iraq is always free — grant permanent premium right now so they never need to visit the Premium page
         if (claimedCountry === "Iraq") grantIraqPremium = true;
       }
 
@@ -368,7 +368,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         }
       }
 
-      // Face detection gate â€” run whenever a new verification selfie is being submitted
+      // Face detection gate — run whenever a new verification selfie is being submitted
       const incomingSelfie: string | undefined = (parsed as any).verificationSelfie;
       if (incomingSelfie && incomingSelfie.startsWith("data:image")) {
         const faceCheck = await checkFacePresent(incomingSelfie);
@@ -392,7 +392,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         const existingSlotUrlSet = new Set(existingSlots.map((s: any) => s.url));
 
         // A photo is "kept approved" if it already lives in an approved slot.
-        // This works for both HTTP URLs and base64 data URIs â€” the only thing
+        // This works for both HTTP URLs and base64 data URIs — the only thing
         // that matters is whether the identical string is already stored.
         const keptApprovedUrlSet = new Set(
           submittedPhotos.filter(p => existingSlots.some((s: any) => s.status === "approved" && s.url === p))
@@ -402,9 +402,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         newUploads = submittedPhotos.filter(p => !existingSlotUrlSet.has(p));
 
         // Rebuild slots:
-        //   â€¢ Approved slots the user kept â†’ stay approved (never reset)
-        //   â€¢ Pending slots â†’ always kept (awaiting admin review)
-        //   â€¢ Rejected slots â†’ kept, but auto-retired (FIFO) when new uploads are present
+        //   • Approved slots the user kept → stay approved (never reset)
+        //   • Pending slots → always kept (awaiting admin review)
+        //   • Rejected slots → kept, but auto-retired (FIFO) when new uploads are present
         //     so that each new upload consumes exactly one "freed" slot without exceeding the limit
         let slotsToKeep = existingSlots.filter((s: any) =>
           (s.status === "approved" && keptApprovedUrlSet.has(s.url)) ||
@@ -436,7 +436,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         if (firstSubmittedApproved) {
           mainPhotoUrl = firstSubmittedApproved;
         } else if (mainPhotoUrl && !keptApproved.includes(mainPhotoUrl)) {
-          // Current main was removed â€” fall back to first remaining approved photo
+          // Current main was removed — fall back to first remaining approved photo
           mainPhotoUrl = keptApproved[0] ?? null;
         }
       }
@@ -481,7 +481,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const userId = getUserId(req);
       const parsed = privacySettingsSchema.parse(req.body);
       const currentUser = await storage.getUserById(userId);
-      // photosBlurred is a female-only feature â€” strip it for non-female users
+      // photosBlurred is a female-only feature — strip it for non-female users
       const safePayload = currentUser?.gender !== "female" ? {} : parsed;
       const updated = await storage.updateUser(userId, safePayload);
       res.json({ user: updated });
@@ -669,8 +669,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       return res.status(402).json({ error: "Payment required. Contact support@gustilk.com to get early access." });
     }
 
-    // Iraq is always free â€” country was geo-verified at signup, no re-check needed here.
-    // premiumUntil: null means no expiry â€” Iraq premium is permanent.
+    // Iraq is always free — country was geo-verified at signup, no re-check needed here.
+    // premiumUntil: null means no expiry — Iraq premium is permanent.
     await storage.updateUser(userId, { isPremium: true, premiumUntil: null });
     res.json({ ok: true });
   });
@@ -684,7 +684,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
     // Web / server-side record check
     if (user.premiumUntil && user.premiumUntil > now) {
-      // Subscription record is still valid â€” re-activate the flag if it was lost
+      // Subscription record is still valid — re-activate the flag if it was lost
       if (!user.isPremium) {
         await storage.updateUser(userId, { isPremium: true });
       }
@@ -696,7 +696,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       });
     }
 
-    // No valid subscription found â€” clean up any stale flag
+    // No valid subscription found — clean up any stale flag
     if (user.isPremium) {
       await storage.updateUser(userId, { isPremium: false, premiumUntil: null });
     }
@@ -753,7 +753,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       if (existing.length > 0) return res.json({ matchId: existing[0].id });
       const matchId = randomUUID();
       await db.insert(matches).values({ id: matchId, user1Id: supportAccount.id, user2Id: userId });
-      const openingMsg = `Hello! I'm the GÃ»stÃ®lk Support Assistant â€” an AI available 24/7. How can I help you today?`;
+      const openingMsg = `Hello! I'm the Gûstîlk Support Assistant — an AI available 24/7. How can I help you today?`;
       await storage.sendMessage(matchId, supportAccount.id, openingMsg);
       res.json({ matchId });
     } catch (e: any) {
@@ -937,7 +937,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           supportMatchId = randomUUID();
           await db.insert(matches).values({ id: supportMatchId, user1Id: supportAccount.id, user2Id: targetId });
         }
-        const welcomeMsg = `Welcome to GÃ»stÃ®lk! ðŸŽ‰ Your account is now verified and you are part of our community. I am the GÃ»stÃ®lk Support Assistant â€” an AI here 24/7 to help you. Feel free to ask me anything about matching, your profile, events, premium features, or any issue you run into. We hope you find meaningful connections here!`;
+        const welcomeMsg = `Welcome to Gûstîlk! 🎉 Your account is now verified and you are part of our community. I am the Gûstîlk Support Assistant — an AI here 24/7 to help you. Feel free to ask me anything about matching, your profile, events, premium features, or any issue you run into. We hope you find meaningful connections here!`;
         await storage.sendMessage(supportMatchId, supportAccount.id, welcomeMsg);
       } catch (e) {
         console.error("[welcome-message error]", e);
@@ -962,7 +962,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         }
         const defaultMsg = action === "ban"
           ? "Your account has been suspended for violating our community guidelines."
-          : "Thank you for registering on GÃ»stÃ®lk. Unfortunately, we were unable to approve your account at this time.";
+          : "Thank you for registering on Gûstîlk. Unfortunately, we were unable to approve your account at this time.";
         const msg = reason?.trim() ? `${defaultMsg} ${reason.trim()}` : defaultMsg;
         await storage.sendMessage(matchId, adminId, msg);
       } catch (e) {

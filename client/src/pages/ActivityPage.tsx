@@ -198,7 +198,7 @@ function ActivityCard({ item, isPremium, blurred, tab, onBeforeNavigate, onActed
       style={{ aspectRatio: "3/4", background: "#1a0a2e" }}
       data-testid={`activity-card-${user.id}`}
     >
-      {/* Photo â€” tappable area navigates to profile */}
+      {/* Photo — tappable area navigates to profile */}
       <div
         className="absolute inset-0 cursor-pointer active:scale-[0.97] transition-transform"
         onClick={() => {
@@ -260,7 +260,7 @@ function ActivityCard({ item, isPremium, blurred, tab, onBeforeNavigate, onActed
         )}
         {blurred && <p className="text-cream/40 text-[10px] text-center">{timeAgo}</p>}
 
-        {/* Accept / Decline buttons â€” Hinge-style, only on Likes tab for premium */}
+        {/* Accept / Decline buttons — Hinge-style, only on Likes tab for premium */}
         {showActions && (
           <div className="flex gap-2 mt-1">
             <button

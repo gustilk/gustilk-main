@@ -55,20 +55,20 @@ type CountryConfig = {
 };
 
 const COUNTRY_DATA: Record<string, CountryConfig> = {
-  USA:       { isFree: false, flag: "ðŸ‡ºðŸ‡¸", methods: ["card", "paypal", "apple_pay", "google_pay"] },
-  Canada:    { isFree: false, flag: "ðŸ‡¨ðŸ‡¦", methods: ["card", "paypal", "apple_pay", "google_pay", "interac"] },
-  Australia: { isFree: false, flag: "ðŸ‡¦ðŸ‡º", methods: ["card", "paypal", "apple_pay", "google_pay", "bpay"] },
-  Germany:   { isFree: false, flag: "ðŸ‡©ðŸ‡ª", methods: ["card", "sepa", "paypal", "apple_pay", "google_pay", "klarna", "giropay"] },
-  Holland:   { isFree: false, flag: "ðŸ‡³ðŸ‡±", methods: ["card", "ideal", "paypal", "apple_pay", "google_pay", "klarna"] },
-  Sweden:    { isFree: false, flag: "ðŸ‡¸ðŸ‡ª", methods: ["card", "swish", "paypal", "apple_pay", "google_pay", "klarna"] },
-  Belgium:   { isFree: false, flag: "ðŸ‡§ðŸ‡ª", methods: ["card", "bancontact", "paypal", "apple_pay", "google_pay"] },
-  France:    { isFree: false, flag: "ðŸ‡«ðŸ‡·", methods: ["card", "paypal", "apple_pay", "google_pay", "klarna", "lyf_pay"] },
-  Turkey:    { isFree: false, flag: "ðŸ‡¹ðŸ‡·", methods: ["card", "paypal", "apple_pay", "google_pay"] },
-  Armenia:   { isFree: false, flag: "ðŸ‡¦ðŸ‡²", methods: ["card", "paypal", "idram"] },
-  Georgia:   { isFree: false, flag: "ðŸ‡¬ðŸ‡ª", methods: ["card", "paypal", "apple_pay", "google_pay", "bog_pay"] },
-  Russia:    { isFree: false, flag: "ðŸ‡·ðŸ‡º", methods: ["card", "mir"] },
-  UK:        { isFree: false, flag: "ðŸ‡¬ðŸ‡§", methods: ["card", "paypal", "apple_pay", "google_pay", "klarna"] },
-  Iraq:      { isFree: true,  flag: "ðŸ‡®ðŸ‡¶", methods: [] },
+  USA:       { isFree: false, flag: "🇺🇸", methods: ["card", "paypal", "apple_pay", "google_pay"] },
+  Canada:    { isFree: false, flag: "🇨🇦", methods: ["card", "paypal", "apple_pay", "google_pay", "interac"] },
+  Australia: { isFree: false, flag: "🇦🇺", methods: ["card", "paypal", "apple_pay", "google_pay", "bpay"] },
+  Germany:   { isFree: false, flag: "🇩🇪", methods: ["card", "sepa", "paypal", "apple_pay", "google_pay", "klarna", "giropay"] },
+  Holland:   { isFree: false, flag: "🇳🇱", methods: ["card", "ideal", "paypal", "apple_pay", "google_pay", "klarna"] },
+  Sweden:    { isFree: false, flag: "🇸🇪", methods: ["card", "swish", "paypal", "apple_pay", "google_pay", "klarna"] },
+  Belgium:   { isFree: false, flag: "🇧🇪", methods: ["card", "bancontact", "paypal", "apple_pay", "google_pay"] },
+  France:    { isFree: false, flag: "🇫🇷", methods: ["card", "paypal", "apple_pay", "google_pay", "klarna", "lyf_pay"] },
+  Turkey:    { isFree: false, flag: "🇹🇷", methods: ["card", "paypal", "apple_pay", "google_pay"] },
+  Armenia:   { isFree: false, flag: "🇦🇲", methods: ["card", "paypal", "idram"] },
+  Georgia:   { isFree: false, flag: "🇬🇪", methods: ["card", "paypal", "apple_pay", "google_pay", "bog_pay"] },
+  Russia:    { isFree: false, flag: "🇷🇺", methods: ["card", "mir"] },
+  UK:        { isFree: false, flag: "🇬🇧", methods: ["card", "paypal", "apple_pay", "google_pay", "klarna"] },
+  Iraq:      { isFree: true,  flag: "🇮🇶", methods: [] },
 };
 
 function getCountryConfig(country: string): CountryConfig {
@@ -136,12 +136,12 @@ export default function PremiumPage({ user }: Props) {
         }
       }
     } else if (isNative()) {
-      // Native app â€” trigger App Store / Google Play IAP sheet via RevenueCat
+      // Native app — trigger App Store / Google Play IAP sheet via RevenueCat
       const result = await purchasePremium();
       if (result.cancelled) {
-        // User dismissed the sheet â€” do nothing
+        // User dismissed the sheet — do nothing
       } else if (result.success) {
-        // IAP succeeded â€” sync premium status from our server
+        // IAP succeeded — sync premium status from our server
         try {
           await apiRequest("POST", "/api/premium/restore", {});
           await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
@@ -185,7 +185,7 @@ export default function PremiumPage({ user }: Props) {
           <div className="flex justify-center mb-4">
             {isFree ? (
               <div className="w-20 h-20 rounded-full flex items-center justify-center text-4xl"
-                style={{ background: "rgba(201,168,76,0.08)", border: "2px solid #c9a84c" }}>ðŸŽ‰</div>
+                style={{ background: "rgba(201,168,76,0.08)", border: "2px solid #c9a84c" }}>🎉</div>
             ) : (
               <div className="w-20 h-20 rounded-full flex items-center justify-center"
                 style={{ border: "2px solid #c9a84c" }}>
@@ -306,7 +306,7 @@ export default function PremiumPage({ user }: Props) {
           }
         >
           <Star size={17} fill={isFree ? "white" : "#1a0a2e"} />
-          {loading ? "Processingâ€¦" : isFree ? "Get Free Premium" : isNative() ? "Subscribe â€” $5 / month" : `Subscribe via ${method?.label ?? "Payment"}`}
+          {loading ? "Processing…" : isFree ? "Get Free Premium" : isNative() ? "Subscribe — $5 / month" : `Subscribe via ${method?.label ?? "Payment"}`}
         </button>
 
         <p className="text-center text-cream/25 text-xs">

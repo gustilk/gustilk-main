@@ -962,12 +962,12 @@ function SubscriptionTermsSubScreen({ onBack }: { onBack: () => void }) {
     <SubScreenShell title={t("settings.subscriptionTerms")} onBack={onBack} testId="button-back-sub-terms">
       <div className="flex-1 overflow-y-auto px-5 py-5 pb-16 space-y-4">
         {[
-          { title: "Billing & Payment", body: "GÃ»stÃ®lk Premium is billed on a monthly basis. Payment is charged to your selected payment method at the start of each billing period. All prices are shown in USD and may vary by region." },
+          { title: "Billing & Payment", body: "Gûstîlk Premium is billed on a monthly basis. Payment is charged to your selected payment method at the start of each billing period. All prices are shown in USD and may vary by region." },
           { title: "Auto-Renewal", body: "Your subscription renews automatically unless you cancel at least 24 hours before the end of the current period. You can manage or cancel your subscription at any time through the Manage Subscription option in Settings." },
           { title: "Free Trial", body: "Where a free trial is offered, it will be clearly stated at the time of sign-up. Any unused portion of a free trial will be forfeited when a paid subscription is purchased." },
           { title: "Refund Policy", body: "Except as required by applicable law, payments are non-refundable. If you believe you were charged in error, please contact us via Help & Support within 14 days of the charge." },
           { title: "Cancellation", body: "You may cancel your subscription at any time. Cancellation takes effect at the end of the current billing period; you retain access to Premium features until that date." },
-          { title: "Price Changes", body: "GÃ»stÃ®lk may change subscription pricing with at least 30 days' notice. Continued use of the service after a price change constitutes acceptance of the new pricing." },
+          { title: "Price Changes", body: "Gûstîlk may change subscription pricing with at least 30 days' notice. Continued use of the service after a price change constitutes acceptance of the new pricing." },
           { title: "Iraq Free Premium", body: "Users connecting from Iraq are eligible for a complimentary Premium membership while this promotion is active. This offer is subject to change and is verified by server-side IP geolocation to prevent abuse." },
           { title: "Contact", body: "For billing questions or disputes, open Help & Support in Settings and our team will assist you as quickly as possible." },
         ].map((s, i) => (
