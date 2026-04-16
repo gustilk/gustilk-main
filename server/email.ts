@@ -145,26 +145,66 @@ export async function sendAccountDeletedEmail(to: string, name: string, wasPremi
   }
 }
 
-export async function sendSupportMessageAlertEmail(userDisplayName: string, messagePreview: string, matchId: string): Promise<void> {
+export async function sendFeatureFeedbackEmail(
+  type: "Feature Request" | "Feedback",
+  userDisplayName: string,
+  userId: string,
+  matchId: string,
+  recentMessages: { role: "user" | "assistant"; content: string }[],
+): Promise<void> {
   try {
     const resend = getResend();
-    const preview = messagePreview.length > 200 ? messagePreview.slice(0, 200) + "…" : messagePreview;
+    const subject = type === "Feature Request"
+      ? `[Feature Request] ${userDisplayName} has a new feature request`
+      : `[Feedback] ${userDisplayName} left feedback`;
+
+    const messagesHtml = recentMessages.map(m => {
+      const sender = m.role === "user" ? userDisplayName : "Gûstîlk AI";
+      const bg = m.role === "user" ? "rgba(201,168,76,0.07)" : "rgba(255,255,255,0.03)";
+      const nameColor = m.role === "user" ? "#c9a84c" : "rgba(253,248,240,0.4)";
+      const safe = m.content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      return `
+        <div style="margin-bottom:12px;padding:12px 14px;background:${bg};border-radius:10px;border:1px solid rgba(255,255,255,0.06);">
+          <p style="margin:0 0 4px;font-size:11px;font-weight:bold;color:${nameColor};text-transform:uppercase;letter-spacing:0.8px;">${sender}</p>
+          <p style="margin:0;font-size:13px;color:rgba(253,248,240,0.8);line-height:1.65;white-space:pre-wrap;">${safe}</p>
+        </div>`;
+    }).join("");
+
     await resend.emails.send({
       from: "Gûstîlk <noreply@gustilk.com>",
       to: "support@gustilk.com",
-      subject: `New support message from ${userDisplayName}`,
+      subject,
       html: emailShell(`
-        <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">New Support Message</h2>
-        <p style="margin:0 0 8px;font-size:13px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:1px;">From</p>
-        <p style="margin:0 0 20px;font-size:15px;color:#c9a84c;font-weight:bold;">${userDisplayName}</p>
-        <p style="margin:0 0 8px;font-size:13px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:1px;">Message</p>
-        <div style="margin:0 0 28px;padding:16px;background:rgba(255,255,255,0.04);border-radius:12px;border:1px solid rgba(255,255,255,0.08);">
-          <p style="margin:0;font-size:14px;color:rgba(253,248,240,0.8);line-height:1.7;">${preview}</p>
+        <h2 style="margin:0 0 4px;font-size:20px;color:#fdf8f0;font-weight:normal;">${type}</h2>
+        <p style="margin:0 0 24px;font-size:12px;color:rgba(253,248,240,0.35);letter-spacing:1px;text-transform:uppercase;">Detected in support chat</p>
+
+        <div style="margin-bottom:24px;padding:16px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(201,168,76,0.12);">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="padding-bottom:8px;">
+                <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">User</span><br>
+                <span style="font-size:14px;color:#c9a84c;font-weight:bold;">${userDisplayName}</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding-bottom:8px;">
+                <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">User ID</span><br>
+                <span style="font-size:13px;color:rgba(253,248,240,0.7);font-family:monospace;">${userId}</span>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Conversation ID</span><br>
+                <span style="font-size:13px;color:rgba(253,248,240,0.7);font-family:monospace;">${matchId}</span>
+              </td>
+            </tr>
+          </table>
         </div>
-        <p style="margin:0 0 8px;font-size:13px;color:rgba(253,248,240,0.35);line-height:1.6;">
-          The AI assistant has already sent an automatic reply. Log in as the support account to respond manually if needed.
-        </p>
-        <table cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
+
+        <p style="margin:0 0 10px;font-size:13px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Recent Conversation (last ${recentMessages.length} messages)</p>
+        ${messagesHtml}
+
+        <table cellpadding="0" cellspacing="0" style="margin-top:20px;">
           <tr><td style="border-radius:12px;background:linear-gradient(135deg,#c9a84c,#e8c97a);">
             <a href="https://www.gustilk.com/chat/${matchId}" style="display:inline-block;padding:14px 36px;font-size:15px;font-weight:bold;color:#1a0a2e;text-decoration:none;border-radius:12px;font-family:sans-serif;">
               Open Conversation

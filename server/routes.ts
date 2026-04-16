@@ -11,7 +11,7 @@ import { db } from "./db";
 import { cacheDel } from "./cache";
 import { count, sql, eq, asc, desc, or, and, ilike, isNotNull } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
-import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail, sendAdminApprovalNeededEmail } from "./email";
+import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendFeatureFeedbackEmail, sendAdminApprovalNeededEmail } from "./email";
 import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
 import OpenAI from "openai";
 
@@ -192,6 +192,17 @@ IMPORTANT RULES
 - Be warm, empathetic, and concise (aim for under 120 words per reply unless a detailed explanation is genuinely needed)
 - Never make up information — if you are unsure, say so and direct them to support@gustilk.com
 - Respond in the user's language if it is one of the six supported languages (English, Arabic, German, Armenian, Russian, Kurdish) — otherwise respond in English`;
+
+const FEATURE_REQUEST_PATTERN = /\b(add|adding|request|feature|suggest|suggestion|would like to have|can you add|please add|could you add|would be great|would be nice|would love|wish|i want|i need|new option|new feature|include|implement|missing feature|could we have|how about adding|it would help|it would be great if)\b/i;
+const FEEDBACK_PATTERN = /\b(feedback|improve|improvement|issue|problem|not working|doesn't work|bug|love|hate|dislike|complaint|complain|broken|error|glitch|crash|slow|laggy|confusing|hard to use|difficult|annoying|terrible|awful|amazing|excellent|great app|bad|worst|best|suggestion|experience|ui|ux|design|interface)\b/i;
+
+function classifyUserMessage(text: string): "Feature Request" | "Feedback" | null {
+  // Require minimum length to avoid false positives on very short messages
+  if (text.trim().length < 15) return null;
+  if (FEATURE_REQUEST_PATTERN.test(text)) return "Feature Request";
+  if (FEEDBACK_PATTERN.test(text)) return "Feedback";
+  return null;
+}
 
 async function generateSupportAiReply(matchId: string, supportAccountId: string): Promise<void> {
   try {
@@ -571,8 +582,22 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if ((otherUser?.isSystemAccount || otherUser?.isAdmin) && !user?.isAdmin && !user?.isSystemAccount) {
       generateSupportAiReply(match.id, otherUserId);
       if (otherUser?.isSystemAccount) {
-        const displayName = user?.fullName ?? user?.firstName ?? user?.email ?? "A user";
-        sendSupportMessageAlertEmail(displayName, text, match.id).catch(() => {});
+        const emailType = classifyUserMessage(text);
+        if (emailType) {
+          const displayName = user?.fullName ?? user?.firstName ?? user?.email ?? "A user";
+          // Fetch recent history for context (last 8-10 messages)
+          storage.getMessages(match.id).then(history => {
+            const recent = history.slice(-10);
+            const supportAccountId = otherUserId;
+            const contextMessages = recent
+              .filter(m => m.text && m.text.trim().length > 0)
+              .map(m => ({
+                role: (m.senderId === supportAccountId ? "assistant" : "user") as "user" | "assistant",
+                content: m.text,
+              }));
+            return sendFeatureFeedbackEmail(emailType, displayName, userId, match.id, contextMessages);
+          }).catch(() => {});
+        }
       }
     }
     res.json({ message: msg });
