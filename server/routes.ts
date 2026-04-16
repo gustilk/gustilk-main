@@ -447,9 +447,23 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         if (firstSubmittedApproved) {
           mainPhotoUrl = firstSubmittedApproved;
         } else if (mainPhotoUrl && !keptApproved.includes(mainPhotoUrl)) {
-          // Current main was removed — fall back to first remaining approved photo
+          // Main cover was deleted — auto-promote the first remaining approved photo
           mainPhotoUrl = keptApproved[0] ?? null;
         }
+
+        // Reorder photoSlots so approved slots appear in the user's submitted order.
+        // This ensures the Cover badge (idx === 0) always reflects the actual main cover.
+        // Non-approved slots (pending/rejected) are appended after the approved ones.
+        const approvedSlotByUrl = new Map<string, any>(
+          updatedSlots.filter((s: any) => s.status === "approved").map((s: any) => [s.url, s])
+        );
+        const nonApprovedSlots = updatedSlots.filter((s: any) => s.status !== "approved");
+        const orderedApprovedSlots = keptApproved
+          .map(url => approvedSlotByUrl.get(url))
+          .filter(Boolean)
+          // Enforce single-cover rule: isMain=true only on the slot matching mainPhotoUrl
+          .map((s: any) => ({ ...s, isMain: s.url === mainPhotoUrl }));
+        updatedSlots = [...orderedApprovedSlots, ...nonApprovedSlots];
       }
 
       const data = user?.country ? rest : parsed;

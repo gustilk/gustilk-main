@@ -617,7 +617,18 @@ export class DatabaseStorage implements IStorage {
     if (slots[slotIdx].status !== "approved") return;
 
     const newMain = slots[slotIdx].url;
-    const updatedSlots = slots.map((s, i) => ({ ...s, isMain: i === slotIdx }));
+
+    // Move the chosen slot to position 0 among approved slots so the Cover
+    // badge (idx === 0) always reflects the actual main. Non-approved slots
+    // (pending/rejected) stay at the end.
+    const chosen = { ...slots[slotIdx], isMain: true };
+    const approvedRest = slots
+      .filter((s, i) => i !== slotIdx && s.status === "approved")
+      .map(s => ({ ...s, isMain: false }));
+    const nonApproved = slots
+      .filter((s, i) => i !== slotIdx && s.status !== "approved")
+      .map(s => ({ ...s, isMain: false }));
+    const updatedSlots = [chosen, ...approvedRest, ...nonApproved];
 
     await db.update(users).set({
       photoSlots: updatedSlots,
