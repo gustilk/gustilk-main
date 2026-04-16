@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import type { SafeUser, MatchWithUser } from "@shared/schema";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
 import ReportModal from "@/components/ReportModal";
+import PhotoViewerModal from "@/components/PhotoViewerModal";
 import { useVideoCallContext } from "@/hooks/useVideoCall";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -21,6 +22,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
   const [, setLocation] = useLocation();
   const { t } = useTranslation();
   const [photoIdx, setPhotoIdx] = useState(0);
+  const [viewerOpen, setViewerOpen] = useState(false);
   const [showReport, setShowReport] = useState(false);
   const { startCall, callState } = useVideoCallContext();
 
@@ -135,7 +137,11 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
       {/* ── Photos ─────────────────────────────────────────── */}
       <div className="relative" style={{ height: "65vw", maxHeight: 400, minHeight: 280 }}>
         {allPhotos.length > 0 ? (
-          <div className="w-full h-full overflow-hidden">
+          <div
+            className="w-full h-full overflow-hidden"
+            onClick={() => { if (isPremium) setViewerOpen(true); }}
+            style={{ cursor: isPremium ? "pointer" : "default" }}
+          >
             {isPremium ? (
               <ProtectedPhoto
                 src={allPhotos[photoIdx] ?? allPhotos[0]}
@@ -348,7 +354,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
             <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold mb-2">Photos</p>
             <div className="flex gap-2 overflow-x-auto pb-1">
               {allPhotos.map((p, i) => (
-                <button key={i} onClick={() => setPhotoIdx(i)} data-testid={`thumb-photo-${i}`}
+                <button key={i} onClick={() => { setPhotoIdx(i); setViewerOpen(true); }} data-testid={`thumb-photo-${i}`}
                   className="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden transition-all"
                   style={{ border: i === photoIdx ? "2px solid #c9a84c" : "2px solid transparent", opacity: i === photoIdx ? 1 : 0.65 }}>
                   <ProtectedPhoto src={p} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" blurred={shouldBlurPhotos} />
@@ -366,6 +372,17 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
           reportedUserName={displayName}
           onClose={() => setShowReport(false)}
           onBlocked={() => { setShowReport(false); goBack(); }}
+        />
+      )}
+
+      {/* Full-screen photo viewer */}
+      {viewerOpen && isPremium && allPhotos.length > 0 && (
+        <PhotoViewerModal
+          photos={allPhotos}
+          initialIndex={photoIdx}
+          blurred={shouldBlurPhotos}
+          useProtected
+          onClose={() => setViewerOpen(false)}
         />
       )}
     </div>
