@@ -145,6 +145,50 @@ export async function sendAccountDeletedEmail(to: string, name: string, wasPremi
   }
 }
 
+export async function sendDirectFeatureRequestEmail(
+  userDisplayName: string,
+  userId: string,
+  userEmail: string | null,
+  message: string,
+): Promise<void> {
+  try {
+    const resend = getResend();
+    const safe = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    await resend.emails.send({
+      from: "Gûstîlk <noreply@gustilk.com>",
+      to: "support@gustilk.com",
+      subject: `[Feature Request] ${userDisplayName} submitted a feature request`,
+      html: emailShell(`
+        <h2 style="margin:0 0 4px;font-size:20px;color:#fdf8f0;font-weight:normal;">Feature Request</h2>
+        <p style="margin:0 0 24px;font-size:12px;color:rgba(253,248,240,0.35);letter-spacing:1px;text-transform:uppercase;">Submitted from app settings</p>
+
+        <div style="margin-bottom:24px;padding:16px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(201,168,76,0.12);">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="padding-bottom:10px;">
+              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">User</span><br>
+              <span style="font-size:15px;color:#c9a84c;font-weight:bold;">${userDisplayName}</span>
+            </td></tr>
+            <tr><td style="padding-bottom:10px;">
+              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">User ID</span><br>
+              <span style="font-size:13px;color:rgba(253,248,240,0.7);font-family:monospace;">${userId}</span>
+            </td></tr>
+            ${userEmail ? `<tr><td>
+              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Email</span><br>
+              <span style="font-size:13px;color:rgba(253,248,240,0.7);">${userEmail}</span>
+            </td></tr>` : ""}
+          </table>
+        </div>
+
+        <p style="margin:0 0 10px;font-size:13px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Their Request</p>
+        <div style="padding:16px;background:rgba(201,168,76,0.06);border-radius:12px;border:1px solid rgba(201,168,76,0.15);">
+          <p style="margin:0;font-size:14px;color:rgba(253,248,240,0.85);line-height:1.7;white-space:pre-wrap;">${safe}</p>
+        </div>
+      `),
+    });
+  } catch {
+  }
+}
+
 export async function sendFeatureFeedbackEmail(
   type: "Feature Request" | "Feedback",
   userDisplayName: string,

@@ -445,14 +445,8 @@ export default function SettingsPage({ user }: Props) {
 
   if (subScreen === "feature-request") {
     return (
-      <FeedbackSubScreen
-        title={t("settings.featureRequest")}
-        icon={Lightbulb}
-        placeholder={t("settings.featureRequestPlaceholder")}
-        messagePrefix="FEATURE REQUEST: "
-        supportMatch={supportMatch}
+      <FeatureRequestSubScreen
         onBack={() => setSubScreen(null)}
-        onNavigate={(url) => setLocation(url)}
       />
     );
   }
@@ -885,6 +879,84 @@ function FaqSubScreen({ onBack }: { onBack: () => void }) {
             )}
           </div>
         ))}
+      </div>
+    </SubScreenShell>
+  );
+}
+
+function FeatureRequestSubScreen({ onBack }: { onBack: () => void }) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const [text, setText] = useState("");
+  const [sent, setSent] = useState(false);
+
+  const sendMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/support/feature-request", { text: text.trim() });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error((err as any).error ?? "Failed to send");
+      }
+    },
+    onSuccess: () => {
+      setSent(true);
+      toast({ title: "Feature request sent!", description: "Thanks! Our team will review your idea." });
+    },
+    onError: (e: Error) => toast({ title: "Could not send", description: e.message, variant: "destructive" }),
+  });
+
+  return (
+    <SubScreenShell title={t("settings.featureRequest")} onBack={onBack} testId="button-back-feature-request">
+      <div className="flex-1 overflow-y-auto px-5 py-5 pb-16 flex flex-col gap-4">
+        {sent ? (
+          <div className="flex-1 flex flex-col items-center justify-center gap-4 py-12">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center"
+              style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.3)" }}>
+              <Lightbulb size={28} color="#c9a84c" />
+            </div>
+            <p className="text-center text-lg font-serif text-cream">Request received!</p>
+            <p className="text-center text-sm text-cream/50 leading-relaxed px-4">
+              Your idea has been sent directly to our team. We review every suggestion — thank you!
+            </p>
+            <button
+              onClick={onBack}
+              className="mt-2 px-6 py-2.5 rounded-full text-sm font-semibold"
+              style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.25)" }}
+            >
+              Back to Settings
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="rounded-2xl p-4 flex items-start gap-3"
+              style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.15)" }}>
+              <Lightbulb size={18} color="#c9a84c" className="flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-cream/60 leading-relaxed">{t("settings.featureRequestPlaceholder")}</p>
+            </div>
+            <textarea
+              data-testid="input-feature-request-text"
+              value={text}
+              onChange={e => setText(e.target.value)}
+              placeholder="Describe the feature you'd like to see..."
+              rows={7}
+              className="w-full px-4 py-3.5 rounded-2xl text-sm placeholder-cream/20 outline-none resize-none"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(201,168,76,0.2)", color: "#fdf8f0" }}
+            />
+            <button
+              data-testid="button-send-feature-request"
+              onClick={() => sendMutation.mutate()}
+              disabled={!text.trim() || sendMutation.isPending}
+              className="w-full py-3.5 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-40"
+              style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
+            >
+              <Send size={15} />
+              {sendMutation.isPending ? "Sending…" : "Send Feature Request"}
+            </button>
+            <p className="text-center text-xs" style={{ color: "rgba(253,248,240,0.3)" }}>
+              Your request goes directly to our team at support@gustilk.com
+            </p>
+          </>
+        )}
       </div>
     </SubScreenShell>
   );

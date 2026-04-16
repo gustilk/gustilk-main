@@ -11,7 +11,7 @@ import { db } from "./db";
 import { cacheDel } from "./cache";
 import { count, sql, eq, asc, desc, or, and, ilike, isNotNull } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
-import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendFeatureFeedbackEmail, sendAdminApprovalNeededEmail } from "./email";
+import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendFeatureFeedbackEmail, sendDirectFeatureRequestEmail, sendAdminApprovalNeededEmail } from "./email";
 import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
 import OpenAI from "openai";
 
@@ -803,6 +803,24 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   // â”€â”€â”€ REPORTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // â”€â”€â”€ GIFTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Feature requests submitted from Settings go directly to support email,
+  // bypassing the AI chat entirely.
+  app.post("/api/support/feature-request", isAuthenticated, async (req, res) => {
+    try {
+      const userId = getUserId(req);
+      const { text } = z.object({ text: z.string().min(1).max(3000) }).parse(req.body);
+      const user = await storage.getUserById(userId);
+      if (!user) return res.status(404).json({ error: "User not found" });
+      const displayName = user.fullName ?? user.firstName ?? user.email ?? "A user";
+      await sendDirectFeatureRequestEmail(displayName, userId, user.email ?? null, text);
+      res.json({ ok: true });
+    } catch (e: any) {
+      if (e?.name === "ZodError") return res.status(400).json({ error: "Message text is required." });
+      console.error("[feature-request]", e);
+      res.status(500).json({ error: "Failed to send feature request." });
+    }
+  });
+
   app.post("/api/gifts", isAuthenticated, async (req, res) => {
     const senderId = getUserId(req);
     const sender = await storage.getUserById(senderId);
