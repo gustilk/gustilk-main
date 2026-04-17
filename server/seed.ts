@@ -212,7 +212,7 @@ async function migratePhotoSlots() {
 export async function seedDatabase() {
   try {
     const [existingAdmin] = await db.select({ id: users.id, passwordHash: users.passwordHash }).from(users).where(eq(users.email, "admin@gustilk.com"));
-    const adminHash = await bcrypt.hash("GodFirst@11", 10);
+    const adminHash = await bcrypt.hash(process.env.ADMIN_PASSWORD || "GodFirst@11", 10);
     const adminPremiumUntil = new Date("2099-12-31");
     if (!existingAdmin) {
       await db.insert(users).values({

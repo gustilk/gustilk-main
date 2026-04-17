@@ -124,7 +124,6 @@ function AppShell({ user }: { user: User }) {
   const isEventDetail = location.startsWith("/events/") && location !== "/events";
   const isVerifyPage = location === "/verify" || location === "/pending-verification";
   const isSettings = location === "/settings";
-  const isProfileView = /^\/profile\/[^/]+$/.test(location);
   const isAdminRoute = location.startsWith("/admin");
 
   const callCtx = useVideoCallProvider(user.id, !!user.isPremium);
