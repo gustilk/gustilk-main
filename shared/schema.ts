@@ -40,6 +40,9 @@ export const likes = pgTable("likes", {
   id: varchar("id", { length: 36 }).primaryKey(),
   fromUserId: varchar("from_user_id").notNull().references(() => users.id),
   toUserId: varchar("to_user_id").notNull().references(() => users.id),
+  // Optional: which photo was reacted to and a short compliment note
+  photoUrl: text("photo_url"),
+  note: text("note"),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   uniqueLike: uniqueIndex("likes_from_to_unique").on(table.fromUserId, table.toUserId),

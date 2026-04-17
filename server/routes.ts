@@ -532,7 +532,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const userId = getUserId(req);
     const targetId = req.params.targetId as string;
     if (targetId === userId) return res.status(400).json({ error: "You cannot like yourself." });
-    const result = await storage.likeUser(userId, targetId);
+    // Optional photo reaction and compliment note
+    const { photoUrl, note } = z.object({
+      photoUrl: z.string().url().nullable().optional(),
+      note: z.string().max(200).nullable().optional(),
+    }).parse(req.body ?? {});
+    const result = await storage.likeUser(userId, targetId, photoUrl, note);
     res.json(result);
   });
 

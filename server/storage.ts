@@ -12,7 +12,7 @@ export interface IStorage {
 
   getDiscoverProfiles(userId: string, caste: string, gender: string, minAge: number, maxAge: number): Promise<SafeUser[]>;
 
-  likeUser(fromUserId: string, toUserId: string): Promise<{ matched: boolean; matchId?: string }>;
+  likeUser(fromUserId: string, toUserId: string, photoUrl?: string | null, note?: string | null): Promise<{ matched: boolean; matchId?: string }>;
   dislikeUser(fromUserId: string, toUserId: string): Promise<void>;
   unlikeUser(fromUserId: string, toUserId: string): Promise<void>;
   undislikeUser(fromUserId: string, toUserId: string): Promise<void>;
@@ -256,8 +256,8 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async likeUser(fromUserId: string, toUserId: string): Promise<{ matched: boolean; matchId?: string }> {
-    await db.insert(likes).values({ id: randomUUID(), fromUserId, toUserId }).onConflictDoNothing();
+  async likeUser(fromUserId: string, toUserId: string, photoUrl?: string | null, note?: string | null): Promise<{ matched: boolean; matchId?: string }> {
+    await db.insert(likes).values({ id: randomUUID(), fromUserId, toUserId, photoUrl: photoUrl ?? null, note: note ?? null }).onConflictDoNothing();
     // Bust both caches: liker no longer sees the liked profile; liked user no
     // longer sees the liker in discover (they'll find them in "Likes You" instead).
     cacheDelPrefix(`discover:${fromUserId}:`);
@@ -671,7 +671,7 @@ export class DatabaseStorage implements IStorage {
       .filter((r): r is { user: SafeUser; createdAt: Date } => !!r.user);
   }
 
-  async getLikesReceived(userId: string): Promise<{ user: SafeUser; createdAt: Date }[]> {
+  async getLikesReceived(userId: string): Promise<{ user: SafeUser; createdAt: Date; photoUrl?: string | null; note?: string | null }[]> {
     const rows = await db.select().from(likes).where(eq(likes.toUserId, userId)).orderBy(desc(likes.createdAt));
     if (rows.length === 0) return [];
     const fromIds = [...new Set(rows.map(r => r.fromUserId))];
@@ -689,19 +689,19 @@ export class DatabaseStorage implements IStorage {
     );
     const userMap = new Map(userRows.map(u => [u.id, enrichCardUser(u)]));
     return rows
-      .map(r => ({ user: userMap.get(r.fromUserId), createdAt: r.createdAt! }))
-      .filter((r): r is { user: SafeUser; createdAt: Date } => !!r.user);
+      .map(r => ({ user: userMap.get(r.fromUserId) as SafeUser | undefined, createdAt: r.createdAt!, photoUrl: r.photoUrl, note: r.note }))
+      .filter(r => !!r.user) as { user: SafeUser; createdAt: Date; photoUrl?: string | null; note?: string | null }[];
   }
 
-  async getLikesSent(userId: string): Promise<{ user: SafeUser; createdAt: Date }[]> {
+  async getLikesSent(userId: string): Promise<{ user: SafeUser; createdAt: Date; photoUrl?: string | null; note?: string | null }[]> {
     const rows = await db.select().from(likes).where(eq(likes.fromUserId, userId)).orderBy(desc(likes.createdAt));
     if (rows.length === 0) return [];
     const toIds = [...new Set(rows.map(r => r.toUserId))];
     const userRows = await db.select(CARD_COLUMNS).from(users).where(inArray(users.id, toIds));
     const userMap = new Map(userRows.map(u => [u.id, enrichCardUser(u)]));
     return rows
-      .map(r => ({ user: userMap.get(r.toUserId), createdAt: r.createdAt! }))
-      .filter((r): r is { user: SafeUser; createdAt: Date } => !!r.user);
+      .map(r => ({ user: userMap.get(r.toUserId) as SafeUser | undefined, createdAt: r.createdAt!, photoUrl: r.photoUrl, note: r.note }))
+      .filter(r => !!r.user) as { user: SafeUser; createdAt: Date; photoUrl?: string | null; note?: string | null }[];
   }
 
   async blockUser(blockerId: string, blockedId: string): Promise<void> {

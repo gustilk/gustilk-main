@@ -1,7 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { ArrowLeft, MessageCircle, Video, Star, Lock, MapPin, Shield, Flag, Crown, Heart, X } from "lucide-react";
+import { ArrowLeft, MessageCircle, Video, Star, Lock, MapPin, Shield, Flag, Crown, Heart, X, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { SafeUser, MatchWithUser } from "@shared/schema";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
@@ -24,6 +24,10 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
   const [photoIdx, setPhotoIdx] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [showReport, setShowReport] = useState(false);
+  const [showLikeSheet, setShowLikeSheet] = useState(false);
+  const [likeNote, setLikeNote] = useState("");
+  const [likePhotoUrl, setLikePhotoUrl] = useState<string | null>(null);
+  const [liked, setLiked] = useState(false);
   const { startCall, callState } = useVideoCallContext();
 
   // Capture the referrer that was stored by the navigating page.
@@ -54,13 +58,17 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
   const isPremium = !!viewer.isPremium;
 
   const likeMutation = useMutation({
-    mutationFn: () => apiRequest("POST", `/api/like/${userId}`),
+    mutationFn: ({ photoUrl, note }: { photoUrl?: string | null; note?: string | null } = {}) =>
+      apiRequest("POST", `/api/like/${userId}`, { photoUrl: photoUrl ?? null, note: note?.trim() || null }),
     onSuccess: () => {
       setActedOnLike(true);
+      setLiked(true);
+      setShowLikeSheet(false);
       queryClient.invalidateQueries({ queryKey: ["/api/activity/likes-received"] });
       queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
       queryClient.invalidateQueries({ queryKey: ["/api/discover"] });
-      goBack();
+      // Only go back if this was a Like Back action (from likes-received)
+      if (showLikeActions) goBack();
     },
   });
 
@@ -217,6 +225,34 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
             <button className="absolute right-0 top-0 bottom-0 w-1/3" onClick={() => setPhotoIdx(i => Math.min(allPhotos.length - 1, i + 1))} />
           </>
         )}
+
+        {/* Floating heart — opens the Send Like sheet (hidden when already liked or in Like Back mode) */}
+        {!showLikeActions && !isMatchedWithViewer && (
+          <button
+            data-testid="button-send-like"
+            onClick={() => {
+              if (liked) return;
+              setLikePhotoUrl(allPhotos[photoIdx] ?? null);
+              setShowLikeSheet(true);
+            }}
+            className="absolute bottom-4 right-4 w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-90"
+            style={{
+              background: liked
+                ? "linear-gradient(135deg,#c9a84c,#e8c97a)"
+                : "rgba(13,6,24,0.75)",
+              border: liked ? "none" : "1.5px solid rgba(201,168,76,0.45)",
+              boxShadow: liked ? "0 4px 16px rgba(201,168,76,0.4)" : "0 2px 8px rgba(0,0,0,0.5)",
+              zIndex: 30,
+            }}
+          >
+            <Heart
+              size={20}
+              fill={liked ? "#1a0a2e" : "none"}
+              color={liked ? "#1a0a2e" : "#c9a84c"}
+              strokeWidth={2}
+            />
+          </button>
+        )}
       </div>
 
       {/* ── Profile info ──────────────────────────────────── */}
@@ -283,7 +319,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
               Pass
             </button>
             <button
-              onClick={() => likeMutation.mutate()}
+              onClick={() => likeMutation.mutate({})}
               disabled={likeMutation.isPending || dislikeMutation.isPending}
               data-testid="button-like-from-likes"
               className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all active:scale-95 disabled:opacity-50"
@@ -384,6 +420,87 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
           useProtected
           onClose={() => setViewerOpen(false)}
         />
+      )}
+
+      {/* ── Send Like sheet ─────────────────────────────── */}
+      {showLikeSheet && (
+        <div
+          className="fixed inset-0 z-50 flex items-end"
+          style={{ background: "rgba(0,0,0,0.6)" }}
+          onClick={() => setShowLikeSheet(false)}
+        >
+          <div
+            className="w-full rounded-t-3xl px-5 pt-3 pb-10"
+            style={{ background: "#1a0a2e", border: "1px solid rgba(201,168,76,0.15)" }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Handle */}
+            <div className="w-10 h-1 rounded-full mx-auto mb-4" style={{ background: "rgba(255,255,255,0.12)" }} />
+
+            <p className="text-center text-sm font-semibold mb-4" style={{ color: "rgba(253,248,240,0.6)" }}>
+              Like {displayName}'s photo
+            </p>
+
+            {/* Photo selector — pick which photo to react to */}
+            {allPhotos.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-2 mb-4">
+                {allPhotos.map((p, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setLikePhotoUrl(p)}
+                    className="flex-shrink-0 rounded-xl overflow-hidden transition-all"
+                    style={{
+                      width: 64, height: 64,
+                      border: likePhotoUrl === p
+                        ? "2.5px solid #c9a84c"
+                        : "2.5px solid transparent",
+                      opacity: likePhotoUrl === p ? 1 : 0.55,
+                      position: "relative",
+                    }}
+                  >
+                    <img src={p} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" draggable={false} />
+                    {likePhotoUrl === p && (
+                      <div className="absolute inset-0 flex items-center justify-center"
+                        style={{ background: "rgba(201,168,76,0.18)" }}>
+                        <Heart size={18} fill="#c9a84c" color="#c9a84c" />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Optional note / compliment */}
+            <textarea
+              value={likeNote}
+              onChange={e => setLikeNote(e.target.value)}
+              placeholder={`Add a compliment for ${displayName}… (optional)`}
+              maxLength={200}
+              rows={3}
+              className="w-full px-4 py-3 rounded-2xl text-sm placeholder-cream/20 outline-none resize-none mb-4"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(201,168,76,0.2)", color: "#fdf8f0" }}
+            />
+
+            {/* Send button */}
+            <button
+              data-testid="button-confirm-like"
+              onClick={() => likeMutation.mutate({ photoUrl: likePhotoUrl, note: likeNote })}
+              disabled={likeMutation.isPending}
+              className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all active:scale-[0.98] disabled:opacity-50"
+              style={{ background: "linear-gradient(135deg,#c9a84c,#e8c97a)", color: "#1a0a2e" }}
+            >
+              <Heart size={16} fill="#1a0a2e" color="#1a0a2e" />
+              {likeMutation.isPending ? "Sending…" : `Like ${displayName}`}
+            </button>
+            <button
+              onClick={() => setShowLikeSheet(false)}
+              className="w-full mt-2 py-3 rounded-2xl text-sm font-semibold"
+              style={{ color: "rgba(253,248,240,0.35)" }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
