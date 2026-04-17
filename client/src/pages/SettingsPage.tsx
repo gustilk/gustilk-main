@@ -452,17 +452,7 @@ export default function SettingsPage({ user }: Props) {
   }
 
   if (subScreen === "feedback") {
-    return (
-      <FeedbackSubScreen
-        title={t("settings.giveUsFeedback")}
-        icon={ThumbsUp}
-        placeholder={t("settings.giveUsFeedbackPlaceholder")}
-        messagePrefix="FEEDBACK: "
-        supportMatch={supportMatch}
-        onBack={() => setSubScreen(null)}
-        onNavigate={(url) => setLocation(url)}
-      />
-    );
+    return <FeedbackSubScreen onBack={() => setSubScreen(null)} />;
   }
 
   if (subScreen === "subscription-terms") {
@@ -962,54 +952,140 @@ function FeatureRequestSubScreen({ onBack }: { onBack: () => void }) {
   );
 }
 
-function FeedbackSubScreen({ title, icon: Icon, placeholder, messagePrefix, supportMatch, onBack, onNavigate }: {
-  title: string;
-  icon: any;
-  placeholder: string;
-  messagePrefix: string;
-  supportMatch: any;
-  onBack: () => void;
-  onNavigate: (url: string) => void;
-}) {
-  const { t } = useTranslation();
+const FEEDBACK_TYPES = [
+  { value: "general",         label: "General Feedback" },
+  { value: "bug_report",      label: "Bug Report" },
+  { value: "feature_request", label: "Feature Request" },
+  { value: "other",           label: "Other" },
+] as const;
+
+type FeedbackType = typeof FEEDBACK_TYPES[number]["value"];
+
+function FeedbackSubScreen({ onBack }: { onBack: () => void }) {
   const { toast } = useToast();
+  const [type, setType] = useState<FeedbackType>("general");
+  const [rating, setRating] = useState<number | null>(null);
+  const [hoveredStar, setHoveredStar] = useState<number | null>(null);
   const [text, setText] = useState("");
+  const [sent, setSent] = useState(false);
 
   const sendMutation = useMutation({
     mutationFn: async () => {
-      let matchId = supportMatch?.id as string | undefined;
-      if (!matchId) {
-        const r = await apiRequest("POST", "/api/support/start");
-        const d = await r.json();
-        matchId = d.matchId as string;
+      const res = await apiRequest("POST", "/api/feedback", {
+        type,
+        rating,
+        message: text.trim(),
+        deviceInfo: {
+          platform: navigator.platform || undefined,
+          userAgent: navigator.userAgent || undefined,
+        },
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error((err as any).error ?? "Failed to send");
       }
-      await apiRequest("POST", `/api/messages/${matchId}`, { text: `${messagePrefix}${text.trim()}` });
-      return matchId as string;
+      return res.json();
     },
-    onSuccess: (matchId) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
-      toast({ title: "Message sent!", description: "We'll get back to you in the support chat." });
-      onNavigate(`/chat/${matchId}?support=1&from=settings`);
-    },
-    onError: () => toast({ title: "Could not send", description: "Please try again.", variant: "destructive" }),
+    onSuccess: () => setSent(true),
+    onError: (e: Error) => toast({ title: "Could not send", description: e.message, variant: "destructive" }),
   });
 
-  return (
-    <SubScreenShell title={title} onBack={onBack} testId={`button-back-${title.toLowerCase().replace(/ /g, "-")}`}>
-      <div className="flex-1 overflow-y-auto px-5 py-5 pb-16 flex flex-col gap-4">
-        <div className="rounded-2xl p-4 flex items-start gap-3" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.15)" }}>
-          <Icon size={18} color="#c9a84c" className="flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-cream/60 leading-relaxed">{placeholder}</p>
+  if (sent) {
+    return (
+      <SubScreenShell title="Give Us Feedback" onBack={onBack} testId="button-back-feedback">
+        <div className="flex-1 flex flex-col items-center justify-center gap-4 px-5 py-12">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.3)" }}>
+            <ThumbsUp size={28} color="#c9a84c" />
+          </div>
+          <p className="text-center text-lg font-serif text-cream">Thank you!</p>
+          <p className="text-center text-sm text-cream/50 leading-relaxed px-4">
+            Your feedback helps us improve Gûstîlk. We read every submission.
+          </p>
+          <button
+            onClick={onBack}
+            className="mt-2 px-6 py-2.5 rounded-full text-sm font-semibold"
+            style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.25)" }}
+          >
+            Back to Settings
+          </button>
         </div>
-        <textarea
-          data-testid="input-feedback-text"
-          value={text}
-          onChange={e => setText(e.target.value)}
-          placeholder={t("settings.feedbackPlaceholder")}
-          rows={7}
-          className="w-full px-4 py-3.5 rounded-2xl text-sm placeholder-cream/20 outline-none resize-none"
-          style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(201,168,76,0.2)", color: "#fdf8f0" }}
-        />
+      </SubScreenShell>
+    );
+  }
+
+  const activeStar = hoveredStar ?? rating;
+
+  return (
+    <SubScreenShell title="Give Us Feedback" onBack={onBack} testId="button-back-feedback">
+      <div className="flex-1 overflow-y-auto px-5 py-5 pb-16 flex flex-col gap-5">
+
+        {/* Feedback type */}
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(253,248,240,0.35)" }}>
+            Type
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {FEEDBACK_TYPES.map(ft => (
+              <button
+                key={ft.value}
+                data-testid={`button-feedback-type-${ft.value}`}
+                onClick={() => setType(ft.value)}
+                className="py-2.5 px-3 rounded-xl text-xs font-semibold text-left transition-all"
+                style={type === ft.value
+                  ? { background: "rgba(201,168,76,0.15)", color: "#c9a84c", border: "1.5px solid rgba(201,168,76,0.45)" }
+                  : { background: "rgba(255,255,255,0.04)", color: "rgba(253,248,240,0.45)", border: "1.5px solid rgba(255,255,255,0.07)" }
+                }
+              >
+                {ft.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Star rating */}
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(253,248,240,0.35)" }}>
+            Rating <span style={{ color: "rgba(253,248,240,0.2)", fontWeight: 400, textTransform: "none" }}>(optional)</span>
+          </p>
+          <div className="flex gap-2">
+            {[1, 2, 3, 4, 5].map(star => (
+              <button
+                key={star}
+                data-testid={`button-star-${star}`}
+                onClick={() => setRating(rating === star ? null : star)}
+                onMouseEnter={() => setHoveredStar(star)}
+                onMouseLeave={() => setHoveredStar(null)}
+                className="text-3xl leading-none transition-transform active:scale-90"
+                style={{ color: activeStar !== null && star <= activeStar ? "#c9a84c" : "rgba(255,255,255,0.15)" }}
+              >
+                ★
+              </button>
+            ))}
+          </div>
+          {rating !== null && (
+            <p className="text-xs mt-1" style={{ color: "rgba(253,248,240,0.3)" }}>
+              {["", "Very poor", "Poor", "Okay", "Good", "Excellent"][rating]}
+            </p>
+          )}
+        </div>
+
+        {/* Message */}
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "rgba(253,248,240,0.35)" }}>
+            Message
+          </p>
+          <textarea
+            data-testid="input-feedback-text"
+            value={text}
+            onChange={e => setText(e.target.value)}
+            placeholder="Tell us what's on your mind..."
+            rows={6}
+            className="w-full px-4 py-3.5 rounded-2xl text-sm placeholder-cream/20 outline-none resize-none"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(201,168,76,0.2)", color: "#fdf8f0" }}
+          />
+        </div>
+
         <button
           data-testid="button-send-feedback"
           onClick={() => sendMutation.mutate()}
@@ -1018,10 +1094,10 @@ function FeedbackSubScreen({ title, icon: Icon, placeholder, messagePrefix, supp
           style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
         >
           <Send size={15} />
-          {sendMutation.isPending ? t("settings.feedbackSending") : t("settings.feedbackSend")}
+          {sendMutation.isPending ? "Sending…" : "Send Feedback"}
         </button>
-        <p className="text-center text-xs" style={{ color: "rgba(253,248,240,0.3)" }}>
-          {t("settings.feedbackFooter")}
+        <p className="text-center text-xs" style={{ color: "rgba(253,248,240,0.25)" }}>
+          Your feedback is private and goes directly to our team.
         </p>
       </div>
     </SubScreenShell>

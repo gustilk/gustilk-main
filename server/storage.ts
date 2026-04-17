@@ -1,6 +1,6 @@
 ﻿import { db } from "./db";
-import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys, blocks, visitors, gifts, magicLinkTokens, blacklist, auditLogs } from "@shared/schema";
-import type { User, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report, InsertUser, PhotoSlot, Block, Gift } from "@shared/schema";
+import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys, blocks, visitors, gifts, magicLinkTokens, blacklist, auditLogs, feedback } from "@shared/schema";
+import type { User, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report, InsertUser, PhotoSlot, Block, Gift, Feedback, InsertFeedback } from "@shared/schema";
 import { eq, and, or, ne, notInArray, inArray, isNull, desc, sql, isNotNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { cacheGet, cacheSet, cacheDel, cacheDelPrefix, TTL } from "./cache";
@@ -742,6 +742,15 @@ export class DatabaseStorage implements IStorage {
 
   async resolveReport(reportId: string): Promise<void> {
     await db.update(reports).set({ status: "resolved" }).where(eq(reports.id, reportId));
+  }
+
+  async insertFeedback(data: InsertFeedback): Promise<Feedback> {
+    const [row] = await db.insert(feedback).values(data).returning();
+    return row;
+  }
+
+  async markFeedbackEmailSent(id: string): Promise<void> {
+    await db.update(feedback).set({ emailSent: true }).where(eq(feedback.id, id));
   }
 }
 

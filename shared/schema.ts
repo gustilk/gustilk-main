@@ -193,6 +193,25 @@ export const successStories = pgTable("success_stories", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// ─── FEEDBACK ─────────────────────────────────────────────────────────────────
+// Stores all in-app feedback submissions. Email alerts are sent only for
+// high-priority entries (feature requests, bug reports, or low ratings).
+
+export const feedback = pgTable("feedback", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  // general | bug_report | feature_request | other
+  type: text("type").notNull().default("general"),
+  rating: integer("rating"),            // 1–5 stars, nullable
+  message: text("message").notNull(),
+  deviceInfo: jsonb("device_info"),     // { platform, appVersion, userAgent }
+  emailSent: boolean("email_sent").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type Feedback = typeof feedback.$inferSelect;
+export type InsertFeedback = typeof feedback.$inferInsert;
+
 // ─── VALIDATION SCHEMAS ────────────────────────────────────────────────────────
 
 export const profileUpdateSchema = z.object({

@@ -11,7 +11,7 @@ import { db } from "./db";
 import { cacheDel } from "./cache";
 import { count, sql, eq, asc, desc, or, and, ilike, isNotNull } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
-import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendFeatureFeedbackEmail, sendDirectFeatureRequestEmail, sendAdminApprovalNeededEmail } from "./email";
+import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendFeatureFeedbackEmail, sendDirectFeatureRequestEmail, sendFeedbackAlertEmail, sendAdminApprovalNeededEmail } from "./email";
 import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
 import OpenAI from "openai";
 
@@ -818,6 +818,69 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       if (e?.name === "ZodError") return res.status(400).json({ error: "Message text is required." });
       console.error("[feature-request]", e);
       res.status(500).json({ error: "Failed to send feature request." });
+    }
+  });
+
+  // ─── FEEDBACK ─────────────────────────────────────────────────────────────────
+  // Always saves to the feedback table. Sends an email alert only when:
+  //   • type is "feature_request"
+  //   • message contains bug/crash keywords
+  //   • rating is 1 or 2 (low satisfaction)
+  app.post("/api/feedback", isAuthenticated, async (req, res) => {
+    try {
+      const userId = getUserId(req);
+      const schema = z.object({
+        type: z.enum(["general", "bug_report", "feature_request", "other"]).default("general"),
+        rating: z.number().int().min(1).max(5).nullable().optional(),
+        message: z.string().min(1).max(3000),
+        deviceInfo: z.object({
+          platform: z.string().optional(),
+          appVersion: z.string().optional(),
+          userAgent: z.string().optional(),
+        }).nullable().optional(),
+      });
+      const parsed = schema.parse(req.body);
+      const { type, rating = null, message, deviceInfo = null } = parsed;
+
+      // Persist to database
+      const row = await storage.insertFeedback({
+        id: randomUUID(),
+        userId,
+        type,
+        rating: rating ?? null,
+        message,
+        deviceInfo: deviceInfo as any ?? null,
+        emailSent: false,
+      });
+
+      // Determine whether this entry warrants an email alert
+      const BUG_KEYWORDS = /\b(bug|crash|crashes|not working|doesn't work|broken|error|glitch|freezing|freeze|stuck|fails|failure|problem|issue)\b/i;
+      const shouldEmail =
+        type === "feature_request" ||
+        type === "bug_report" ||
+        BUG_KEYWORDS.test(message) ||
+        (rating !== null && rating !== undefined && rating <= 2);
+
+      if (shouldEmail) {
+        const user = await storage.getUserById(userId);
+        const displayName = user?.fullName ?? user?.firstName ?? user?.email ?? "A user";
+        sendFeedbackAlertEmail({
+          userDisplayName: displayName,
+          userId,
+          userEmail: user?.email ?? null,
+          type,
+          rating: rating ?? null,
+          message,
+          deviceInfo: deviceInfo ?? null,
+          createdAt: row.createdAt ?? new Date(),
+        }).then(() => storage.markFeedbackEmailSent(row.id)).catch(() => {});
+      }
+
+      res.json({ ok: true, message: "Thank you! Your feedback helps us improve Gûstîlk." });
+    } catch (e: any) {
+      if (e?.name === "ZodError") return res.status(400).json({ error: e.errors[0].message });
+      console.error("[feedback]", e);
+      res.status(500).json({ error: "Failed to save feedback. Please try again." });
     }
   });
 

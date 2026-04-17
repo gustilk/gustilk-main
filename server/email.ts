@@ -145,6 +145,90 @@ export async function sendAccountDeletedEmail(to: string, name: string, wasPremi
   }
 }
 
+export async function sendFeedbackAlertEmail(opts: {
+  userDisplayName: string;
+  userId: string;
+  userEmail: string | null;
+  type: string;
+  rating: number | null;
+  message: string;
+  deviceInfo: { platform?: string; appVersion?: string; userAgent?: string } | null;
+  createdAt: Date;
+}): Promise<void> {
+  try {
+    const resend = getResend();
+    const { userDisplayName, userId, userEmail, type, rating, message, deviceInfo, createdAt } = opts;
+
+    const typeLabel: Record<string, string> = {
+      general: "General Feedback",
+      bug_report: "Bug Report",
+      feature_request: "Feature Request",
+      other: "Other",
+    };
+
+    // Subject clearly states the feedback category
+    const isUrgent = type === "bug_report" || (rating !== null && rating <= 2);
+    const subjectTag = type === "feature_request" ? "[Feature Request]" : isUrgent ? "[Bug / Low Rating]" : "[Feedback]";
+    const subject = `${subjectTag} ${userDisplayName} — ${typeLabel[type] ?? type}`;
+
+    const starsHtml = rating
+      ? Array.from({ length: 5 }, (_, i) =>
+          `<span style="color:${i < rating ? "#c9a84c" : "rgba(255,255,255,0.15)"};font-size:18px;">&#9733;</span>`
+        ).join("")
+      : null;
+
+    const safe = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+    await resend.emails.send({
+      from: "Gûstîlk <noreply@gustilk.com>",
+      to: "support@gustilk.com",
+      subject,
+      html: emailShell(`
+        <h2 style="margin:0 0 4px;font-size:20px;color:#fdf8f0;font-weight:normal;">${typeLabel[type] ?? type}</h2>
+        <p style="margin:0 0 24px;font-size:12px;color:rgba(253,248,240,0.35);letter-spacing:1px;text-transform:uppercase;">In-app feedback submission</p>
+
+        <div style="margin-bottom:24px;padding:16px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(201,168,76,0.12);">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="padding-bottom:10px;">
+              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">User</span><br>
+              <span style="font-size:15px;color:#c9a84c;font-weight:bold;">${safe(userDisplayName)}</span>
+            </td></tr>
+            <tr><td style="padding-bottom:10px;">
+              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">User ID</span><br>
+              <span style="font-size:13px;color:rgba(253,248,240,0.7);font-family:monospace;">${userId}</span>
+            </td></tr>
+            ${userEmail ? `<tr><td style="padding-bottom:10px;">
+              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Email</span><br>
+              <span style="font-size:13px;color:rgba(253,248,240,0.7);">${safe(userEmail)}</span>
+            </td></tr>` : ""}
+            ${starsHtml ? `<tr><td style="padding-bottom:10px;">
+              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Rating</span><br>
+              <span>${starsHtml}</span>
+              <span style="font-size:13px;color:rgba(253,248,240,0.5);margin-left:6px;">(${rating}/5)</span>
+            </td></tr>` : ""}
+            <tr><td style="padding-bottom:10px;">
+              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Date</span><br>
+              <span style="font-size:13px;color:rgba(253,248,240,0.7);">${createdAt.toUTCString()}</span>
+            </td></tr>
+            ${deviceInfo?.platform || deviceInfo?.appVersion ? `<tr><td>
+              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Device / Version</span><br>
+              <span style="font-size:13px;color:rgba(253,248,240,0.7);">
+                ${[deviceInfo?.platform, deviceInfo?.appVersion].filter(Boolean).join(" · ")}
+              </span>
+            </td></tr>` : ""}
+          </table>
+        </div>
+
+        <p style="margin:0 0 10px;font-size:13px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Message</p>
+        <div style="padding:16px;background:rgba(201,168,76,0.06);border-radius:12px;border:1px solid rgba(201,168,76,0.15);">
+          <p style="margin:0;font-size:14px;color:rgba(253,248,240,0.85);line-height:1.7;white-space:pre-wrap;">${safe(message)}</p>
+        </div>
+      `),
+    });
+  } catch {
+  }
+}
+
 export async function sendDirectFeatureRequestEmail(
   userDisplayName: string,
   userId: string,
