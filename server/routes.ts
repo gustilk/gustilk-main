@@ -1157,6 +1157,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (premiumFilter === "premium") conditions.push(eq(users.isPremium, true));
     if (premiumFilter === "non_premium") conditions.push(eq(users.isPremium, false));
     if (casteFilter && ["sheikh", "pir", "murid"].includes(casteFilter)) conditions.push(eq(users.caste, casteFilter as any));
+    if (req.query.banned === "true") conditions.push(eq(users.verificationStatus, "banned" as any));
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
     const [allUsers, [countRow]] = await Promise.all([
       whereClause

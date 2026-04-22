@@ -18,6 +18,7 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filterPremium, setFilterPremium] = useState<"" | "premium" | "non_premium">("");
   const [filterCaste, setFilterCaste] = useState<"" | "sheikh" | "pir" | "murid">("");
+  const [filterBanned, setFilterBanned] = useState(false);
   const [pending, setPending] = useState<null | {
     title: string; description: string;
     variant: "danger" | "warning" | "success";
@@ -25,12 +26,13 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
   }>(null);
 
   const { data, isLoading } = useQuery<{ users: User[]; total: number }>({
-    queryKey: ["/api/admin/users", debouncedSearch, page, filterPremium, filterCaste],
+    queryKey: ["/api/admin/users", debouncedSearch, page, filterPremium, filterCaste, filterBanned],
     queryFn: async () => {
       const params = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(page * PAGE_SIZE) });
       if (debouncedSearch) params.set("search", debouncedSearch);
       if (filterPremium) params.set("premium", filterPremium);
       if (filterCaste) params.set("caste", filterCaste);
+      if (filterBanned) params.set("banned", "true");
       return (await fetch(`/api/admin/users?${params}`, { credentials: "include" })).json();
     },
   });
@@ -70,7 +72,7 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
     setFilterCaste(c => c === val ? "" : val);
     setPage(0);
   };
-  const activeFilters = [filterPremium, filterCaste].filter(Boolean).length;
+  const activeFilters = [filterPremium, filterCaste, filterBanned ? "banned" : ""].filter(Boolean).length;
 
   const users = data?.users ?? [];
   const total = data?.total ?? 0;
@@ -152,9 +154,25 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
           </button>
         ))}
 
+        <div className="w-px h-4 mx-0.5" style={{ background: "rgba(255,255,255,0.1)" }} />
+
+        <button
+          onClick={() => { setFilterBanned(b => !b); setPage(0); }}
+          data-testid="filter-banned"
+          className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all"
+          style={{
+            background: filterBanned ? "rgba(239,68,68,0.2)" : "rgba(255,255,255,0.05)",
+            border: filterBanned ? "1px solid rgba(239,68,68,0.55)" : "1px solid rgba(255,255,255,0.08)",
+            color: filterBanned ? "#ef4444" : "rgba(253,248,240,0.45)",
+          }}
+        >
+          <Ban size={11} />
+          Banned
+        </button>
+
         {activeFilters > 0 && (
           <button
-            onClick={() => { setFilterPremium(""); setFilterCaste(""); setPage(0); }}
+            onClick={() => { setFilterPremium(""); setFilterCaste(""); setFilterBanned(false); setPage(0); }}
             data-testid="button-clear-filters"
             className="px-3 py-1 rounded-full text-xs font-semibold transition-all ml-1"
             style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", color: "#ef4444" }}
