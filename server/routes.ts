@@ -598,7 +598,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     // Auto AI reply when a regular user messages the support account or admin chat
     const otherUserId = match.user1Id === userId ? match.user2Id : match.user1Id;
     const otherUser = await storage.getUserById(otherUserId);
-    if ((otherUser?.isSystemAccount || otherUser?.isAdmin) && !user?.isAdmin && !user?.isSystemAccount) {
+    if (otherUser?.isSystemAccount && !user?.isAdmin && !user?.isSystemAccount) {
       generateSupportAiReply(match.id, otherUserId);
       if (otherUser?.isSystemAccount) {
         const emailType = classifyUserMessage(text);
