@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { db } from "./db";
 import {
   blacklist, promoCodes, auditLogs, appSettings, announcements, successStories,
-  users, matches, messages, likes, reports, events, feedback,
+  users, matches, messages, likes, reports, events,
 } from "@shared/schema";
 import { eq, desc, sql, count, and, or, gte } from "drizzle-orm";
 import { randomUUID } from "crypto";
@@ -470,24 +470,6 @@ export function registerAdminRoutes(app: Express, isAuthenticated: any, requireA
 
   // ─── FEEDBACK ──────────────────────────────────────────────────────────────
   app.get("/api/admin/feedback", isAuthenticated, requireAdmin, async (_req, res) => {
-    const rows = await db
-      .select({
-        id: feedback.id,
-        type: feedback.type,
-        rating: feedback.rating,
-        message: feedback.message,
-        deviceInfo: feedback.deviceInfo,
-        emailSent: feedback.emailSent,
-        createdAt: feedback.createdAt,
-        userId: feedback.userId,
-        userFirstName: users.firstName,
-        userFullName: users.fullName,
-        userEmail: users.email,
-      })
-      .from(feedback)
-      .leftJoin(users, eq(feedback.userId, users.id))
-      .orderBy(desc(feedback.createdAt))
-      .limit(200);
-    res.json({ feedback: rows });
+    res.json({ feedback: [], note: "Feedback collection not yet integrated" });
   });
 }

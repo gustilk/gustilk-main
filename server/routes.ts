@@ -11,7 +11,7 @@ import { db } from "./db";
 import { cacheDel } from "./cache";
 import { count, sql, eq, asc, desc, or, and, ilike, isNotNull } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
-import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendFeatureFeedbackEmail, sendDirectFeatureRequestEmail, sendFeedbackAlertEmail, sendAdminApprovalNeededEmail } from "./email";
+import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail, sendAdminApprovalNeededEmail } from "./email";
 import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
 import OpenAI from "openai";
 
@@ -192,17 +192,6 @@ IMPORTANT RULES
 - Be warm, empathetic, and concise (aim for under 120 words per reply unless a detailed explanation is genuinely needed)
 - Never make up information — if you are unsure, say so and direct them to support@gustilk.com
 - Respond in the user's language if it is one of the six supported languages (English, Arabic, German, Armenian, Russian, Kurdish) — otherwise respond in English`;
-
-const FEATURE_REQUEST_PATTERN = /\b(add|adding|request|feature|suggest|suggestion|would like to have|can you add|please add|could you add|would be great|would be nice|would love|wish|i want|i need|new option|new feature|include|implement|missing feature|could we have|how about adding|it would help|it would be great if)\b/i;
-const FEEDBACK_PATTERN = /\b(feedback|improve|improvement|issue|problem|not working|doesn't work|bug|love|hate|dislike|complaint|complain|broken|error|glitch|crash|slow|laggy|confusing|hard to use|difficult|annoying|terrible|awful|amazing|excellent|great app|bad|worst|best|suggestion|experience|ui|ux|design|interface)\b/i;
-
-function classifyUserMessage(text: string): "Feature Request" | "Feedback" | null {
-  // Require minimum length to avoid false positives on very short messages
-  if (text.trim().length < 15) return null;
-  if (FEATURE_REQUEST_PATTERN.test(text)) return "Feature Request";
-  if (FEEDBACK_PATTERN.test(text)) return "Feedback";
-  return null;
-}
 
 async function generateSupportAiReply(matchId: string, supportAccountId: string): Promise<void> {
   try {
@@ -447,23 +436,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         if (firstSubmittedApproved) {
           mainPhotoUrl = firstSubmittedApproved;
         } else if (mainPhotoUrl && !keptApproved.includes(mainPhotoUrl)) {
-          // Main cover was deleted — auto-promote the first remaining approved photo
+          // Current main was removed — fall back to first remaining approved photo
           mainPhotoUrl = keptApproved[0] ?? null;
         }
-
-        // Reorder photoSlots so approved slots appear in the user's submitted order.
-        // This ensures the Cover badge (idx === 0) always reflects the actual main cover.
-        // Non-approved slots (pending/rejected) are appended after the approved ones.
-        const approvedSlotByUrl = new Map<string, any>(
-          updatedSlots.filter((s: any) => s.status === "approved").map((s: any) => [s.url, s])
-        );
-        const nonApprovedSlots = updatedSlots.filter((s: any) => s.status !== "approved");
-        const orderedApprovedSlots = keptApproved
-          .map(url => approvedSlotByUrl.get(url))
-          .filter(Boolean)
-          // Enforce single-cover rule: isMain=true only on the slot matching mainPhotoUrl
-          .map((s: any) => ({ ...s, isMain: s.url === mainPhotoUrl }));
-        updatedSlots = [...orderedApprovedSlots, ...nonApprovedSlots];
       }
 
       const data = user?.country ? rest : parsed;
@@ -532,12 +507,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const userId = getUserId(req);
     const targetId = req.params.targetId as string;
     if (targetId === userId) return res.status(400).json({ error: "You cannot like yourself." });
-    // Optional photo reaction and compliment note
-    const { photoUrl, note } = z.object({
-      photoUrl: z.string().url().nullable().optional(),
-      note: z.string().max(200).nullable().optional(),
-    }).parse(req.body ?? {});
-    const result = await storage.likeUser(userId, targetId, photoUrl, note);
+    const result = await storage.likeUser(userId, targetId);
     res.json(result);
   });
 
@@ -598,25 +568,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     // Auto AI reply when a regular user messages the support account or admin chat
     const otherUserId = match.user1Id === userId ? match.user2Id : match.user1Id;
     const otherUser = await storage.getUserById(otherUserId);
-    if (otherUser?.isSystemAccount && !user?.isAdmin && !user?.isSystemAccount) {
+    if ((otherUser?.isSystemAccount || otherUser?.isAdmin) && !user?.isAdmin && !user?.isSystemAccount) {
       generateSupportAiReply(match.id, otherUserId);
       if (otherUser?.isSystemAccount) {
-        const emailType = classifyUserMessage(text);
-        if (emailType) {
-          const displayName = user?.fullName ?? user?.firstName ?? user?.email ?? "A user";
-          // Fetch recent history for context (last 8-10 messages)
-          storage.getMessages(match.id).then(history => {
-            const recent = history.slice(-10);
-            const supportAccountId = otherUserId;
-            const contextMessages = recent
-              .filter(m => m.text && m.text.trim().length > 0)
-              .map(m => ({
-                role: (m.senderId === supportAccountId ? "assistant" : "user") as "user" | "assistant",
-                content: m.text,
-              }));
-            return sendFeatureFeedbackEmail(emailType, displayName, userId, match.id, contextMessages);
-          }).catch(() => {});
-        }
+        const displayName = user?.fullName ?? user?.firstName ?? user?.email ?? "A user";
+        sendSupportMessageAlertEmail(displayName, text, match.id).catch(() => {});
       }
     }
     res.json({ message: msg });
@@ -808,87 +764,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   // â”€â”€â”€ REPORTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // â”€â”€â”€ GIFTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  // Feature requests submitted from Settings go directly to support email,
-  // bypassing the AI chat entirely.
-  app.post("/api/support/feature-request", isAuthenticated, async (req, res) => {
-    try {
-      const userId = getUserId(req);
-      const { text } = z.object({ text: z.string().min(1).max(3000) }).parse(req.body);
-      const user = await storage.getUserById(userId);
-      if (!user) return res.status(404).json({ error: "User not found" });
-      const displayName = user.fullName ?? user.firstName ?? user.email ?? "A user";
-      await sendDirectFeatureRequestEmail(displayName, userId, user.email ?? null, text);
-      res.json({ ok: true });
-    } catch (e: any) {
-      if (e?.name === "ZodError") return res.status(400).json({ error: "Message text is required." });
-      console.error("[feature-request]", e);
-      res.status(500).json({ error: "Failed to send feature request." });
-    }
-  });
-
-  // ─── FEEDBACK ─────────────────────────────────────────────────────────────────
-  // Always saves to the feedback table. Sends an email alert only when:
-  //   • type is "feature_request"
-  //   • message contains bug/crash keywords
-  //   • rating is 1 or 2 (low satisfaction)
-  app.post("/api/feedback", isAuthenticated, async (req, res) => {
-    try {
-      const userId = getUserId(req);
-      const schema = z.object({
-        type: z.enum(["general", "bug_report", "feature_request", "other"]).default("general"),
-        rating: z.number().int().min(1).max(5).nullable().optional(),
-        message: z.string().min(1).max(3000),
-        deviceInfo: z.object({
-          platform: z.string().optional(),
-          appVersion: z.string().optional(),
-          userAgent: z.string().optional(),
-        }).nullable().optional(),
-      });
-      const parsed = schema.parse(req.body);
-      const { type, rating = null, message, deviceInfo = null } = parsed;
-
-      // Persist to database
-      const row = await storage.insertFeedback({
-        id: randomUUID(),
-        userId,
-        type,
-        rating: rating ?? null,
-        message,
-        deviceInfo: deviceInfo as any ?? null,
-        emailSent: false,
-      });
-
-      // Determine whether this entry warrants an email alert
-      const BUG_KEYWORDS = /\b(bug|crash|crashes|not working|doesn't work|broken|error|glitch|freezing|freeze|stuck|fails|failure|problem|issue)\b/i;
-      const shouldEmail =
-        type === "feature_request" ||
-        type === "bug_report" ||
-        BUG_KEYWORDS.test(message) ||
-        (rating !== null && rating !== undefined && rating <= 2);
-
-      if (shouldEmail) {
-        const user = await storage.getUserById(userId);
-        const displayName = user?.fullName ?? user?.firstName ?? user?.email ?? "A user";
-        sendFeedbackAlertEmail({
-          userDisplayName: displayName,
-          userId,
-          userEmail: user?.email ?? null,
-          type,
-          rating: rating ?? null,
-          message,
-          deviceInfo: deviceInfo ?? null,
-          createdAt: row.createdAt ?? new Date(),
-        }).then(() => storage.markFeedbackEmailSent(row.id)).catch(() => {});
-      }
-
-      res.json({ ok: true, message: "Thank you! Your feedback helps us improve Gûstîlk." });
-    } catch (e: any) {
-      if (e?.name === "ZodError") return res.status(400).json({ error: e.errors[0].message });
-      console.error("[feedback]", e);
-      res.status(500).json({ error: "Failed to save feedback. Please try again." });
-    }
-  });
-
   app.post("/api/gifts", isAuthenticated, async (req, res) => {
     const senderId = getUserId(req);
     const sender = await storage.getUserById(senderId);
@@ -1157,7 +1032,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (premiumFilter === "premium") conditions.push(eq(users.isPremium, true));
     if (premiumFilter === "non_premium") conditions.push(eq(users.isPremium, false));
     if (casteFilter && ["sheikh", "pir", "murid"].includes(casteFilter)) conditions.push(eq(users.caste, casteFilter as any));
-    if (req.query.banned === "true") conditions.push(eq(users.verificationStatus, "banned" as any));
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
     const [allUsers, [countRow]] = await Promise.all([
       whereClause

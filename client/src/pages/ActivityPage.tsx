@@ -10,8 +10,6 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 interface ActivityItem {
   user: SafeUser;
   createdAt: string;
-  photoUrl?: string | null;
-  note?: string | null;
 }
 
 interface Props {
@@ -164,7 +162,7 @@ function ActivityCard({ item, isPremium, blurred, tab, onBeforeNavigate, onActed
 }) {
   const [, setLocation] = useLocation();
   const [done, setDone] = useState(false);
-  const { user, createdAt, photoUrl, note } = item;
+  const { user, createdAt } = item;
   const displayName = user.firstName ?? user.fullName?.split(" ")[0] ?? "Member";
   const timeAgo = formatDistanceToNow(new Date(createdAt), { addSuffix: true });
 
@@ -249,24 +247,6 @@ function ActivityCard({ item, isPremium, blurred, tab, onBeforeNavigate, onActed
         </div>
       )}
 
-      {/* Liked photo thumbnail — shown when the sender reacted to a specific photo */}
-      {!blurred && photoUrl && isPremium && (
-        <div className="absolute top-2 right-2 z-10">
-          <div
-            className="w-14 h-14 rounded-xl overflow-hidden"
-            style={{ border: "2px solid rgba(201,168,76,0.7)", boxShadow: "0 2px 8px rgba(0,0,0,0.6)" }}
-          >
-            <img src={photoUrl} alt="Liked photo" className="w-full h-full object-cover" draggable={false} />
-          </div>
-          <div
-            className="absolute -bottom-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg,#c9a84c,#e8c97a)", border: "1.5px solid #0d0618" }}
-          >
-            <Heart size={9} fill="#1a0a2e" color="#1a0a2e" />
-          </div>
-        </div>
-      )}
-
       {/* Info + action buttons at bottom */}
       <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
         {!blurred && (
@@ -275,16 +255,7 @@ function ActivityCard({ item, isPremium, blurred, tab, onBeforeNavigate, onActed
             onClick={() => { onBeforeNavigate(); sessionStorage.setItem("profile_back_to", "/activity"); if (showActions) sessionStorage.setItem("profile_show_like_actions", "true"); setLocation(`/profile/${user.id}`); }}
           >
             <p className="text-cream font-semibold text-sm truncate">{displayName}{user.age ? `, ${user.age}` : ""}</p>
-            {/* Note / compliment bubble */}
-            {note && isPremium && (
-              <p
-                className="text-[11px] leading-snug mt-1 px-2 py-1 rounded-lg line-clamp-2"
-                style={{ background: "rgba(201,168,76,0.15)", color: "rgba(253,248,240,0.8)", border: "1px solid rgba(201,168,76,0.2)" }}
-              >
-                "{note}"
-              </p>
-            )}
-            <p className="text-cream/50 text-[10px] mt-1">{timeAgo}</p>
+            <p className="text-cream/50 text-[10px]">{timeAgo}</p>
           </div>
         )}
         {blurred && <p className="text-cream/40 text-[10px] text-center">{timeAgo}</p>}

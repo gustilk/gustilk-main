@@ -145,194 +145,26 @@ export async function sendAccountDeletedEmail(to: string, name: string, wasPremi
   }
 }
 
-export async function sendFeedbackAlertEmail(opts: {
-  userDisplayName: string;
-  userId: string;
-  userEmail: string | null;
-  type: string;
-  rating: number | null;
-  message: string;
-  deviceInfo: { platform?: string; appVersion?: string; userAgent?: string } | null;
-  createdAt: Date;
-}): Promise<void> {
+export async function sendSupportMessageAlertEmail(userDisplayName: string, messagePreview: string, matchId: string): Promise<void> {
   try {
     const resend = getResend();
-    const { userDisplayName, userId, userEmail, type, rating, message, deviceInfo, createdAt } = opts;
-
-    const typeLabel: Record<string, string> = {
-      general: "General Feedback",
-      bug_report: "Bug Report",
-      feature_request: "Feature Request",
-      other: "Other",
-    };
-
-    // Subject clearly states the feedback category
-    const isUrgent = type === "bug_report" || (rating !== null && rating <= 2);
-    const subjectTag = type === "feature_request" ? "[Feature Request]" : isUrgent ? "[Bug / Low Rating]" : "[Feedback]";
-    const subject = `${subjectTag} ${userDisplayName} — ${typeLabel[type] ?? type}`;
-
-    const starsHtml = rating
-      ? Array.from({ length: 5 }, (_, i) =>
-          `<span style="color:${i < rating ? "#c9a84c" : "rgba(255,255,255,0.15)"};font-size:18px;">&#9733;</span>`
-        ).join("")
-      : null;
-
-    const safe = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
+    const preview = messagePreview.length > 200 ? messagePreview.slice(0, 200) + "…" : messagePreview;
     await resend.emails.send({
       from: "Gûstîlk <noreply@gustilk.com>",
       to: "support@gustilk.com",
-      subject,
+      subject: `New support message from ${userDisplayName}`,
       html: emailShell(`
-        <h2 style="margin:0 0 4px;font-size:20px;color:#fdf8f0;font-weight:normal;">${typeLabel[type] ?? type}</h2>
-        <p style="margin:0 0 24px;font-size:12px;color:rgba(253,248,240,0.35);letter-spacing:1px;text-transform:uppercase;">In-app feedback submission</p>
-
-        <div style="margin-bottom:24px;padding:16px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(201,168,76,0.12);">
-          <table width="100%" cellpadding="0" cellspacing="0">
-            <tr><td style="padding-bottom:10px;">
-              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">User</span><br>
-              <span style="font-size:15px;color:#c9a84c;font-weight:bold;">${safe(userDisplayName)}</span>
-            </td></tr>
-            <tr><td style="padding-bottom:10px;">
-              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">User ID</span><br>
-              <span style="font-size:13px;color:rgba(253,248,240,0.7);font-family:monospace;">${userId}</span>
-            </td></tr>
-            ${userEmail ? `<tr><td style="padding-bottom:10px;">
-              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Email</span><br>
-              <span style="font-size:13px;color:rgba(253,248,240,0.7);">${safe(userEmail)}</span>
-            </td></tr>` : ""}
-            ${starsHtml ? `<tr><td style="padding-bottom:10px;">
-              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Rating</span><br>
-              <span>${starsHtml}</span>
-              <span style="font-size:13px;color:rgba(253,248,240,0.5);margin-left:6px;">(${rating}/5)</span>
-            </td></tr>` : ""}
-            <tr><td style="padding-bottom:10px;">
-              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Date</span><br>
-              <span style="font-size:13px;color:rgba(253,248,240,0.7);">${createdAt.toUTCString()}</span>
-            </td></tr>
-            ${deviceInfo?.platform || deviceInfo?.appVersion ? `<tr><td>
-              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Device / Version</span><br>
-              <span style="font-size:13px;color:rgba(253,248,240,0.7);">
-                ${[deviceInfo?.platform, deviceInfo?.appVersion].filter(Boolean).join(" · ")}
-              </span>
-            </td></tr>` : ""}
-          </table>
+        <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">New Support Message</h2>
+        <p style="margin:0 0 8px;font-size:13px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:1px;">From</p>
+        <p style="margin:0 0 20px;font-size:15px;color:#c9a84c;font-weight:bold;">${userDisplayName}</p>
+        <p style="margin:0 0 8px;font-size:13px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:1px;">Message</p>
+        <div style="margin:0 0 28px;padding:16px;background:rgba(255,255,255,0.04);border-radius:12px;border:1px solid rgba(255,255,255,0.08);">
+          <p style="margin:0;font-size:14px;color:rgba(253,248,240,0.8);line-height:1.7;">${preview}</p>
         </div>
-
-        <p style="margin:0 0 10px;font-size:13px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Message</p>
-        <div style="padding:16px;background:rgba(201,168,76,0.06);border-radius:12px;border:1px solid rgba(201,168,76,0.15);">
-          <p style="margin:0;font-size:14px;color:rgba(253,248,240,0.85);line-height:1.7;white-space:pre-wrap;">${safe(message)}</p>
-        </div>
-      `),
-    });
-  } catch {
-  }
-}
-
-export async function sendDirectFeatureRequestEmail(
-  userDisplayName: string,
-  userId: string,
-  userEmail: string | null,
-  message: string,
-): Promise<void> {
-  try {
-    const resend = getResend();
-    const safe = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    await resend.emails.send({
-      from: "Gûstîlk <noreply@gustilk.com>",
-      to: "support@gustilk.com",
-      subject: `[Feature Request] ${userDisplayName} submitted a feature request`,
-      html: emailShell(`
-        <h2 style="margin:0 0 4px;font-size:20px;color:#fdf8f0;font-weight:normal;">Feature Request</h2>
-        <p style="margin:0 0 24px;font-size:12px;color:rgba(253,248,240,0.35);letter-spacing:1px;text-transform:uppercase;">Submitted from app settings</p>
-
-        <div style="margin-bottom:24px;padding:16px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(201,168,76,0.12);">
-          <table width="100%" cellpadding="0" cellspacing="0">
-            <tr><td style="padding-bottom:10px;">
-              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">User</span><br>
-              <span style="font-size:15px;color:#c9a84c;font-weight:bold;">${userDisplayName}</span>
-            </td></tr>
-            <tr><td style="padding-bottom:10px;">
-              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">User ID</span><br>
-              <span style="font-size:13px;color:rgba(253,248,240,0.7);font-family:monospace;">${userId}</span>
-            </td></tr>
-            ${userEmail ? `<tr><td>
-              <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Email</span><br>
-              <span style="font-size:13px;color:rgba(253,248,240,0.7);">${userEmail}</span>
-            </td></tr>` : ""}
-          </table>
-        </div>
-
-        <p style="margin:0 0 10px;font-size:13px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Their Request</p>
-        <div style="padding:16px;background:rgba(201,168,76,0.06);border-radius:12px;border:1px solid rgba(201,168,76,0.15);">
-          <p style="margin:0;font-size:14px;color:rgba(253,248,240,0.85);line-height:1.7;white-space:pre-wrap;">${safe}</p>
-        </div>
-      `),
-    });
-  } catch {
-  }
-}
-
-export async function sendFeatureFeedbackEmail(
-  type: "Feature Request" | "Feedback",
-  userDisplayName: string,
-  userId: string,
-  matchId: string,
-  recentMessages: { role: "user" | "assistant"; content: string }[],
-): Promise<void> {
-  try {
-    const resend = getResend();
-    const subject = type === "Feature Request"
-      ? `[Feature Request] ${userDisplayName} has a new feature request`
-      : `[Feedback] ${userDisplayName} left feedback`;
-
-    const messagesHtml = recentMessages.map(m => {
-      const sender = m.role === "user" ? userDisplayName : "Gûstîlk AI";
-      const bg = m.role === "user" ? "rgba(201,168,76,0.07)" : "rgba(255,255,255,0.03)";
-      const nameColor = m.role === "user" ? "#c9a84c" : "rgba(253,248,240,0.4)";
-      const safe = m.content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-      return `
-        <div style="margin-bottom:12px;padding:12px 14px;background:${bg};border-radius:10px;border:1px solid rgba(255,255,255,0.06);">
-          <p style="margin:0 0 4px;font-size:11px;font-weight:bold;color:${nameColor};text-transform:uppercase;letter-spacing:0.8px;">${sender}</p>
-          <p style="margin:0;font-size:13px;color:rgba(253,248,240,0.8);line-height:1.65;white-space:pre-wrap;">${safe}</p>
-        </div>`;
-    }).join("");
-
-    await resend.emails.send({
-      from: "Gûstîlk <noreply@gustilk.com>",
-      to: "support@gustilk.com",
-      subject,
-      html: emailShell(`
-        <h2 style="margin:0 0 4px;font-size:20px;color:#fdf8f0;font-weight:normal;">${type}</h2>
-        <p style="margin:0 0 24px;font-size:12px;color:rgba(253,248,240,0.35);letter-spacing:1px;text-transform:uppercase;">Detected in support chat</p>
-
-        <div style="margin-bottom:24px;padding:16px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(201,168,76,0.12);">
-          <table width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-              <td style="padding-bottom:8px;">
-                <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">User</span><br>
-                <span style="font-size:14px;color:#c9a84c;font-weight:bold;">${userDisplayName}</span>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding-bottom:8px;">
-                <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">User ID</span><br>
-                <span style="font-size:13px;color:rgba(253,248,240,0.7);font-family:monospace;">${userId}</span>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <span style="font-size:11px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Conversation ID</span><br>
-                <span style="font-size:13px;color:rgba(253,248,240,0.7);font-family:monospace;">${matchId}</span>
-              </td>
-            </tr>
-          </table>
-        </div>
-
-        <p style="margin:0 0 10px;font-size:13px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:0.8px;">Recent Conversation (last ${recentMessages.length} messages)</p>
-        ${messagesHtml}
-
-        <table cellpadding="0" cellspacing="0" style="margin-top:20px;">
+        <p style="margin:0 0 8px;font-size:13px;color:rgba(253,248,240,0.35);line-height:1.6;">
+          The AI assistant has already sent an automatic reply. Log in as the support account to respond manually if needed.
+        </p>
+        <table cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
           <tr><td style="border-radius:12px;background:linear-gradient(135deg,#c9a84c,#e8c97a);">
             <a href="https://www.gustilk.com/chat/${matchId}" style="display:inline-block;padding:14px 36px;font-size:15px;font-weight:bold;color:#1a0a2e;text-decoration:none;border-radius:12px;font-family:sans-serif;">
               Open Conversation

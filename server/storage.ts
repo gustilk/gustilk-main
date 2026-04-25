@@ -1,6 +1,6 @@
 ﻿import { db } from "./db";
-import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys, blocks, visitors, gifts, magicLinkTokens, blacklist, auditLogs, feedback } from "@shared/schema";
-import type { User, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report, InsertUser, PhotoSlot, Block, Gift, Feedback, InsertFeedback } from "@shared/schema";
+import { users, likes, dislikes, matches, messages, events, eventAttendees, reports, otpCodes, passkeys, blocks, visitors, gifts, magicLinkTokens, blacklist, auditLogs } from "@shared/schema";
+import type { User, SafeUser, Match, Message, MatchWithUser, Event, EventWithAttendance, Report, InsertUser, PhotoSlot, Block, Gift } from "@shared/schema";
 import { eq, and, or, ne, notInArray, inArray, isNull, desc, sql, isNotNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { cacheGet, cacheSet, cacheDel, cacheDelPrefix, TTL } from "./cache";
@@ -12,7 +12,7 @@ export interface IStorage {
 
   getDiscoverProfiles(userId: string, caste: string, gender: string, minAge: number, maxAge: number): Promise<SafeUser[]>;
 
-  likeUser(fromUserId: string, toUserId: string, photoUrl?: string | null, note?: string | null): Promise<{ matched: boolean; matchId?: string }>;
+  likeUser(fromUserId: string, toUserId: string): Promise<{ matched: boolean; matchId?: string }>;
   dislikeUser(fromUserId: string, toUserId: string): Promise<void>;
   unlikeUser(fromUserId: string, toUserId: string): Promise<void>;
   undislikeUser(fromUserId: string, toUserId: string): Promise<void>;
@@ -256,8 +256,8 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async likeUser(fromUserId: string, toUserId: string, photoUrl?: string | null, note?: string | null): Promise<{ matched: boolean; matchId?: string }> {
-    await db.insert(likes).values({ id: randomUUID(), fromUserId, toUserId, photoUrl: photoUrl ?? null, note: note ?? null }).onConflictDoNothing();
+  async likeUser(fromUserId: string, toUserId: string): Promise<{ matched: boolean; matchId?: string }> {
+    await db.insert(likes).values({ id: randomUUID(), fromUserId, toUserId }).onConflictDoNothing();
     // Bust both caches: liker no longer sees the liked profile; liked user no
     // longer sees the liker in discover (they'll find them in "Likes You" instead).
     cacheDelPrefix(`discover:${fromUserId}:`);
@@ -617,18 +617,7 @@ export class DatabaseStorage implements IStorage {
     if (slots[slotIdx].status !== "approved") return;
 
     const newMain = slots[slotIdx].url;
-
-    // Move the chosen slot to position 0 among approved slots so the Cover
-    // badge (idx === 0) always reflects the actual main. Non-approved slots
-    // (pending/rejected) stay at the end.
-    const chosen = { ...slots[slotIdx], isMain: true };
-    const approvedRest = slots
-      .filter((s, i) => i !== slotIdx && s.status === "approved")
-      .map(s => ({ ...s, isMain: false }));
-    const nonApproved = slots
-      .filter((s, i) => i !== slotIdx && s.status !== "approved")
-      .map(s => ({ ...s, isMain: false }));
-    const updatedSlots = [chosen, ...approvedRest, ...nonApproved];
+    const updatedSlots = slots.map((s, i) => ({ ...s, isMain: i === slotIdx }));
 
     await db.update(users).set({
       photoSlots: updatedSlots,
@@ -671,7 +660,7 @@ export class DatabaseStorage implements IStorage {
       .filter((r): r is { user: SafeUser; createdAt: Date } => !!r.user);
   }
 
-  async getLikesReceived(userId: string): Promise<{ user: SafeUser; createdAt: Date; photoUrl?: string | null; note?: string | null }[]> {
+  async getLikesReceived(userId: string): Promise<{ user: SafeUser; createdAt: Date }[]> {
     const rows = await db.select().from(likes).where(eq(likes.toUserId, userId)).orderBy(desc(likes.createdAt));
     if (rows.length === 0) return [];
     const fromIds = [...new Set(rows.map(r => r.fromUserId))];
@@ -689,19 +678,19 @@ export class DatabaseStorage implements IStorage {
     );
     const userMap = new Map(userRows.map(u => [u.id, enrichCardUser(u)]));
     return rows
-      .map(r => ({ user: userMap.get(r.fromUserId) as SafeUser | undefined, createdAt: r.createdAt!, photoUrl: r.photoUrl, note: r.note }))
-      .filter(r => !!r.user) as { user: SafeUser; createdAt: Date; photoUrl?: string | null; note?: string | null }[];
+      .map(r => ({ user: userMap.get(r.fromUserId), createdAt: r.createdAt! }))
+      .filter((r): r is { user: SafeUser; createdAt: Date } => !!r.user);
   }
 
-  async getLikesSent(userId: string): Promise<{ user: SafeUser; createdAt: Date; photoUrl?: string | null; note?: string | null }[]> {
+  async getLikesSent(userId: string): Promise<{ user: SafeUser; createdAt: Date }[]> {
     const rows = await db.select().from(likes).where(eq(likes.fromUserId, userId)).orderBy(desc(likes.createdAt));
     if (rows.length === 0) return [];
     const toIds = [...new Set(rows.map(r => r.toUserId))];
     const userRows = await db.select(CARD_COLUMNS).from(users).where(inArray(users.id, toIds));
     const userMap = new Map(userRows.map(u => [u.id, enrichCardUser(u)]));
     return rows
-      .map(r => ({ user: userMap.get(r.toUserId) as SafeUser | undefined, createdAt: r.createdAt!, photoUrl: r.photoUrl, note: r.note }))
-      .filter(r => !!r.user) as { user: SafeUser; createdAt: Date; photoUrl?: string | null; note?: string | null }[];
+      .map(r => ({ user: userMap.get(r.toUserId), createdAt: r.createdAt! }))
+      .filter((r): r is { user: SafeUser; createdAt: Date } => !!r.user);
   }
 
   async blockUser(blockerId: string, blockedId: string): Promise<void> {
@@ -742,15 +731,6 @@ export class DatabaseStorage implements IStorage {
 
   async resolveReport(reportId: string): Promise<void> {
     await db.update(reports).set({ status: "resolved" }).where(eq(reports.id, reportId));
-  }
-
-  async insertFeedback(data: InsertFeedback): Promise<Feedback> {
-    const [row] = await db.insert(feedback).values(data).returning();
-    return row;
-  }
-
-  async markFeedbackEmailSent(id: string): Promise<void> {
-    await db.update(feedback).set({ emailSent: true }).where(eq(feedback.id, id));
   }
 }
 
