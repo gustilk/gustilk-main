@@ -257,7 +257,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // â”€â”€â”€ MAGIC LINK AUTH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€â"€ MAGIC LINK AUTH â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   app.post("/api/auth/forgot-password", async (req, res) => {
     try {
       const { email } = z.object({ email: z.string().email() }).parse(req.body);
@@ -317,7 +317,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // â”€â”€â”€ FACE CHECK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€â"€ FACE CHECK â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   app.post("/api/check-face", isAuthenticated, async (req, res) => {
     try {
       const { image } = req.body;
@@ -332,7 +332,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // â”€â”€â”€ PROFILE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€â"€ PROFILE â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   app.put("/api/profile", isAuthenticated, async (req, res) => {
     try {
       const userId = getUserId(req);
@@ -490,7 +490,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // â”€â”€â”€ DISCOVER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€â"€ DISCOVER â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   app.get("/api/discover", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
@@ -501,7 +501,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ profiles });
   });
 
-  // â”€â”€â”€ LIKES / DISLIKES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€â"€ LIKES / DISLIKES â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   app.post("/api/like/:targetId", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const targetId = req.params.targetId as string;
@@ -532,14 +532,14 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
-  // â”€â”€â”€ MATCHES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€â"€ MATCHES â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   app.get("/api/matches", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const matchList = await storage.getMatches(userId);
     res.json({ matches: matchList });
   });
 
-  // â”€â”€â”€ MESSAGES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€â"€ MESSAGES â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   app.get("/api/messages/:matchId", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
@@ -583,7 +583,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
-  // â”€â”€â”€ EVENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€â"€ EVENTS â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   app.get("/api/events", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const evList = await storage.listEvents(userId);
@@ -658,7 +658,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
-  // â”€â”€â”€ PREMIUM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€â"€ PREMIUM â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   app.post("/api/premium/subscribe", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
@@ -722,16 +722,16 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
-  app.post(“/api/profile/reapply”, isAuthenticated, async (req, res) => {
+  app.post("/api/profile/reapply", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
-    if (!user) return res.status(404).json({ error: “User not found” });
-    if (user.verificationStatus === “banned”) return res.status(403).json({ error: “Banned accounts cannot reapply.” });
-    if (user.verificationStatus === “pending”) return res.status(400).json({ error: “Already pending review.” });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    if (user.verificationStatus === "banned") return res.status(403).json({ error: "Banned accounts cannot reapply." });
+    if (user.verificationStatus === "pending") return res.status(400).json({ error: "Already pending review." });
     const { selfie } = z.object({ selfie: z.string().optional() }).parse(req.body);
-    if (selfie && selfie.startsWith(“data:image”)) {
+    if (selfie && selfie.startsWith("data:image")) {
       const faceCheck = await checkFacePresent(selfie);
-      if (!faceCheck.faceDetected) return res.status(400).json({ error: “Please upload a clear selfie showing your face.” });
+      if (!faceCheck.faceDetected) return res.status(400).json({ error: "Please upload a clear selfie showing your face." });
     }
     await storage.reapplyUser(userId, selfie);
     notifyAdminNewApplicant(userId);
@@ -739,7 +739,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   // ─── SUPPORT CHAT ─────────────────────────────────────────
-  app.post(“/api/support/start”, isAuthenticated, async (req, res) => {
+  app.post("/api/support/start", isAuthenticated, async (req, res) => {
     try {
       const userId = getUserId(req);
       const supportAccount = await getOrCreateSupportAccount();
@@ -756,42 +756,42 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       await storage.sendMessage(matchId, supportAccount.id, openingMsg);
       res.json({ matchId });
     } catch (e: any) {
-      console.error(“[support/start]”, e);
-      res.status(500).json({ error: “Failed to start support chat” });
+      console.error("[support/start]", e);
+      res.status(500).json({ error: "Failed to start support chat" });
     }
   });
 
   // ─── GIFTS ────────────────────────────────────────────────
-  app.post(“/api/gifts”, isAuthenticated, async (req, res) => {
+  app.post("/api/gifts", isAuthenticated, async (req, res) => {
     const senderId = getUserId(req);
     const sender = await storage.getUserById(senderId);
-    if (!sender?.isPremium) return res.status(403).json({ error: “Premium required to send gifts” });
+    if (!sender?.isPremium) return res.status(403).json({ error: "Premium required to send gifts" });
 
     const { recipientId, matchId, giftType, message, animationStyle } = z.object({
       recipientId: z.string(),
       matchId: z.string(),
       giftType: z.string().min(1),
-      message: z.string().max(200).optional().default(“”),
-      animationStyle: z.enum([“none”,”confetti”,”sparkles”,”fireworks”,”hearts”,”flowers”]).default(“none”),
+      message: z.string().max(200).optional().default(""),
+      animationStyle: z.enum(["none","confetti","sparkles","fireworks","hearts","flowers"]).default("none"),
     }).parse(req.body);
 
     const gift = await storage.sendGift(senderId, recipientId, matchId, giftType, message, animationStyle);
     res.json({ gift });
   });
 
-  app.get(“/api/gifts/match/:matchId”, isAuthenticated, async (req, res) => {
+  app.get("/api/gifts/match/:matchId", isAuthenticated, async (req, res) => {
     const gifts = await storage.getGiftsInMatch(req.params.matchId);
     res.json({ gifts });
   });
 
-  app.get(“/api/gifts/received”, isAuthenticated, async (req, res) => {
+  app.get("/api/gifts/received", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const gifts = await storage.getGiftsReceived(userId);
     res.json({ gifts });
   });
 
   // ─── SEEN ─────────────────────────────────────────────────
-  app.post(“/api/seen/matches”, isAuthenticated, async (req, res) => {
+  app.post("/api/seen/matches", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     await db.update(messages)
       .set({ readAt: new Date() })
@@ -801,7 +801,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
-  app.post(“/api/seen/activity”, isAuthenticated, async (req, res) => {
+  app.post("/api/seen/activity", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const now = new Date();
     await db.update(users).set({ activitySeenAt: now } as any).where(eq(users.id, userId));
@@ -810,56 +810,56 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   // ─── ACTIVITY ─────────────────────────────────────────────
-  app.post(“/api/users/:userId/visit”, isAuthenticated, async (req, res) => {
+  app.post("/api/users/:userId/visit", isAuthenticated, async (req, res) => {
     const fromUserId = getUserId(req);
     const toUserId = String(req.params.userId);
     await storage.recordVisit(fromUserId, toUserId);
     res.json({ ok: true });
   });
 
-  app.get(“/api/activity/likes-received”, isAuthenticated, async (req, res) => {
+  app.get("/api/activity/likes-received", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const items = await storage.getLikesReceived(userId);
     res.json({ items });
   });
 
-  app.get(“/api/activity/likes-sent”, isAuthenticated, async (req, res) => {
+  app.get("/api/activity/likes-sent", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const items = await storage.getLikesSent(userId);
     res.json({ items });
   });
 
-  app.get(“/api/activity/visitors”, isAuthenticated, async (req, res) => {
+  app.get("/api/activity/visitors", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const items = await storage.getVisitors(userId);
     res.json({ items });
   });
 
   // ─── PUSH NOTIFICATIONS ───────────────────────────────────
-  app.post(“/api/push/register”, isAuthenticated, async (req, res) => {
+  app.post("/api/push/register", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const { token, platform } = req.body;
-    if (!token || !platform) return res.status(400).json({ error: “token and platform required” });
+    if (!token || !platform) return res.status(400).json({ error: "token and platform required" });
     await storage.updateUser(userId, { pushToken: token, pushPlatform: platform } as any);
     res.json({ ok: true });
   });
 
   // ─── BLOCKS ───────────────────────────────────────────────
-  app.get(“/api/blocks”, isAuthenticated, async (req, res) => {
+  app.get("/api/blocks", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const blocked = await storage.getBlockedUsers(userId);
     res.json({ users: blocked });
   });
 
-  app.post(“/api/users/:userId/block”, isAuthenticated, async (req, res) => {
+  app.post("/api/users/:userId/block", isAuthenticated, async (req, res) => {
     const blockerId = getUserId(req);
     const blockedId = String(req.params.userId);
-    if (blockerId === blockedId) return res.status(400).json({ error: “Cannot block yourself” });
+    if (blockerId === blockedId) return res.status(400).json({ error: "Cannot block yourself" });
     await storage.blockUser(blockerId, blockedId);
     res.json({ ok: true });
   });
 
-  app.delete(“/api/users/:userId/block”, isAuthenticated, async (req, res) => {
+  app.delete("/api/users/:userId/block", isAuthenticated, async (req, res) => {
     const blockerId = getUserId(req);
     const blockedId = String(req.params.userId);
     await storage.unblockUser(blockerId, blockedId);
@@ -878,7 +878,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ report });
   });
 
-  // â”€â”€â”€ ADMIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€â"€ ADMIN â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   async function requireAdmin(req: any, res: any, next: any) {
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
@@ -1252,7 +1252,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // â”€â”€â”€ CHANGE PASSWORD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€â"€ CHANGE PASSWORD â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   app.patch("/api/auth/change-password", isAuthenticated, async (req: any, res) => {
     try {
       const bcrypt = await import("bcryptjs");
@@ -1272,7 +1272,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // â”€â”€â”€ CHANGE PHONE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€â"€ CHANGE PHONE â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   app.patch("/api/auth/change-phone", isAuthenticated, async (req: any, res) => {
     try {
       const { newPhone } = req.body;
@@ -1287,7 +1287,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // â”€â”€â”€ DELETE ACCOUNT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â"€â"€â"€ DELETE ACCOUNT â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   app.delete("/api/account", isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
