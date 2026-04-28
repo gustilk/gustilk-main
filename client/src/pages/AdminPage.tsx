@@ -912,8 +912,8 @@ function VerificationCard({ user, onApprove, onReject, onBan, onPhotoAction, onV
           placeholder="Rejection / ban reason (optional) — will be sent to the user automatically"
           rows={2}
           data-testid={`input-rejection-reason-${user.id}`}
-          className="w-full rounded-xl px-3 py-2 text-xs outline-none resize-none leading-relaxed placeholder:text-[rgba(253,248,240,0.3)]"
-          style={{ background: "rgba(255,255,255,0.05)", color: "#fdf8f0", border: "1px solid rgba(255,255,255,0.1)" }}
+          className="w-full rounded-xl px-3 py-2 text-xs outline-none resize-none leading-relaxed"
+          style={{ background: "rgba(255,255,255,0.05)", color: "#fdf8f0", border: "1px solid rgba(255,255,255,0.1)", placeholder: "rgba(253,248,240,0.3)" }}
         />
       </div>
 

@@ -207,26 +207,24 @@ export default function VerificationPage({ user }: Props) {
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center relative px-5 gap-4">
-          {!useFallback && (
-            <div className="relative w-72 h-72">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                data-testid="camera-preview"
-                className="w-full h-full object-cover rounded-full"
-                style={{
-                  transform: "scaleX(-1)",
-                  border: "3px solid rgba(201,168,76,0.5)",
-                  background: "#1a0a2e",
-                  boxShadow: "0 0 40px rgba(201,168,76,0.15)",
-                }}
-              />
-              <div className="absolute inset-0 rounded-full pointer-events-none"
-                style={{ border: "2px dashed rgba(201,168,76,0.4)" }} />
-            </div>
-          )}
+          <div className="relative w-72 h-72">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              data-testid="camera-preview"
+              className="w-full h-full object-cover rounded-full"
+              style={{
+                transform: "scaleX(-1)",
+                border: "3px solid rgba(201,168,76,0.5)",
+                background: "#1a0a2e",
+                boxShadow: "0 0 40px rgba(201,168,76,0.15)",
+              }}
+            />
+            <div className="absolute inset-0 rounded-full pointer-events-none"
+              style={{ border: "2px dashed rgba(201,168,76,0.4)" }} />
+          </div>
 
           {cameraError && (
             <div className="w-full rounded-2xl px-4 py-3 flex items-start gap-3"
