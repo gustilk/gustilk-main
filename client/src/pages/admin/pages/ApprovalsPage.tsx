@@ -126,7 +126,9 @@ export default function ApprovalsPage({ user: adminUser }: { user: User }) {
             const profilePhotos = slots.filter(s => s.url).map(s => s.url as string);
             const selfieUrl = (u as any).verificationSelfie as string | undefined;
             const allPhotos = [...profilePhotos, ...(selfieUrl ? [selfieUrl] : [])];
-            const casteLabel = ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[u.caste ?? ""] ?? u.caste ?? "");
+            const casteLabels = { sheikh: "Sheikh", pir: "Pir", murid: "Mirid" } as const;
+            const casteLabel =
+              u.caste && u.caste in casteLabels ? casteLabels[u.caste as keyof typeof casteLabels] : (u.caste ?? "");
             const timeAgo = u.createdAt ? formatDistanceToNow(new Date(u.createdAt), { addSuffix: true }) : "";
             const name = u.fullName ?? u.firstName ?? "this user";
             const appCount = ((u as any).applicationCount as number | null) ?? 1;

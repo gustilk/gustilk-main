@@ -805,7 +805,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.get("/api/gifts/match/:matchId", isAuthenticated, async (req, res) => {
-    const gifts = await storage.getGiftsInMatch(req.params.matchId);
+    const gifts = await storage.getGiftsInMatch(String(req.params.matchId));
     res.json({ gifts });
   });
 
@@ -1005,14 +1005,14 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.post("/api/admin/suspicious-logins/:userId/revoke-premium", isAuthenticated, requireAdmin, async (req, res) => {
     await db.update(users)
       .set({ isPremium: false, premiumUntil: null } as any)
-      .where(eq(users.id, req.params.userId));
+      .where(eq(users.id, String(req.params.userId)));
     res.json({ ok: true });
   });
 
   app.post("/api/admin/suspicious-logins/:userId/dismiss", isAuthenticated, requireAdmin, async (req, res) => {
     await db.update(users)
       .set({ suspiciousLoginAt: null, suspiciousLoginIp: null } as any)
-      .where(eq(users.id, req.params.userId));
+      .where(eq(users.id, String(req.params.userId)));
     res.json({ ok: true });
   });
 

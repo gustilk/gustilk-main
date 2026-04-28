@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useRoute, Link } from "wouter";
+import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard, Users, UserCheck, Camera, Flag, Shield, Ban, Copy,
   BarChart2, CreditCard, Tag, Share2, Bell, Megaphone, Mail, MessageSquare,
@@ -41,7 +42,7 @@ import SuspiciousLoginsPage from "./pages/SuspiciousLoginsPage";
 interface NavItem {
   label: string;
   path: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: LucideIcon;
   badgeKey?: "pendingPhotos";
 }
 

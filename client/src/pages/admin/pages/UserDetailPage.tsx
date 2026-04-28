@@ -86,7 +86,9 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
   const isBanned = u.verificationStatus === "banned";
   const statusColor = isBanned ? "#ef4444" : u.isVerified ? "#10b981" : isPending ? "#fbbf24" : "#6b7280";
   const statusLabel = isBanned ? "Banned" : u.isVerified ? "Verified" : isPending ? "Pending Approval" : "Unverified";
-  const casteLabel = ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[u.caste ?? ""] ?? u.caste ?? "—");
+  const casteLabels = { sheikh: "Sheikh", pir: "Pir", murid: "Mirid" } as const;
+  const casteLabel =
+    u.caste && u.caste in casteLabels ? casteLabels[u.caste as keyof typeof casteLabels] : (u.caste ?? "—");
   const name = u.fullName ?? u.firstName ?? "this user";
 
   const backPath = isPending ? "/admin/approvals" : "/admin/users";
@@ -316,16 +318,16 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
       })()}
 
       {/* Identity selfie */}
-      {u.selfieUrl && (
+      {u.verificationSelfie && (
         <div className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}>
           <h3 className="text-cream text-sm font-semibold mb-3">Identity Selfie</h3>
           <button
-            onClick={() => { setLightboxUrls([u.selfieUrl!]); setLightboxIdx(0); }}
+            onClick={() => { setLightboxUrls([u.verificationSelfie!]); setLightboxIdx(0); }}
             data-testid="selfie-thumb"
             className="relative max-w-xs rounded-xl overflow-hidden group cursor-zoom-in"
             style={{ border: "1px solid rgba(201,168,76,0.2)" }}
           >
-            <img src={u.selfieUrl} alt="Identity selfie" className="w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+            <img src={u.verificationSelfie} alt="Identity selfie" className="w-full object-cover transition-transform duration-300 group-hover:scale-105" />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center">
               <span className="opacity-0 group-hover:opacity-100 text-white text-xs font-semibold transition-opacity">View Full</span>
             </div>

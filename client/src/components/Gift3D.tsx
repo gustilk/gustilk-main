@@ -313,7 +313,7 @@ function Chocolate({ s }: { s: number }) {
           width: s * 0.12, height: bh, right: -s * 0.08,
           background: "linear-gradient(90deg, rgba(0,0,0,0.25), transparent)",
           top: top * 0.6, borderRadius: "0 4px 4px 0",
-          skewY: "0deg",
+          transform: "skewY(0deg)",
         })} />
       </div>
     </div>
