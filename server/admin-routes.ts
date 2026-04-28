@@ -256,7 +256,7 @@ export function registerAdminRoutes(app: Express, isAuthenticated: any, requireA
       ] = await Promise.all([
         db.select({ n: count() }).from(users),
         db.select({ n: count() }).from(users).where(sql`${users.isPremium} = true`),
-        db.select({ n: count() }).from(users).where(sql`${users.isVerified} = true`),
+        db.select({ n: count() }).from(users).where(sql`${users.verificationStatus} = 'approved'`),
         db.select({ n: count() }).from(users).where(sql`${users.verificationStatus} = 'banned'`),
         db.select({ n: count() }).from(users).where(sql`${users.gender} = 'male'`),
         db.select({ n: count() }).from(users).where(sql`${users.gender} = 'female'`),

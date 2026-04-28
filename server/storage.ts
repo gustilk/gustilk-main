@@ -288,7 +288,7 @@ export class DatabaseStorage implements IStorage {
   async dislikeUser(fromUserId: string, toUserId: string): Promise<void> {
     await db.insert(dislikes).values({ id: randomUUID(), fromUserId, toUserId }).onConflictDoNothing();
     cacheDelPrefix(`discover:${fromUserId}:`);
-
+    cacheDelPrefix(`discover:${toUserId}:`);
   }
 
   async unlikeUser(fromUserId: string, toUserId: string): Promise<void> {
@@ -420,6 +420,11 @@ export class DatabaseStorage implements IStorage {
         sql`${messages.readAt} IS NULL`,
       ));
     cacheDel(`matches:${userId}`);
+    const match = await this.getMatch(matchId);
+    if (match) {
+      const otherId = match.user1Id === userId ? match.user2Id : match.user1Id;
+      cacheDel(`matches:${otherId}`);
+    }
   }
 
   async cleanupExpiredMessages(): Promise<number> {
@@ -666,15 +671,20 @@ export class DatabaseStorage implements IStorage {
     if (rows.length === 0) return [];
     const fromIds = [...new Set(rows.map(r => r.fromUserId))];
 
-    // Exclude people the current user has already liked back or passed
     const alreadyLiked = db.select({ id: likes.toUserId }).from(likes).where(eq(likes.fromUserId, userId));
     const alreadyDisliked = db.select({ id: dislikes.toUserId }).from(dislikes).where(eq(dislikes.fromUserId, userId));
+    const blockedByMe = db.select({ id: blocks.blockedId }).from(blocks).where(eq(blocks.blockerId, userId));
+    const blockedMe = db.select({ id: blocks.blockerId }).from(blocks).where(eq(blocks.blockedId, userId));
 
     const userRows = await db.select(CARD_COLUMNS).from(users).where(
       and(
         inArray(users.id, fromIds),
         notInArray(users.id, alreadyLiked),
         notInArray(users.id, alreadyDisliked),
+        notInArray(users.id, blockedByMe),
+        notInArray(users.id, blockedMe),
+        eq(users.verificationStatus, "approved"),
+        eq(users.profileVisible, true),
       )
     );
     const userMap = new Map(userRows.map(u => [u.id, enrichCardUser(u)]));

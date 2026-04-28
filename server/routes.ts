@@ -15,6 +15,16 @@ import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sen
 import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
 import OpenAI from "openai";
 
+// Simple in-memory rate limiter for visit recording (per user, 1 visit per profile per 5 min)
+const visitRateLimit = new Map<string, number>();
+function canRecordVisit(fromUserId: string, toUserId: string): boolean {
+  const key = `${fromUserId}:${toUserId}`;
+  const last = visitRateLimit.get(key) ?? 0;
+  if (Date.now() - last < 5 * 60 * 1000) return false;
+  visitRateLimit.set(key, Date.now());
+  return true;
+}
+
 let _openai: OpenAI | null = null;
 function getOpenAI(): OpenAI | null {
   if (!process.env.OPENAI_API_KEY) return null;
@@ -495,6 +505,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
     if (!user || !user.caste || !user.gender) return res.status(400).json({ error: "Profile incomplete" });
+    if (!user.isAdmin && user.verificationStatus !== "approved") return res.status(403).json({ error: "Account not yet approved" });
     const minAge = parseInt(req.query.minAge as string) || 18;
     const maxAge = parseInt(req.query.maxAge as string) || 80;
     const profiles = await storage.getDiscoverProfiles(userId, user.caste as string, user.gender as string, minAge, maxAge);
@@ -579,6 +590,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.post("/api/messages/:matchId/read", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
+    const match = await storage.getMatch(req.params.matchId as string);
+    if (!match || (match.user1Id !== userId && match.user2Id !== userId)) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
     await storage.markMessagesRead(req.params.matchId as string, userId);
     res.json({ ok: true });
   });
@@ -609,7 +624,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
-  app.post("/api/events", isAuthenticated, async (req, res) => {
+  app.post("/api/events", isAuthenticated, requireAdmin, async (req, res) => {
     const userId = getUserId(req);
     const schema = z.object({
       title: z.string().min(1), description: z.string().min(1),
@@ -775,6 +790,15 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       animationStyle: z.enum([“none”,”confetti”,”sparkles”,”fireworks”,”hearts”,”flowers”]).default(“none”),
     }).parse(req.body);
 
+    const match = await storage.getMatch(matchId);
+    if (!match || (match.user1Id !== senderId && match.user2Id !== senderId)) {
+      return res.status(403).json({ error: “Forbidden” });
+    }
+    const otherUserId = match.user1Id === senderId ? match.user2Id : match.user1Id;
+    if (recipientId !== otherUserId) {
+      return res.status(400).json({ error: “Recipient does not match the other user in this match” });
+    }
+
     const gift = await storage.sendGift(senderId, recipientId, matchId, giftType, message, animationStyle);
     res.json({ gift });
   });
@@ -813,7 +837,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.post(“/api/users/:userId/visit”, isAuthenticated, async (req, res) => {
     const fromUserId = getUserId(req);
     const toUserId = String(req.params.userId);
-    await storage.recordVisit(fromUserId, toUserId);
+    if (canRecordVisit(fromUserId, toUserId)) {
+      await storage.recordVisit(fromUserId, toUserId);
+    }
     res.json({ ok: true });
   });
 
