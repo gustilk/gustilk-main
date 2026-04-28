@@ -137,7 +137,7 @@ export default {
     photosRequired: "(2 erforderlich)",
     photoBothRequired: "Beide Fotos sind erforderlich, um fortzufahren",
     selfieAdminNote: "Ein klares Selfie deines Gesichts ist für die Admin-Überprüfung der Community-Mitgliedschaft erforderlich. Es wird anderen Nutzern nicht angezeigt.",
-    takeSelfie: "Selfie aufnehmen oder Foto hochladen",
+    takeSelfie: "Selfie aufnehmen",
     selfieVisible: "Gesicht muss deutlich sichtbar sein",
     adminOnly: "Nur für Admins",
     saving: "Wird gespeichert…",

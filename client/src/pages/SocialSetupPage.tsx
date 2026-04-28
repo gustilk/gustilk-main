@@ -211,7 +211,7 @@ export default function SocialSetupPage({ user }: Props) {
   const isFemale = data.gender === "female";
   const totalSteps = isFemale ? 3 : 2;
   const step1Valid = data.country && (!countryHasStates || data.state) && data.city.trim() && agreedGuidelines && agreedTruthful && isAtLeast18(data.dateOfBirth);
-  const step2Valid = photos.filter(Boolean).length >= 1 && selfie;
+  const step2Valid = photos.filter(Boolean).length >= 2 && selfie;
   const canSubmit = step2Valid && !cropTarget && !selfieChecking;
 
   return (
@@ -570,7 +570,7 @@ export default function SocialSetupPage({ user }: Props) {
                     </div>
                   ))}
                 </div>
-                <p className="text-cream/30 text-xs mt-2 pl-0.5">At least 1 photo required · up to 3</p>
+                <p className="text-cream/30 text-xs mt-2 pl-0.5">At least 2 photos required · up to 3</p>
               </div>
 
               {/* Verification selfie */}

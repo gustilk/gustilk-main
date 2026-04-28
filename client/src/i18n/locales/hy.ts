@@ -137,7 +137,7 @@ export default {
     photosRequired: "(2 պարտադիր)",
     photoBothRequired: "Երկուսն էլ պարտադիր են",
     selfieAdminNote: "Ձեր սելֆին տեսանելի է միայն ադմինին:",
-    takeSelfie: "Նկարեք կամ վերբեռնեք",
+    takeSelfie: "Նկարեք սելֆի",
     selfieVisible: "Դեմքը պետք է երևա",
     adminOnly: "Միայն ադմինի համար",
     saving: "Պահում…",

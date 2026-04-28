@@ -137,7 +137,7 @@ export default {
     photosRequired: "(2 required)",
     photoBothRequired: "Both photos are required to continue",
     selfieAdminNote: "A clear selfie of your face is required for admin review to verify community membership. It will not be shown to other users.",
-    takeSelfie: "Take selfie or upload photo",
+    takeSelfie: "Take selfie",
     selfieVisible: "Face must be clearly visible",
     adminOnly: "Admin only",
     saving: "Saving…",

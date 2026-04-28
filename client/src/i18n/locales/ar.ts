@@ -137,7 +137,7 @@ export default {
     photosRequired: "(مطلوبتان)",
     photoBothRequired: "كلتا الصورتين مطلوبتان للمتابعة",
     selfieAdminNote: "صورة سيلفي واضحة لوجهك مطلوبة لمراجعة الإدارة للتحقق من عضوية المجتمع. لن تُعرض للمستخدمين الآخرين.",
-    takeSelfie: "التقط سيلفي أو ارفع صورة",
+    takeSelfie: "التقط سيلفي",
     selfieVisible: "يجب أن يكون وجهك ظاهرًا بوضوح",
     adminOnly: "للإدارة فقط",
     saving: "جارٍ الحفظ…",
