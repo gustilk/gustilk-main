@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Camera, Upload, CheckCircle, ArrowRight, Shield, RotateCcw, Sun, AlertCircle } from "lucide-react";
+import { Camera, CheckCircle, ArrowRight, Shield, RotateCcw, Sun, AlertCircle } from "lucide-react";
 import type { SafeUser } from "@shared/schema";
 
 interface Props { user: SafeUser }
@@ -29,12 +29,10 @@ export default function VerificationPage({ user }: Props) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [brightnessWarn, setBrightnessWarn] = useState(false);
-  const [useFallback, setUseFallback] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const stopStream = useCallback(() => {
     streamRef.current?.getTracks().forEach(t => t.stop());
@@ -56,15 +54,14 @@ export default function VerificationPage({ user }: Props) {
         videoRef.current.play().catch(() => {});
       }
     } catch {
-      setCameraError("Camera not available. Please use the upload option below.");
-      setUseFallback(true);
+      setCameraError("Camera not available. Please allow camera access and try again.");
     }
   }, []);
 
   useEffect(() => {
-    if (step === "camera" && !useFallback) startCamera();
+    if (step === "camera") startCamera();
     if (step !== "camera") stopStream();
-  }, [step, useFallback, startCamera, stopStream]);
+  }, [step, startCamera, stopStream]);
 
   const capturePhoto = () => {
     const video = videoRef.current;
@@ -95,19 +92,6 @@ export default function VerificationPage({ user }: Props) {
     stopStream();
     setSelfieData(dataUrl);
     setStep("preview");
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) { setCameraError("Please select an image file."); return; }
-    setCameraError(null);
-    const reader = new FileReader();
-    reader.onload = ev => {
-      setSelfieData(ev.target?.result as string);
-      setStep("preview");
-    };
-    reader.readAsDataURL(file);
   };
 
   const submitMutation = useMutation({
@@ -261,29 +245,11 @@ export default function VerificationPage({ user }: Props) {
           )}
 
           <div className="w-full space-y-3">
-            {!useFallback ? (
-              <button onClick={capturePhoto} data-testid="button-capture"
-                className="w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
-                style={{ background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white" }}>
-                <Camera size={18} /> Capture Photo
-              </button>
-            ) : (
-              <button onClick={() => fileInputRef.current?.click()}
-                data-testid="button-upload-selfie"
-                className="w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
-                style={{ background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white" }}>
-                <Upload size={18} /> Upload a Photo
-              </button>
-            )}
-
-            {!useFallback && (
-              <button onClick={() => { stopStream(); setUseFallback(true); }}
-                data-testid="button-use-upload"
-                className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-                style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                <Upload size={14} /> Upload from gallery instead
-              </button>
-            )}
+            <button onClick={capturePhoto} data-testid="button-capture"
+              className="w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
+              style={{ background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white" }}>
+              <Camera size={18} /> Capture Photo
+            </button>
           </div>
 
           <p className="text-cream/25 text-xs text-center px-4">
@@ -292,8 +258,6 @@ export default function VerificationPage({ user }: Props) {
         </div>
 
         <canvas ref={canvasRef} className="hidden" />
-        <input ref={fileInputRef} type="file" accept="image/*" capture="user"
-          className="hidden" onChange={handleFileChange} />
       </div>
     );
   }

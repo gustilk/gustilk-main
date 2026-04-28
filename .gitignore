@@ -4,3 +4,13 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Capacitor — ignore build artifacts, keep native project files
+ios/App/Pods/
+ios/App/App/public/
+ios/App/.DS_Store
+ios/.DS_Store
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties

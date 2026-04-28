@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { X, Flag, ShieldX } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useTranslation } from "react-i18next";
 
 interface ReportModalProps {
   reportedUserId: string;
@@ -10,20 +11,21 @@ interface ReportModalProps {
   onBlocked?: () => void;
 }
 
-const REASONS = [
-  "Fake profile",
-  "Inappropriate behavior",
-  "Misrepresentation of caste",
-  "Harassment",
-  "Offensive content",
-  "Other",
-];
-
 export default function ReportModal({ reportedUserId, reportedUserName, onClose, onBlocked }: ReportModalProps) {
+  const { t } = useTranslation();
   const [view, setView] = useState<"menu" | "report" | "block-confirm">("menu");
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const REASONS = [
+    { key: "fake",       label: t("report.fake") },
+    { key: "behavior",   label: t("report.behavior") },
+    { key: "casteIssue", label: t("report.casteIssue") },
+    { key: "harassment", label: t("report.harassment") },
+    { key: "offensive",  label: t("report.offensive") },
+    { key: "other",      label: t("report.other") },
+  ];
 
   const reportMutation = useMutation({
     mutationFn: async () => {
@@ -38,7 +40,7 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
       onClose();
     },
     onError: () => {
-      setSubmitError("Failed to submit report. Please try again.");
+      setSubmitError(t("report.submitError"));
     },
   });
 
@@ -50,7 +52,7 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
       onBlocked ? onBlocked() : onClose();
     },
     onError: () => {
-      setSubmitError("Failed to block user. Please try again.");
+      setSubmitError(t("report.blockError"));
     },
   });
 
@@ -72,8 +74,8 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
               : <Flag size={18} color="#d4608a" />}
             <h3 className="font-serif text-lg text-cream">
               {view === "menu" && reportedUserName}
-              {view === "report" && `Report ${reportedUserName}`}
-              {view === "block-confirm" && `Block ${reportedUserName}?`}
+              {view === "report" && t("report.reportTitle", { name: reportedUserName })}
+              {view === "block-confirm" && t("report.blockTitle", { name: reportedUserName })}
             </h3>
           </div>
           <button onClick={onClose} data-testid="button-close-report">
@@ -92,8 +94,8 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
             >
               <Flag size={16} color="#d4608a" />
               <div>
-                <p className="text-sm font-medium">Report</p>
-                <p className="text-xs mt-0.5" style={{ color: "rgba(253,248,240,0.35)" }}>Report inappropriate behavior</p>
+                <p className="text-sm font-medium">{t("report.title")}</p>
+                <p className="text-xs mt-0.5" style={{ color: "rgba(253,248,240,0.35)" }}>{t("report.menuReportSub")}</p>
               </div>
             </button>
 
@@ -105,8 +107,8 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
             >
               <ShieldX size={16} color="#c9a84c" />
               <div>
-                <p className="text-sm font-medium">Block</p>
-                <p className="text-xs mt-0.5" style={{ color: "rgba(253,248,240,0.35)" }}>They won't see you or be able to contact you</p>
+                <p className="text-sm font-medium">{t("report.block")}</p>
+                <p className="text-xs mt-0.5" style={{ color: "rgba(253,248,240,0.35)" }}>{t("report.menuBlockSub")}</p>
               </div>
             </button>
           </div>
@@ -116,29 +118,29 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
         {view === "report" && (
           <>
             <div className="space-y-2 mb-4">
-              <p className="text-cream/50 text-xs uppercase tracking-wider font-semibold">Reason</p>
+              <p className="text-cream/50 text-xs uppercase tracking-wider font-semibold">{t("report.reason")}</p>
               {REASONS.map(r => (
                 <button
-                  key={r}
-                  onClick={() => setReason(r)}
-                  data-testid={`reason-${r.replace(/\s+/g, '-')}`}
+                  key={r.key}
+                  onClick={() => setReason(r.key)}
+                  data-testid={`reason-${r.key}`}
                   className="w-full text-left px-4 py-2.5 rounded-xl text-sm transition-all"
-                  style={reason === r
+                  style={reason === r.key
                     ? { background: "rgba(212,96,138,0.15)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.3)" }
                     : { background: "rgba(255,255,255,0.04)", color: "rgba(253,248,240,0.6)", border: "1px solid rgba(255,255,255,0.06)" }
                   }
                 >
-                  {r}
+                  {r.label}
                 </button>
               ))}
             </div>
 
             <div className="mb-5">
-              <p className="text-cream/50 text-xs uppercase tracking-wider font-semibold mb-2">Additional details (optional)</p>
+              <p className="text-cream/50 text-xs uppercase tracking-wider font-semibold mb-2">{t("report.detailsOptional")}</p>
               <textarea
                 value={description}
                 onChange={e => setDescription(e.target.value)}
-                placeholder="Describe the issue…"
+                placeholder={t("report.detailsPlaceholder")}
                 rows={3}
                 data-testid="input-report-description"
                 className="w-full px-4 py-3 rounded-xl text-sm text-cream placeholder-cream/25 outline-none resize-none"
@@ -156,10 +158,10 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
               className="w-full py-3.5 rounded-xl font-bold text-sm disabled:opacity-50 transition-all"
               style={{ background: "linear-gradient(135deg, #b91c1c, #ef4444)", color: "white" }}
             >
-              {reportMutation.isPending ? "Submitting…" : "Submit Report"}
+              {reportMutation.isPending ? t("report.submitting") : t("report.submit")}
             </button>
             <p className="text-center text-cream/25 text-xs mt-3">
-              False reports may result in account suspension.
+              {t("report.falseReportWarning")}
             </p>
           </>
         )}
@@ -168,13 +170,13 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
         {view === "block-confirm" && (
           <>
             <p className="text-sm mb-6" style={{ color: "rgba(253,248,240,0.55)", lineHeight: 1.6 }}>
-              Blocking <strong style={{ color: "#fdf8f0" }}>{reportedUserName}</strong> will:
+              {t("report.blockWill", { name: reportedUserName })}
             </p>
             <ul className="space-y-2 mb-6">
               {[
-                "Remove them from your matches and messages",
-                "Stop them from seeing your profile",
-                "Hide them from your discover feed",
+                t("report.blockEffect1"),
+                t("report.blockEffect2"),
+                t("report.blockEffect3"),
               ].map(item => (
                 <li key={item} className="flex items-start gap-2 text-sm" style={{ color: "rgba(253,248,240,0.5)" }}>
                   <span className="mt-1 flex-shrink-0 w-1.5 h-1.5 rounded-full" style={{ background: "#c9a84c" }} />
@@ -195,7 +197,7 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
                 className="w-full py-3.5 rounded-xl font-bold text-sm disabled:opacity-50 transition-all"
                 style={{ background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white" }}
               >
-                {blockMutation.isPending ? "Blocking…" : `Block ${reportedUserName}`}
+                {blockMutation.isPending ? t("report.blocking") : t("report.blockConfirm", { name: reportedUserName })}
               </button>
               <button
                 onClick={() => setView("menu")}
@@ -203,7 +205,7 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
                 className="w-full py-3 rounded-xl text-sm font-medium"
                 style={{ color: "rgba(253,248,240,0.4)" }}
               >
-                Cancel
+                {t("report.cancel")}
               </button>
             </div>
           </>

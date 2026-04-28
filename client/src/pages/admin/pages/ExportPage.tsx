@@ -1,5 +1,6 @@
 import { Download, Users, Heart, Flag } from "lucide-react";
 import type { User } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
 
 const EXPORTS = [
   { type: "users", label: "User Data", description: "All user profiles, status, and metadata", icon: Users, color: "#3b82f6" },
@@ -8,9 +9,14 @@ const EXPORTS = [
 ];
 
 export default function ExportPage({ user }: { user: User }) {
+  const { toast } = useToast();
+
   const handleExport = async (type: string) => {
     const res = await fetch(`/api/admin/export/${type}`, { credentials: "include" });
-    if (!res.ok) { alert("Export failed"); return; }
+    if (!res.ok) {
+      toast({ title: "Export failed", description: "Could not export data. Please try again.", variant: "destructive" });
+      return;
+    }
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

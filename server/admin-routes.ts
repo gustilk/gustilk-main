@@ -410,12 +410,11 @@ export function registerAdminRoutes(app: Express, isAuthenticated: any, requireA
       `),
     ]);
 
-    const messageRows = (messageCount as { rows?: { n?: number }[] }).rows ?? [];
     res.json({
       user,
       stats: {
         matches: Number(matchCount[0].n),
-        messages: Number(messageRows[0]?.n ?? 0),
+        messages: Number((messageCount as any[])[0]?.n ?? 0),
       },
     });
   });

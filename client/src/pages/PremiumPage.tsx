@@ -1,21 +1,16 @@
-import { useState } from "react";
+﻿import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation } from "wouter";
 import { ArrowLeft, Star, Check, Eye, Heart, MessageCircle, Users, Globe, CreditCard, Smartphone } from "lucide-react";
 import { SiPaypal, SiApplepay, SiGooglepay, SiVenmo, SiKlarna } from "react-icons/si";
 import type { SafeUser } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { isNative, purchasePremium } from "@/lib/purchases";
 
 
 interface Props { user: SafeUser }
 
-const BENEFITS = [
-  { icon: Heart, text: "Unlimited likes every day" },
-  { icon: MessageCircle, text: "Send & read all messages" },
-  { icon: Eye, text: "See who liked your profile" },
-  { icon: Users, text: "See all your matches" },
-  { icon: Star, text: "Priority profile placement" },
-];
 
 type FieldDef = { key: string; label: string; placeholder: string; type?: string };
 
@@ -40,14 +35,14 @@ const METHODS: Record<string, Method> = {
   google_pay:{ id: "google_pay",label: "Google Pay",     icon: <SiGooglepay size={20} />,    fields: [], redirectOnly: true },
   venmo:     { id: "venmo",     label: "Venmo",          icon: <SiVenmo size={18} />,        fields: [{ key: "handle", label: "Venmo Username", placeholder: "@your-username" }] },
   klarna:    { id: "klarna",    label: "Klarna",         icon: <SiKlarna size={18} />,       fields: [{ key: "email", label: "Email", placeholder: "your@email.com", type: "email" }] },
-  sepa:      { id: "sepa",      label: "SEPA",           icon: <span className="text-xs font-bold">€</span>, fields: [{ key: "iban", label: "IBAN", placeholder: "DE89 3704 0044 0532 0130 00" }, { key: "bic", label: "BIC", placeholder: "COBADEFFXXX" }] },
+  sepa:      { id: "sepa",      label: "SEPA",           icon: <span className="text-xs font-bold">â‚¬</span>, fields: [{ key: "iban", label: "IBAN", placeholder: "DE89 3704 0044 0532 0130 00" }, { key: "bic", label: "BIC", placeholder: "COBADEFFXXX" }] },
   giropay:   { id: "giropay",   label: "Giropay",        icon: <span className="text-xs font-bold">GP</span>,fields: [{ key: "iban", label: "IBAN", placeholder: "DE89 3704 0044 0532 0130 00" }, { key: "bic", label: "BIC", placeholder: "COBADEFFXXX" }] },
   ideal:     { id: "ideal",     label: "iDEAL",          icon: <span className="text-xs font-bold">iD</span>,fields: [{ key: "bank", label: "Bank", placeholder: "ABN AMRO / ING / Rabobank" }] },
   swish:     { id: "swish",     label: "Swish",          icon: <Smartphone size={16} />,     fields: [{ key: "phone", label: "Phone", placeholder: "+46 70 000 0000", type: "tel" }] },
   bancontact:{ id: "bancontact",label: "Bancontact",     icon: <span className="text-xs font-bold">BC</span>,fields: [{ key: "card", label: "Card Number", placeholder: "6703 xxxx xxxx xxxx" }, { key: "expiry", label: "MM / YY", placeholder: "12 / 27" }] },
   interac:   { id: "interac",   label: "Interac",        icon: <span className="text-xs font-bold">INT</span>,fields: [{ key: "email", label: "Email", placeholder: "your@email.com", type: "email" }] },
   bpay:      { id: "bpay",      label: "BPAY",           icon: <span className="text-xs font-bold">BP</span>,fields: [{ key: "biller", label: "Biller Code", placeholder: "12345" }, { key: "ref", label: "Reference", placeholder: "00000000" }] },
-  mir:       { id: "mir",       label: "MIR",            icon: <span className="text-xs font-bold">МИР</span>,fields: CARD_FIELDS },
+  mir:       { id: "mir",       label: "MIR",            icon: <span className="text-xs font-bold">ÐœÐ˜Ð </span>,fields: CARD_FIELDS },
   idram:     { id: "idram",     label: "IDram",          icon: <Smartphone size={16} />,     fields: [{ key: "phone", label: "Phone", placeholder: "+374 XX XXX XXX", type: "tel" }] },
   bog_pay:   { id: "bog_pay",   label: "BOG Pay",        icon: <Smartphone size={16} />,     fields: [], redirectOnly: true },
   lyf_pay:   { id: "lyf_pay",   label: "Lyf Pay",        icon: <Smartphone size={16} />,     fields: [], redirectOnly: true },
@@ -81,6 +76,15 @@ function getCountryConfig(country: string): CountryConfig {
 }
 
 export default function PremiumPage({ user }: Props) {
+  const { t } = useTranslation();
+  const BENEFITS = [
+    { icon: Heart, text: t("premium.benefit1") },
+    { icon: MessageCircle, text: t("premium.benefit2") },
+    { icon: Eye, text: t("premium.benefit3") },
+    { icon: Users, text: t("premium.benefit4") },
+    { icon: Star, text: t("premium.benefit5") },
+    { icon: Globe, text: t("premium.benefit6") },
+  ];
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -100,8 +104,8 @@ export default function PremiumPage({ user }: Props) {
         <div className="w-24 h-24 rounded-full flex items-center justify-center mb-6" style={{ border: "3px solid #c9a84c" }}>
           <Star size={40} fill="#c9a84c" color="#c9a84c" />
         </div>
-        <h2 className="font-serif text-3xl text-gold mb-2">Premium Active</h2>
-        <p className="text-cream/50 text-sm mb-8">You have full access to all premium features.</p>
+        <h2 className="font-serif text-3xl text-gold mb-2">{t("premium.alreadyPremium")}</h2>
+        <p className="text-cream/50 text-sm mb-8">{t("premium.subtitle")}</p>
         <button onClick={() => setLocation("/discover")} data-testid="button-back-discover"
           className="px-6 py-3 rounded-xl font-semibold text-sm"
           style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
@@ -117,29 +121,42 @@ export default function PremiumPage({ user }: Props) {
       try {
         await apiRequest("POST", "/api/premium/subscribe", {});
         await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-        toast({ title: "Welcome to Premium!", description: "Your free Iraqi membership is now active." });
+        toast({ title: t("premium.title"), description: t("premium.freeIraqSub") });
         setLocation("/discover");
       } catch (err: any) {
         const raw: string = err?.message ?? "";
         const statusMatch = raw.match(/^(\d+): ([\s\S]+)$/);
         if (statusMatch) {
-          const [, status, bodyText] = statusMatch;
+          const [, , bodyText] = statusMatch;
           let description = "Please try again.";
           try { description = JSON.parse(bodyText)?.error ?? bodyText; } catch { description = bodyText; }
-          toast({
-            title: status === "403" ? "Location verification failed" : "Something went wrong",
-            description,
-            variant: "destructive",
-          });
+          toast({ title: "Something went wrong", description, variant: "destructive" });
         } else {
           toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
         }
       }
+    } else if (isNative()) {
+      // Native app — trigger App Store / Google Play IAP sheet via RevenueCat
+      const result = await purchasePremium();
+      if (result.cancelled) {
+        // User dismissed the sheet — do nothing
+      } else if (result.success) {
+        // IAP succeeded — sync premium status from our server
+        try {
+          await apiRequest("POST", "/api/premium/restore", {});
+          await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+          toast({ title: t("premium.title"), description: "You now have full access." });
+          setLocation("/discover");
+        } catch {
+          toast({ title: "Purchase successful!", description: "Restart the app if premium doesn't activate immediately." });
+        }
+      } else {
+        toast({ title: "Purchase failed", description: result.error ?? "Please try again.", variant: "destructive" });
+      }
     } else {
-      await new Promise(r => setTimeout(r, 1500));
       toast({
         title: "Payment setup required",
-        description: `${method?.label ?? "Payment"} integration coming soon. Contact support@gustilk.com.`,
+        description: `${method?.label ?? "Payment"} integration is coming soon. Email support@gustilk.com to get early access.`,
       });
     }
     setLoading(false);
@@ -178,7 +195,7 @@ export default function PremiumPage({ user }: Props) {
           </div>
           {isFree ? (
             <>
-              <h2 className="font-serif text-3xl text-gold mb-1">مجاناً!</h2>
+              <h2 className="font-serif text-3xl text-gold mb-1">Ù…Ø¬Ø§Ù†Ø§Ù‹!</h2>
               <p className="text-cream/60 text-sm">Premium is free for users in Iraq</p>
               <p className="text-cream/35 text-xs mt-1">As a thank-you to our Yezidi homeland community</p>
             </>
@@ -289,7 +306,7 @@ export default function PremiumPage({ user }: Props) {
           }
         >
           <Star size={17} fill={isFree ? "white" : "#1a0a2e"} />
-          {loading ? "Processing…" : isFree ? "Get Free Premium" : `Subscribe via ${method?.label ?? "Payment"}`}
+          {loading ? "Processing…" : isFree ? "Get Free Premium" : isNative() ? "Subscribe — $5 / month" : `Subscribe via ${method?.label ?? "Payment"}`}
         </button>
 
         <p className="text-center text-cream/25 text-xs">
@@ -311,3 +328,4 @@ function GoldInput({ ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
     />
   );
 }
+

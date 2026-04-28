@@ -14,6 +14,8 @@ export interface IStorage {
 
   likeUser(fromUserId: string, toUserId: string): Promise<{ matched: boolean; matchId?: string }>;
   dislikeUser(fromUserId: string, toUserId: string): Promise<void>;
+  unlikeUser(fromUserId: string, toUserId: string): Promise<void>;
+  undislikeUser(fromUserId: string, toUserId: string): Promise<void>;
 
   getMatches(userId: string): Promise<MatchWithUser[]>;
   getMatch(matchId: string): Promise<Match | undefined>;
@@ -286,6 +288,21 @@ export class DatabaseStorage implements IStorage {
   async dislikeUser(fromUserId: string, toUserId: string): Promise<void> {
     await db.insert(dislikes).values({ id: randomUUID(), fromUserId, toUserId }).onConflictDoNothing();
     cacheDelPrefix(`discover:${fromUserId}:`);
+
+  }
+
+  async unlikeUser(fromUserId: string, toUserId: string): Promise<void> {
+    await db.delete(likes).where(and(eq(likes.fromUserId, fromUserId), eq(likes.toUserId, toUserId)));
+    await db.delete(matches).where(or(and(eq(matches.user1Id, fromUserId), eq(matches.user2Id, toUserId)), and(eq(matches.user1Id, toUserId), eq(matches.user2Id, fromUserId))));
+    cacheDelPrefix("discover:" + fromUserId + ":");
+    cacheDelPrefix("discover:" + toUserId + ":");
+    cacheDel("matches:" + fromUserId);
+    cacheDel("matches:" + toUserId);
+  }
+
+  async undislikeUser(fromUserId: string, toUserId: string): Promise<void> {
+    await db.delete(dislikes).where(and(eq(dislikes.fromUserId, fromUserId), eq(dislikes.toUserId, toUserId)));
+    cacheDelPrefix("discover:" + fromUserId + ":");
   }
 
   async getMatches(userId: string): Promise<MatchWithUser[]> {
@@ -719,3 +736,4 @@ export class DatabaseStorage implements IStorage {
 }
 
 export const storage = new DatabaseStorage();
+

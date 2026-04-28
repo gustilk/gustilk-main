@@ -28,13 +28,11 @@ export default function EventDetailPage({ user, eventId }: Props) {
 
   const attendMutation = useMutation({
     mutationFn: async (isAttending: boolean) => {
-      if (isAttending) {
-        const res = await apiRequest("DELETE", `/api/events/${eventId}/attend`);
-        return res.json();
-      } else {
-        const res = await apiRequest("POST", `/api/events/${eventId}/attend`);
-        return res.json();
-      }
+      const endpoint = isAttending
+        ? `/api/events/${eventId}/unattend`
+        : `/api/events/${eventId}/attend`;
+      const res = await apiRequest("POST", endpoint);
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events", eventId] });

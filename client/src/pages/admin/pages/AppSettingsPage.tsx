@@ -111,7 +111,7 @@ export default function AppSettingsPage({ user }: { user: User }) {
         <div key={section.title} className="rounded-2xl p-4 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}>
           <h3 className="text-cream/60 text-xs font-bold uppercase tracking-wide mb-2">{section.title}</h3>
           {section.fields.map(f => (
-            <FieldRow key={f.k} label={f.label} k={f.k} type={f.type as any} hint={"hint" in f ? f.hint : undefined} />
+            <FieldRow key={f.k} label={f.label} k={f.k} type={f.type as any} hint={f.hint} />
           ))}
         </div>
       ))}

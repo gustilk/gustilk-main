@@ -20,10 +20,6 @@ export default function BottomNav() {
   const [location] = useLocation();
   const { t } = useTranslation();
 
-  // Local cleared flags — badges vanish instantly on click, server catches up asynchronously
-  const [matchesCleared, setMatchesCleared] = useState(false);
-  const [activityCleared, setActivityCleared] = useState(false);
-
   const { data: userData } = useQuery<{ user: UserType } | null>({
     queryKey: ["/api/auth/me"],
     staleTime: 1000 * 60 * 5,
@@ -45,42 +41,45 @@ export default function BottomNav() {
 
   const seenMatchesMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/seen/matches"),
+    onMutate: () => {
+      queryClient.setQueryData(["/api/matches"], (old: any) =>
+        old ? { ...old, matches: old.matches?.map((m: any) => ({ ...m, unreadCount: 0 })) } : old
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     },
   });
 
   const seenActivityMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/seen/activity"),
+    onMutate: () => {
+      const now = new Date().toISOString();
+      queryClient.setQueryData(["/api/auth/me"], (old: any) =>
+        old ? { ...old, user: { ...old.user, activitySeenAt: now } } : old
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     },
   });
 
-  // Matches badge — clears immediately on click, then refetch confirms
-  const unreadCount = matchesCleared
-    ? 0
-    : (matchData?.matches?.reduce((sum, m) => sum + (m.unreadCount || 0), 0) ?? 0);
+  const unreadCount = matchData?.matches?.reduce((sum, m) => sum + (m.unreadCount || 0), 0) ?? 0;
 
-  // Activity badge — new likes since activitySeenAt
+
   const activitySeenAt = userData?.user?.activitySeenAt
     ? new Date(userData.user.activitySeenAt as unknown as string)
     : null;
 
-  const likesCount = activityCleared
-    ? 0
-    : (likesData?.items?.filter(item =>
-        activitySeenAt ? new Date(item.createdAt) > activitySeenAt : true
-      ).length ?? 0);
+  const likesCount = likesData?.items?.filter(item =>
+    activitySeenAt ? new Date(item.createdAt) > activitySeenAt : true
+  ).length ?? 0;
 
   const handleNavClick = (id: string) => {
     if (id === "matches" && unreadCount > 0) {
-      setMatchesCleared(true);
       seenMatchesMutation.mutate();
     }
     if (id === "activity" && likesCount > 0) {
-      setActivityCleared(true);
       seenActivityMutation.mutate();
     }
   };

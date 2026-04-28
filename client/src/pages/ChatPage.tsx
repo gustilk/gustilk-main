@@ -102,7 +102,7 @@ export default function ChatPage({ user, matchId }: Props) {
   const { startCall, callState } = useVideoCallContext();
 
   const [location] = useLocation();
-  const _qs = new URLSearchParams(location.split("?")[1] ?? "");
+  const _qs = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
   const isSupportChatFromUrl = _qs.get("support") === "1";
   const backTo = _qs.get("from") === "settings" ? "/settings" : "/matches";
 
@@ -163,6 +163,16 @@ export default function ChatPage({ user, matchId }: Props) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [timeline.length]);
+
+  useEffect(() => {
+    if (!matchId) return;
+    apiRequest("POST", `/api/messages/${matchId}/read`).catch(() => {});
+    queryClient.setQueryData(["/api/matches"], (old: any) =>
+      old
+        ? { ...old, matches: old.matches?.map((m: any) => m.id === matchId ? { ...m, unreadCount: 0 } : m) }
+        : old
+    );
+  }, [matchId]);
 
   const handleSend = () => {
     const trimmed = text.trim();

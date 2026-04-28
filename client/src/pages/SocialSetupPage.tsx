@@ -10,6 +10,8 @@ import type { User } from "@shared/schema";
 import { PhotoCropModal, compressImage } from "@/components/PhotoCropModal";
 
 import { COUNTRY_STATES } from "@/lib/countryStates";
+import { pickPhoto, pickSelfie } from "@/lib/camera";
+import { Capacitor } from "@capacitor/core";
 
 const COUNTRIES = ["USA", "Canada", "Australia", "Germany", "Holland", "Sweden", "Belgium", "France", "Turkey", "Iraq", "Armenia", "Georgia", "Russia", "UK"];
 
@@ -531,7 +533,14 @@ export default function SocialSetupPage({ user }: Props) {
                       />
                       <button
                         type="button"
-                        onClick={() => photoInputRefs[idx].current?.click()}
+                        onClick={async () => {
+                          if (Capacitor.isNativePlatform()) {
+                            const result = await pickPhoto("prompt");
+                            if (result) setCropTarget({ imgSrc: result.dataUrl, index: idx });
+                          } else {
+                            photoInputRefs[idx].current?.click();
+                          }
+                        }}
                         data-testid={`button-upload-photo-${idx}`}
                         className="w-full aspect-square rounded-2xl flex flex-col items-center justify-center transition-all relative overflow-hidden"
                         style={photo
@@ -616,7 +625,14 @@ export default function SocialSetupPage({ user }: Props) {
                 ) : (
                   <button
                     type="button"
-                    onClick={() => selfieInputRef.current?.click()}
+                    onClick={async () => {
+                      if (Capacitor.isNativePlatform()) {
+                        const result = await pickSelfie();
+                        if (result) setCropTarget({ imgSrc: result.dataUrl, index: "selfie" });
+                      } else {
+                        selfieInputRef.current?.click();
+                      }
+                    }}
                     data-testid="button-take-selfie"
                     className="w-full py-10 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all"
                     style={{ background: "rgba(255,255,255,0.04)", border: "2px dashed rgba(201,168,76,0.3)" }}

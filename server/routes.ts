@@ -1,13 +1,14 @@
-import type { Express } from "express";
+﻿import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupSession, registerAuthRoutes, isAuthenticated } from "./auth";
+import { setupSession, registerAuthRoutes, isAuthenticated, sessionMiddleware } from "./auth";
 import { profileUpdateSchema, privacySettingsSchema, users, matches, messages, events, eventAttendees, magicLinkTokens } from "@shared/schema";
 import { verifyCountryFromRequest, verifyIraqFromRequest, getClientIp, lookupIpCountry } from "./geo";
 import { setupWs } from "./ws";
 import { z } from "zod";
 import { checkFacePresent } from "./moderation";
 import { db } from "./db";
+import { cacheDel } from "./cache";
 import { count, sql, eq, asc, desc, or, and, ilike, isNotNull } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
 import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail, sendAdminApprovalNeededEmail } from "./email";
@@ -239,7 +240,7 @@ function getUserId(req: any): string {
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
   setupSession(app);
   registerAuthRoutes(app);
-  setupWs(httpServer);
+  setupWs(httpServer, sessionMiddleware);
 
   // Ensure support account exists on startup
   getOrCreateSupportAccount().catch(e => console.error("[startup] support account error:", e));
@@ -256,7 +257,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // ─── MAGIC LINK AUTH ─────────────────────────────────────
+  // â”€â”€â”€ MAGIC LINK AUTH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   app.post("/api/auth/forgot-password", async (req, res) => {
     try {
       const { email } = z.object({ email: z.string().email() }).parse(req.body);
@@ -316,7 +317,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // ─── FACE CHECK ──────────────────────────────────────────
+  // â”€â”€â”€ FACE CHECK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   app.post("/api/check-face", isAuthenticated, async (req, res) => {
     try {
       const { image } = req.body;
@@ -331,7 +332,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // ─── PROFILE ─────────────────────────────────────────────
+  // â”€â”€â”€ PROFILE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   app.put("/api/profile", isAuthenticated, async (req, res) => {
     try {
       const userId = getUserId(req);
@@ -341,6 +342,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       // Country is locked once set — ignore any country update if the user already has one
       const { country: _ignored, ...rest } = parsed as any;
 
+      let grantIraqPremium = false;
       if (!user?.country && (parsed as any).country) {
         // First time setting country — verify server-side that the IP matches
         const claimedCountry: string = (parsed as any).country;
@@ -348,6 +350,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         if (!geoCheck.allowed) {
           return res.status(403).json({ error: geoCheck.reason ?? "Location verification failed." });
         }
+        // Iraq is always free — grant permanent premium right now so they never need to visit the Premium page
+        if (claimedCountry === "Iraq") grantIraqPremium = true;
       }
 
       const photosIncluded = Array.isArray((parsed as any).photos);
@@ -419,7 +423,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           return res.status(400).json({ error: "You can have a maximum of 6 photos." });
         }
 
-        keptApproved = keptSlots.filter((s: any) => s.status === "approved").map((s: any) => s.url);
+        const keptApprovedUnordered = keptSlots.filter((s: any) => s.status === "approved").map((s: any) => s.url);
+        const keptApprovedSet = new Set(keptApprovedUnordered);
+        keptApproved = submittedPhotos.filter(p => keptApprovedSet.has(p));
       }
 
       let mainPhotoUrl = user?.mainPhotoUrl;
@@ -441,6 +447,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         user?.verificationStatus !== "pending";
       const updated = await storage.updateUser(userId, {
         ...(data as any),
+        ...(grantIraqPremium ? { isPremium: true, premiumUntil: null } : {}),
         ...(photosIncluded ? {
           photoSlots: updatedSlots,
           photos: keptApproved,
@@ -483,7 +490,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // ─── DISCOVER ─────────────────────────────────────────────
+  // â”€â”€â”€ DISCOVER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   app.get("/api/discover", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
@@ -494,7 +501,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ profiles });
   });
 
-  // ─── LIKES / DISLIKES ─────────────────────────────────────
+  // â”€â”€â”€ LIKES / DISLIKES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   app.post("/api/like/:targetId", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const targetId = req.params.targetId as string;
@@ -511,14 +518,28 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
-  // ─── MATCHES ──────────────────────────────────────────────
+  app.delete("/api/like/:targetId", isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const targetId = req.params.targetId as string;
+    await storage.unlikeUser(userId, targetId);
+    res.json({ ok: true });
+  });
+
+  app.delete("/api/dislike/:targetId", isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const targetId = req.params.targetId as string;
+    await storage.undislikeUser(userId, targetId);
+    res.json({ ok: true });
+  });
+
+  // â”€â”€â”€ MATCHES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   app.get("/api/matches", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const matchList = await storage.getMatches(userId);
     res.json({ matches: matchList });
   });
 
-  // ─── MESSAGES ─────────────────────────────────────────────
+  // â”€â”€â”€ MESSAGES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   app.get("/api/messages/:matchId", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
@@ -562,7 +583,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
-  // ─── EVENTS ───────────────────────────────────────────────
+  // â”€â”€â”€ EVENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   app.get("/api/events", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const evList = await storage.listEvents(userId);
@@ -637,73 +658,28 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
-  // ─── PREMIUM ──────────────────────────────────────────────
+  // â”€â”€â”€ PREMIUM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   app.post("/api/premium/subscribe", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
 
-    // Iraq users get free premium — but we verify server-side that the connection is actually from Iraq
-    if (user?.country === "Iraq") {
-      const geoCheck = await verifyIraqFromRequest(req);
-      if (!geoCheck.isIraq) {
-        return res.status(403).json({ error: geoCheck.reason ?? "Free membership is only available from Iraq." });
-      }
+    if (user?.country !== "Iraq") {
+      // Non-Iraq users require payment integration (not yet live)
+      return res.status(402).json({ error: "Payment required. Contact support@gustilk.com to get early access." });
     }
 
-    const until = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    await storage.updateUser(userId, { isPremium: true, premiumUntil: until });
+    // Iraq is always free — country was geo-verified at signup, no re-check needed here.
+    // premiumUntil: null means no expiry — Iraq premium is permanent.
+    await storage.updateUser(userId, { isPremium: true, premiumUntil: null });
     res.json({ ok: true });
   });
 
-  /**
-   * POST /api/premium/restore
-   *
-   * "Restore Purchases" endpoint.  Works for web, and will be the server-side
-   * verification target when this app is wrapped in a native shell (Capacitor /
-   * React Native) that sends an Apple / Google receipt for validation.
-   *
-   * Current logic (web):
-   *  1. Re-read the user row so we always work from fresh DB state.
-   *  2. If premiumUntil is still in the future → make sure isPremium=true and
-   *     return { restored: true }.
-   *  3. If premiumUntil has passed (or was never set) → clear isPremium, return
-   *     { restored: false } so the client can show a friendly "no active
-   *     subscription" message.
-   *
-   * Native IAP extension point:
-   *  When a native receipt payload is present in the body ({ receipt, platform })
-   *  the server should validate it with Apple / Google servers and, on success,
-   *  update premiumUntil with the real expiry date from the receipt.  The stub
-   *  for that verification is included below so future devs know exactly where
-   *  to add it.
-   */
   app.post("/api/premium/restore", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const now = new Date();
-
-    // ── Native IAP extension point ──────────────────────────────────────────
-    // When the native shell sends a receipt, verify it with the store and
-    // derive the real expiry date before falling through to the DB check.
-    //
-    // const { receipt, platform } = req.body;
-    // if (receipt && platform === "ios") {
-    //   const appleExpiry = await verifyAppleReceipt(receipt);
-    //   if (appleExpiry > now) {
-    //     await storage.updateUser(userId, { isPremium: true, premiumUntil: appleExpiry });
-    //     return res.json({ restored: true, isPremium: true, premiumUntil: appleExpiry, message: "Premium restored from App Store" });
-    //   }
-    // }
-    // if (receipt && platform === "android") {
-    //   const googleExpiry = await verifyGooglePlayReceipt(receipt);
-    //   if (googleExpiry > now) {
-    //     await storage.updateUser(userId, { isPremium: true, premiumUntil: googleExpiry });
-    //     return res.json({ restored: true, isPremium: true, premiumUntil: googleExpiry, message: "Premium restored from Google Play" });
-    //   }
-    // }
-    // ── End native extension point ──────────────────────────────────────────
 
     // Web / server-side record check
     if (user.premiumUntil && user.premiumUntil > now) {
@@ -746,16 +722,16 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
-  app.post("/api/profile/reapply", isAuthenticated, async (req, res) => {
+  app.post(“/api/profile/reapply”, isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    if (user.verificationStatus === "banned") return res.status(403).json({ error: "Banned accounts cannot reapply." });
-    if (user.verificationStatus === "pending") return res.status(400).json({ error: "Already pending review." });
+    if (!user) return res.status(404).json({ error: “User not found” });
+    if (user.verificationStatus === “banned”) return res.status(403).json({ error: “Banned accounts cannot reapply.” });
+    if (user.verificationStatus === “pending”) return res.status(400).json({ error: “Already pending review.” });
     const { selfie } = z.object({ selfie: z.string().optional() }).parse(req.body);
-    if (selfie && selfie.startsWith("data:image")) {
+    if (selfie && selfie.startsWith(“data:image”)) {
       const faceCheck = await checkFacePresent(selfie);
-      if (!faceCheck.faceDetected) return res.status(400).json({ error: "Please upload a clear selfie showing your face." });
+      if (!faceCheck.faceDetected) return res.status(400).json({ error: “Please upload a clear selfie showing your face.” });
     }
     await storage.reapplyUser(userId, selfie);
     notifyAdminNewApplicant(userId);
@@ -763,7 +739,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   // ─── SUPPORT CHAT ─────────────────────────────────────────
-  app.post("/api/support/start", isAuthenticated, async (req, res) => {
+  app.post(“/api/support/start”, isAuthenticated, async (req, res) => {
     try {
       const userId = getUserId(req);
       const supportAccount = await getOrCreateSupportAccount();
@@ -780,106 +756,116 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       await storage.sendMessage(matchId, supportAccount.id, openingMsg);
       res.json({ matchId });
     } catch (e: any) {
-      console.error("[support/start]", e);
-      res.status(500).json({ error: "Failed to start support chat" });
+      console.error(“[support/start]”, e);
+      res.status(500).json({ error: “Failed to start support chat” });
     }
   });
 
-  // ─── REPORTS ──────────────────────────────────────────────
   // ─── GIFTS ────────────────────────────────────────────────
-  app.post("/api/gifts", isAuthenticated, async (req, res) => {
+  app.post(“/api/gifts”, isAuthenticated, async (req, res) => {
     const senderId = getUserId(req);
     const sender = await storage.getUserById(senderId);
-    if (!sender?.isPremium) return res.status(403).json({ error: "Premium required to send gifts" });
+    if (!sender?.isPremium) return res.status(403).json({ error: “Premium required to send gifts” });
 
     const { recipientId, matchId, giftType, message, animationStyle } = z.object({
       recipientId: z.string(),
       matchId: z.string(),
       giftType: z.string().min(1),
-      message: z.string().max(200).optional().default(""),
-      animationStyle: z.enum(["none","confetti","sparkles","fireworks","hearts","flowers"]).default("none"),
+      message: z.string().max(200).optional().default(“”),
+      animationStyle: z.enum([“none”,”confetti”,”sparkles”,”fireworks”,”hearts”,”flowers”]).default(“none”),
     }).parse(req.body);
 
     const gift = await storage.sendGift(senderId, recipientId, matchId, giftType, message, animationStyle);
     res.json({ gift });
   });
 
-  app.get("/api/gifts/match/:matchId", isAuthenticated, async (req, res) => {
-    const gifts = await storage.getGiftsInMatch(String(req.params.matchId));
+  app.get(“/api/gifts/match/:matchId”, isAuthenticated, async (req, res) => {
+    const gifts = await storage.getGiftsInMatch(req.params.matchId);
     res.json({ gifts });
   });
 
-  app.get("/api/gifts/received", isAuthenticated, async (req, res) => {
+  app.get(“/api/gifts/received”, isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const gifts = await storage.getGiftsReceived(userId);
     res.json({ gifts });
   });
 
   // ─── SEEN ─────────────────────────────────────────────────
-  app.post("/api/seen/matches", isAuthenticated, async (req, res) => {
+  app.post(“/api/seen/matches”, isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
-    // Mark all unread messages sent to this user as read
     await db.update(messages)
       .set({ readAt: new Date() })
       .where(and(eq(messages.readAt, null as any), sql`${messages.senderId} != ${userId}`));
-    // Update matchesSeenAt
     await db.update(users).set({ matchesSeenAt: new Date() } as any).where(eq(users.id, userId));
+    cacheDel(`matches:${userId}`);
     res.json({ ok: true });
   });
 
-  app.post("/api/seen/activity", isAuthenticated, async (req, res) => {
+  app.post(“/api/seen/activity”, isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
-    await db.update(users).set({ activitySeenAt: new Date() } as any).where(eq(users.id, userId));
+    const now = new Date();
+    await db.update(users).set({ activitySeenAt: now } as any).where(eq(users.id, userId));
+    cacheDel(`user:${userId}`);
     res.json({ ok: true });
   });
 
   // ─── ACTIVITY ─────────────────────────────────────────────
-  app.post("/api/users/:userId/visit", isAuthenticated, async (req, res) => {
+  app.post(“/api/users/:userId/visit”, isAuthenticated, async (req, res) => {
     const fromUserId = getUserId(req);
     const toUserId = String(req.params.userId);
     await storage.recordVisit(fromUserId, toUserId);
     res.json({ ok: true });
   });
 
-  app.get("/api/activity/likes-received", isAuthenticated, async (req, res) => {
+  app.get(“/api/activity/likes-received”, isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const items = await storage.getLikesReceived(userId);
     res.json({ items });
   });
 
-  app.get("/api/activity/likes-sent", isAuthenticated, async (req, res) => {
+  app.get(“/api/activity/likes-sent”, isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const items = await storage.getLikesSent(userId);
     res.json({ items });
   });
 
-  app.get("/api/activity/visitors", isAuthenticated, async (req, res) => {
+  app.get(“/api/activity/visitors”, isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const items = await storage.getVisitors(userId);
     res.json({ items });
   });
 
+  // ─── PUSH NOTIFICATIONS ───────────────────────────────────
+  app.post(“/api/push/register”, isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const { token, platform } = req.body;
+    if (!token || !platform) return res.status(400).json({ error: “token and platform required” });
+    await storage.updateUser(userId, { pushToken: token, pushPlatform: platform } as any);
+    res.json({ ok: true });
+  });
+
   // ─── BLOCKS ───────────────────────────────────────────────
-  app.get("/api/blocks", isAuthenticated, async (req, res) => {
+  app.get(“/api/blocks”, isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
     const blocked = await storage.getBlockedUsers(userId);
     res.json({ users: blocked });
   });
 
-  app.post("/api/users/:userId/block", isAuthenticated, async (req, res) => {
+  app.post(“/api/users/:userId/block”, isAuthenticated, async (req, res) => {
     const blockerId = getUserId(req);
     const blockedId = String(req.params.userId);
-    if (blockerId === blockedId) return res.status(400).json({ error: "Cannot block yourself" });
+    if (blockerId === blockedId) return res.status(400).json({ error: “Cannot block yourself” });
     await storage.blockUser(blockerId, blockedId);
     res.json({ ok: true });
   });
 
-  app.delete("/api/users/:userId/block", isAuthenticated, async (req, res) => {
+  app.delete(“/api/users/:userId/block”, isAuthenticated, async (req, res) => {
     const blockerId = getUserId(req);
     const blockedId = String(req.params.userId);
     await storage.unblockUser(blockerId, blockedId);
     res.json({ ok: true });
   });
+
 
   app.post("/api/reports", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
@@ -892,7 +878,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ report });
   });
 
-  // ─── ADMIN ────────────────────────────────────────────────
+  // â”€â”€â”€ ADMIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function requireAdmin(req: any, res: any, next: any) {
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
@@ -1266,7 +1252,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // ─── CHANGE PASSWORD ──────────────────────────────────────
+  // â”€â”€â”€ CHANGE PASSWORD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   app.patch("/api/auth/change-password", isAuthenticated, async (req: any, res) => {
     try {
       const bcrypt = await import("bcryptjs");
@@ -1286,7 +1272,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // ─── CHANGE PHONE ─────────────────────────────────────────
+  // â”€â”€â”€ CHANGE PHONE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   app.patch("/api/auth/change-phone", isAuthenticated, async (req: any, res) => {
     try {
       const { newPhone } = req.body;
@@ -1301,7 +1287,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // ─── DELETE ACCOUNT ───────────────────────────────────────
+  // â”€â”€â”€ DELETE ACCOUNT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   app.delete("/api/account", isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
@@ -1330,3 +1316,4 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   return httpServer;
 }
+

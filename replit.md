@@ -2,16 +2,8 @@
 
 A culturally sensitive dating platform designed exclusively for the Yezidi community, respecting traditional values and the caste system.
 
-## User Preferences
-- **Testing**: User tests all changes manually — skip automated e2e testing
-
 ## Recent Changes
-- **Code audit & stability fixes**: Fixed critical bug where `req.user` (always undefined) was used instead of `getUserId(req)` in the admin user-delete route — audit log entries and emails now record the correct admin identity. Fixed null crash in ChatPage where `otherUser!.id` (non-null assertion) would throw if the match data hadn't loaded yet. Added try/catch to admin analytics route so a DB failure returns a clean 500 JSON instead of crashing Express. Added Zod → HTTP 400 handling to the global error handler so invalid request bodies return structured JSON errors instead of 500s. Added URL aliases for all legal pages (`/privacy-policy`, `/terms-of-service`, `/refunds`, `/refund-policy`, `/community-guidelines`, `/safety`). Deleted unused `VerificationQueuePage.tsx` file.
-- **Lottie animations**: Installed `lottie-react`. 20 Lottie JSON files placed in `client/public/lottie/`. Created `LottieAnimation` component (`client/src/components/LottieAnimation.tsx`). Replaced static PNG gift images with Lottie animations in the gift picker and gift bubbles (ChatPage). MatchModal now shows `celebration.json` confetti + `valentine-hearts.json` between avatars. DiscoverPage shows `filling-heart.json` / `cute-broken-heart.json` overlay on like/dislike. LandingPage logo now has a floating `valentine-hearts.json` Lottie near the title. Removed `logo-flip` CSS animation from index.css.
-- **Test users created**: layla.test@gustilk.com, sara.test@gustilk.com, dara.test@gustilk.com (all password: test1234). A match between admin and Layla is seeded in the DB.
-- **Admin routing fixed (UserDetailPage)**: The root cause was wouter v3's wildcard route (`/admin/:rest*`) silently creating a nested routing context that stripped `/admin` from all paths seen by `useLocation`/`useRoute` inside AdminLayout. Fixed by rendering the admin panel **outside** the wouter Switch/Route entirely via a direct `isAdminRoute` location check in AppShell. AdminLayout now uses `useRoute()` hooks (not string parsing) for reliable sub-page matching.
-- **Full Admin Panel (28 sub-pages)**: Lazy-loaded at `/admin/*`. Includes Dashboard, Users (paginated), User Detail, Approvals, Verification Queue, Reports, Moderation, Blacklist, Duplicates, Analytics (with daily bar chart), Payments, Promo Codes, Referrals, Notifications, Announcements, Email Templates, Feedback, Caste Management, Events, Success Stories, Translations, Team, Audit Logs, App Settings, App Store, Export (CSV), System Health, Backups. All backed by `server/admin-routes.ts` with 6 new DB tables.
-- **Block feature complete**: Users can block/unblock others via ReportModal and from Settings → Blocked Users list. Routes: `POST /api/users/:userId/block`, `DELETE /api/users/:userId/block`, `GET /api/blocks`.
+- **Block feature complete**: Users can block/unblock others via ReportModal (redesigned with menu → report/block flows) and from Settings → Blocked Users list. Blocked users are filtered from discover feed and match list. Routes: `POST /api/users/:userId/block`, `DELETE /api/users/:userId/block`, `GET /api/blocks`.
 
 ## Overview
 
