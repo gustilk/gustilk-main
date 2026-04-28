@@ -128,7 +128,7 @@ export default function EventsPage({ user }: Props) {
             <img src="/gustilk-logo.png?v=4" alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
             <h1 className="font-serif text-2xl text-gold">{t("events.title")}</h1>
           </div>
-          {(user.isAdmin || user.isPremium) && (
+          {(user.isAdmin || user.verificationStatus === "approved") && (
             <button
               onClick={() => setFormView("create")}
               data-testid="button-create-event"

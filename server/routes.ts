@@ -624,8 +624,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
-  app.post("/api/events", isAuthenticated, requireAdmin, async (req, res) => {
+  app.post("/api/events", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
+    const currentUser = await storage.getUserById(userId);
+    if (!currentUser?.isAdmin && currentUser?.verificationStatus !== "approved") {
+      return res.status(403).json({ error: "Only verified members can create events" });
+    }
     const schema = z.object({
       title: z.string().min(1), description: z.string().min(1),
       type: z.enum(["cultural", "meetup", "online"]),
