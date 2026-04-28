@@ -792,11 +792,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
     const match = await storage.getMatch(matchId);
     if (!match || (match.user1Id !== senderId && match.user2Id !== senderId)) {
-      return res.status(403).json({ error: “Forbidden” });
+      return res.status(403).json({ error: "Forbidden" });
     }
     const otherUserId = match.user1Id === senderId ? match.user2Id : match.user1Id;
     if (recipientId !== otherUserId) {
-      return res.status(400).json({ error: “Recipient does not match the other user in this match” });
+      return res.status(400).json({ error: "Recipient does not match the other user in this match" });
     }
 
     const gift = await storage.sendGift(senderId, recipientId, matchId, giftType, message, animationStyle);
