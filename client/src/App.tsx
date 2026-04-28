@@ -191,7 +191,7 @@ function AppShell({ user }: { user: User }) {
               <Route path="/premium" component={() => <PremiumPage user={user} />} />
               <Route path="/events/:eventId" component={({ params }) => <EventDetailPage user={user} eventId={params.eventId} />} />
               <Route path="/events" component={() => <EventsPage user={user} />} />
-              <Route path="/activity" component={() => <ActivityPage user={user} />} />
+              <Route path="/activity" component={() => user.isAdmin ? <Redirect to="/admin" /> : <ActivityPage user={user} />} />
               <Route path="/profile/:userId" component={({ params }) => <ViewUserProfilePage viewer={user} userId={params.userId} />} />
               <Route path="/settings" component={() => <SettingsPage user={user} />} />
               <Route path="/verify" component={() => <VerificationPage user={user} />} />
