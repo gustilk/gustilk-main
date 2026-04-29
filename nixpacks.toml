@@ -1,8 +1,13 @@
 [phases.setup]
 nixPkgs = ['nodejs_20', 'npm-9_x']
 
+[phases.install]
+cmds = ['npm ci --prefer-offline']
+cacheDirectories = ['node_modules']
+
 [phases.build]
-cmds = ['npm install', 'npm run build']
+cmds = ['npm run build']
+cacheDirectories = ['node_modules', '.vite']
 
 [start]
 cmd = 'npm run start'
