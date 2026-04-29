@@ -91,45 +91,60 @@ function VideoGift({ src, size }: { src: string; size: number }) {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas) return;
+
+    // Scale canvas to device pixel ratio for sharp rendering on Retina/high-DPI screens
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = size * dpr;
+    canvas.height = size * dpr;
+
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
+    ctx.scale(dpr, dpr);
 
     let raf: number;
     let bg: [number, number, number] | null = null;
-    const tol = 45;
+    const tol = 50;      // colour distance to classify as background
+    const fadeZone = 30; // extra range for gradual edge fade
 
     const sampleBg = () => {
       try {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        // Sample all 4 corners and pick the most common channel values
+        ctx.drawImage(video, 0, 0, size, size);
+        // Average all 4 corners to detect background colour
+        const w = canvas.width, h = canvas.height;
         const samples = [
           ctx.getImageData(0, 0, 1, 1).data,
-          ctx.getImageData(canvas.width - 1, 0, 1, 1).data,
-          ctx.getImageData(0, canvas.height - 1, 1, 1).data,
-          ctx.getImageData(canvas.width - 1, canvas.height - 1, 1, 1).data,
+          ctx.getImageData(w - 1, 0, 1, 1).data,
+          ctx.getImageData(0, h - 1, 1, 1).data,
+          ctx.getImageData(w - 1, h - 1, 1, 1).data,
         ];
-        const r = Math.round(samples.reduce((s, d) => s + d[0], 0) / 4);
-        const g = Math.round(samples.reduce((s, d) => s + d[1], 0) / 4);
-        const b = Math.round(samples.reduce((s, d) => s + d[2], 0) / 4);
-        bg = [r, g, b];
+        bg = [
+          Math.round(samples.reduce((s, d) => s + d[0], 0) / 4),
+          Math.round(samples.reduce((s, d) => s + d[1], 0) / 4),
+          Math.round(samples.reduce((s, d) => s + d[2], 0) / 4),
+        ];
       } catch { /* cross-origin guard */ }
     };
 
     const draw = () => {
-      if (!video.paused && !video.ended && canvas.width > 0) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      if (!video.paused && !video.ended) {
+        ctx.clearRect(0, 0, size, size);
+        ctx.drawImage(video, 0, 0, size, size);
         if (bg) {
           try {
             const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const px = img.data;
             const [R, G, B] = bg;
             for (let i = 0; i < px.length; i += 4) {
-              if (
-                Math.abs(px[i]     - R) < tol &&
-                Math.abs(px[i + 1] - G) < tol &&
-                Math.abs(px[i + 2] - B) < tol
-              ) px[i + 3] = 0;
+              const dist = Math.sqrt(
+                (px[i] - R) ** 2 + (px[i + 1] - G) ** 2 + (px[i + 2] - B) ** 2
+              );
+              if (dist < tol) {
+                // Fully transparent inside tolerance
+                px[i + 3] = 0;
+              } else if (dist < tol + fadeZone) {
+                // Gradual fade in the edge zone for smooth anti-aliased borders
+                px[i + 3] = Math.round(((dist - tol) / fadeZone) * px[i + 3]);
+              }
             }
             ctx.putImageData(img, 0, 0);
           } catch { /* cross-origin guard */ }
@@ -138,17 +153,21 @@ function VideoGift({ src, size }: { src: string; size: number }) {
       raf = requestAnimationFrame(draw);
     };
 
-    const onReady = () => { sampleBg(); video.play().catch(() => {}); raf = requestAnimationFrame(draw); };
+    const onReady = () => {
+      sampleBg();
+      video.play().catch(() => {});
+      raf = requestAnimationFrame(draw);
+    };
     video.addEventListener("loadeddata", onReady, { once: true });
     video.load();
 
     return () => { cancelAnimationFrame(raf); video.removeEventListener("loadeddata", onReady); };
-  }, [src]);
+  }, [src, size]);
 
   return (
     <div style={{ width: size, height: size, position: "relative" }}>
       <video ref={videoRef} src={src} muted loop playsInline preload="auto" style={{ display: "none" }} />
-      <canvas ref={canvasRef} width={size} height={size} style={{ width: size, height: size, display: "block" }} />
+      <canvas ref={canvasRef} style={{ width: size, height: size, display: "block" }} />
     </div>
   );
 }
