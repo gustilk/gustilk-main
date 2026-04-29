@@ -18,7 +18,7 @@ interface Props {
 
 // ─── Gift catalogue ────────────────────────────────────────────────────────
 export const GIFTS: { id: string; lottie?: string | null; video?: string | null; name: string; color: string }[] = [
-  { id: "special-dance", video: "/gifts/special-dance.mp4", lottie: null, name: "Viral 🔥",  color: "#ff3b5c" },
+  { id: "special-dance", video: "/gifts/special-dance.mp4", lottie: null, name: "Blooming",  color: "#ff3b5c" },
   { id: "rose",         lottie: "/lottie/rose.json",              name: "Rose",         color: "#e83e6c" },
   { id: "butterfly",    lottie: "/lottie/butterfly.json",          name: "Butterfly",    color: "#7b3fa0" },
   { id: "diamond",      lottie: "/lottie/add-to-favorites.json",  name: "Favourite",    color: "#f59e0b" },
@@ -83,7 +83,13 @@ function GiftMedia({ g, size }: { g: ReturnType<typeof giftById>; size: number }
         loop
         muted
         playsInline
-        style={{ width: size, height: size, objectFit: "cover", borderRadius: 8 }}
+        style={{
+          width: size,
+          height: size,
+          objectFit: "contain",
+          mixBlendMode: "screen",
+          background: "transparent",
+        }}
       />
     );
   }
@@ -731,8 +737,8 @@ function GiftRevealOverlay({ gift, onClose, isPreview = false }: { gift: GiftTyp
       {/* Gift animation */}
       <div
         style={{
-          width: 230,
-          height: 230,
+          width: g.video ? 320 : 230,
+          height: g.video ? 320 : 230,
           animation: "gr-zoom-in 5s ease-out forwards",
           opacity: 0,
           position: "relative",
@@ -740,7 +746,7 @@ function GiftRevealOverlay({ gift, onClose, isPreview = false }: { gift: GiftTyp
         }}
         data-testid="gift-reveal-animation"
       >
-        <GiftMedia g={g} size={230} />
+        <GiftMedia g={g} size={g.video ? 320 : 230} />
       </div>
 
       {/* Message only — no name */}
@@ -954,7 +960,7 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                     borderRadius: 12,
                   }}
                 >
-                  <div style={{ width: 58, height: 58, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", borderRadius: 8 }}>
+                  <div style={{ width: 58, height: 58, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <GiftMedia g={g} size={58} />
                   </div>
                 </button>
