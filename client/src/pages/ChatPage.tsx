@@ -153,8 +153,24 @@ function VideoGift({ src, size }: { src: string; size: number }) {
   );
 }
 
-function GiftMedia({ g, size }: { g: ReturnType<typeof giftById>; size: number }) {
-  if (g.video) return <VideoGift src={g.video} size={size} />;
+function GiftMedia({ g, size, chromaKey = false }: { g: ReturnType<typeof giftById>; size: number; chromaKey?: boolean }) {
+  if (g.video) {
+    // Picker thumbnails: plain video (fast, no per-pixel processing)
+    // Reveal & chat bubble: canvas chroma key (full transparency, one gift at a time)
+    if (!chromaKey) {
+      return (
+        <video
+          src={g.video}
+          autoPlay
+          loop
+          muted
+          playsInline
+          style={{ width: size, height: size, objectFit: "contain", borderRadius: 6 }}
+        />
+      );
+    }
+    return <VideoGift src={g.video} size={size} />;
+  }
   if (g.lottie) {
     return <LottieAnimation src={g.lottie} loop autoplay style={{ width: size, height: size }} placeholderSize={Math.round(size * 0.5)} />;
   }
@@ -808,7 +824,7 @@ function GiftRevealOverlay({ gift, onClose, isPreview = false }: { gift: GiftTyp
         }}
         data-testid="gift-reveal-animation"
       >
-        <GiftMedia g={g} size={g.video ? 320 : 230} />
+        <GiftMedia g={g} size={g.video ? 320 : 230} chromaKey />
       </div>
 
       {/* Message only — no name */}
@@ -877,7 +893,7 @@ function GiftBubble({ gift, isMine, viewerId }: { gift: GiftType; isMine: boolea
             {revealed ? (
               /* Revealed — bare animation, no card */
               <div style={{ width: 90, height: 90, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <GiftMedia g={g} size={90} />
+                <GiftMedia g={g} size={90} chromaKey />
               </div>
             ) : (
               /* Unrevealed — mystery card */
