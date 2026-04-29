@@ -83,25 +83,78 @@ function giftById(id: string) {
   return GIFTS.find(g => g.id === id) ?? { id, lottie: null as string | null, video: null as string | null, name: "Gift", color: "#c9a84c" };
 }
 
+function VideoGift({ src, size }: { src: string; size: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return;
+
+    let raf: number;
+    let bg: [number, number, number] | null = null;
+    const tol = 45;
+
+    const sampleBg = () => {
+      try {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // Sample all 4 corners and pick the most common channel values
+        const samples = [
+          ctx.getImageData(0, 0, 1, 1).data,
+          ctx.getImageData(canvas.width - 1, 0, 1, 1).data,
+          ctx.getImageData(0, canvas.height - 1, 1, 1).data,
+          ctx.getImageData(canvas.width - 1, canvas.height - 1, 1, 1).data,
+        ];
+        const r = Math.round(samples.reduce((s, d) => s + d[0], 0) / 4);
+        const g = Math.round(samples.reduce((s, d) => s + d[1], 0) / 4);
+        const b = Math.round(samples.reduce((s, d) => s + d[2], 0) / 4);
+        bg = [r, g, b];
+      } catch { /* cross-origin guard */ }
+    };
+
+    const draw = () => {
+      if (!video.paused && !video.ended && canvas.width > 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        if (bg) {
+          try {
+            const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const px = img.data;
+            const [R, G, B] = bg;
+            for (let i = 0; i < px.length; i += 4) {
+              if (
+                Math.abs(px[i]     - R) < tol &&
+                Math.abs(px[i + 1] - G) < tol &&
+                Math.abs(px[i + 2] - B) < tol
+              ) px[i + 3] = 0;
+            }
+            ctx.putImageData(img, 0, 0);
+          } catch { /* cross-origin guard */ }
+        }
+      }
+      raf = requestAnimationFrame(draw);
+    };
+
+    const onReady = () => { sampleBg(); video.play().catch(() => {}); raf = requestAnimationFrame(draw); };
+    video.addEventListener("loadeddata", onReady, { once: true });
+    video.load();
+
+    return () => { cancelAnimationFrame(raf); video.removeEventListener("loadeddata", onReady); };
+  }, [src]);
+
+  return (
+    <div style={{ width: size, height: size, position: "relative" }}>
+      <video ref={videoRef} src={src} muted loop playsInline preload="auto" style={{ display: "none" }} />
+      <canvas ref={canvasRef} width={size} height={size} style={{ width: size, height: size, display: "block" }} />
+    </div>
+  );
+}
+
 function GiftMedia({ g, size }: { g: ReturnType<typeof giftById>; size: number }) {
-  if (g.video) {
-    return (
-      <video
-        src={g.video}
-        autoPlay
-        loop
-        muted
-        playsInline
-        style={{
-          width: size,
-          height: size,
-          objectFit: "contain",
-          mixBlendMode: "screen",
-          background: "transparent",
-        }}
-      />
-    );
-  }
+  if (g.video) return <VideoGift src={g.video} size={size} />;
   if (g.lottie) {
     return <LottieAnimation src={g.lottie} loop autoplay style={{ width: size, height: size }} placeholderSize={Math.round(size * 0.5)} />;
   }
