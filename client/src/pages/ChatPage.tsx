@@ -17,7 +17,8 @@ interface Props {
 }
 
 // ─── Gift catalogue ────────────────────────────────────────────────────────
-export const GIFTS = [
+export const GIFTS: { id: string; lottie?: string | null; video?: string | null; name: string; color: string }[] = [
+  { id: "special-dance", video: "/gifts/special-dance.mp4", lottie: null, name: "Viral 🔥",  color: "#ff3b5c" },
   { id: "rose",         lottie: "/lottie/rose.json",              name: "Rose",         color: "#e83e6c" },
   { id: "butterfly",    lottie: "/lottie/butterfly.json",          name: "Butterfly",    color: "#7b3fa0" },
   { id: "diamond",      lottie: "/lottie/add-to-favorites.json",  name: "Favourite",    color: "#f59e0b" },
@@ -70,7 +71,26 @@ export const GIFTS = [
 ];
 
 function giftById(id: string) {
-  return GIFTS.find(g => g.id === id) ?? { id, lottie: null as string | null, name: "Gift", color: "#c9a84c" };
+  return GIFTS.find(g => g.id === id) ?? { id, lottie: null as string | null, video: null as string | null, name: "Gift", color: "#c9a84c" };
+}
+
+function GiftMedia({ g, size }: { g: ReturnType<typeof giftById>; size: number }) {
+  if (g.video) {
+    return (
+      <video
+        src={g.video}
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={{ width: size, height: size, objectFit: "cover", borderRadius: 8 }}
+      />
+    );
+  }
+  if (g.lottie) {
+    return <LottieAnimation src={g.lottie} loop autoplay style={{ width: size, height: size }} placeholderSize={Math.round(size * 0.5)} />;
+  }
+  return <span style={{ fontSize: Math.round(size * 0.55) }}>🎁</span>;
 }
 
 // ─── Merged timeline item ─────────────────────────────────────────────────
@@ -720,10 +740,7 @@ function GiftRevealOverlay({ gift, onClose, isPreview = false }: { gift: GiftTyp
         }}
         data-testid="gift-reveal-animation"
       >
-        {g.lottie
-          ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} placeholderSize={80} />
-          : <span style={{ fontSize: 120 }}>🎁</span>
-        }
+        <GiftMedia g={g} size={230} />
       </div>
 
       {/* Message only — no name */}
@@ -791,11 +808,8 @@ function GiftBubble({ gift, isMine, viewerId }: { gift: GiftType; isMine: boolea
           >
             {revealed ? (
               /* Revealed — bare animation, no card */
-              <div style={{ width: 90, height: 90 }}>
-                {g.lottie
-                  ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} placeholderSize={34} />
-                  : <span className="text-5xl">🎁</span>
-                }
+              <div style={{ width: 90, height: 90, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <GiftMedia g={g} size={90} />
               </div>
             ) : (
               /* Unrevealed — mystery card */
@@ -940,11 +954,8 @@ function GiftPicker({ recipientName, isPending, onSend, onClose }: {
                     borderRadius: 12,
                   }}
                 >
-                  <div style={{ width: 58, height: 58 }}>
-                    {g.lottie
-                      ? <LottieAnimation src={g.lottie} loop autoplay style={{ width: "100%", height: "100%" }} placeholderSize={24} />
-                      : <span className="text-3xl">🎁</span>
-                    }
+                  <div style={{ width: 58, height: 58, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", borderRadius: 8 }}>
+                    <GiftMedia g={g} size={58} />
                   </div>
                 </button>
               );
