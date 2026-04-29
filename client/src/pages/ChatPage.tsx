@@ -18,8 +18,16 @@ interface Props {
 
 // ─── Gift catalogue ────────────────────────────────────────────────────────
 export const GIFTS: { id: string; lottie?: string | null; video?: string | null; name: string; color: string }[] = [
-  { id: "special-dance", video: "/gifts/special-dance.mp4",  lottie: null, name: "Blooming", color: "#ff3b5c" },
-  { id: "video-gift-2",  video: "/gifts/video-gift-2.mp4",  lottie: null, name: "Magic",    color: "#a855f7" },
+  { id: "special-dance", video: "/gifts/special-dance.mp4",  lottie: null, name: "Blooming",  color: "#ff3b5c" },
+  { id: "video-gift-2",  video: "/gifts/video-gift-2.mp4",  lottie: null, name: "Magic",     color: "#a855f7" },
+  { id: "video-gift-3",  video: "/gifts/video-gift-3.mp4",  lottie: null, name: "Stardust",  color: "#f59e0b" },
+  { id: "video-gift-4",  video: "/gifts/video-gift-4.mp4",  lottie: null, name: "Cherish",   color: "#e83e6c" },
+  { id: "video-gift-5",  video: "/gifts/video-gift-5.mp4",  lottie: null, name: "Dreamy",    color: "#67e8f9" },
+  { id: "video-gift-6",  video: "/gifts/video-gift-6.mp4",  lottie: null, name: "Eternal",   color: "#c9a84c" },
+  { id: "video-gift-7",  video: "/gifts/video-gift-7.mp4",  lottie: null, name: "Flutter",   color: "#22c55e" },
+  { id: "video-gift-8",  video: "/gifts/video-gift-8.mp4",  lottie: null, name: "Radiance",  color: "#d4608a" },
+  { id: "video-gift-9",  video: "/gifts/video-gift-9.mp4",  lottie: null, name: "Enchant",   color: "#6366f1" },
+  { id: "video-gift-10", video: "/gifts/video-gift-10.mp4", lottie: null, name: "Shimmer",   color: "#f97316" },
   { id: "rose",         lottie: "/lottie/rose.json",              name: "Rose",         color: "#e83e6c" },
   { id: "butterfly",    lottie: "/lottie/butterfly.json",          name: "Butterfly",    color: "#7b3fa0" },
   { id: "diamond",      lottie: "/lottie/add-to-favorites.json",  name: "Favourite",    color: "#f59e0b" },
