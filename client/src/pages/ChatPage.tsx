@@ -18,7 +18,8 @@ interface Props {
 
 // ─── Gift catalogue ────────────────────────────────────────────────────────
 export const GIFTS: { id: string; lottie?: string | null; video?: string | null; name: string; color: string }[] = [
-  { id: "special-dance", video: "/gifts/special-dance.mp4", lottie: null, name: "Blooming",  color: "#ff3b5c" },
+  { id: "special-dance", video: "/gifts/special-dance.mp4",  lottie: null, name: "Blooming", color: "#ff3b5c" },
+  { id: "video-gift-2",  video: "/gifts/video-gift-2.mp4",  lottie: null, name: "Magic",    color: "#a855f7" },
   { id: "rose",         lottie: "/lottie/rose.json",              name: "Rose",         color: "#e83e6c" },
   { id: "butterfly",    lottie: "/lottie/butterfly.json",          name: "Butterfly",    color: "#7b3fa0" },
   { id: "diamond",      lottie: "/lottie/add-to-favorites.json",  name: "Favourite",    color: "#f59e0b" },
