@@ -149,8 +149,8 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
   return (
     <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
 
-      {/* ── Photos ─────────────────────────────────────────── */}
-      <div className="relative" style={{ height: "65vw", maxHeight: 400, minHeight: 280 }}>
+      {/* ── Photo section ───────────────────────────────── */}
+      <div className="relative" style={{ height: "72vw", maxHeight: 480, minHeight: 320 }}>
         {allPhotos.length > 0 ? (
           <div className="w-full h-full overflow-hidden">
             {isPremium ? (
@@ -161,12 +161,8 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
                 blurred={shouldBlurPhotos}
               />
             ) : (
-              <img
-                src={allPhotos[0]}
-                alt=""
-                className="w-full h-full object-cover"
-                style={{ filter: "blur(22px) brightness(0.65) saturate(0.4)", transform: "scale(1.1)" }}
-              />
+              <img src={allPhotos[0]} alt="" className="w-full h-full object-cover"
+                style={{ filter: "blur(22px) brightness(0.65) saturate(0.4)", transform: "scale(1.1)" }} />
             )}
           </div>
         ) : (
@@ -177,23 +173,25 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
         )}
 
         {/* Gradient overlay */}
-        <div className="absolute inset-0"
-          style={{ background: "linear-gradient(to bottom, rgba(13,6,24,0.55) 0%, transparent 35%, transparent 60%, rgba(13,6,24,0.85) 100%)" }} />
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: "linear-gradient(to bottom, rgba(13,6,24,0.6) 0%, transparent 30%, transparent 55%, rgba(13,6,24,0.95) 100%)" }} />
 
-        {/* Photo dot indicators — premium only */}
+        {/* Photo progress bars — premium */}
         {isPremium && allPhotos.length > 1 && (
-          <div className="absolute top-0 left-0 right-0 flex gap-1 px-3 pt-14">
+          <div className="absolute top-0 left-0 right-0 flex gap-1 px-4 pt-14 z-20">
             {allPhotos.map((_, i) => (
-              <button key={i} onClick={() => setPhotoIdx(i)}
-                className="flex-1 h-[3px] rounded-full transition-all"
-                style={{ background: i === photoIdx ? "rgba(201,168,76,0.9)" : "rgba(255,255,255,0.3)" }} />
+              <button key={i} onClick={() => setPhotoIdx(i)} className="flex-1 h-[3px] rounded-full overflow-hidden"
+                style={{ background: "rgba(255,255,255,0.25)" }}>
+                <div className="h-full rounded-full transition-all duration-200"
+                  style={{ background: i <= photoIdx ? "rgba(255,255,255,0.9)" : "transparent", width: i <= photoIdx ? "100%" : "0%" }} />
+              </button>
             ))}
           </div>
         )}
 
-        {/* Premium lock over photo */}
+        {/* Premium lock */}
         {!isPremium && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 pt-16">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 pt-16 z-10">
             <div className="w-14 h-14 rounded-full flex items-center justify-center"
               style={{ background: "rgba(13,6,24,0.85)", border: "2px solid rgba(201,168,76,0.5)" }}>
               <Lock size={22} color="#c9a84c" />
@@ -209,32 +207,68 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
 
         {/* Back button */}
         <button onClick={goBack} data-testid="button-back-profile"
-          className="absolute top-12 left-4 w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ background: "rgba(13,6,24,0.7)", border: "1px solid rgba(255,255,255,0.15)", zIndex: 30 }}>
+          className="absolute top-12 left-4 w-9 h-9 rounded-full flex items-center justify-center z-30"
+          style={{ background: "rgba(13,6,24,0.7)", border: "1px solid rgba(255,255,255,0.15)" }}>
           <ArrowLeft size={18} color="rgba(253,248,240,0.85)" />
         </button>
 
         {/* Report button */}
         <button onClick={() => setShowReport(true)} data-testid="button-report-profile"
-          className="absolute top-12 right-4 w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ background: "rgba(13,6,24,0.7)", border: "1px solid rgba(255,255,255,0.15)", zIndex: 30 }}>
+          className="absolute top-12 right-4 w-9 h-9 rounded-full flex items-center justify-center z-30"
+          style={{ background: "rgba(13,6,24,0.7)", border: "1px solid rgba(255,255,255,0.15)" }}>
           <Flag size={16} color="rgba(253,248,240,0.5)" />
         </button>
 
         {/* Tap zones for photo browsing — premium */}
         {isPremium && allPhotos.length > 1 && (
           <>
-            <button className="absolute left-0 top-0 bottom-0 w-1/3" onClick={() => setPhotoIdx(i => Math.max(0, i - 1))} />
-            <button className="absolute right-0 top-0 bottom-0 w-1/3" onClick={() => setPhotoIdx(i => Math.min(allPhotos.length - 1, i + 1))} />
+            <button className="absolute left-0 top-0 bottom-0 w-1/3 z-10" onClick={() => setPhotoIdx(i => Math.max(0, i - 1))} />
+            <button className="absolute right-0 top-0 bottom-0 w-1/3 z-10" onClick={() => setPhotoIdx(i => Math.min(allPhotos.length - 1, i + 1))} />
           </>
         )}
+
+        {/* Name + location over photo bottom */}
+        <div className="absolute bottom-0 left-0 right-0 px-5 pb-4 pointer-events-none z-20">
+          <div className="flex items-end justify-between">
+            <div>
+              <h1 className="font-serif text-2xl text-white font-bold" data-testid="text-profile-name">
+                {displayName}{profile.age ? `, ${profile.age}` : ""}
+              </h1>
+              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                {profile.caste && (
+                  <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold"
+                    style={{ background: "rgba(201,168,76,0.85)", color: "#1a0a2e" }}>
+                    {casteLabel(profile.caste)}
+                  </span>
+                )}
+                {profile.isVerified && (
+                  <span className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-semibold"
+                    style={{ background: "rgba(59,130,246,0.85)", color: "white" }}>
+                    <Shield size={9} /> Verified
+                  </span>
+                )}
+                {location && (
+                  <span className="flex items-center gap-1 text-[11px] text-white/60">
+                    <MapPin size={10} color="rgba(201,168,76,0.8)" /> {location}
+                  </span>
+                )}
+              </div>
+            </div>
+            {profile.isPremium && (
+              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ background: "rgba(201,168,76,0.15)", border: "1.5px solid rgba(201,168,76,0.4)" }}>
+                <Star size={16} fill="#c9a84c" color="#c9a84c" />
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Reply to photo button — matched premium users only */}
         {isPremium && match && allPhotos.length > 0 && (
           <button
             onClick={() => setReplyPhotoUrl(allPhotos[photoIdx])}
             data-testid="button-reply-to-photo"
-            className="absolute bottom-4 right-4 flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold z-30 transition-all active:scale-95"
+            className="absolute bottom-16 right-4 flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold z-30 transition-all active:scale-95"
             style={{ background: "rgba(13,6,24,0.8)", border: "1px solid rgba(201,168,76,0.5)", color: "#c9a84c", backdropFilter: "blur(6px)" }}
           >
             <MessageCircle size={13} />
@@ -246,105 +280,113 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
       {/* ── Profile info ──────────────────────────────────── */}
       <div className="px-5 pt-4 space-y-4">
 
-        {/* Name + badges */}
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="font-serif text-3xl text-cream" data-testid="text-profile-name">
-              {displayName}{profile.age ? `, ${profile.age}` : ""}
-            </h1>
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
-              {profile.caste && (
-                <span className="text-xs px-2.5 py-1 rounded-full font-semibold"
-                  style={{ background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.25)" }}>
-                  {casteLabel(profile.caste)}
-                </span>
-              )}
-              {profile.isVerified && (
-                <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold"
-                  style={{ background: "rgba(59,130,246,0.12)", color: "#60a5fa", border: "1px solid rgba(59,130,246,0.25)" }}>
-                  <Shield size={10} /> Verified
-                </span>
-              )}
+        {/* Active status */}
+        {(profile as any).activitySeenAt && (() => {
+          const hours = (Date.now() - new Date((profile as any).activitySeenAt).getTime()) / 3_600_000;
+          if (hours > 72) return null;
+          return (
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" style={{ boxShadow: "0 0 6px #34d399" }} />
+              <span className="text-emerald-400 text-xs font-medium">{hours < 24 ? "Active today" : "Active recently"}</span>
             </div>
-          </div>
-          {profile.isPremium && (
-            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ background: "rgba(201,168,76,0.1)", border: "1.5px solid rgba(201,168,76,0.3)" }}>
-              <Star size={18} fill="#c9a84c" color="#c9a84c" />
-            </div>
-          )}
-        </div>
-
-        {/* Location */}
-        {location && (
-          <div className="flex items-center gap-2 text-cream/50 text-sm">
-            <MapPin size={14} className="flex-shrink-0" />
-            <span data-testid="text-profile-location">{location}</span>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Bio */}
         {profile.bio && (
           <div className="px-4 py-3.5 rounded-2xl"
             style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}>
-            <p className="text-cream/70 text-sm leading-relaxed" data-testid="text-profile-bio">
-              {profile.bio}
-            </p>
+            <p className="text-cream/70 text-sm leading-relaxed" data-testid="text-profile-bio">{profile.bio}</p>
+          </div>
+        )}
+
+        {/* Details grid */}
+        {(() => {
+          const details = [
+            profile.gender && { label: "Gender", value: profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1) },
+            (profile as any).occupation && { label: "Occupation", value: (profile as any).occupation },
+            profile.age && { label: "Age", value: `${profile.age} years old` },
+          ].filter(Boolean) as { label: string; value: string }[];
+          if (!details.length) return null;
+          return (
+            <div className="grid grid-cols-2 gap-2">
+              {details.map(d => (
+                <div key={d.label} className="px-3 py-2.5 rounded-xl"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <p className="text-cream/35 text-[10px] uppercase tracking-wider font-semibold">{d.label}</p>
+                  <p className="text-cream/80 text-sm mt-0.5 font-medium">{d.value}</p>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+
+        {/* Languages */}
+        {(profile.languages ?? []).length > 0 && (
+          <div>
+            <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold mb-2">Languages</p>
+            <div className="flex flex-wrap gap-2">
+              {(profile.languages ?? []).map((lang: string) => (
+                <span key={lang} className="px-3 py-1 rounded-full text-xs font-semibold"
+                  style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}>
+                  {lang}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Interests */}
+        {((profile as any).interests ?? []).length > 0 && (
+          <div>
+            <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold mb-2">Interests</p>
+            <div className="flex flex-wrap gap-2">
+              {((profile as any).interests ?? []).map((it: string) => (
+                <span key={it} className="px-3 py-1 rounded-full text-xs font-semibold"
+                  style={{ background: "rgba(123,63,160,0.15)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.2)" }}>
+                  {it}
+                </span>
+              ))}
+            </div>
           </div>
         )}
 
         {/* ── Like / Pass bar — shown when arriving from Likes Received ── */}
         {showLikeActions && !actedOnLike && (
           <div className="flex gap-3">
-            <button
-              onClick={() => dislikeMutation.mutate()}
+            <button onClick={() => dislikeMutation.mutate()}
               disabled={dislikeMutation.isPending || likeMutation.isPending}
               data-testid="button-pass-from-likes"
               className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all active:scale-95 disabled:opacity-50"
-              style={{ background: "rgba(212,96,138,0.12)", border: "1.5px solid rgba(212,96,138,0.45)", color: "#d4608a" }}
-            >
-              <X size={18} strokeWidth={2.5} />
-              Pass
+              style={{ background: "rgba(212,96,138,0.12)", border: "1.5px solid rgba(212,96,138,0.45)", color: "#d4608a" }}>
+              <X size={18} strokeWidth={2.5} /> Pass
             </button>
-            <button
-              onClick={() => likeMutation.mutate()}
+            <button onClick={() => likeMutation.mutate()}
               disabled={likeMutation.isPending || dislikeMutation.isPending}
               data-testid="button-like-from-likes"
               className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all active:scale-95 disabled:opacity-50"
-              style={{ background: "rgba(201,168,76,0.12)", border: "1.5px solid rgba(201,168,76,0.5)", color: "#c9a84c" }}
-            >
-              <Heart size={18} strokeWidth={2.5} />
-              Like Back
+              style={{ background: "rgba(201,168,76,0.12)", border: "1.5px solid rgba(201,168,76,0.5)", color: "#c9a84c" }}>
+              <Heart size={18} strokeWidth={2.5} /> Like Back
             </button>
           </div>
         )}
 
-        {/* ── Divider ── */}
         <div style={{ height: 1, background: "rgba(201,168,76,0.08)" }} />
 
-        {/* ── Action buttons ────────────────────────────── */}
+        {/* ── Action buttons ── */}
         <div className="grid grid-cols-2 gap-3">
-
-          {/* Message button */}
-          <button
-            onClick={handleMessage}
-            data-testid="button-message-user"
+          <button onClick={handleMessage} data-testid="button-message-user"
             className="flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all"
             style={isPremium && match
               ? { background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white", boxShadow: "0 4px 16px rgba(123,63,160,0.3)" }
               : isPremium && !match
                 ? { background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.4)", border: "1px solid rgba(255,255,255,0.1)", cursor: "default" }
                 : { background: "rgba(201,168,76,0.08)", color: "#c9a84c", border: "1.5px solid rgba(201,168,76,0.3)" }
-            }
-          >
+            }>
             {isPremium ? <MessageCircle size={18} /> : <Lock size={16} />}
             {isPremium ? (match ? "Message" : "Not matched") : "Message"}
           </button>
-
-          {/* Video call button */}
-          <button
-            onClick={handleCall}
-            data-testid="button-videocall-user"
+          <button onClick={handleCall} data-testid="button-videocall-user"
             disabled={isPremium && (!match || callState !== "idle")}
             className="flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all disabled:opacity-40"
             style={isPremium && match
@@ -352,35 +394,29 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
               : !isPremium
                 ? { background: "rgba(201,168,76,0.08)", color: "#c9a84c", border: "1.5px solid rgba(201,168,76,0.3)" }
                 : { background: "rgba(255,255,255,0.04)", color: "rgba(253,248,240,0.3)", border: "1px solid rgba(255,255,255,0.08)" }
-            }
-          >
+            }>
             {isPremium ? <Video size={18} /> : <Lock size={16} />}
             Video Call
           </button>
         </div>
 
-        {/* Premium upsell strip for free users */}
         {!isPremium && (
-          <button
-            onClick={() => setLocation("/premium")}
-            data-testid="button-upgrade-profile"
+          <button onClick={() => setLocation("/premium")} data-testid="button-upgrade-profile"
             className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-sm"
-            style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 6px 20px rgba(201,168,76,0.25)" }}
-          >
-            <Crown size={16} />
-            Upgrade to see photos &amp; message
+            style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 6px 20px rgba(201,168,76,0.25)" }}>
+            <Crown size={16} /> Upgrade to see photos &amp; message
           </button>
         )}
 
-        {/* Photo gallery row — premium only */}
+        {/* Photo thumbnails row — premium */}
         {isPremium && allPhotos.length > 1 && (
           <div>
-            <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold mb-2">Photos</p>
+            <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold mb-2">All Photos</p>
             <div className="flex gap-2 overflow-x-auto pb-1">
               {allPhotos.map((p, i) => (
                 <button key={i} onClick={() => setPhotoIdx(i)} data-testid={`thumb-photo-${i}`}
-                  className="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden transition-all"
-                  style={{ border: i === photoIdx ? "2px solid #c9a84c" : "2px solid transparent", opacity: i === photoIdx ? 1 : 0.65 }}>
+                  className="flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden transition-all"
+                  style={{ border: i === photoIdx ? "2px solid #c9a84c" : "2px solid transparent", opacity: i === photoIdx ? 1 : 0.6 }}>
                   <ProtectedPhoto src={p} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" blurred={shouldBlurPhotos} />
                 </button>
               ))}

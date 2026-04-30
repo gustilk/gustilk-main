@@ -48,6 +48,7 @@ export default function DiscoverPage({ user }: Props) {
   const [undoState, setUndoState] = useState<UndoState | null>(null);
   const [undoProgress, setUndoProgress] = useState(100);
   const [returningFrom, setReturningFrom] = useState<"left" | "right" | null>(null);
+  const [cardPhotoIdx, setCardPhotoIdx] = useState(0);
   const undoTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const undoStartRef = useRef<number>(0);
   const lastVisitedId = useRef<string | null>(null);
@@ -157,6 +158,7 @@ export default function DiscoverPage({ user }: Props) {
       setSwipeDir(null);
       setSwipeAnim(null);
       setCurrentIndex(i => i + 1);
+      setCardPhotoIdx(0);
       if (profile) {
         startUndo(profile, dir === "right" ? "like" : "dislike", matchId);
       }
@@ -293,92 +295,131 @@ export default function DiscoverPage({ user }: Props) {
               }}
               data-testid={`card-profile-${current.id}`}
             >
-              <div
-                className="relative flex items-center justify-center"
-                style={{ height: "min(420px, 52vh)", background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}
-              >
-                {current.photos && current.photos.length > 0 ? (
-                  <ProtectedPhoto
-                    src={current.photos[0]}
-                    alt={current.fullName ?? ""}
-                    className="w-full h-full object-cover"
-                    blurred={current.gender === "female" && !!current.photosBlurred}
-                  />
-                ) : (
-                  <div
-                    className="w-28 h-28 rounded-full flex items-center justify-center text-5xl font-serif text-gold"
-                    style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.25)" }}
-                  >
-                    {(current.fullName ?? current.firstName ?? "M").charAt(0)}
-                  </div>
-                )}
+              {/* ── Photo area ── */}
+              {(() => {
+                const photos = current.photos ?? [];
+                const photo = photos[cardPhotoIdx] ?? photos[0] ?? null;
+                const totalPhotos = photos.length;
+                const age = (() => {
+                  if ((current as any).dateOfBirth) {
+                    const dob = new Date((current as any).dateOfBirth);
+                    const today = new Date();
+                    let a = today.getFullYear() - dob.getFullYear();
+                    const m = today.getMonth() - dob.getMonth();
+                    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) a--;
+                    return a;
+                  }
+                  return current.age;
+                })();
+                return (
+                  <div className="relative" style={{ height: "min(520px, 68vh)", background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}>
+                    {photo ? (
+                      <ProtectedPhoto
+                        src={photo}
+                        alt={current.fullName ?? ""}
+                        className="w-full h-full object-cover"
+                        blurred={current.gender === "female" && !!current.photosBlurred}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-28 h-28 rounded-full flex items-center justify-center text-5xl font-serif text-gold"
+                          style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.25)" }}>
+                          {(current.fullName ?? current.firstName ?? "M").charAt(0)}
+                        </div>
+                      </div>
+                    )}
 
-                <div
-                  className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold"
-                  style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
-                  data-testid={`badge-caste-${current.id}`}
-                >
-                  {casteLabel(current.caste ?? "murid")}
-                </div>
+                    {/* Photo progress bars */}
+                    {totalPhotos > 1 && (
+                      <div className="absolute top-3 left-3 right-3 flex gap-1 z-20">
+                        {photos.map((_, i) => (
+                          <div key={i} className="flex-1 h-[3px] rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.25)" }}>
+                            <div className="h-full rounded-full transition-all duration-200"
+                              style={{ background: i <= cardPhotoIdx ? "rgba(255,255,255,0.9)" : "transparent", width: i <= cardPhotoIdx ? "100%" : "0%" }} />
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
-                {/* View full profile button */}
-                <button
-                  onClick={() => {
-                    sessionStorage.setItem("profile_back_to", "/discover");
-                    sessionStorage.setItem("discover_return_index", String(currentIndex));
-                    setLocation(`/profile/${current.id}`);
-                  }}
-                  data-testid={`button-view-profile-${current.id}`}
-                  className="absolute top-3 left-3 w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95"
-                  style={{ background: "rgba(13,6,24,0.75)", border: "1.5px solid rgba(201,168,76,0.4)", backdropFilter: "blur(4px)" }}
-                  title="View full profile"
-                >
-                  <Info size={17} color="#c9a84c" />
-                </button>
+                    {/* Left tap zone — prev photo */}
+                    <button
+                      className="absolute left-0 top-0 bottom-0 w-1/3 z-10"
+                      onClick={() => setCardPhotoIdx(i => Math.max(0, i - 1))}
+                    />
+                    {/* Right tap zone — next photo */}
+                    <button
+                      className="absolute right-0 top-0 bottom-0 w-1/3 z-10"
+                      onClick={() => setCardPhotoIdx(i => Math.min(totalPhotos - 1, i + 1))}
+                    />
 
-                <div className="absolute bottom-0 left-0 right-0 h-52" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.98), transparent)" }} />
-                <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <h2 className="font-serif text-2xl text-white font-bold leading-tight" data-testid={`text-name-${current.id}`}>
-                    {current.fullName ?? current.firstName ?? "Member"}, {(() => {
-                    if ((current as any).dateOfBirth) {
-                      const dob = new Date((current as any).dateOfBirth);
-                      const today = new Date();
-                      let a = today.getFullYear() - dob.getFullYear();
-                      const m = today.getMonth() - dob.getMonth();
-                      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) a--;
-                      return a;
-                    }
-                    return current.age;
-                  })()}
-                  </h2>
-                  <div className="flex items-center gap-1.5 mt-1.5">
-                    <MapPin size={13} color="rgba(201,168,76,0.8)" />
-                    <p className="text-white/60 text-sm">{current.city}{current.state ? `, ${current.state}` : ""}, {current.country}</p>
-                  </div>
-                  {getActiveLabel(current.activitySeenAt) && (
-                    <div className="flex items-center gap-1.5 mt-1.5" data-testid={`status-active-${current.id}`}>
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" style={{ boxShadow: "0 0 6px #34d399" }} />
-                      <span className="text-emerald-400 text-xs font-medium">{getActiveLabel(current.activitySeenAt)}</span>
+                    {/* View full profile — centre tap zone */}
+                    <button
+                      onClick={() => {
+                        sessionStorage.setItem("profile_back_to", "/discover");
+                        sessionStorage.setItem("discover_return_index", String(currentIndex));
+                        setLocation(`/profile/${current.id}`);
+                      }}
+                      data-testid={`button-view-profile-${current.id}`}
+                      className="absolute top-10 right-3 w-9 h-9 rounded-full flex items-center justify-center z-20 transition-all active:scale-95"
+                      style={{ background: "rgba(13,6,24,0.75)", border: "1.5px solid rgba(201,168,76,0.4)", backdropFilter: "blur(4px)" }}
+                    >
+                      <Info size={17} color="#c9a84c" />
+                    </button>
+
+                    {/* Caste badge */}
+                    <div className="absolute top-10 left-3 px-2.5 py-1 rounded-full text-xs font-bold z-20"
+                      style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
+                      data-testid={`badge-caste-${current.id}`}>
+                      {casteLabel(current.caste ?? "murid")}
                     </div>
-                  )}
-                  {current.bio && (
-                    <p className="text-white/50 text-xs mt-2 line-clamp-2 leading-relaxed">{current.bio}</p>
-                  )}
-                  {(current.languages ?? []).length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-2.5">
-                      {(current.languages ?? []).slice(0, 3).map(lang => (
-                        <span
-                          key={lang}
-                          className="px-2 py-0.5 rounded-full text-[11px]"
-                          style={{ background: "rgba(201,168,76,0.15)", color: "rgba(201,168,76,0.9)", border: "1px solid rgba(201,168,76,0.2)" }}
-                        >
-                          {lang}
-                        </span>
-                      ))}
+
+                    {/* Gradient + info overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 h-56 pointer-events-none"
+                      style={{ background: "linear-gradient(to top, rgba(13,6,24,1), rgba(13,6,24,0.7) 50%, transparent)" }} />
+                    <div className="absolute bottom-0 left-0 right-0 px-5 pb-5 pointer-events-none">
+                      <div className="flex items-end justify-between gap-2">
+                        <div className="flex-1">
+                          <h2 className="font-serif text-2xl text-white font-bold leading-tight" data-testid={`text-name-${current.id}`}>
+                            {current.fullName ?? current.firstName ?? "Member"}{age ? `, ${age}` : ""}
+                          </h2>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <MapPin size={12} color="rgba(201,168,76,0.8)" />
+                            <p className="text-white/60 text-sm">{current.city}{current.state ? `, ${current.state}` : ""}, {current.country}</p>
+                          </div>
+                          {getActiveLabel(current.activitySeenAt) && (
+                            <div className="flex items-center gap-1.5 mt-1" data-testid={`status-active-${current.id}`}>
+                              <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" style={{ boxShadow: "0 0 6px #34d399" }} />
+                              <span className="text-emerald-400 text-xs font-medium">{getActiveLabel(current.activitySeenAt)}</span>
+                            </div>
+                          )}
+                        </div>
+                        {totalPhotos > 1 && (
+                          <span className="text-white/40 text-xs flex-shrink-0 mb-1">{cardPhotoIdx + 1}/{totalPhotos}</span>
+                        )}
+                      </div>
+                      {current.bio && (
+                        <p className="text-white/55 text-xs mt-2 line-clamp-2 leading-relaxed">{current.bio}</p>
+                      )}
+                      {((current.languages ?? []).length > 0 || (current as any).interests?.length > 0) && (
+                        <div className="flex flex-wrap gap-1.5 mt-2.5">
+                          {(current.languages ?? []).slice(0, 2).map((lang: string) => (
+                            <span key={lang} className="px-2 py-0.5 rounded-full text-[11px]"
+                              style={{ background: "rgba(201,168,76,0.15)", color: "rgba(201,168,76,0.9)", border: "1px solid rgba(201,168,76,0.2)" }}>
+                              {lang}
+                            </span>
+                          ))}
+                          {((current as any).interests ?? []).slice(0, 2).map((it: string) => (
+                            <span key={it} className="px-2 py-0.5 rounded-full text-[11px]"
+                              style={{ background: "rgba(123,63,160,0.2)", color: "rgba(212,96,138,0.9)", border: "1px solid rgba(212,96,138,0.2)" }}>
+                              {it}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
+                );
+              })()}
             </div>
 
             <p className="text-center text-cream/25 text-xs mt-3">
