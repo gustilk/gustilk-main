@@ -17,17 +17,7 @@ interface Props {
 }
 
 // ─── Gift catalogue ────────────────────────────────────────────────────────
-export const GIFTS: { id: string; lottie?: string | null; video?: string | null; name: string; color: string }[] = [
-  { id: "special-dance", video: "/gifts/special-dance.mp4",  lottie: null, name: "Blooming",  color: "#ff3b5c" },
-  { id: "video-gift-2",  video: "/gifts/video-gift-2.mp4",  lottie: null, name: "Magic",     color: "#a855f7" },
-  { id: "video-gift-3",  video: "/gifts/video-gift-3.mp4",  lottie: null, name: "Stardust",  color: "#f59e0b" },
-  { id: "video-gift-4",  video: "/gifts/video-gift-4.mp4",  lottie: null, name: "Cherish",   color: "#e83e6c" },
-  { id: "video-gift-5",  video: "/gifts/video-gift-5.mp4",  lottie: null, name: "Dreamy",    color: "#67e8f9" },
-  { id: "video-gift-6",  video: "/gifts/video-gift-6.mp4",  lottie: null, name: "Eternal",   color: "#c9a84c" },
-  { id: "video-gift-7",  video: "/gifts/video-gift-7.mp4",  lottie: null, name: "Flutter",   color: "#22c55e" },
-  { id: "video-gift-8",  video: "/gifts/video-gift-8.mp4",  lottie: null, name: "Radiance",  color: "#d4608a" },
-  { id: "video-gift-9",  video: "/gifts/video-gift-9.mp4",  lottie: null, name: "Enchant",   color: "#6366f1" },
-  { id: "video-gift-10", video: "/gifts/video-gift-10.mp4", lottie: null, name: "Shimmer",   color: "#f97316" },
+export const GIFTS: { id: string; lottie?: string | null; name: string; color: string }[] = [
   { id: "rose",         lottie: "/lottie/rose.json",              name: "Rose",         color: "#e83e6c" },
   { id: "butterfly",    lottie: "/lottie/butterfly.json",          name: "Butterfly",    color: "#7b3fa0" },
   { id: "diamond",      lottie: "/lottie/add-to-favorites.json",  name: "Favourite",    color: "#f59e0b" },
@@ -80,121 +70,10 @@ export const GIFTS: { id: string; lottie?: string | null; video?: string | null;
 ];
 
 function giftById(id: string) {
-  return GIFTS.find(g => g.id === id) ?? { id, lottie: null as string | null, video: null as string | null, name: "Gift", color: "#c9a84c" };
+  return GIFTS.find(g => g.id === id) ?? { id, lottie: null as string | null, name: "Gift", color: "#c9a84c" };
 }
 
-function VideoGift({ src, size }: { src: string; size: number }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    if (!video || !canvas) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = size * dpr;
-    canvas.height = size * dpr;
-
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
-    if (!ctx) return;
-    ctx.scale(dpr, dpr);
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-
-    let raf: number;
-    let bg: [number, number, number] | null = null;
-    const tol = 40;
-    const tol2 = tol * tol;
-    const fadeZone = 20;
-    let frameCount = 0;
-
-    // Sample background from full edge ring — far more reliable than 4 corners
-    const sampleBg = () => {
-      try {
-        ctx.drawImage(video, 0, 0, size, size);
-        const cw = canvas.width, ch = canvas.height;
-        const ring = Math.max(2, Math.round(dpr));
-        const top    = ctx.getImageData(0, 0, cw, ring).data;
-        const bottom = ctx.getImageData(0, ch - ring, cw, ring).data;
-        const left   = ctx.getImageData(0, 0, ring, ch).data;
-        const right  = ctx.getImageData(cw - ring, 0, ring, ch).data;
-        let r = 0, g = 0, b = 0, n = 0;
-        for (const d of [top, bottom, left, right]) {
-          for (let i = 0; i < d.length; i += 4) {
-            r += d[i]; g += d[i + 1]; b += d[i + 2]; n++;
-          }
-        }
-        if (n > 0) bg = [Math.round(r / n), Math.round(g / n), Math.round(b / n)];
-      } catch { /* cross-origin / tainted canvas guard */ }
-    };
-
-    const draw = () => {
-      if (!video.paused && !video.ended) {
-        frameCount++;
-        ctx.clearRect(0, 0, size, size);
-        ctx.drawImage(video, 0, 0, size, size);
-        // Re-sample background every ~2 s to handle color shifts in animations
-        if (frameCount % 120 === 0) sampleBg();
-        if (bg) {
-          try {
-            const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const px = img.data;
-            const [R, G, B] = bg;
-            for (let i = 0; i < px.length; i += 4) {
-              const dr = px[i] - R, dg = px[i + 1] - G, db = px[i + 2] - B;
-              const d2 = dr * dr + dg * dg + db * db;
-              if (d2 < tol2) {
-                px[i + 3] = 0;
-              } else if (d2 < (tol + fadeZone) * (tol + fadeZone)) {
-                const dist = Math.sqrt(d2);
-                px[i + 3] = Math.round(((dist - tol) / fadeZone) * px[i + 3]);
-              }
-            }
-            ctx.putImageData(img, 0, 0);
-          } catch { /* cross-origin guard */ }
-        }
-      }
-      raf = requestAnimationFrame(draw);
-    };
-
-    const onReady = () => {
-      sampleBg();
-      video.play().catch(() => {});
-      raf = requestAnimationFrame(draw);
-    };
-    video.addEventListener("loadeddata", onReady, { once: true });
-    video.load();
-
-    return () => { cancelAnimationFrame(raf); video.removeEventListener("loadeddata", onReady); };
-  }, [src, size]);
-
-  return (
-    <div style={{ width: size, height: size, position: "relative" }}>
-      <video ref={videoRef} src={src} muted loop playsInline preload="auto" style={{ display: "none" }} />
-      <canvas ref={canvasRef} style={{ width: size, height: size, display: "block" }} />
-    </div>
-  );
-}
-
-function GiftMedia({ g, size, chromaKey = false }: { g: ReturnType<typeof giftById>; size: number; chromaKey?: boolean }) {
-  if (g.video) {
-    // Picker thumbnails: plain video (fast, no per-pixel processing)
-    // Reveal & chat bubble: canvas chroma key (full transparency, one gift at a time)
-    if (!chromaKey) {
-      return (
-        <video
-          src={g.video}
-          autoPlay
-          loop
-          muted
-          playsInline
-          style={{ width: size, height: size, objectFit: "contain", borderRadius: 6 }}
-        />
-      );
-    }
-    return <VideoGift src={g.video} size={size} />;
-  }
+function GiftMedia({ g, size }: { g: ReturnType<typeof giftById>; size: number }) {
   if (g.lottie) {
     return <LottieAnimation src={g.lottie} loop autoplay style={{ width: size, height: size }} placeholderSize={Math.round(size * 0.5)} />;
   }
@@ -839,8 +718,8 @@ function GiftRevealOverlay({ gift, onClose, isPreview = false }: { gift: GiftTyp
       {/* Gift animation */}
       <div
         style={{
-          width: g.video ? 320 : 230,
-          height: g.video ? 320 : 230,
+          width: 230,
+          height: 230,
           animation: "gr-zoom-in 5s ease-out forwards",
           opacity: 0,
           position: "relative",
@@ -848,7 +727,7 @@ function GiftRevealOverlay({ gift, onClose, isPreview = false }: { gift: GiftTyp
         }}
         data-testid="gift-reveal-animation"
       >
-        <GiftMedia g={g} size={g.video ? 320 : 230} chromaKey />
+        <GiftMedia g={g} size={230} />
       </div>
 
       {/* Message only — no name */}
@@ -917,7 +796,7 @@ function GiftBubble({ gift, isMine, viewerId }: { gift: GiftType; isMine: boolea
             {revealed ? (
               /* Revealed — bare animation, no card */
               <div style={{ width: 90, height: 90, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <GiftMedia g={g} size={90} chromaKey />
+                <GiftMedia g={g} size={90} />
               </div>
             ) : (
               /* Unrevealed — mystery card */
