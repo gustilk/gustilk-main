@@ -150,14 +150,14 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
     <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
 
       {/* ── Photo section ───────────────────────────────── */}
-      <div className="relative" style={{ height: "72vw", maxHeight: 480, minHeight: 320 }}>
+      <div className="relative" style={{ aspectRatio: "3 / 4", maxHeight: "85vh", background: "#0a0412" }}>
         {allPhotos.length > 0 ? (
-          <div className="w-full h-full overflow-hidden">
+          <div className="w-full h-full overflow-hidden flex items-center justify-center">
             {isPremium ? (
               <ProtectedPhoto
                 src={allPhotos[photoIdx] ?? allPhotos[0]}
                 alt={displayName}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 blurred={shouldBlurPhotos}
               />
             ) : (
@@ -277,58 +277,90 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
         )}
       </div>
 
-      {/* ── Profile info ──────────────────────────────────── */}
-      <div className="px-5 pt-4 space-y-4">
+      {/* ── Profile info — Hily-style clean cards ──────────── */}
+      <div className="px-4 pt-4 pb-32 space-y-3">
 
-        {/* Active status */}
+        {/* Active status pill */}
         {(profile as any).activitySeenAt && (() => {
           const hours = (Date.now() - new Date((profile as any).activitySeenAt).getTime()) / 3_600_000;
           if (hours > 72) return null;
           return (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-1">
               <span className="w-2 h-2 rounded-full bg-emerald-400" style={{ boxShadow: "0 0 6px #34d399" }} />
               <span className="text-emerald-400 text-xs font-medium">{hours < 24 ? "Active today" : "Active recently"}</span>
             </div>
           );
         })()}
 
-        {/* Bio */}
-        {profile.bio && (
-          <div className="px-4 py-3.5 rounded-2xl"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.1)" }}>
-            <p className="text-cream/70 text-sm leading-relaxed" data-testid="text-profile-bio">{profile.bio}</p>
+        {/* Location card */}
+        {location && (
+          <div className="rounded-2xl px-4 py-3.5 flex items-center gap-3"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <MapPin size={18} color="#c9a84c" />
+            <span className="text-cream/85 text-sm font-medium" data-testid="text-profile-location">{location}</span>
           </div>
         )}
 
-        {/* Details grid */}
+        {/* About me card */}
+        {profile.bio && (
+          <div className="rounded-2xl p-4"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <h3 className="text-white font-bold text-base mb-2">About me</h3>
+            <p className="text-cream/75 text-sm leading-relaxed" data-testid="text-profile-bio">{profile.bio}</p>
+          </div>
+        )}
+
+        {/* Faith & Caste card */}
+        {profile.caste && (
+          <div className="rounded-2xl p-4"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <h3 className="text-white font-bold text-base mb-3">Faith & Caste</h3>
+            <div className="flex flex-wrap gap-2">
+              <span className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                style={{ background: "rgba(201,168,76,0.18)", color: "#e8c97a", border: "1px solid rgba(201,168,76,0.35)" }}>
+                {casteLabel(profile.caste)}
+              </span>
+              <span className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.75)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                Yezidi
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* General info card */}
         {(() => {
-          const details = [
-            profile.gender && { label: "Gender", value: profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1) },
-            (profile as any).occupation && { label: "Occupation", value: (profile as any).occupation },
-            profile.age && { label: "Age", value: `${profile.age} years old` },
-          ].filter(Boolean) as { label: string; value: string }[];
-          if (!details.length) return null;
+          const chips = [
+            profile.age && `${profile.age} years old`,
+            profile.gender && profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1),
+            (profile as any).occupation,
+          ].filter(Boolean) as string[];
+          if (!chips.length) return null;
           return (
-            <div className="grid grid-cols-2 gap-2">
-              {details.map(d => (
-                <div key={d.label} className="px-3 py-2.5 rounded-xl"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                  <p className="text-cream/35 text-[10px] uppercase tracking-wider font-semibold">{d.label}</p>
-                  <p className="text-cream/80 text-sm mt-0.5 font-medium">{d.value}</p>
-                </div>
-              ))}
+            <div className="rounded-2xl p-4"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <h3 className="text-white font-bold text-base mb-3">General info</h3>
+              <div className="flex flex-wrap gap-2">
+                {chips.map(c => (
+                  <span key={c} className="px-3 py-1.5 rounded-full text-xs font-medium"
+                    style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.85)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    {c}
+                  </span>
+                ))}
+              </div>
             </div>
           );
         })()}
 
-        {/* Languages */}
+        {/* Languages card */}
         {(profile.languages ?? []).length > 0 && (
-          <div>
-            <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold mb-2">Languages</p>
+          <div className="rounded-2xl p-4"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <h3 className="text-white font-bold text-base mb-3">Languages</h3>
             <div className="flex flex-wrap gap-2">
               {(profile.languages ?? []).map((lang: string) => (
-                <span key={lang} className="px-3 py-1 rounded-full text-xs font-semibold"
-                  style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}>
+                <span key={lang} className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                  style={{ background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.22)" }}>
                   {lang}
                 </span>
               ))}
@@ -336,14 +368,15 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
           </div>
         )}
 
-        {/* Interests */}
+        {/* Interests card */}
         {((profile as any).interests ?? []).length > 0 && (
-          <div>
-            <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold mb-2">Interests</p>
+          <div className="rounded-2xl p-4"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <h3 className="text-white font-bold text-base mb-3">Interests</h3>
             <div className="flex flex-wrap gap-2">
               {((profile as any).interests ?? []).map((it: string) => (
-                <span key={it} className="px-3 py-1 rounded-full text-xs font-semibold"
-                  style={{ background: "rgba(123,63,160,0.15)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.2)" }}>
+                <span key={it} className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                  style={{ background: "rgba(123,63,160,0.18)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.25)" }}>
                   {it}
                 </span>
               ))}
@@ -351,67 +384,11 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
           </div>
         )}
 
-        {/* ── Like / Pass bar — shown when arriving from Likes Received ── */}
-        {showLikeActions && !actedOnLike && (
-          <div className="flex gap-3">
-            <button onClick={() => dislikeMutation.mutate()}
-              disabled={dislikeMutation.isPending || likeMutation.isPending}
-              data-testid="button-pass-from-likes"
-              className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all active:scale-95 disabled:opacity-50"
-              style={{ background: "rgba(212,96,138,0.12)", border: "1.5px solid rgba(212,96,138,0.45)", color: "#d4608a" }}>
-              <X size={18} strokeWidth={2.5} /> Pass
-            </button>
-            <button onClick={() => likeMutation.mutate()}
-              disabled={likeMutation.isPending || dislikeMutation.isPending}
-              data-testid="button-like-from-likes"
-              className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all active:scale-95 disabled:opacity-50"
-              style={{ background: "rgba(201,168,76,0.12)", border: "1.5px solid rgba(201,168,76,0.5)", color: "#c9a84c" }}>
-              <Heart size={18} strokeWidth={2.5} /> Like Back
-            </button>
-          </div>
-        )}
-
-        <div style={{ height: 1, background: "rgba(201,168,76,0.08)" }} />
-
-        {/* ── Action buttons ── */}
-        <div className="grid grid-cols-2 gap-3">
-          <button onClick={handleMessage} data-testid="button-message-user"
-            className="flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all"
-            style={isPremium && match
-              ? { background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white", boxShadow: "0 4px 16px rgba(123,63,160,0.3)" }
-              : isPremium && !match
-                ? { background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.4)", border: "1px solid rgba(255,255,255,0.1)", cursor: "default" }
-                : { background: "rgba(201,168,76,0.08)", color: "#c9a84c", border: "1.5px solid rgba(201,168,76,0.3)" }
-            }>
-            {isPremium ? <MessageCircle size={18} /> : <Lock size={16} />}
-            {isPremium ? (match ? "Message" : "Not matched") : "Message"}
-          </button>
-          <button onClick={handleCall} data-testid="button-videocall-user"
-            disabled={isPremium && (!match || callState !== "idle")}
-            className="flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all disabled:opacity-40"
-            style={isPremium && match
-              ? { background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1.5px solid rgba(201,168,76,0.3)" }
-              : !isPremium
-                ? { background: "rgba(201,168,76,0.08)", color: "#c9a84c", border: "1.5px solid rgba(201,168,76,0.3)" }
-                : { background: "rgba(255,255,255,0.04)", color: "rgba(253,248,240,0.3)", border: "1px solid rgba(255,255,255,0.08)" }
-            }>
-            {isPremium ? <Video size={18} /> : <Lock size={16} />}
-            Video Call
-          </button>
-        </div>
-
-        {!isPremium && (
-          <button onClick={() => setLocation("/premium")} data-testid="button-upgrade-profile"
-            className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-sm"
-            style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 6px 20px rgba(201,168,76,0.25)" }}>
-            <Crown size={16} /> Upgrade to see photos &amp; message
-          </button>
-        )}
-
-        {/* Photo thumbnails row — premium */}
+        {/* Photo thumbnails card — premium */}
         {isPremium && allPhotos.length > 1 && (
-          <div>
-            <p className="text-cream/30 text-xs uppercase tracking-wider font-semibold mb-2">All Photos</p>
+          <div className="rounded-2xl p-4"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <h3 className="text-white font-bold text-base mb-3">All Photos</h3>
             <div className="flex gap-2 overflow-x-auto pb-1">
               {allPhotos.map((p, i) => (
                 <button key={i} onClick={() => setPhotoIdx(i)} data-testid={`thumb-photo-${i}`}
@@ -423,6 +400,61 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
             </div>
           </div>
         )}
+
+        {/* Premium upgrade CTA */}
+        {!isPremium && (
+          <button onClick={() => setLocation("/premium")} data-testid="button-upgrade-profile"
+            className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-sm"
+            style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 6px 20px rgba(201,168,76,0.25)" }}>
+            <Crown size={16} /> Upgrade to see photos &amp; message
+          </button>
+        )}
+      </div>
+
+      {/* ── Floating action bar — Hily-style ────────────────── */}
+      <div className="fixed bottom-0 left-0 right-0 px-4 pt-6 pb-5 z-40 pointer-events-none"
+        style={{ background: "linear-gradient(to top, #0d0618 55%, rgba(13,6,24,0.6) 85%, transparent 100%)" }}>
+        <div className="flex items-center justify-center gap-5 max-w-sm mx-auto pointer-events-auto">
+          {showLikeActions && !actedOnLike ? (
+            <>
+              <button onClick={() => dislikeMutation.mutate()}
+                disabled={dislikeMutation.isPending || likeMutation.isPending}
+                data-testid="button-pass-from-likes"
+                className="w-14 h-14 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
+                style={{ background: "rgba(30,15,45,0.95)", border: "1.5px solid rgba(255,255,255,0.12)", boxShadow: "0 6px 20px rgba(0,0,0,0.5)" }}>
+                <X size={26} color="rgba(253,248,240,0.85)" strokeWidth={2.5} />
+              </button>
+              <button onClick={() => likeMutation.mutate()}
+                disabled={likeMutation.isPending || dislikeMutation.isPending}
+                data-testid="button-like-from-likes"
+                className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
+                style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", boxShadow: "0 8px 26px rgba(201,168,76,0.5)" }}>
+                <Heart size={28} color="#1a0a2e" fill="#1a0a2e" strokeWidth={2.5} />
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={handleCall} data-testid="button-videocall-user"
+                disabled={isPremium && (!match || callState !== "idle")}
+                className="w-14 h-14 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-40"
+                style={{ background: "rgba(30,15,45,0.95)", border: "1.5px solid rgba(201,168,76,0.35)", boxShadow: "0 6px 20px rgba(0,0,0,0.5)" }}>
+                {isPremium ? <Video size={22} color="#c9a84c" /> : <Lock size={20} color="#c9a84c" />}
+              </button>
+              <button onClick={handleMessage} data-testid="button-message-user"
+                className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90"
+                style={{
+                  background: isPremium && match
+                    ? "linear-gradient(135deg, #7b3fa0, #d4608a)"
+                    : "linear-gradient(135deg, #c9a84c, #e8c97a)",
+                  boxShadow: isPremium && match
+                    ? "0 8px 26px rgba(123,63,160,0.5)"
+                    : "0 8px 26px rgba(201,168,76,0.5)",
+                }}>
+                {isPremium ? <MessageCircle size={28} color="white" /> : <Lock size={24} color="#1a0a2e" />}
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Reply-to-photo bottom sheet */}

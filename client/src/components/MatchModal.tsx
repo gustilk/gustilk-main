@@ -1,4 +1,4 @@
-import newLogo from "@assets/IMG_1777_1777566688564.jpeg";
+import newLogo from "@assets/IMG_1819_1777576571349_transparent.png";
 import { useEffect, useRef } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { useLocation } from "wouter";

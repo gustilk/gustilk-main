@@ -10,6 +10,7 @@ import ReportModal from "@/components/ReportModal";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
 import { useVideoCallContext } from "@/hooks/useVideoCall";
 import LottieAnimation from "@/components/LottieAnimation";
+import newLogo from "@assets/IMG_1819_1777576571349_transparent.png";
 
 interface Props {
   user: SafeUser;
