@@ -146,6 +146,10 @@ export default {
     faceCheckTitle: "Դեմք չի հայտնաբերվել",
     faceCheckDesc: "Դեմք չի գտնվել: Նկարեք հստակ սելֆի:",
     faceChecking: "Ստուգվում է…",
+    recoveryEmailTitle: "Ավելացնել վերականգնման Email",
+    recoveryEmailSubtitle: "Կամընտիր — օգնում է վերականգնել հաշիվը, եթե կորցնեք սարքը:",
+    skipForNow: "Բաց թողնել",
+    continueToApp: "Անցնել հավելված",
   },
   discover: {
     title: "Discover",
@@ -479,6 +483,11 @@ export default {
     premiumDeleteWarning: "Ունեք ակտիվ Premium: Ջնջելը կեղջ այն:",
     savingEllipsis: "Պահում…",
     footer: "Gûstîlk · Yezidi Community",
+    recoveryEmail: "Վերականգնման Email",
+    recoveryEmailDesc: "Օգտագործվում է հաշիվ վերականգնելու համար, եթե կորցնեք հեռախոսը:",
+    recoveryEmailSaved: "Վերականգնման Email-ը հաջողությամբ պահված է:",
+    emailAddress: "Էլ. հասցե",
+    saveRecoveryEmail: "Պահել վերականգնման Email",
   },
   ageGate: {
     title: "Տարիքի հաստատում",

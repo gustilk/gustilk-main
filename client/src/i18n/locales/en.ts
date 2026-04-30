@@ -146,6 +146,10 @@ export default {
     faceCheckTitle: "No Face Detected",
     faceCheckDesc: "No face was found in your photo. Please take a selfie where your face is visible and try again.",
     faceChecking: "Scanning face…",
+    recoveryEmailTitle: "Add a Recovery Email",
+    recoveryEmailSubtitle: "Optional — helps you recover your account if you lose your device.",
+    skipForNow: "Skip for now",
+    continueToApp: "Continue to App",
   },
   discover: {
     title: "Discover",
@@ -479,6 +483,11 @@ export default {
     premiumDeleteWarning: "You have an active Premium membership. Deleting your account will permanently cancel it with no refund.",
     savingEllipsis: "Saving…",
     footer: "Gûstîlk · Yezidi Community",
+    recoveryEmail: "Recovery Email",
+    recoveryEmailDesc: "Used to recover your account if you lose access to your phone or biometrics.",
+    recoveryEmailSaved: "Recovery email saved successfully.",
+    emailAddress: "Email address",
+    saveRecoveryEmail: "Save Recovery Email",
   },
   ageGate: {
     title: "Age Verification",

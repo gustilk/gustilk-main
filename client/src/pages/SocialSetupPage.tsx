@@ -39,7 +39,10 @@ export default function SocialSetupPage({ user }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { t } = useTranslation();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | "recovery">(1);
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [recoverySaving, setRecoverySaving] = useState(false);
+  const [recoveryDone, setRecoveryDone] = useState(false);
 
   const CASTES = [
     { value: "sheikh", label: t("setup.sheikh") },
@@ -130,7 +133,11 @@ export default function SocialSetupPage({ user }: Props) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-      setLocation("/discover");
+      if (user.phone && !user.email) {
+        setStep("recovery");
+      } else {
+        setLocation("/discover");
+      }
     },
     onError: (err: Error) => {
       try {
@@ -257,22 +264,24 @@ export default function SocialSetupPage({ user }: Props) {
           </button>
 
           {/* Step indicator */}
+          {step !== "recovery" && (
           <div className="flex items-center gap-2">
             {Array.from({ length: totalSteps }, (_, i) => i + 1).map(s => (
               <div key={s} className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
                   style={step === s
                     ? { background: "#c9a84c", color: "#1a0a2e" }
-                    : step > s
+                    : (step as number) > s
                       ? { background: "rgba(201,168,76,0.3)", color: "#c9a84c" }
                       : { background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.3)", border: "1px solid rgba(255,255,255,0.1)" }
                   }>
-                  {step > s ? "✓" : s}
+                  {(step as number) > s ? "✓" : s}
                 </div>
-                {s < totalSteps && <div className="w-8 h-px" style={{ background: step > s ? "rgba(201,168,76,0.5)" : "rgba(255,255,255,0.1)" }} />}
+                {s < totalSteps && <div className="w-8 h-px" style={{ background: (step as number) > s ? "rgba(201,168,76,0.5)" : "rgba(255,255,255,0.1)" }} />}
               </div>
             ))}
           </div>
+          )}
         </div>
 
         {/* ── STEP 1: Profile details ── */}
@@ -502,6 +511,72 @@ export default function SocialSetupPage({ user }: Props) {
                 </button>
               </div>
             </div>
+          </>
+        )}
+
+        {/* ── RECOVERY EMAIL (phone users only, after profile saved) ── */}
+        {step === "recovery" && (
+          <>
+            <div className="text-center mb-7">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.3)" }}>
+                {recoveryDone
+                  ? <CheckCircle2 size={28} color="#10b981" />
+                  : <CheckCircle2 size={28} color="#c9a84c" />}
+              </div>
+              <h1 className="font-serif text-2xl text-gold mb-1">{t("setup.recoveryEmailTitle")}</h1>
+              <p className="text-cream/50 text-sm">{t("setup.recoveryEmailSubtitle")}</p>
+            </div>
+
+            {recoveryDone ? (
+              <div className="text-center space-y-4">
+                <div className="rounded-2xl p-4" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)" }}>
+                  <p className="text-green-400 text-sm font-semibold">{t("settings.recoveryEmailSaved")}</p>
+                </div>
+                <button
+                  onClick={() => setLocation("/discover")}
+                  className="w-full py-4 rounded-xl font-bold text-sm"
+                  style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 6px 20px rgba(201,168,76,0.3)" }}>
+                  {t("setup.continueToApp")}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <input
+                  type="email"
+                  placeholder={t("settings.emailAddress")}
+                  value={recoveryEmail}
+                  onChange={e => setRecoveryEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
+                  style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.25)" }}
+                />
+                <button
+                  onClick={async () => {
+                    if (!recoveryEmail.trim()) { setLocation("/discover"); return; }
+                    setRecoverySaving(true);
+                    try {
+                      await apiRequest("PATCH", "/api/auth/add-recovery-email", { email: recoveryEmail.trim() });
+                      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+                      setRecoveryDone(true);
+                    } catch {
+                      setLocation("/discover");
+                    } finally {
+                      setRecoverySaving(false);
+                    }
+                  }}
+                  disabled={recoverySaving}
+                  className="w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
+                  style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 6px 20px rgba(201,168,76,0.3)" }}>
+                  {recoverySaving ? <Loader2 size={15} className="animate-spin" /> : t("settings.saveRecoveryEmail")}
+                </button>
+                <button
+                  onClick={() => setLocation("/discover")}
+                  className="w-full py-3 rounded-xl text-sm font-semibold"
+                  style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  {t("setup.skipForNow")}
+                </button>
+              </div>
+            )}
           </>
         )}
 

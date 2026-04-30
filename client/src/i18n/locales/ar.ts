@@ -146,6 +146,10 @@ export default {
     faceCheckTitle: "لم يتم اكتشاف وجه",
     faceCheckDesc: "لم يتم العثور على وجه في صورتك. يرجى التقاط سيلفي يظهر فيه وجهك والمحاولة مرة أخرى.",
     faceChecking: "جارٍ فحص الوجه…",
+    recoveryEmailTitle: "أضف بريد إلكتروني للاسترداد",
+    recoveryEmailSubtitle: "اختياري — يساعدك على استرداد حسابك إذا فقدت جهازك.",
+    skipForNow: "تخطي الآن",
+    continueToApp: "متابعة للتطبيق",
   },
   discover: {
     title: "اكتشاف",
@@ -479,6 +483,11 @@ export default {
     premiumDeleteWarning: "لديك عضوية Premium نشطة. سيؤدي حذف حسابك إلى إلغائها بشكل دائم دون استرداد.",
     savingEllipsis: "جاري الحفظ…",
     footer: "Gûstîlk · المجتمع الإيزيدي",
+    recoveryEmail: "البريد الإلكتروني للاسترداد",
+    recoveryEmailDesc: "يُستخدم لاسترداد حسابك إذا فقدت الوصول إلى هاتفك.",
+    recoveryEmailSaved: "تم حفظ البريد الإلكتروني للاسترداد بنجاح.",
+    emailAddress: "عنوان البريد الإلكتروني",
+    saveRecoveryEmail: "حفظ البريد الإلكتروني للاسترداد",
   },
   ageGate: {
     title: "التحقق من العمر",

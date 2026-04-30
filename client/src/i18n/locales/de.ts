@@ -146,6 +146,10 @@ export default {
     faceCheckTitle: "Kein Gesicht erkannt",
     faceCheckDesc: "In deinem Foto wurde kein Gesicht gefunden. Bitte mach ein Selfie, auf dem dein Gesicht sichtbar ist, und versuche es erneut.",
     faceChecking: "Gesicht wird gescannt…",
+    recoveryEmailTitle: "Wiederherstellungs-E-Mail hinzufügen",
+    recoveryEmailSubtitle: "Optional — hilft Ihnen, Ihr Konto wiederherzustellen, wenn Sie Ihr Gerät verlieren.",
+    skipForNow: "Jetzt überspringen",
+    continueToApp: "Weiter zur App",
   },
   discover: {
     title: "Entdecken",
@@ -479,6 +483,11 @@ export default {
     premiumDeleteWarning: "Sie haben eine aktive Premium-Mitgliedschaft. Das Löschen Ihres Kontos kündigt diese dauerhaft ohne Rückerstattung.",
     savingEllipsis: "Speichern…",
     footer: "Gûstîlk · Jesidische Gemeinschaft",
+    recoveryEmail: "Wiederherstellungs-E-Mail",
+    recoveryEmailDesc: "Wird zur Kontowiederherstellung verwendet, wenn Sie keinen Zugang zu Ihrem Telefon haben.",
+    recoveryEmailSaved: "Wiederherstellungs-E-Mail erfolgreich gespeichert.",
+    emailAddress: "E-Mail-Adresse",
+    saveRecoveryEmail: "Wiederherstellungs-E-Mail speichern",
   },
   ageGate: {
     title: "Altersverifizierung",
