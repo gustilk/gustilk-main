@@ -38,7 +38,9 @@ export default function SocialSetupPage({ user }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { t } = useTranslation();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | "recovery">(1);
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [recoveryEmailError, setRecoveryEmailError] = useState<string | null>(null);
 
   const CASTES = [
     { value: "sheikh", label: t("setup.sheikh") },
@@ -129,7 +131,11 @@ export default function SocialSetupPage({ user }: Props) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-      setLocation("/discover");
+      if (user.phone && !user.email) {
+        setStep("recovery");
+      } else {
+        setLocation("/discover");
+      }
     },
     onError: (err: Error) => {
       try {
@@ -144,6 +150,21 @@ export default function SocialSetupPage({ user }: Props) {
         setSaveError(err.message || t("setup.couldNotSave"));
       }
     },
+  });
+
+  const recoveryEmailMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("PATCH", "/api/auth/add-recovery-email", { email: recoveryEmail.trim() });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.message ?? "Failed to save email");
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      setLocation("/discover");
+    },
+    onError: (err: Error) => setRecoveryEmailError(err.message),
   });
 
   const openCrop = (file: File, index: number | "selfie") => {
@@ -257,12 +278,12 @@ export default function SocialSetupPage({ user }: Props) {
 
           {/* Step indicator */}
           <div className="flex items-center gap-2">
-            {Array.from({ length: totalSteps }, (_, i) => i + 1).map(s => (
+            {step !== "recovery" && Array.from({ length: totalSteps }, (_, i) => i + 1).map(s => (
               <div key={s} className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
                   style={step === s
                     ? { background: "#c9a84c", color: "#1a0a2e" }
-                    : step > s
+                    : (step as number) > s
                       ? { background: "rgba(201,168,76,0.3)", color: "#c9a84c" }
                       : { background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.3)", border: "1px solid rgba(255,255,255,0.1)" }
                   }>
@@ -685,6 +706,56 @@ export default function SocialSetupPage({ user }: Props) {
             </div>
           </>
         )}
+
+        {/* ── RECOVERY EMAIL STEP (phone users only, shown after profile saved) ── */}
+        {step === "recovery" && (
+          <div className="space-y-6 text-center animate-slide-up">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto" style={{ background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.3)" }}>
+              <CheckCircle2 size={32} color="#c9a84c" />
+            </div>
+            <div>
+              <h1 className="font-serif text-2xl text-gold mb-2">{t("setup.recoveryEmailTitle")}</h1>
+              <p className="text-cream/50 text-sm leading-relaxed">{t("setup.recoveryEmailSubtitle")}</p>
+            </div>
+            <div className="text-left space-y-3">
+              <input
+                type="email"
+                inputMode="email"
+                value={recoveryEmail}
+                onChange={e => { setRecoveryEmail(e.target.value); setRecoveryEmailError(null); }}
+                placeholder="your@email.com"
+                data-testid="input-setup-recovery-email"
+                className="w-full px-4 py-3 rounded-xl text-sm placeholder-cream/25 outline-none"
+                style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.25)", color: "#fdf8f0" }}
+              />
+              {recoveryEmailError && (
+                <p className="text-xs font-medium" style={{ color: "#d4608a" }}>{recoveryEmailError}</p>
+              )}
+            </div>
+            <div className="space-y-3">
+              <button
+                onClick={() => recoveryEmailMutation.mutate()}
+                disabled={!recoveryEmail.trim() || recoveryEmailMutation.isPending}
+                data-testid="button-save-setup-recovery-email"
+                className="w-full py-4 rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 6px 20px rgba(201,168,76,0.3)" }}
+              >
+                {recoveryEmailMutation.isPending
+                  ? <><Loader2 size={15} className="animate-spin" /> {t("setup.saving")}</>
+                  : t("setup.saveAndContinue")}
+              </button>
+              <button
+                onClick={() => setLocation("/discover")}
+                data-testid="button-skip-recovery-email"
+                className="w-full py-3 text-sm font-medium"
+                style={{ color: "rgba(253,248,240,0.35)" }}
+              >
+                {t("setup.skipForNow")}
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
     </>

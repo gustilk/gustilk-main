@@ -92,7 +92,6 @@ function VideoGift({ src, size }: { src: string; size: number }) {
     const canvas = canvasRef.current;
     if (!video || !canvas) return;
 
-    // Scale canvas to device pixel ratio for sharp rendering on Retina/high-DPI screens
     const dpr = window.devicePixelRatio || 1;
     canvas.width = size * dpr;
     canvas.height = size * dpr;
@@ -100,49 +99,55 @@ function VideoGift({ src, size }: { src: string; size: number }) {
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
     ctx.scale(dpr, dpr);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
 
     let raf: number;
     let bg: [number, number, number] | null = null;
-    const tol = 50;      // colour distance to classify as background
-    const fadeZone = 30; // extra range for gradual edge fade
+    const tol = 40;
+    const tol2 = tol * tol;
+    const fadeZone = 20;
+    let frameCount = 0;
 
+    // Sample background from full edge ring — far more reliable than 4 corners
     const sampleBg = () => {
       try {
         ctx.drawImage(video, 0, 0, size, size);
-        // Average all 4 corners to detect background colour
-        const w = canvas.width, h = canvas.height;
-        const samples = [
-          ctx.getImageData(0, 0, 1, 1).data,
-          ctx.getImageData(w - 1, 0, 1, 1).data,
-          ctx.getImageData(0, h - 1, 1, 1).data,
-          ctx.getImageData(w - 1, h - 1, 1, 1).data,
-        ];
-        bg = [
-          Math.round(samples.reduce((s, d) => s + d[0], 0) / 4),
-          Math.round(samples.reduce((s, d) => s + d[1], 0) / 4),
-          Math.round(samples.reduce((s, d) => s + d[2], 0) / 4),
-        ];
-      } catch { /* cross-origin guard */ }
+        const cw = canvas.width, ch = canvas.height;
+        const ring = Math.max(2, Math.round(dpr));
+        const top    = ctx.getImageData(0, 0, cw, ring).data;
+        const bottom = ctx.getImageData(0, ch - ring, cw, ring).data;
+        const left   = ctx.getImageData(0, 0, ring, ch).data;
+        const right  = ctx.getImageData(cw - ring, 0, ring, ch).data;
+        let r = 0, g = 0, b = 0, n = 0;
+        for (const d of [top, bottom, left, right]) {
+          for (let i = 0; i < d.length; i += 4) {
+            r += d[i]; g += d[i + 1]; b += d[i + 2]; n++;
+          }
+        }
+        if (n > 0) bg = [Math.round(r / n), Math.round(g / n), Math.round(b / n)];
+      } catch { /* cross-origin / tainted canvas guard */ }
     };
 
     const draw = () => {
       if (!video.paused && !video.ended) {
+        frameCount++;
         ctx.clearRect(0, 0, size, size);
         ctx.drawImage(video, 0, 0, size, size);
+        // Re-sample background every ~2 s to handle color shifts in animations
+        if (frameCount % 120 === 0) sampleBg();
         if (bg) {
           try {
             const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const px = img.data;
             const [R, G, B] = bg;
             for (let i = 0; i < px.length; i += 4) {
-              const dist = Math.sqrt(
-                (px[i] - R) ** 2 + (px[i + 1] - G) ** 2 + (px[i + 2] - B) ** 2
-              );
-              if (dist < tol) {
-                // Fully transparent inside tolerance
+              const dr = px[i] - R, dg = px[i + 1] - G, db = px[i + 2] - B;
+              const d2 = dr * dr + dg * dg + db * db;
+              if (d2 < tol2) {
                 px[i + 3] = 0;
-              } else if (dist < tol + fadeZone) {
-                // Gradual fade in the edge zone for smooth anti-aliased borders
+              } else if (d2 < (tol + fadeZone) * (tol + fadeZone)) {
+                const dist = Math.sqrt(d2);
                 px[i + 3] = Math.round(((dist - tol) / fadeZone) * px[i + 3]);
               }
             }

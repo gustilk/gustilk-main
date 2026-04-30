@@ -221,9 +221,12 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
-  const [forgotState, setForgotState] = useState<"hidden" | "form" | "sending" | "sent" | "error">("hidden");
+  const [forgotState, setForgotState] = useState<"hidden" | "form" | "sending" | "code" | "newpw" | "saving" | "error">("hidden");
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotError, setForgotError] = useState<string | null>(null);
+  const [forgotCode, setForgotCode] = useState("");
+  const [forgotNewPw, setForgotNewPw] = useState("");
+  const [forgotConfirmPw, setForgotConfirmPw] = useState("");
   const [ageStatus, setAgeStatus] = useState<"unchecked" | "confirmed" | "blocked">("unchecked");
 
   // Activation screen state
@@ -331,7 +334,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
     }
   }
 
-  async function sendMagicLink(e: React.FormEvent) {
+  async function sendForgotCode(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = forgotEmail.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
@@ -340,6 +343,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
     }
     setForgotState("sending");
     setForgotError(null);
+    setForgotCode("");
     try {
       const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
@@ -351,11 +355,55 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
         setForgotError(data.error ?? "Something went wrong. Please try again.");
         setForgotState("error");
       } else {
-        setForgotState("sent");
+        setForgotState("code");
       }
     } catch {
       setForgotError("Network error — please check your connection and try again.");
       setForgotState("error");
+    }
+  }
+
+  function verifyForgotCode(e: React.FormEvent) {
+    e.preventDefault();
+    if (forgotCode.trim().length !== 6) {
+      setForgotError("Please enter the 6-digit code from your email.");
+      return;
+    }
+    setForgotError(null);
+    setForgotNewPw("");
+    setForgotConfirmPw("");
+    setForgotState("newpw");
+  }
+
+  async function resetPassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (forgotNewPw.length < 6) {
+      setForgotError("Password must be at least 6 characters.");
+      return;
+    }
+    if (forgotNewPw !== forgotConfirmPw) {
+      setForgotError("Passwords do not match.");
+      return;
+    }
+    setForgotState("saving");
+    setForgotError(null);
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail.trim(), code: forgotCode.trim(), newPassword: forgotNewPw }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setForgotError(data.error ?? "Something went wrong. Please try again.");
+        // If code was wrong, send them back to the code step
+        setForgotState(data.error?.includes("code") ? "code" : "newpw");
+      } else {
+        window.location.href = "/";
+      }
+    } catch {
+      setForgotError("Network error — please check your connection and try again.");
+      setForgotState("newpw");
     }
   }
 
@@ -705,7 +753,7 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
         <div className="mt-5 text-center">
           {forgotState === "hidden" && (
             <button
-              onClick={() => { setForgotState("form"); setForgotEmail(email.trim()); setForgotError(null); }}
+              onClick={() => { setForgotState("form"); setForgotEmail(email.trim()); setForgotError(null); setForgotCode(""); }}
               data-testid="button-forgot-password"
               className="text-xs font-medium"
               style={{ color: "rgba(201,168,76,0.6)" }}
@@ -713,13 +761,15 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
               Forgot password?
             </button>
           )}
-          {(forgotState === "form" || forgotState === "sending" || forgotState === "error") && (
-            <div className="rounded-xl px-4 py-3 text-left" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.2)" }}>
-              <p className="text-xs font-semibold text-gold mb-2">Sign in with a magic link</p>
+
+          {/* ── Step 1: enter email ── */}
+          {(forgotState === "form" || forgotState === "sending" || (forgotState === "error" && !forgotCode)) && (
+            <div className="rounded-xl px-4 py-4 text-left" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.2)" }}>
+              <p className="text-xs font-semibold text-gold mb-1">Forgot password?</p>
               <p className="text-xs mb-3" style={{ color: "rgba(253,248,240,0.5)" }}>
-                We'll email you a one-click sign-in link that expires in 15 minutes.
+                Enter your email and we'll send you a 6-digit login code.
               </p>
-              <form onSubmit={sendMagicLink} className="space-y-2">
+              <form onSubmit={sendForgotCode} className="space-y-2">
                 <input
                   type="email"
                   name="email"
@@ -740,15 +790,15 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
                   <button
                     type="submit"
                     disabled={forgotState === "sending"}
-                    data-testid="button-send-magic-link"
+                    data-testid="button-send-code"
                     className="flex-1 py-2 rounded-lg text-xs font-bold disabled:opacity-60"
                     style={{ background: "linear-gradient(135deg,#c9a84c,#e8c97a)", color: "#1a0a2e" }}
                   >
-                    {forgotState === "sending" ? "Sending…" : "Send magic link"}
+                    {forgotState === "sending" ? "Sending…" : "Send code"}
                   </button>
                   <button
                     type="button"
-                    onClick={() => setForgotState("hidden")}
+                    onClick={() => { setForgotState("hidden"); setForgotError(null); }}
                     className="px-3 py-2 rounded-lg text-xs"
                     style={{ color: "rgba(253,248,240,0.35)" }}
                   >
@@ -758,19 +808,116 @@ function EmailScreen({ onBack }: { onBack: () => void }) {
               </form>
             </div>
           )}
-          {forgotState === "sent" && (
-            <div className="rounded-xl px-4 py-3 text-left" style={{ background: "rgba(16,185,129,0.07)", border: "1px solid rgba(16,185,129,0.25)" }}>
-              <p className="text-xs font-semibold mb-1" style={{ color: "#10b981" }} data-testid="text-magic-link-sent">Magic link sent!</p>
-              <p className="text-xs leading-relaxed" style={{ color: "rgba(253,248,240,0.55)" }}>
-                Check your inbox at <span className="font-semibold text-cream/80">{forgotEmail}</span>. Click the link in the email to sign in instantly.
+
+          {/* ── Step 2: enter code ── */}
+          {(forgotState === "code") && (
+            <div className="rounded-xl px-4 py-4 text-left" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.2)" }}>
+              <p className="text-xs font-semibold text-gold mb-1">Check your email</p>
+              <p className="text-xs mb-3" style={{ color: "rgba(253,248,240,0.5)" }}>
+                We sent a 6-digit code to <span className="text-cream/70 font-medium">{forgotEmail}</span>. Enter it below.
               </p>
-              <button
-                onClick={() => setForgotState("hidden")}
-                className="text-xs mt-2"
-                style={{ color: "rgba(253,248,240,0.3)" }}
-              >
-                Dismiss
-              </button>
+              <form onSubmit={verifyForgotCode} className="space-y-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={6}
+                  placeholder="000000"
+                  value={forgotCode}
+                  onChange={e => { setForgotCode(e.target.value.replace(/\D/g, "")); setForgotError(null); }}
+                  data-testid="input-forgot-code"
+                  autoComplete="one-time-code"
+                  autoFocus
+                  className="w-full px-3 py-3 rounded-lg text-center text-2xl font-bold tracking-widest text-gold placeholder-cream/20 outline-none"
+                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(201,168,76,0.25)", letterSpacing: "0.3em" }}
+                />
+                {forgotError && (
+                  <p className="text-xs" style={{ color: "#ef4444" }} data-testid="text-forgot-error">{forgotError}</p>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={forgotCode.length !== 6}
+                    data-testid="button-verify-code"
+                    className="flex-1 py-2 rounded-lg text-xs font-bold disabled:opacity-60"
+                    style={{ background: "linear-gradient(135deg,#c9a84c,#e8c97a)", color: "#1a0a2e" }}
+                  >
+                    Continue
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setForgotState("form"); setForgotCode(""); setForgotError(null); }}
+                    className="px-3 py-2 rounded-lg text-xs"
+                    style={{ color: "rgba(253,248,240,0.35)" }}
+                  >
+                    Back
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={sendForgotCode as any}
+                  className="w-full text-xs pt-1"
+                  style={{ color: "rgba(201,168,76,0.5)" }}
+                >
+                  Didn't receive it? Resend code
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* ── Step 3: set new password ── */}
+          {(forgotState === "newpw" || forgotState === "saving") && (
+            <div className="rounded-xl px-4 py-4 text-left" style={{ background: "rgba(201,168,76,0.07)", border: "1px solid rgba(201,168,76,0.2)" }}>
+              <p className="text-xs font-semibold text-gold mb-1">Set a new password</p>
+              <p className="text-xs mb-3" style={{ color: "rgba(253,248,240,0.5)" }}>
+                Choose a new password for <span className="text-cream/70 font-medium">{forgotEmail}</span>.
+              </p>
+              <form onSubmit={resetPassword} className="space-y-2">
+                <input
+                  type="password"
+                  placeholder="New password"
+                  value={forgotNewPw}
+                  onChange={e => { setForgotNewPw(e.target.value); setForgotError(null); }}
+                  data-testid="input-new-password"
+                  autoFocus
+                  className="w-full px-3 py-2.5 rounded-lg text-sm text-cream placeholder-cream/30 outline-none"
+                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(201,168,76,0.25)" }}
+                  disabled={forgotState === "saving"}
+                />
+                <input
+                  type="password"
+                  placeholder="Confirm new password"
+                  value={forgotConfirmPw}
+                  onChange={e => { setForgotConfirmPw(e.target.value); setForgotError(null); }}
+                  data-testid="input-confirm-new-password"
+                  className="w-full px-3 py-2.5 rounded-lg text-sm text-cream placeholder-cream/30 outline-none"
+                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(201,168,76,0.25)" }}
+                  disabled={forgotState === "saving"}
+                />
+                {forgotError && (
+                  <p className="text-xs" style={{ color: "#ef4444" }} data-testid="text-forgot-error">{forgotError}</p>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={forgotState === "saving" || !forgotNewPw || !forgotConfirmPw}
+                    data-testid="button-set-password"
+                    className="flex-1 py-2 rounded-lg text-xs font-bold disabled:opacity-60"
+                    style={{ background: "linear-gradient(135deg,#c9a84c,#e8c97a)", color: "#1a0a2e" }}
+                  >
+                    {forgotState === "saving" ? "Saving…" : "Set Password"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setForgotState("code"); setForgotError(null); }}
+                    className="px-3 py-2 rounded-lg text-xs"
+                    style={{ color: "rgba(253,248,240,0.35)" }}
+                    disabled={forgotState === "saving"}
+                  >
+                    Back
+                  </button>
+                </div>
+              </form>
             </div>
           )}
         </div>

@@ -2,7 +2,7 @@
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupSession, registerAuthRoutes, isAuthenticated, sessionMiddleware } from "./auth";
-import { profileUpdateSchema, privacySettingsSchema, users, matches, messages, events, eventAttendees, magicLinkTokens } from "@shared/schema";
+import { profileUpdateSchema, privacySettingsSchema, users, matches, messages, events, eventAttendees, magicLinkTokens, otpCodes } from "@shared/schema";
 import { verifyCountryFromRequest, verifyIraqFromRequest, getClientIp, lookupIpCountry } from "./geo";
 import { setupWs } from "./ws";
 import { z } from "zod";
@@ -11,7 +11,7 @@ import { db } from "./db";
 import { cacheDel } from "./cache";
 import { count, sql, eq, asc, desc, or, and, ilike, isNotNull } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
-import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail, sendAdminApprovalNeededEmail } from "./email";
+import { sendLoginCodeEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail, sendAdminApprovalNeededEmail } from "./email";
 import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
 import OpenAI from "openai";
 
@@ -267,63 +267,89 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // â"€â"€â"€ MAGIC LINK AUTH â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+  // ─── EMAIL OTP LOGIN ───────────────────────────────────────────────────────
   app.post("/api/auth/forgot-password", async (req, res) => {
     try {
       const { email } = z.object({ email: z.string().email() }).parse(req.body);
+      const normalised = email.toLowerCase().trim();
       const [user] = await db
         .select({ id: users.id, email: users.email })
         .from(users)
-        .where(eq(users.email, email.toLowerCase().trim()));
-      if (!user || !user.email) {
-        return res.json({ ok: true });
-      }
-      await db
-        .update(magicLinkTokens)
-        .set({ used: true })
-        .where(eq(magicLinkTokens.userId, user.id));
-      const token = randomBytes(32).toString("hex");
-      const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
-      await db.insert(magicLinkTokens).values({
+        .where(eq(users.email, normalised));
+      if (!user?.email) return res.json({ ok: true }); // silent — don't reveal account existence
+      // Invalidate previous codes for this email
+      await db.update(otpCodes).set({ used: true }).where(eq(otpCodes.identifier, normalised));
+      const code = String(Math.floor(100000 + Math.random() * 900000)); // 6-digit code
+      await db.insert(otpCodes).values({
         id: randomUUID(),
-        userId: user.id,
-        token,
-        expiresAt,
+        identifier: normalised,
+        code,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
         used: false,
       });
-      const proto = (req.get("x-forwarded-proto") as string) || req.protocol;
-      const host = req.get("x-forwarded-host") || req.get("host");
-      const baseUrl = `${proto}://${host}`;
-      const magicLink = `${baseUrl}/api/auth/magic-link?token=${token}`;
-      await sendMagicLinkEmail(user.email, magicLink);
+      await sendLoginCodeEmail(user.email, code);
       return res.json({ ok: true });
     } catch (err: any) {
       if (err instanceof z.ZodError) return res.status(400).json({ error: "Invalid email address" });
       console.error("[forgot-password]", err?.message ?? err);
-      return res.status(500).json({ error: "Failed to send email. Please try again." });
+      return res.status(500).json({ error: "Failed to send code. Please try again." });
     }
   });
 
-  app.get("/api/auth/magic-link", async (req, res) => {
+  app.post("/api/auth/verify-otp", async (req, res) => {
     try {
-      const token = String(req.query.token ?? "");
-      if (!token) return res.redirect("/?magic=invalid");
+      const { email, code } = z.object({ email: z.string().email(), code: z.string().length(6) }).parse(req.body);
+      const normalised = email.toLowerCase().trim();
       const [row] = await db
         .select()
-        .from(magicLinkTokens)
-        .where(eq(magicLinkTokens.token, token));
-      if (!row || row.used || !row.expiresAt || row.expiresAt < new Date()) {
-        return res.redirect("/?magic=invalid");
+        .from(otpCodes)
+        .where(eq(otpCodes.identifier, normalised))
+        .orderBy(desc(otpCodes.createdAt))
+        .limit(1);
+      if (!row || row.used || row.code !== code || !row.expiresAt || row.expiresAt < new Date()) {
+        return res.status(400).json({ error: "Invalid or expired code. Please try again." });
       }
-      await db
-        .update(magicLinkTokens)
-        .set({ used: true })
-        .where(eq(magicLinkTokens.id, row.id));
-      (req.session as any).userId = row.userId;
-      req.session.save(() => res.redirect("/"));
+      await db.update(otpCodes).set({ used: true }).where(eq(otpCodes.id, row.id));
+      const [user] = await db.select({ id: users.id }).from(users).where(eq(users.email, normalised));
+      if (!user) return res.status(400).json({ error: "Account not found." });
+      (req.session as any).userId = user.id;
+      await new Promise<void>((resolve, reject) => req.session.save(err => err ? reject(err) : resolve()));
+      return res.json({ ok: true });
     } catch (err: any) {
-      console.error("[magic-link]", err?.message ?? err);
-      return res.redirect("/?magic=invalid");
+      if (err instanceof z.ZodError) return res.status(400).json({ error: "Please enter a valid 6-digit code." });
+      console.error("[verify-otp]", err?.message ?? err);
+      return res.status(500).json({ error: "Something went wrong. Please try again." });
+    }
+  });
+
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { email, code, newPassword } = z.object({
+        email: z.string().email(),
+        code: z.string().length(6),
+        newPassword: z.string().min(6, "Password must be at least 6 characters"),
+      }).parse(req.body);
+      const normalised = email.toLowerCase().trim();
+      const [user] = await db.select().from(users).where(eq(users.email, normalised));
+      if (!user || !user.passwordHash) return res.status(400).json({ error: "No password account found for this email." });
+      const [row] = await db.select().from(otpCodes)
+        .where(eq(otpCodes.identifier, normalised))
+        .orderBy(desc(otpCodes.createdAt))
+        .limit(1);
+      if (!row || row.used || row.code !== code || !row.expiresAt || row.expiresAt < new Date()) {
+        return res.status(400).json({ error: "Invalid or expired code. Please go back and request a new one." });
+      }
+      const bcrypt = await import("bcryptjs");
+      const hash = await bcrypt.hash(newPassword, 10);
+      await db.update(otpCodes).set({ used: true }).where(eq(otpCodes.id, row.id));
+      await db.update(users).set({ passwordHash: hash }).where(eq(users.id, user.id));
+      (req.session as any).userId = user.id;
+      await new Promise<void>((resolve, reject) => req.session.save(err => err ? reject(err) : resolve()));
+      return res.json({ ok: true });
+    } catch (err: any) {
+      if (err instanceof z.ZodError) return res.status(400).json({ error: err.errors[0]?.message ?? "Invalid input." });
+      console.error("[reset-password]", err?.message ?? err);
+      return res.status(500).json({ error: "Something went wrong. Please try again." });
     }
   });
 
@@ -1260,6 +1286,27 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const matchId = randomUUID();
     await db.insert(matches).values({ id: matchId, user1Id: adminId, user2Id: targetId });
     res.json({ matchId });
+  });
+
+  // ─── ADD RECOVERY EMAIL (phone-only users, no password required) ──────────
+  app.patch("/api/auth/add-recovery-email", isAuthenticated, async (req: any, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) return res.status(400).json({ message: "Email is required" });
+      const userId = getUserId(req);
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (!user) return res.status(404).json({ message: "User not found" });
+      if (user.passwordHash) return res.status(403).json({ message: "Use the change email form for password accounts" });
+      const normalised = (email as string).toLowerCase().trim();
+      const emailResult = z.string().email().safeParse(normalised);
+      if (!emailResult.success) return res.status(400).json({ message: "Invalid email address" });
+      const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.email, normalised));
+      if (existing && existing.id !== userId) return res.status(409).json({ message: "That email is already in use" });
+      await db.update(users).set({ email: normalised }).where(eq(users.id, userId));
+      res.json({ ok: true });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
   });
 
   // ─── CHANGE EMAIL ─────────────────────────────────────────

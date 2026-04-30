@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { db } from "./db";
 import {
   blacklist, promoCodes, auditLogs, appSettings, announcements, successStories,
-  users, matches, messages, likes, reports, events,
+  users, matches, messages, likes, reports, events, passkeys,
 } from "@shared/schema";
 import { eq, desc, sql, count, and, or, gte } from "drizzle-orm";
 import { randomUUID } from "crypto";
@@ -452,6 +452,18 @@ export function registerAdminRoutes(app: Express, isAuthenticated: any, requireA
       updatedAt: new Date(),
     }).where(eq(users.id, targetId));
     await writeAuditLog(adminId, adminUser?.email ?? "", "suspend_user", "user", targetId, `${days} days: ${reason}`);
+    res.json({ ok: true });
+  });
+
+  app.delete("/api/admin/users/:id/passkeys", isAuthenticated, requireAdmin, async (req, res) => {
+    const adminId = getUserId(req);
+    const [adminUser] = await db.select({ email: users.email }).from(users).where(eq(users.id, adminId));
+    const targetId = req.params.id;
+    const [target] = await db.select({ id: users.id, phone: users.phone }).from(users).where(eq(users.id, targetId));
+    if (!target) return res.status(404).json({ message: "User not found" });
+    if (!target.phone) return res.status(400).json({ message: "This user did not sign up with a phone number" });
+    await db.delete(passkeys).where(eq(passkeys.userId, targetId));
+    await writeAuditLog(adminId, adminUser?.email ?? "", "reset_passkeys", "user", targetId, `Passkeys cleared for phone recovery — identity verified by admin`);
     res.json({ ok: true });
   });
 

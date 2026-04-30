@@ -664,9 +664,15 @@ export default function SettingsPage({ user }: Props) {
 
 function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () => void }) {
   const { t } = useTranslation();
+  const isPhoneUser = !!user.phone;
+
   const [emailForm, setEmailForm] = useState({ newEmail: "", currentPassword: "" });
   const [emailError, setEmailError] = useState<string | null>(null);
   const [emailDone, setEmailDone] = useState(false);
+
+  const [recoveryEmail, setRecoveryEmail] = useState(user.email ?? "");
+  const [recoveryEmailError, setRecoveryEmailError] = useState<string | null>(null);
+  const [recoveryEmailDone, setRecoveryEmailDone] = useState(false);
 
   const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [pwError, setPwError] = useState<string | null>(null);
@@ -701,6 +707,12 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
     onError: async (err: any) => setPhoneError(await parseError(err)),
   });
 
+  const recoveryEmailMutation = useMutation({
+    mutationFn: () => apiRequest("PATCH", "/api/auth/add-recovery-email", { email: recoveryEmail }).then(r => r.json()),
+    onSuccess: () => { setRecoveryEmailDone(true); setRecoveryEmailError(null); queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] }); },
+    onError: async (err: any) => setRecoveryEmailError(await parseError(err)),
+  });
+
   const inputStyle = {
     background: "rgba(255,255,255,0.07)",
     border: "1.5px solid rgba(201,168,76,0.25)",
@@ -722,38 +734,69 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
 
       <div className="flex-1 overflow-y-auto px-5 py-5 pb-20 space-y-5">
 
-        {/* Change Email */}
-        <div className="rounded-2xl p-4 space-y-3" style={sectionStyle}>
-          <div className="flex items-center gap-2 mb-1">
-            <Mail size={16} color="#c9a84c" />
-            <p className="text-sm font-semibold text-gold">{t("settings.changeEmail")}</p>
-          </div>
-          <p className="text-xs text-cream/40 -mt-1">{user.email ? t("settings.changeEmailCurrent", { value: user.email }) : t("settings.notSet")}</p>
-          {emailDone ? (
-            <div className="flex items-center gap-2 py-2" style={{ color: "#10b981" }}>
-              <CheckCircle2 size={16} /><span className="text-sm font-medium">{t("settings.emailUpdated")}</span>
+        {/* Recovery Email (phone users) / Change Email (email users) */}
+        {isPhoneUser ? (
+          <div className="rounded-2xl p-4 space-y-3" style={sectionStyle}>
+            <div className="flex items-center gap-2 mb-1">
+              <Mail size={16} color="#c9a84c" />
+              <p className="text-sm font-semibold text-gold">{t("settings.recoveryEmail")}</p>
             </div>
-          ) : (
-            <>
-              <div>
-                <label className={labelClass}>{t("settings.newEmail")}</label>
-                <input type="email" value={emailForm.newEmail} onChange={e => { setEmailForm(f => ({ ...f, newEmail: e.target.value })); setEmailError(null); }}
-                  placeholder="new@email.com" data-testid="input-new-email" className={inputClass} style={inputStyle} />
+            <p className="text-xs text-cream/40 -mt-1">
+              {user.email ? t("settings.changeEmailCurrent", { value: user.email }) : t("settings.recoveryEmailDesc")}
+            </p>
+            {recoveryEmailDone ? (
+              <div className="flex items-center gap-2 py-2" style={{ color: "#10b981" }}>
+                <CheckCircle2 size={16} /><span className="text-sm font-medium">{t("settings.recoveryEmailSaved")}</span>
               </div>
-              <div>
-                <label className={labelClass}>{t("settings.currentPassword")}</label>
-                <input type="password" value={emailForm.currentPassword} onChange={e => { setEmailForm(f => ({ ...f, currentPassword: e.target.value })); setEmailError(null); }}
-                  placeholder="Confirm with your password" data-testid="input-email-current-password" className={inputClass} style={inputStyle} />
+            ) : (
+              <>
+                <div>
+                  <label className={labelClass}>{t("settings.emailAddress")}</label>
+                  <input type="email" value={recoveryEmail} onChange={e => { setRecoveryEmail(e.target.value); setRecoveryEmailError(null); }}
+                    placeholder="your@email.com" data-testid="input-recovery-email" className={inputClass} style={inputStyle} />
+                </div>
+                {recoveryEmailError && <p className={errorClass} style={{ color: "#d4608a" }}>{recoveryEmailError}</p>}
+                <button onClick={() => recoveryEmailMutation.mutate()} disabled={!recoveryEmail.trim() || recoveryEmailMutation.isPending}
+                  data-testid="button-save-recovery-email" className="w-full py-3 rounded-xl text-sm font-bold disabled:opacity-50"
+                  style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
+                  {recoveryEmailMutation.isPending ? t("settings.savingEllipsis") : t("settings.saveRecoveryEmail")}
+                </button>
+              </>
+            )}
+          </div>
+        ) : (
+          <div className="rounded-2xl p-4 space-y-3" style={sectionStyle}>
+            <div className="flex items-center gap-2 mb-1">
+              <Mail size={16} color="#c9a84c" />
+              <p className="text-sm font-semibold text-gold">{t("settings.changeEmail")}</p>
+            </div>
+            <p className="text-xs text-cream/40 -mt-1">{user.email ? t("settings.changeEmailCurrent", { value: user.email }) : t("settings.notSet")}</p>
+            {emailDone ? (
+              <div className="flex items-center gap-2 py-2" style={{ color: "#10b981" }}>
+                <CheckCircle2 size={16} /><span className="text-sm font-medium">{t("settings.emailUpdated")}</span>
               </div>
-              {emailError && <p className={errorClass} style={{ color: "#d4608a" }}>{emailError}</p>}
-              <button onClick={() => emailMutation.mutate()} disabled={!emailForm.newEmail || !emailForm.currentPassword || emailMutation.isPending}
-                data-testid="button-save-email" className="w-full py-3 rounded-xl text-sm font-bold disabled:opacity-50"
-                style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
-                {emailMutation.isPending ? t("settings.savingEllipsis") : t("settings.updateEmail")}
-              </button>
-            </>
-          )}
-        </div>
+            ) : (
+              <>
+                <div>
+                  <label className={labelClass}>{t("settings.newEmail")}</label>
+                  <input type="email" value={emailForm.newEmail} onChange={e => { setEmailForm(f => ({ ...f, newEmail: e.target.value })); setEmailError(null); }}
+                    placeholder="new@email.com" data-testid="input-new-email" className={inputClass} style={inputStyle} />
+                </div>
+                <div>
+                  <label className={labelClass}>{t("settings.currentPassword")}</label>
+                  <input type="password" value={emailForm.currentPassword} onChange={e => { setEmailForm(f => ({ ...f, currentPassword: e.target.value })); setEmailError(null); }}
+                    placeholder="Confirm with your password" data-testid="input-email-current-password" className={inputClass} style={inputStyle} />
+                </div>
+                {emailError && <p className={errorClass} style={{ color: "#d4608a" }}>{emailError}</p>}
+                <button onClick={() => emailMutation.mutate()} disabled={!emailForm.newEmail || !emailForm.currentPassword || emailMutation.isPending}
+                  data-testid="button-save-email" className="w-full py-3 rounded-xl text-sm font-bold disabled:opacity-50"
+                  style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
+                  {emailMutation.isPending ? t("settings.savingEllipsis") : t("settings.updateEmail")}
+                </button>
+              </>
+            )}
+          </div>
+        )}
 
         {/* Change Password */}
         <div className="rounded-2xl p-4 space-y-3" style={sectionStyle}>
