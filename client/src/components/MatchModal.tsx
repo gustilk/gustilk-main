@@ -1,3 +1,4 @@
+import newLogo from "@assets/IMG_1777_1777566688564.jpeg";
 import { useEffect, useRef } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { useLocation } from "wouter";
@@ -281,7 +282,7 @@ export default function MatchModal({ matchedUser, currentUser, matchId, onClose 
             style={{ animation: "logo-bounce 2s ease-in-out infinite" }}
           >
             <img
-              src="/gustilk-logo.png?v=4"
+              src={newLogo}
               alt="Gûstîlk"
               style={{
                 width: 48,

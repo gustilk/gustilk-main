@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { LANGUAGE_LIST } from "@/i18n";
 import i18n from "@/i18n";
 import { COUNTRY_LIST, PINNED_COUNTRY_ISOS } from "@shared/countries";
+import newLogo from "@assets/IMG_1777_1777566688564.jpeg";
 
 function triggerLangPicker() {
   window.dispatchEvent(new Event("gustilk:pick-language"));
@@ -102,7 +103,7 @@ function Logo() {
     <div className="text-center mb-5">
       <div className="inline-flex items-center justify-center mb-1">
         <img
-          src="/gustilk-logo.png?v=4"
+          src={newLogo}
           alt="Gûstîlk"
           style={{
             width: "min(80px, 26vw)",
