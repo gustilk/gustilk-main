@@ -106,7 +106,7 @@ function Logo() {
           src={newLogo}
           alt="Gûstîlk"
           style={{
-            width: "min(80px, 26vw)",
+            width: "min(140px, 42vw)",
             height: "auto",
             objectFit: "contain",
           }}

@@ -126,7 +126,7 @@ export default function EventsPage({ user }: Props) {
       <div className="pt-12 pb-4 px-5">
         <div className="flex items-center justify-between mb-0.5">
           <div className="flex items-center gap-2.5">
-            <img src={newLogo} alt="" className="flex-shrink-0" style={{ width: "48px", height: "48px", objectFit: "contain", filter: "drop-shadow(0 1px 6px rgba(201,168,76,0.6))" }} />
+            <img src={newLogo} alt="" className="flex-shrink-0" style={{ width: "64px", height: "64px", objectFit: "contain" }} />
             <h1 className="font-serif text-2xl text-gold">{t("events.title")}</h1>
           </div>
           {(user.isAdmin || user.isPremium) && (

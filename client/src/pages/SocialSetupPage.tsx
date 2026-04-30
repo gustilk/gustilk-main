@@ -288,7 +288,7 @@ export default function SocialSetupPage({ user }: Props) {
         {step === 1 && (
           <>
             <div className="text-center mb-7">
-              <img src={newLogo} alt="Gûstîlk" className="mx-auto mb-4" style={{ width: "140px", height: "140px", objectFit: "contain", filter: "none" }} />
+              <img src={newLogo} alt="Gûstîlk" className="mx-auto mb-4" style={{ width: "180px", height: "180px", objectFit: "contain" }} />
               <h1 className="font-serif text-3xl text-gold mb-1">
                 {(() => {
                   const name = (user.fullName ?? user.firstName ?? "").split(" ")[0];

@@ -285,9 +285,9 @@ export default function MatchModal({ matchedUser, currentUser, matchId, onClose 
               src={newLogo}
               alt="Gûstîlk"
               style={{
-                width: 48,
-                height: 48,
-                filter: "drop-shadow(0 0 10px rgba(201,168,76,0.9)) drop-shadow(0 0 24px rgba(201,168,76,0.5))",
+                width: 80,
+                height: 80,
+                objectFit: "contain",
               }}
             />
           </div>
