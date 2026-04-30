@@ -2,7 +2,7 @@
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupSession, registerAuthRoutes, isAuthenticated, sessionMiddleware } from "./auth";
-import { profileUpdateSchema, privacySettingsSchema, users, matches, messages, events, eventAttendees, magicLinkTokens, otpCodes } from "@shared/schema";
+import { profileUpdateSchema, privacySettingsSchema, users, matches, messages, events, eventAttendees, magicLinkTokens } from "@shared/schema";
 import { verifyCountryFromRequest, verifyIraqFromRequest, getClientIp, lookupIpCountry } from "./geo";
 import { setupWs } from "./ws";
 import { z } from "zod";
@@ -11,19 +11,9 @@ import { db } from "./db";
 import { cacheDel } from "./cache";
 import { count, sql, eq, asc, desc, or, and, ilike, isNotNull } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
-import { sendLoginCodeEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail, sendAdminApprovalNeededEmail } from "./email";
+import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail, sendAdminApprovalNeededEmail } from "./email";
 import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
 import OpenAI from "openai";
-
-// Simple in-memory rate limiter for visit recording (per user, 1 visit per profile per 5 min)
-const visitRateLimit = new Map<string, number>();
-function canRecordVisit(fromUserId: string, toUserId: string): boolean {
-  const key = `${fromUserId}:${toUserId}`;
-  const last = visitRateLimit.get(key) ?? 0;
-  if (Date.now() - last < 5 * 60 * 1000) return false;
-  visitRateLimit.set(key, Date.now());
-  return true;
-}
 
 let _openai: OpenAI | null = null;
 function getOpenAI(): OpenAI | null {
@@ -267,89 +257,63 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
-  // ─── EMAIL OTP LOGIN ───────────────────────────────────────────────────────
+  // â"€â"€â"€ MAGIC LINK AUTH â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   app.post("/api/auth/forgot-password", async (req, res) => {
     try {
       const { email } = z.object({ email: z.string().email() }).parse(req.body);
-      const normalised = email.toLowerCase().trim();
       const [user] = await db
         .select({ id: users.id, email: users.email })
         .from(users)
-        .where(eq(users.email, normalised));
-      if (!user?.email) return res.json({ ok: true }); // silent — don't reveal account existence
-      // Invalidate previous codes for this email
-      await db.update(otpCodes).set({ used: true }).where(eq(otpCodes.identifier, normalised));
-      const code = String(Math.floor(100000 + Math.random() * 900000)); // 6-digit code
-      await db.insert(otpCodes).values({
+        .where(eq(users.email, email.toLowerCase().trim()));
+      if (!user || !user.email) {
+        return res.json({ ok: true });
+      }
+      await db
+        .update(magicLinkTokens)
+        .set({ used: true })
+        .where(eq(magicLinkTokens.userId, user.id));
+      const token = randomBytes(32).toString("hex");
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+      await db.insert(magicLinkTokens).values({
         id: randomUUID(),
-        identifier: normalised,
-        code,
-        expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+        userId: user.id,
+        token,
+        expiresAt,
         used: false,
       });
-      await sendLoginCodeEmail(user.email, code);
+      const proto = (req.get("x-forwarded-proto") as string) || req.protocol;
+      const host = req.get("x-forwarded-host") || req.get("host");
+      const baseUrl = `${proto}://${host}`;
+      const magicLink = `${baseUrl}/api/auth/magic-link?token=${token}`;
+      await sendMagicLinkEmail(user.email, magicLink);
       return res.json({ ok: true });
     } catch (err: any) {
       if (err instanceof z.ZodError) return res.status(400).json({ error: "Invalid email address" });
       console.error("[forgot-password]", err?.message ?? err);
-      return res.status(500).json({ error: "Failed to send code. Please try again." });
+      return res.status(500).json({ error: "Failed to send email. Please try again." });
     }
   });
 
-  app.post("/api/auth/verify-otp", async (req, res) => {
+  app.get("/api/auth/magic-link", async (req, res) => {
     try {
-      const { email, code } = z.object({ email: z.string().email(), code: z.string().length(6) }).parse(req.body);
-      const normalised = email.toLowerCase().trim();
+      const token = String(req.query.token ?? "");
+      if (!token) return res.redirect("/?magic=invalid");
       const [row] = await db
         .select()
-        .from(otpCodes)
-        .where(eq(otpCodes.identifier, normalised))
-        .orderBy(desc(otpCodes.createdAt))
-        .limit(1);
-      if (!row || row.used || row.code !== code || !row.expiresAt || row.expiresAt < new Date()) {
-        return res.status(400).json({ error: "Invalid or expired code. Please try again." });
+        .from(magicLinkTokens)
+        .where(eq(magicLinkTokens.token, token));
+      if (!row || row.used || !row.expiresAt || row.expiresAt < new Date()) {
+        return res.redirect("/?magic=invalid");
       }
-      await db.update(otpCodes).set({ used: true }).where(eq(otpCodes.id, row.id));
-      const [user] = await db.select({ id: users.id }).from(users).where(eq(users.email, normalised));
-      if (!user) return res.status(400).json({ error: "Account not found." });
-      (req.session as any).userId = user.id;
-      await new Promise<void>((resolve, reject) => req.session.save(err => err ? reject(err) : resolve()));
-      return res.json({ ok: true });
+      await db
+        .update(magicLinkTokens)
+        .set({ used: true })
+        .where(eq(magicLinkTokens.id, row.id));
+      (req.session as any).userId = row.userId;
+      req.session.save(() => res.redirect("/"));
     } catch (err: any) {
-      if (err instanceof z.ZodError) return res.status(400).json({ error: "Please enter a valid 6-digit code." });
-      console.error("[verify-otp]", err?.message ?? err);
-      return res.status(500).json({ error: "Something went wrong. Please try again." });
-    }
-  });
-
-  app.post("/api/auth/reset-password", async (req, res) => {
-    try {
-      const { email, code, newPassword } = z.object({
-        email: z.string().email(),
-        code: z.string().length(6),
-        newPassword: z.string().min(6, "Password must be at least 6 characters"),
-      }).parse(req.body);
-      const normalised = email.toLowerCase().trim();
-      const [user] = await db.select().from(users).where(eq(users.email, normalised));
-      if (!user || !user.passwordHash) return res.status(400).json({ error: "No password account found for this email." });
-      const [row] = await db.select().from(otpCodes)
-        .where(eq(otpCodes.identifier, normalised))
-        .orderBy(desc(otpCodes.createdAt))
-        .limit(1);
-      if (!row || row.used || row.code !== code || !row.expiresAt || row.expiresAt < new Date()) {
-        return res.status(400).json({ error: "Invalid or expired code. Please go back and request a new one." });
-      }
-      const bcrypt = await import("bcryptjs");
-      const hash = await bcrypt.hash(newPassword, 10);
-      await db.update(otpCodes).set({ used: true }).where(eq(otpCodes.id, row.id));
-      await db.update(users).set({ passwordHash: hash }).where(eq(users.id, user.id));
-      (req.session as any).userId = user.id;
-      await new Promise<void>((resolve, reject) => req.session.save(err => err ? reject(err) : resolve()));
-      return res.json({ ok: true });
-    } catch (err: any) {
-      if (err instanceof z.ZodError) return res.status(400).json({ error: err.errors[0]?.message ?? "Invalid input." });
-      console.error("[reset-password]", err?.message ?? err);
-      return res.status(500).json({ error: "Something went wrong. Please try again." });
+      console.error("[magic-link]", err?.message ?? err);
+      return res.redirect("/?magic=invalid");
     }
   });
 
@@ -531,7 +495,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
     if (!user || !user.caste || !user.gender) return res.status(400).json({ error: "Profile incomplete" });
-    if (!user.isAdmin && user.verificationStatus !== "approved") return res.status(403).json({ error: "Account not yet approved" });
     const minAge = parseInt(req.query.minAge as string) || 18;
     const maxAge = parseInt(req.query.maxAge as string) || 80;
     const profiles = await storage.getDiscoverProfiles(userId, user.caste as string, user.gender as string, minAge, maxAge);
@@ -616,10 +579,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.post("/api/messages/:matchId/read", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
-    const match = await storage.getMatch(req.params.matchId as string);
-    if (!match || (match.user1Id !== userId && match.user2Id !== userId)) {
-      return res.status(403).json({ error: "Forbidden" });
-    }
     await storage.markMessagesRead(req.params.matchId as string, userId);
     res.json({ ok: true });
   });
@@ -652,10 +611,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.post("/api/events", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
-    const currentUser = await storage.getUserById(userId);
-    if (!currentUser?.isAdmin && currentUser?.verificationStatus !== "approved") {
-      return res.status(403).json({ error: "Only verified members can create events" });
-    }
     const schema = z.object({
       title: z.string().min(1), description: z.string().min(1),
       type: z.enum(["cultural", "meetup", "online"]),
@@ -820,15 +775,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       animationStyle: z.enum(["none","confetti","sparkles","fireworks","hearts","flowers"]).default("none"),
     }).parse(req.body);
 
-    const match = await storage.getMatch(matchId);
-    if (!match || (match.user1Id !== senderId && match.user2Id !== senderId)) {
-      return res.status(403).json({ error: "Forbidden" });
-    }
-    const otherUserId = match.user1Id === senderId ? match.user2Id : match.user1Id;
-    if (recipientId !== otherUserId) {
-      return res.status(400).json({ error: "Recipient does not match the other user in this match" });
-    }
-
     const gift = await storage.sendGift(senderId, recipientId, matchId, giftType, message, animationStyle);
     res.json({ gift });
   });
@@ -867,9 +813,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.post("/api/users/:userId/visit", isAuthenticated, async (req, res) => {
     const fromUserId = getUserId(req);
     const toUserId = String(req.params.userId);
-    if (canRecordVisit(fromUserId, toUserId)) {
-      await storage.recordVisit(fromUserId, toUserId);
-    }
+    await storage.recordVisit(fromUserId, toUserId);
     res.json({ ok: true });
   });
 
@@ -1286,27 +1230,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const matchId = randomUUID();
     await db.insert(matches).values({ id: matchId, user1Id: adminId, user2Id: targetId });
     res.json({ matchId });
-  });
-
-  // ─── ADD RECOVERY EMAIL (phone-only users, no password required) ──────────
-  app.patch("/api/auth/add-recovery-email", isAuthenticated, async (req: any, res) => {
-    try {
-      const { email } = req.body;
-      if (!email) return res.status(400).json({ message: "Email is required" });
-      const userId = getUserId(req);
-      const [user] = await db.select().from(users).where(eq(users.id, userId));
-      if (!user) return res.status(404).json({ message: "User not found" });
-      if (user.passwordHash) return res.status(403).json({ message: "Use the change email form for password accounts" });
-      const normalised = (email as string).toLowerCase().trim();
-      const emailResult = z.string().email().safeParse(normalised);
-      if (!emailResult.success) return res.status(400).json({ message: "Invalid email address" });
-      const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.email, normalised));
-      if (existing && existing.id !== userId) return res.status(409).json({ message: "That email is already in use" });
-      await db.update(users).set({ email: normalised }).where(eq(users.id, userId));
-      res.json({ ok: true });
-    } catch (err: any) {
-      res.status(500).json({ message: err.message });
-    }
   });
 
   // ─── CHANGE EMAIL ─────────────────────────────────────────

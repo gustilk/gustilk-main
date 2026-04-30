@@ -82,27 +82,6 @@ export async function sendMagicLinkEmail(to: string, magicLink: string): Promise
   });
 }
 
-export async function sendLoginCodeEmail(to: string, code: string): Promise<void> {
-  const resend = getResend();
-  await resend.emails.send({
-    from: "Gûstîlk <noreply@gustilk.com>",
-    to,
-    subject: `${code} — your Gûstîlk login code`,
-    html: emailShell(`
-      <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">Your login code</h2>
-      <p style="margin:0 0 24px;font-size:14px;color:rgba(253,248,240,0.6);line-height:1.7;">
-        Enter this code in the app to sign in. It expires in <strong style="color:#c9a84c;">10 minutes</strong> and can only be used once.
-      </p>
-      <div style="margin:0 auto 32px;text-align:center;letter-spacing:10px;font-size:42px;font-weight:bold;color:#c9a84c;font-family:monospace;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);border-radius:16px;padding:24px 32px;">
-        ${code}
-      </div>
-      <p style="margin:0;font-size:12px;color:rgba(253,248,240,0.3);line-height:1.6;">
-        If you didn't request this, you can safely ignore this email.
-      </p>
-    `),
-  });
-}
-
 export async function sendPhotoApprovedEmail(to: string, name: string): Promise<void> {
   try {
     const resend = getResend();

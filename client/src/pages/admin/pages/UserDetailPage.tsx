@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { ArrowLeft, Crown, Ban, Shield, AlertTriangle, MessageSquare, Trash2, CheckCircle, XCircle, X, ChevronLeft, ChevronRight, KeyRound } from "lucide-react";
+import { ArrowLeft, Crown, Ban, Shield, AlertTriangle, MessageSquare, Trash2, CheckCircle, XCircle, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -71,12 +71,6 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
     mutationFn: async () => (await apiRequest("DELETE", `/api/admin/users/${userId}`)).json(),
     onSuccess: () => { toast({ title: "User deleted" }); setPending(null); setLocation("/admin/users"); },
     onError: (err: Error) => { toast({ title: "Delete failed", description: err.message, variant: "destructive" }); setPending(null); },
-  });
-
-  const resetPasskeysMutation = useMutation({
-    mutationFn: async () => (await apiRequest("DELETE", `/api/admin/users/${userId}/passkeys`)).json(),
-    onSuccess: () => { toast({ title: "Passkeys reset", description: "User can now re-register with Face ID on their new device." }); setPending(null); },
-    onError: (err: Error) => { toast({ title: "Failed", description: err.message, variant: "destructive" }); setPending(null); },
   });
 
   if (isLoading) {
@@ -436,21 +430,6 @@ export default function UserDetailPage({ user: adminUser, userId }: { user: User
             style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>
             <Ban size={13} /> {isBanned ? "Unban" : "Ban"}
           </button>
-          {u.phone && (
-            <button
-              onClick={() => setPending({
-                title: `Reset passkeys for ${name}?`,
-                description: "Only do this after verifying their identity via selfie. They will need to re-register Face ID on their new device.",
-                variant: "warning",
-                label: "Reset Passkeys",
-                onConfirm: () => resetPasskeysMutation.mutate(),
-              })}
-              data-testid="button-reset-passkeys"
-              className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold"
-              style={{ background: "rgba(251,191,36,0.08)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.15)" }}>
-              <KeyRound size={13} /> Reset Passkeys
-            </button>
-          )}
           {!u.isAdmin && (
             <button
               onClick={() => setPending({
