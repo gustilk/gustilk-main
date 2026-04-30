@@ -4,8 +4,9 @@ import { initReactI18next } from "react-i18next";
 import en from "./locales/en";
 import ar from "./locales/ar";
 import de from "./locales/de";
+import hy from "./locales/hy";
 
-export const LANGUAGES = { en, ar, de } as const;
+export const LANGUAGES = { en, ar, de, hy } as const;
 export type LangCode = keyof typeof LANGUAGES;
 
 export const LANGUAGE_LIST: { code: LangCode; name: string; native: string; flag: string; dir: string }[] =
