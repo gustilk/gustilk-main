@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { ArrowLeft, MessageCircle, Video, Star, Lock, MapPin, Shield, Flag, Crown, Heart, X } from "lucide-react";
+import { ArrowLeft, MessageCircle, Video, Star, Lock, MapPin, Shield, Flag, Crown, Heart, X, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { SafeUser, MatchWithUser } from "@shared/schema";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
@@ -40,6 +40,8 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
   });
 
   const [actedOnLike, setActedOnLike] = useState(false);
+  const [replyPhotoUrl, setReplyPhotoUrl] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
 
   // Navigate back to wherever the user came from.
   // Use the stored referrer URL directly — history.back() is unreliable in SPA
@@ -69,6 +71,21 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
       queryClient.invalidateQueries({ queryKey: ["/api/activity/likes-received"] });
       queryClient.invalidateQueries({ queryKey: ["/api/discover"] });
       goBack();
+    },
+  });
+
+  const replyMutation = useMutation({
+    mutationFn: async (text: string) => {
+      if (!match) throw new Error("Not matched");
+      const res = await apiRequest("POST", `/api/messages/${match.id}`, { text });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/messages", match?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
+      setReplyPhotoUrl(null);
+      setReplyText("");
+      if (match) setLocation(`/chat/${match.id}`);
     },
   });
 
@@ -210,6 +227,19 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
             <button className="absolute left-0 top-0 bottom-0 w-1/3" onClick={() => setPhotoIdx(i => Math.max(0, i - 1))} />
             <button className="absolute right-0 top-0 bottom-0 w-1/3" onClick={() => setPhotoIdx(i => Math.min(allPhotos.length - 1, i + 1))} />
           </>
+        )}
+
+        {/* Reply to photo button — matched premium users only */}
+        {isPremium && match && allPhotos.length > 0 && (
+          <button
+            onClick={() => setReplyPhotoUrl(allPhotos[photoIdx])}
+            data-testid="button-reply-to-photo"
+            className="absolute bottom-4 right-4 flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold z-30 transition-all active:scale-95"
+            style={{ background: "rgba(13,6,24,0.8)", border: "1px solid rgba(201,168,76,0.5)", color: "#c9a84c", backdropFilter: "blur(6px)" }}
+          >
+            <MessageCircle size={13} />
+            Reply to photo
+          </button>
         )}
       </div>
 
@@ -358,6 +388,67 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
           </div>
         )}
       </div>
+
+      {/* Reply-to-photo bottom sheet */}
+      {replyPhotoUrl && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col justify-end"
+          style={{ background: "rgba(13,6,24,0.85)" }}
+          onClick={() => setReplyPhotoUrl(null)}
+        >
+          <div
+            className="rounded-t-3xl p-5 space-y-4"
+            style={{ background: "#1a0a2e", border: "1px solid rgba(201,168,76,0.2)" }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center gap-3">
+              <img
+                src={replyPhotoUrl}
+                className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
+                style={{ border: "2px solid rgba(201,168,76,0.35)" }}
+                alt=""
+              />
+              <div className="flex-1">
+                <p className="text-cream/90 text-sm font-semibold">Replying to {displayName}'s photo</p>
+                <p className="text-cream/40 text-xs mt-0.5">Your message will be sent in chat</p>
+              </div>
+              <button
+                onClick={() => setReplyPhotoUrl(null)}
+                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ background: "rgba(255,255,255,0.07)" }}
+              >
+                <X size={16} color="rgba(253,248,240,0.6)" />
+              </button>
+            </div>
+
+            {/* Input row */}
+            <div className="flex gap-2 pb-2">
+              <input
+                autoFocus
+                type="text"
+                value={replyText}
+                onChange={e => setReplyText(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === "Enter" && replyText.trim()) replyMutation.mutate(replyText.trim());
+                }}
+                placeholder={`Say something to ${displayName}…`}
+                className="flex-1 px-4 py-3 rounded-2xl text-sm text-cream placeholder-cream/30 outline-none"
+                style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.2)" }}
+              />
+              <button
+                onClick={() => replyText.trim() && replyMutation.mutate(replyText.trim())}
+                disabled={!replyText.trim() || replyMutation.isPending}
+                data-testid="button-send-photo-reply"
+                className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 disabled:opacity-40 transition-all active:scale-95"
+                style={{ background: "linear-gradient(135deg, #7b3fa0, #d4608a)" }}
+              >
+                <Send size={18} color="white" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Report modal */}
       {showReport && (
