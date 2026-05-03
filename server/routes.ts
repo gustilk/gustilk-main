@@ -879,10 +879,30 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   // â"€â"€â"€ ADMIN â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+  const ROLE_RANK: Record<string, number> = { user: 0, moderator: 1, admin: 2, super_admin: 3 };
+  function getEffectiveRank(user: any): number {
+    const r = ROLE_RANK[user?.role ?? "user"] ?? 0;
+    return user?.isAdmin && r < ROLE_RANK.admin ? ROLE_RANK.admin : r;
+  }
+
   async function requireAdmin(req: any, res: any, next: any) {
     const userId = getUserId(req);
     const user = await storage.getUserById(userId);
-    if (!user?.isAdmin) return res.status(403).json({ error: "Admin only" });
+    if (!user?.isAdmin && getEffectiveRank(user) < ROLE_RANK.moderator) return res.status(403).json({ error: "Admin only" });
+    next();
+  }
+
+  async function requireSuperAdmin(req: any, res: any, next: any) {
+    const userId = getUserId(req);
+    const user = await storage.getUserById(userId);
+    if (getEffectiveRank(user) < ROLE_RANK.super_admin) return res.status(403).json({ error: "Super admin only" });
+    next();
+  }
+
+  async function requireModerator(req: any, res: any, next: any) {
+    const userId = getUserId(req);
+    const user = await storage.getUserById(userId);
+    if (getEffectiveRank(user) < ROLE_RANK.moderator) return res.status(403).json({ error: "Moderator access required" });
     next();
   }
 
@@ -964,6 +984,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         console.error("[verify auto-message error]", e);
       }
     }
+
+    const adminUser = await storage.getUserById(adminId);
+    await writeAuditLog(adminId, adminUser?.email ?? "", `verify:${action}`, "user", targetId, reason ?? "");
 
     res.json({ ok: true });
   });
@@ -1300,7 +1323,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   // ─── EXTENDED ADMIN ROUTES ────────────────────────────────────────────────
-  registerAdminRoutes(app, isAuthenticated, requireAdmin);
+  registerAdminRoutes(app, isAuthenticated, requireAdmin, requireSuperAdmin);
 
   // ─── HOURLY MESSAGE EXPIRY CLEANUP ────────────────────────────────────────
   const runMsgCleanup = async () => {

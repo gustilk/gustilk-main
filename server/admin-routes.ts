@@ -28,7 +28,7 @@ export async function writeAuditLog(
 let analyticsCache: { data: any; ts: number } | null = null;
 const ANALYTICS_TTL = 60 * 60 * 1000;
 
-export function registerAdminRoutes(app: Express, isAuthenticated: any, requireAdmin: any) {
+export function registerAdminRoutes(app: Express, isAuthenticated: any, requireAdmin: any, requireSuperAdmin: any) {
 
   // ─── BLACKLIST ─────────────────────────────────────────────────────────────
   app.get("/api/admin/blacklist", isAuthenticated, requireAdmin, async (_req, res) => {
@@ -483,6 +483,83 @@ export function registerAdminRoutes(app: Express, isAuthenticated: any, requireA
     if (!target.phone) return res.status(400).json({ message: "This user did not sign up with a phone number" });
     await db.delete(passkeys).where(eq(passkeys.userId, targetId));
     await writeAuditLog(adminId, adminUser?.email ?? "", "reset_passkeys", "user", targetId, "Passkeys cleared for phone recovery — identity verified by admin");
+    res.json({ ok: true });
+  });
+
+  // ─── TEAM MANAGEMENT (super_admin only) ───────────────────────────────────
+
+  const VALID_ADMIN_ROLES = ["moderator", "admin", "super_admin"] as const;
+  type AdminRole = typeof VALID_ADMIN_ROLES[number];
+
+  // List all team members (users with role != 'user')
+  app.get("/api/admin/team", isAuthenticated, requireAdmin, async (_req, res) => {
+    const team = await db.select({
+      id: users.id,
+      email: users.email,
+      fullName: users.fullName,
+      role: users.role,
+      isAdmin: users.isAdmin,
+      createdAt: users.createdAt,
+    }).from(users).where(
+      or(
+        eq(users.isAdmin, true),
+        sql`${users.role} IN ('moderator', 'admin', 'super_admin')`
+      )
+    ).orderBy(desc(users.createdAt));
+    res.json({ team });
+  });
+
+  // Invite (assign role to existing user by email) — super_admin only
+  app.post("/api/admin/team/invite", isAuthenticated, requireSuperAdmin, async (req, res) => {
+    const adminId = getUserId(req);
+    const { email, role } = z.object({
+      email: z.string().email(),
+      role: z.enum(VALID_ADMIN_ROLES),
+    }).parse(req.body);
+
+    const [target] = await db.select({ id: users.id, email: users.email, fullName: users.fullName })
+      .from(users).where(eq(users.email, email));
+    if (!target) return res.status(404).json({ error: "No user found with that email" });
+
+    await db.update(users).set({ role, isAdmin: true }).where(eq(users.id, target.id));
+
+    const [adminUser] = await db.select({ email: users.email }).from(users).where(eq(users.id, adminId));
+    await writeAuditLog(adminId, adminUser?.email ?? "", `team:invite`, "user", target.id, `Assigned role '${role}' to ${email}`);
+
+    res.json({ ok: true });
+  });
+
+  // Change role of existing team member — super_admin only
+  app.patch("/api/admin/team/:userId/role", isAuthenticated, requireSuperAdmin, async (req, res) => {
+    const adminId = getUserId(req);
+    const targetId = req.params.userId;
+    const { role } = z.object({ role: z.enum(VALID_ADMIN_ROLES) }).parse(req.body);
+
+    const [target] = await db.select({ id: users.id, email: users.email }).from(users).where(eq(users.id, targetId));
+    if (!target) return res.status(404).json({ error: "User not found" });
+
+    await db.update(users).set({ role, isAdmin: true }).where(eq(users.id, targetId));
+
+    const [adminUser] = await db.select({ email: users.email }).from(users).where(eq(users.id, adminId));
+    await writeAuditLog(adminId, adminUser?.email ?? "", `team:role_change`, "user", targetId, `Role changed to '${role}' for ${target.email}`);
+
+    res.json({ ok: true });
+  });
+
+  // Revoke admin access — super_admin only
+  app.delete("/api/admin/team/:userId", isAuthenticated, requireSuperAdmin, async (req, res) => {
+    const adminId = getUserId(req);
+    const targetId = req.params.userId;
+    if (targetId === adminId) return res.status(400).json({ error: "Cannot revoke your own access" });
+
+    const [target] = await db.select({ id: users.id, email: users.email }).from(users).where(eq(users.id, targetId));
+    if (!target) return res.status(404).json({ error: "User not found" });
+
+    await db.update(users).set({ role: "user", isAdmin: false }).where(eq(users.id, targetId));
+
+    const [adminUser] = await db.select({ email: users.email }).from(users).where(eq(users.id, adminId));
+    await writeAuditLog(adminId, adminUser?.email ?? "", `team:revoke`, "user", targetId, `Revoked admin access from ${target.email}`);
+
     res.json({ ok: true });
   });
 }
