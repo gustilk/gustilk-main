@@ -133,22 +133,8 @@ function HomeScreen({ onEmail, onPhone }: { onEmail: () => void; onPhone: () => 
   const { t } = useTranslation();
   const oauthError = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("oauth") === "error";
 
-  async function handleGoogleLogin() {
-    const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
-    if (isNative) {
-      const { Browser } = await import("@capacitor/browser");
-      const { App } = await import("@capacitor/app");
-      await Browser.open({ url: "https://gustilk.com/api/auth/google?platform=capacitor", windowName: "_self" });
-      const listener = await App.addListener("appUrlOpen", async (event: { url: string }) => {
-        if (event.url.includes("gustilk://oauth/callback")) {
-          await listener.remove();
-          await Browser.close();
-          await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-        }
-      });
-    } else {
-      window.location.href = "/api/auth/google";
-    }
+  function handleGoogleLogin() {
+    window.location.href = "/api/auth/google";
   }
 
   const features = [
