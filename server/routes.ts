@@ -13,6 +13,7 @@ import { count, sql, eq, asc, desc, or, and, ilike, isNotNull } from "drizzle-or
 import { randomUUID, randomBytes } from "crypto";
 import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail, sendAdminApprovalNeededEmail } from "./email";
 import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
+import { registerOAuthRoutes } from "./oauth";
 import OpenAI from "openai";
 
 let _openai: OpenAI | null = null;
@@ -1324,6 +1325,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   // ─── EXTENDED ADMIN ROUTES ────────────────────────────────────────────────
   registerAdminRoutes(app, isAuthenticated, requireAdmin, requireSuperAdmin);
+  registerOAuthRoutes(app);
 
   // ─── HOURLY MESSAGE EXPIRY CLEANUP ────────────────────────────────────────
   const runMsgCleanup = async () => {
