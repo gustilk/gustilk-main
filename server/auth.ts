@@ -64,7 +64,6 @@ declare module "express-session" {
     userId: string;
     webAuthnChallenge?: string;
     webAuthnPhone?: string;
-    oauthPlatform?: string;
   }
 }
 
