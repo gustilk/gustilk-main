@@ -1,4 +1,3 @@
-import newLogo from "@assets/IMG_1901_transparent.png";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Lock, MessageCircle } from "lucide-react";
@@ -35,9 +34,8 @@ export default function MatchesPage({ user }: Props) {
 
   return (
     <div className="flex flex-col min-h-screen pb-20" style={{ background: "#060612" }}>
-      <div className="pt-12 pb-2 px-5 flex items-center gap-2.5">
-        <img src={newLogo} alt="" className="flex-shrink-0" style={{ width: "64px", height: "64px", objectFit: "contain" }} />
-        <h1 className="font-serif text-2xl text-gold">{t("matches.title")}</h1>
+      <div className="pt-12 pb-3 px-5">
+        <h1 className="font-serif text-3xl font-bold text-gold">{t("matches.title")}</h1>
       </div>
 
       {isLoading ? (

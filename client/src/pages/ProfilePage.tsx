@@ -1,4 +1,3 @@
-import newLogo from "@assets/IMG_1901_transparent.png";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -458,8 +457,7 @@ export default function ProfilePage({ user }: Props) {
     )}
     <div className="flex flex-col min-h-screen pb-24" style={{ background: "#060612" }}>
       <div className="pt-12 pb-4 px-5">
-        <div className="flex items-center justify-between mb-3">
-          <img src={newLogo} alt="" className="flex-shrink-0" style={{ width: "52px", height: "52px", objectFit: "contain" }} />
+        <div className="flex justify-end mb-2">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPreviewOpen(true)}
@@ -481,7 +479,7 @@ export default function ProfilePage({ user }: Props) {
             </button>
           </div>
         </div>
-        <h1 className="font-serif text-2xl text-gold">{t("profile.title")}</h1>
+        <h1 className="font-serif text-3xl font-bold text-gold">{t("profile.title")}</h1>
       </div>
 
       {/* Rejection re-upload banner */}

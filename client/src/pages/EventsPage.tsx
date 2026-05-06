@@ -1,4 +1,3 @@
-import newLogo from "@assets/IMG_1901_transparent.png";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -126,8 +125,7 @@ export default function EventsPage({ user }: Props) {
       <div className="pt-12 pb-4 px-5">
         <div className="flex items-center justify-between mb-0.5">
           <div className="flex items-center gap-2.5">
-            <img src={newLogo} alt="" className="flex-shrink-0" style={{ width: "64px", height: "64px", objectFit: "contain" }} />
-            <h1 className="font-serif text-2xl text-gold">{t("events.title")}</h1>
+            <h1 className="font-serif text-3xl font-bold text-gold">{t("events.title")}</h1>
           </div>
           {(user.isAdmin || user.isPremium) && (
             <button
