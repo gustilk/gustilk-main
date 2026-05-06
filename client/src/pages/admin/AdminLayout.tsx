@@ -210,7 +210,7 @@ export default function AdminLayout({ user }: { user: User }) {
   };
 
   const sidebar = (
-    <div className="flex flex-col h-full" style={{ background: "linear-gradient(180deg, #1a0b2e 0%, #060612 100%)" }}>
+    <div className="flex flex-col h-full" style={{ background: "linear-gradient(180deg, #1a0b2e 0%, #0d2a1e 100%)" }}>
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 py-5 border-b" style={{ borderColor: "rgba(201,168,76,0.15)" }}>
         <div className="w-8 h-8 rounded-lg flex items-center justify-center font-serif text-sm font-bold text-gold"
@@ -279,7 +279,7 @@ export default function AdminLayout({ user }: { user: User }) {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "#060612" }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: "#0d2a1e" }}>
       {/* Desktop sidebar */}
       <div className="hidden md:flex flex-col w-52 flex-shrink-0 border-r" style={{ borderColor: "rgba(201,168,76,0.15)" }}>
         {sidebar}

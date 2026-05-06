@@ -26,7 +26,7 @@ export default function VideoCallPage() {
     "Connected";
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: "#060612" }}>
+    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: "#0d2a1e" }}>
       {/* Remote video — full background */}
       <video
         ref={remoteEl}

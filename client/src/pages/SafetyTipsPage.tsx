@@ -94,7 +94,7 @@ const SECTIONS = [
 
 export default function SafetyTipsPage() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#060612" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#0d2a1e" }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-5 pt-12 pb-4 flex-shrink-0"
         style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>

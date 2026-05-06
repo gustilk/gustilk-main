@@ -6,7 +6,7 @@ html, body, #root {
   overflow-x: hidden;
   width: 100%;
   -webkit-text-size-adjust: 100%;
-  background-color: #060612;
+  background-color: #0d2a1e;
   color-scheme: dark;
   overscroll-behavior: none;
 }
@@ -186,7 +186,7 @@ html, body, #root {
 
   body {
     @apply font-sans antialiased text-foreground;
-    background-color: #060612;
+    background-color: #0d2a1e;
   }
 }
 

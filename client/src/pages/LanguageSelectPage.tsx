@@ -20,7 +20,7 @@ export default function LanguageSelectPage({ onSelect }: Props) {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center px-5 py-12"
-      style={{ background: "linear-gradient(160deg, #060612 0%, #1a0a2e 60%, #060612 100%)" }}
+      style={{ background: "linear-gradient(160deg, #0d2a1e 0%, #1a0a2e 60%, #0d2a1e 100%)" }}
     >
       <div className="w-full max-w-sm flex flex-col items-center">
         <div className="relative inline-flex items-center justify-center mb-6">

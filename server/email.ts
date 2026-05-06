@@ -15,15 +15,15 @@ function emailShell(body: string): string {
   <meta name="x-apple-disable-message-reformatting">
   <title>Gustilk</title>
 </head>
-<body style="margin:0;padding:0;background-color:#060612;" bgcolor="#060612">
-  <!--[if mso]><table width="100%" bgcolor="#060612"><tr><td><![endif]-->
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#060612" style="background-color:#060612;padding:40px 16px;">
+<body style="margin:0;padding:0;background-color:#0d2a1e;" bgcolor="#0d2a1e">
+  <!--[if mso]><table width="100%" bgcolor="#0d2a1e"><tr><td><![endif]-->
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0d2a1e" style="background-color:#0d2a1e;padding:40px 16px;">
     <tr><td align="center">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
 
         <!-- Logo header -->
         <tr>
-          <td align="center" bgcolor="#060612" style="background-color:#060612;padding:0 0 28px 0;">
+          <td align="center" bgcolor="#0d2a1e" style="background-color:#0d2a1e;padding:0 0 28px 0;">
             <p style="margin:0 0 4px 0;font-size:32px;font-weight:bold;letter-spacing:3px;color:#c9a84c;font-family:Georgia,serif;">Gustilk</p>
             <p style="margin:0;font-size:10px;color:#7a6535;letter-spacing:4px;text-transform:uppercase;font-family:Arial,sans-serif;">YEZIDI COMMUNITY</p>
           </td>

@@ -100,7 +100,7 @@ export default function PremiumPage({ user }: Props) {
 
   if (user.isPremium) {
     return (
-      <div className="flex flex-col min-h-screen items-center justify-center pb-24 px-6 text-center" style={{ background: "#060612" }}>
+      <div className="flex flex-col min-h-screen items-center justify-center pb-24 px-6 text-center" style={{ background: "#0d2a1e" }}>
         <div className="w-24 h-24 rounded-full flex items-center justify-center mb-6" style={{ border: "3px solid #c9a84c" }}>
           <Star size={40} fill="#c9a84c" color="#c9a84c" />
         </div>
@@ -168,7 +168,7 @@ export default function PremiumPage({ user }: Props) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#060612" }}>
+    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d2a1e" }}>
       <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
         <button onClick={() => window.history.back()} data-testid="button-back" className="text-cream/60">
           <ArrowLeft size={22} />

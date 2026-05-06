@@ -238,7 +238,7 @@ export default function SocialSetupPage({ user }: Props) {
         onClose={() => setShowGuidelinesModal(false)}
       />
     )}
-    <div className="min-h-screen flex items-center justify-center px-5 py-8" style={{ background: "#060612" }}>
+    <div className="min-h-screen flex items-center justify-center px-5 py-8" style={{ background: "#0d2a1e" }}>
       <div className="relative z-10 w-full max-w-sm animate-slide-up">
 
         {/* App name */}
@@ -782,7 +782,7 @@ function CommunityGuidelinesModal({ onAgree, onClose }: { onAgree: () => void; o
   const sections = t("agreement.sections", { returnObjects: true }) as Array<{ title: string; body: string }>;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: "#060612" }}>
+    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: "#0d2a1e" }}>
       <div className="fixed inset-0 pointer-events-none" style={{
         background: "radial-gradient(ellipse 70% 40% at 50% 0%, rgba(74,30,107,0.7) 0%, transparent 70%)",
       }} />
