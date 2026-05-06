@@ -72,7 +72,6 @@ export const users = pgTable("users", {
   isEmailVerified: boolean("is_email_verified").default(false),
   emailActivationCode: varchar("email_activation_code", { length: 6 }),
   emailActivationExpiry: timestamp("email_activation_expiry"),
-  facebookId: varchar("facebook_id", { length: 255 }).unique(),
 });
 
 export type UpsertUser = typeof users.$inferInsert;

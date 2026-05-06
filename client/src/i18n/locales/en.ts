@@ -623,7 +623,7 @@ export default {
   },
   dataDeletion: {
     pageTitle: "Data Deletion",
-    intro: "Last updated: May 2026 · This page explains how to request deletion of your Gûstîlk account and all associated personal data, in compliance with Facebook Platform Policy, Apple App Store, and Google Play Store requirements.",
+    intro: "Last updated: May 2026 · This page explains how to request deletion of your Gûstîlk account and all associated personal data, in compliance with Apple App Store and Google Play Store requirements.",
     sections: [
       {
         title: "1. Delete Your Account In-App",
@@ -635,18 +635,14 @@ export default {
       },
       {
         title: "3. What Gets Deleted",
-        body: "Upon deletion we permanently remove: your profile and photos, all matches and messages, likes, gifts, and event attendance, login credentials and linked social accounts (including Facebook), and any other personal data associated with your account.",
+        body: "Upon deletion we permanently remove: your profile and photos, all matches and messages, likes, gifts, and event attendance, login credentials, and any other personal data associated with your account.",
       },
       {
         title: "4. Retention Period",
         body: "Deleted data is removed from our active systems within 30 days. Encrypted backups may retain data for up to 90 days before being purged. We do not sell or share your data with third parties.",
       },
       {
-        title: "5. Facebook Login Users",
-        body: "If you signed up using Facebook Login, deleting your Gûstîlk account also removes the connection between your Facebook account and Gûstîlk. You can also revoke app access directly from your Facebook settings under Settings → Apps and Websites → Gûstîlk.",
-      },
-      {
-        title: "6. Contact Us",
+        title: "5. Contact Us",
         body: "For any questions about data deletion or your privacy rights, contact us at support@gustilk.com.",
       },
     ],
