@@ -456,7 +456,7 @@ export default function ProfilePage({ user }: Props) {
     {previewOpen && (
       <ProfilePreviewModal user={me} onClose={() => setPreviewOpen(false)} />
     )}
-    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
+    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#060612" }}>
       <div className="pt-12 pb-2 px-5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <img src={newLogo} alt="" className="flex-shrink-0" style={{ width: "64px", height: "64px", objectFit: "contain" }} />

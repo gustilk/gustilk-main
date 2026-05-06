@@ -122,7 +122,7 @@ export default function EventsPage({ user }: Props) {
   }
 
   return (
-    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
+    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#060612" }}>
       <div className="pt-12 pb-4 px-5">
         <div className="flex items-center justify-between mb-0.5">
           <div className="flex items-center gap-2.5">
@@ -226,7 +226,7 @@ function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
   ];
 
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col" style={{ background: "#0d0618" }}>
+    <div className="fixed inset-0 z-[60] flex flex-col" style={{ background: "#060612" }}>
       {/* Native-style nav bar */}
       <div
         className="flex items-center justify-between px-4 flex-shrink-0"

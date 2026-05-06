@@ -192,7 +192,7 @@ export default function DiscoverPage({ user }: Props) {
   })();
 
   return (
-    <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
+    <div className="flex flex-col min-h-screen pb-20" style={{ background: "#060612" }}>
       {/* Like / dislike Lottie overlay */}
       {swipeAnim && (
         <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">

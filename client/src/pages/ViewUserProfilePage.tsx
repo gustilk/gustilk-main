@@ -88,7 +88,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen" style={{ background: "#0d0618" }}>
+      <div className="flex items-center justify-center h-screen" style={{ background: "#060612" }}>
         <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -96,7 +96,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
 
   if (!profile) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen gap-4" style={{ background: "#0d0618" }}>
+      <div className="flex flex-col items-center justify-center h-screen gap-4" style={{ background: "#060612" }}>
         <p className="text-cream/50">Profile not found.</p>
         <button onClick={goBack} className="text-gold text-sm">Go back</button>
       </div>
@@ -130,7 +130,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
+    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#060612" }}>
 
       {/* ── Photo section ───────────────────────────────── */}
       <div className="relative" style={{ aspectRatio: "3 / 4", maxHeight: "85vh", background: "#0a0412" }}>
@@ -384,7 +384,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
 
       {/* ── Floating action bar — Hily-style ────────────────── */}
       <div className="fixed bottom-0 left-0 right-0 px-4 pt-6 pb-5 z-40 pointer-events-none"
-        style={{ background: "linear-gradient(to top, #0d0618 55%, rgba(13,6,24,0.6) 85%, transparent 100%)" }}>
+        style={{ background: "linear-gradient(to top, #060612 55%, rgba(13,6,24,0.6) 85%, transparent 100%)" }}>
         <div className="flex items-center justify-center gap-5 max-w-sm mx-auto pointer-events-auto">
           {showLikeActions && !actedOnLike ? (
             <>

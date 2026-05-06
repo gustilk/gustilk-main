@@ -71,7 +71,7 @@ export default function ActivityPage({ user }: Props) {
   const visitorsCount = visitors?.items?.length ?? 0;
 
   return (
-    <div className="min-h-screen flex flex-col pb-24" style={{ background: "#0d0618" }}>
+    <div className="min-h-screen flex flex-col pb-24" style={{ background: "#060612" }}>
       {/* Header */}
       <div className="px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
         <h1 className="font-serif text-2xl text-gold">{t("activity.title")}</h1>
@@ -111,7 +111,7 @@ export default function ActivityPage({ user }: Props) {
               {count > 0 && (
                 <span
                   className="absolute top-1.5 right-3 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center text-[9px] font-bold"
-                  style={{ background: isActive ? "#c9a84c" : "rgba(201,168,76,0.4)", color: isActive ? "#0d0618" : "rgba(253,248,240,0.8)" }}
+                  style={{ background: isActive ? "#c9a84c" : "rgba(201,168,76,0.4)", color: isActive ? "#060612" : "rgba(253,248,240,0.8)" }}
                   data-testid={`count-${id}`}
                 >
                   {count > 99 ? "99+" : count}

@@ -6,7 +6,7 @@ export default function GdprPage() {
   const sections = t("gdprPage.sections", { returnObjects: true }) as { num: string; title: string; body: string }[];
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#060612" }}>
       <div className="flex items-center gap-3 px-5 pt-12 pb-4 flex-shrink-0"
         style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
         <button

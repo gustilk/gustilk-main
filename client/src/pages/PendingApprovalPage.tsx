@@ -47,7 +47,7 @@ export default function PendingApprovalPage({ user }: Props) {
   if (status === "banned") {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12"
-        style={{ background: "linear-gradient(160deg, #0d0618 0%, #1a0a2e 60%, #0d0618 100%)" }}>
+        style={{ background: "linear-gradient(160deg, #060612 0%, #1a0a2e 60%, #060612 100%)" }}>
         <div className="w-full max-w-sm text-center">
           <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
             style={{ background: "rgba(239,68,68,0.12)", border: "2px solid rgba(239,68,68,0.35)" }}>
@@ -85,7 +85,7 @@ export default function PendingApprovalPage({ user }: Props) {
   if (status === "rejected") {
     return (
       <div className="min-h-screen flex flex-col px-6 py-12"
-        style={{ background: "linear-gradient(160deg, #0d0618 0%, #1a0a2e 60%, #0d0618 100%)" }}>
+        style={{ background: "linear-gradient(160deg, #060612 0%, #1a0a2e 60%, #060612 100%)" }}>
         <div className="w-full max-w-sm mx-auto">
           <div className="text-center mb-6">
             <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5"
@@ -218,7 +218,7 @@ export default function PendingApprovalPage({ user }: Props) {
   // ── PENDING (default) ─────────────────────────────────────────────────────
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12"
-      style={{ background: "linear-gradient(160deg, #0d0618 0%, #1a0a2e 60%, #0d0618 100%)" }}>
+      style={{ background: "linear-gradient(160deg, #060612 0%, #1a0a2e 60%, #060612 100%)" }}>
       <div className="w-full max-w-sm text-center">
         <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
           style={{ background: "linear-gradient(135deg, #c9a84c22, #7b3fa022)", border: "2px solid #c9a84c44" }}>

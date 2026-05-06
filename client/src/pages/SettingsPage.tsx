@@ -197,7 +197,7 @@ export default function SettingsPage({ user }: Props) {
 
   if (subScreen === "guidelines") {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
+      <div className="min-h-screen flex flex-col" style={{ background: "#060612" }}>
         <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
           <button
             onClick={() => setSubScreen(null)}
@@ -234,7 +234,7 @@ export default function SettingsPage({ user }: Props) {
     };
 
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
+      <div className="min-h-screen flex flex-col" style={{ background: "#060612" }}>
         <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
           <button
             onClick={() => setSubScreen(null)}
@@ -300,7 +300,7 @@ export default function SettingsPage({ user }: Props) {
 
   if (subScreen === "language") {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
+      <div className="min-h-screen flex flex-col" style={{ background: "#060612" }}>
         <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
           <button
             onClick={() => setSubScreen(null)}
@@ -347,7 +347,7 @@ export default function SettingsPage({ user }: Props) {
   if (subScreen === "notifications") {
     const pushBlocked = pushPermission === "denied";
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
+      <div className="min-h-screen flex flex-col" style={{ background: "#060612" }}>
         <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
           <button
             onClick={() => setSubScreen(null)}
@@ -476,7 +476,7 @@ export default function SettingsPage({ user }: Props) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col pb-24" style={{ background: "#0d0618" }}>
+    <div className="min-h-screen flex flex-col pb-24" style={{ background: "#060612" }}>
       <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
         <button
           onClick={() => setLocation("/profile")}
@@ -712,7 +712,7 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
   const sectionStyle = { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(201,168,76,0.1)" };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#060612" }}>
       <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
         <button onClick={onBack} data-testid="button-back-account" className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,0.06)" }}>
           <ChevronLeft size={18} color="rgba(253,248,240,0.7)" />
@@ -844,7 +844,7 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
 
 function SubScreenShell({ title, onBack, testId, children }: { title: string; onBack: () => void; testId: string; children: ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#060612" }}>
       <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
         <button onClick={onBack} data-testid={testId} className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,0.06)" }}>
           <ChevronLeft size={18} color="rgba(253,248,240,0.7)" />
@@ -1062,7 +1062,7 @@ function BlockedUsersScreen({ onBack }: { onBack: () => void }) {
   const blockedUsers = data?.users ?? [];
 
   return (
-    <div className="min-h-screen flex flex-col pb-24" style={{ background: "#0d0618" }}>
+    <div className="min-h-screen flex flex-col pb-24" style={{ background: "#060612" }}>
       <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
         <button
           onClick={onBack}

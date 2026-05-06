@@ -50,7 +50,7 @@ export default function EventDetailPage({ user, eventId }: Props) {
   const emoji = event ? TYPE_EMOJI[event.type] ?? "📅" : "📅";
 
   return (
-    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
+    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#060612" }}>
       <div
         className="absolute top-0 left-0 right-0 z-10 flex items-center px-4 pt-12 pb-3"
         style={{ background: "linear-gradient(to bottom, rgba(13,6,24,0.85), transparent)" }}

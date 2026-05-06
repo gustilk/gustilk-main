@@ -14,7 +14,7 @@ export default function GuidelinesPage() {
   const allSections = [...(Array.isArray(agreementSections) ? agreementSections : []), section8, sectionContact];
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#0d0618" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#060612" }}>
       <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.12)" }}>
         <button
           onClick={() => setLocation("/")}
