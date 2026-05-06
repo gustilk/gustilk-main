@@ -33,7 +33,7 @@ export default function MatchesPage({ user }: Props) {
   const conversations = regularMatches.filter(m => !!m.lastMessage);
 
   return (
-    <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d2a1e" }}>
+    <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
       <div className="pt-12 pb-3 px-5">
         <h1 className="font-serif text-3xl font-bold text-gold">{t("matches.title")}</h1>
       </div>
@@ -174,7 +174,7 @@ function NewMatchBubble({ match, isPremium, onClick }: {
         )}
         {isPremium && getActiveLabel(other.activitySeenAt) && (
           <span className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 bg-emerald-400"
-            style={{ borderColor: "#0d2a1e", boxShadow: "0 0 5px #34d399" }} />
+            style={{ borderColor: "#0d0618", boxShadow: "0 0 5px #34d399" }} />
         )}
       </div>
       <span className="text-[11px] text-cream/60 font-medium max-w-[60px] truncate">
@@ -249,7 +249,7 @@ function ConversationItem({ match, currentUserId, isPremium, onClick }: {
         )}
         {isPremium && !hasUnread && getActiveLabel(other.activitySeenAt) && (
           <span className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 bg-emerald-400"
-            style={{ borderColor: "#0d2a1e", boxShadow: "0 0 5px #34d399" }} />
+            style={{ borderColor: "#0d0618", boxShadow: "0 0 5px #34d399" }} />
         )}
       </div>
 

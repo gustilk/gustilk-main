@@ -2,7 +2,7 @@ import { AlertCircle } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center" style={{ background: "#0d2a1e" }}>
+    <div className="min-h-screen w-full flex items-center justify-center" style={{ background: "#0d0618" }}>
       <div className="w-full max-w-md mx-4 rounded-2xl p-6" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}>
         <div className="flex mb-4 gap-2 items-center">
           <AlertCircle className="h-8 w-8" style={{ color: "#d4608a" }} />

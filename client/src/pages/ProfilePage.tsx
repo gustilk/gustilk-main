@@ -455,7 +455,7 @@ export default function ProfilePage({ user }: Props) {
     {previewOpen && (
       <ProfilePreviewModal user={me} onClose={() => setPreviewOpen(false)} />
     )}
-    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d2a1e" }}>
+    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
       <div className="pt-12 pb-4 px-5 flex items-center justify-between">
         <h1 className="font-serif text-3xl font-bold text-gold">{t("profile.title")}</h1>
         <div className="flex items-center gap-2">

@@ -73,7 +73,7 @@ function AdminRoute({ user }: { user: User }) {
 
 function AdminSpinner() {
   return (
-    <div className="flex items-center justify-center min-h-screen" style={{ background: "#0d2a1e" }}>
+    <div className="flex items-center justify-center min-h-screen" style={{ background: "#0d0618" }}>
       <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "rgba(201,168,76,0.6) transparent transparent transparent" }} />
     </div>
   );
@@ -171,7 +171,7 @@ function AppShell({ user }: { user: User }) {
 
   return (
     <VideoCallContext.Provider value={callCtx}>
-      <div className="flex flex-col min-h-screen" style={{ background: "#0d2a1e", fontFamily: "'Open Sans', sans-serif" }}>
+      <div className="flex flex-col min-h-screen" style={{ background: "#0d0618", fontFamily: "'Open Sans', sans-serif" }}>
         {isPending && !isAdminRoute && !isInCall && <PendingReviewBanner />}
         {callCtx.incomingCall && !isInCall && <IncomingCallBanner />}
         {isInCall && <VideoCallPage />}
@@ -180,7 +180,7 @@ function AppShell({ user }: { user: User }) {
             routing context that strips /admin from useLocation/useRoute */}
         {isAdminRoute && <AdminRoute user={user} />}
 
-        <main className="flex-1 overflow-hidden" style={{ background: "#0d2a1e" }}>
+        <main className="flex-1 overflow-hidden" style={{ background: "#0d0618" }}>
           {!isAdminRoute && (
             <Switch>
               <Route path="/discover" component={() => <DiscoverPage user={user} />} />
@@ -216,7 +216,7 @@ function Router() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen" style={{ background: "#0d2a1e" }}>
+      <div className="flex items-center justify-center min-h-screen" style={{ background: "#0d0618" }}>
         <div className="text-center">
           <div className="font-serif text-4xl text-gold mb-3">Gûstîlk</div>
           <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin mx-auto" />

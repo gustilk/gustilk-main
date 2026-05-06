@@ -116,7 +116,7 @@ export default function BottomNav() {
               {isActivity && likesCount > 0 && (
                 <span
                   className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
-                  style={{ background: "#c9a84c", color: "#0d2a1e" }}
+                  style={{ background: "#c9a84c", color: "#0d0618" }}
                   data-testid="badge-activity"
                 >
                   {likesCount > 9 ? "9+" : likesCount}

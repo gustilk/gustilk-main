@@ -20,7 +20,7 @@ export default function PendingVerificationPage({ user }: Props) {
   });
 
   return (
-    <div className="flex flex-col min-h-screen items-center justify-center px-6 text-center" style={{ background: "#0d2a1e" }}>
+    <div className="flex flex-col min-h-screen items-center justify-center px-6 text-center" style={{ background: "#0d0618" }}>
       <div className="relative mb-8">
         <div
           className="w-28 h-28 rounded-full flex items-center justify-center"

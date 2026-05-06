@@ -197,7 +197,7 @@ export default function ChatPage({ user, matchId }: Props) {
 
   if (!user.isPremium && !isSupportChat && !matchLoading && !matchFetching) {
     return (
-      <div className="flex flex-col h-screen" style={{ background: "#0d2a1e" }}>
+      <div className="flex flex-col h-screen" style={{ background: "#0d0618" }}>
         <div className="flex items-center gap-3 px-4 pt-12 pb-3"
           style={{ background: "rgba(13,6,24,0.97)", borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
           <button onClick={() => setLocation(backTo)} data-testid="button-back" className="text-cream/60">
@@ -246,7 +246,7 @@ export default function ChatPage({ user, matchId }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: "#0d2a1e" }}>
+    <div className="flex flex-col h-screen" style={{ background: "#0d0618" }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-12 pb-3"
         style={{ background: "rgba(13,6,24,0.97)", borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
@@ -262,7 +262,7 @@ export default function ChatPage({ user, matchId }: Props) {
                 <img src={newLogo} alt="Support" className="w-10 h-10 object-contain" />
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
-                style={{ background: "#10b981", border: "1.5px solid #0d2a1e" }}>
+                style={{ background: "#10b981", border: "1.5px solid #0d0618" }}>
                 <Bot size={9} color="white" />
               </span>
             </div>
@@ -804,7 +804,7 @@ function GiftBubble({ gift, isMine, viewerId }: { gift: GiftType; isMine: boolea
               <div
                 className="flex flex-col items-center gap-1 px-4 py-3 rounded-2xl"
                 style={{
-                  background: "#0d2a1e",
+                  background: "#0d0618",
                   border: `1px solid ${g.color}44`,
                   boxShadow: `0 0 16px ${g.color}22`,
                 }}

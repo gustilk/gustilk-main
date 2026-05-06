@@ -56,7 +56,7 @@ export default function EditProfilePage({ user }: Props) {
     setForm(f => ({ ...f, [key]: e.target.value }));
 
   return (
-    <div className="flex flex-col min-h-screen pb-8" style={{ background: "#0d2a1e" }}>
+    <div className="flex flex-col min-h-screen pb-8" style={{ background: "#0d0618" }}>
       {/* Header */}
       <div
         className="flex items-center justify-between px-5 pt-12 pb-4"

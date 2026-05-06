@@ -131,7 +131,7 @@ export default function VerificationPage({ user }: Props) {
 
   if (step === "done") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center" style={{ background: "#0d2a1e" }}>
+      <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center" style={{ background: "#0d0618" }}>
         <div className="w-24 h-24 rounded-full flex items-center justify-center mb-6"
           style={{ background: "rgba(16,185,129,0.15)", border: "2px solid rgba(16,185,129,0.4)" }}>
           <CheckCircle size={44} color="#10b981" />
@@ -150,7 +150,7 @@ export default function VerificationPage({ user }: Props) {
 
   if (step === "checking") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-5" style={{ background: "#0d2a1e" }}>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-5" style={{ background: "#0d0618" }}>
         <div className="w-14 h-14 border-2 border-gold border-t-transparent rounded-full animate-spin" />
         <p className="text-cream/60 text-sm">Checking your selfie…</p>
       </div>
@@ -159,7 +159,7 @@ export default function VerificationPage({ user }: Props) {
 
   if (step === "preview" && selfieData) {
     return (
-      <div className="flex flex-col min-h-screen px-5" style={{ background: "#0d2a1e" }}>
+      <div className="flex flex-col min-h-screen px-5" style={{ background: "#0d0618" }}>
         <div className="pt-14 pb-6 text-center">
           <h2 className="font-serif text-2xl text-gold mb-1">Looks good?</h2>
           <p className="text-cream/50 text-sm">Make sure your face is clearly visible</p>
@@ -200,7 +200,7 @@ export default function VerificationPage({ user }: Props) {
 
   if (step === "camera") {
     return (
-      <div className="flex flex-col min-h-screen" style={{ background: "#0d2a1e" }}>
+      <div className="flex flex-col min-h-screen" style={{ background: "#0d0618" }}>
         <div className="pt-12 pb-4 text-center px-5">
           <h2 className="font-serif text-2xl text-gold mb-1">Take a Selfie</h2>
           <p className="text-cream/50 text-sm">Centre your face in the oval and tap Capture</p>
@@ -261,7 +261,7 @@ export default function VerificationPage({ user }: Props) {
   }
 
   return (
-    <div className="flex flex-col min-h-screen px-5" style={{ background: "#0d2a1e" }}>
+    <div className="flex flex-col min-h-screen px-5" style={{ background: "#0d0618" }}>
       <div className="pt-14 pb-2 text-center">
         <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5"
           style={{ background: "rgba(201,168,76,0.1)", border: "2px solid rgba(201,168,76,0.3)" }}>

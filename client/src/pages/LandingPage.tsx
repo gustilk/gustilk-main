@@ -49,7 +49,7 @@ export default function LandingPage() {
   const currentLang = LANGUAGE_LIST.find(l => l.code === i18n.language) ?? LANGUAGE_LIST[0];
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ background: "#0d2a1e" }}>
+    <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ background: "#0d0618" }}>
 
       <button
         onClick={triggerLangPicker}
