@@ -8,71 +8,60 @@ function getResend(): Resend {
 
 function emailShell(body: string): string {
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="color-scheme" content="dark">
-  <title>Gûstîlk</title>
+  <meta name="x-apple-disable-message-reformatting">
+  <title>Gustilk</title>
 </head>
-<body style="margin:0;padding:0;background:#060612;font-family:'Georgia',serif;-webkit-font-smoothing:antialiased;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#060612;padding:48px 16px;">
+<body style="margin:0;padding:0;background-color:#060612;" bgcolor="#060612">
+  <!--[if mso]><table width="100%" bgcolor="#060612"><tr><td><![endif]-->
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#060612" style="background-color:#060612;padding:40px 16px;">
     <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:500px;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
 
-        <!-- Logo / Header -->
-        <tr><td align="center" style="padding-bottom:28px;">
-          <table cellpadding="0" cellspacing="0">
-            <tr>
-              <td style="padding:0 12px 0 0;vertical-align:middle;">
-                <!-- Decorative peacock-feather divider left -->
-                <div style="width:40px;height:1px;background:linear-gradient(to right,transparent,rgba(201,168,76,0.5));"></div>
-              </td>
-              <td align="center" style="vertical-align:middle;">
-                <p style="margin:0;font-size:30px;font-weight:bold;letter-spacing:2px;color:#c9a84c;font-family:'Georgia',serif;">Gûstîlk</p>
-                <p style="margin:2px 0 0;font-size:10px;color:rgba(201,168,76,0.45);letter-spacing:4px;text-transform:uppercase;font-family:Arial,sans-serif;">Yezidi Community</p>
-              </td>
-              <td style="padding:0 0 0 12px;vertical-align:middle;">
-                <div style="width:40px;height:1px;background:linear-gradient(to left,transparent,rgba(201,168,76,0.5));"></div>
-              </td>
-            </tr>
-          </table>
-        </td></tr>
+        <!-- Logo header -->
+        <tr>
+          <td align="center" bgcolor="#060612" style="background-color:#060612;padding:0 0 28px 0;">
+            <p style="margin:0 0 4px 0;font-size:32px;font-weight:bold;letter-spacing:3px;color:#c9a84c;font-family:Georgia,serif;">Gustilk</p>
+            <p style="margin:0;font-size:10px;color:#7a6535;letter-spacing:4px;text-transform:uppercase;font-family:Arial,sans-serif;">YEZIDI COMMUNITY</p>
+          </td>
+        </tr>
 
-        <!-- Card -->
-        <tr><td>
-          <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(160deg,#12062a 0%,#0d0520 100%);border-radius:24px;overflow:hidden;border:1px solid rgba(201,168,76,0.18);box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+        <!-- Gold accent bar -->
+        <tr>
+          <td bgcolor="#c9a84c" height="3" style="background-color:#c9a84c;height:3px;font-size:0;line-height:0;">&nbsp;</td>
+        </tr>
 
-            <!-- Gold top accent bar -->
-            <tr><td style="height:3px;background:linear-gradient(to right,#7b3fa0,#c9a84c,#d4608a);font-size:0;">&nbsp;</td></tr>
+        <!-- Card body -->
+        <tr>
+          <td bgcolor="#100828" style="background-color:#100828;padding:36px 36px 32px 36px;">
+            ${body}
+          </td>
+        </tr>
 
-            <!-- Body content -->
-            <tr><td style="padding:36px 36px 32px;">
-              ${body}
-            </td></tr>
+        <!-- Bottom accent bar -->
+        <tr>
+          <td bgcolor="#7b3fa0" height="2" style="background-color:#7b3fa0;height:2px;font-size:0;line-height:0;">&nbsp;</td>
+        </tr>
 
-            <!-- Footer -->
-            <tr><td style="padding:20px 36px 28px;border-top:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.15);">
-              <table width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td>
-                    <p style="margin:0 0 4px;font-size:11px;color:rgba(253,248,240,0.25);line-height:1.7;font-family:Arial,sans-serif;">
-                      Need help? <a href="mailto:support@gustilk.com" style="color:rgba(201,168,76,0.6);text-decoration:none;">support@gustilk.com</a>
-                    </p>
-                    <p style="margin:0;font-size:10px;color:rgba(253,248,240,0.15);font-family:Arial,sans-serif;">
-                      © ${new Date().getFullYear()} Gûstîlk · <a href="https://www.gustilk.com" style="color:rgba(201,168,76,0.35);text-decoration:none;">www.gustilk.com</a>
-                    </p>
-                  </td>
-                </tr>
-              </table>
-            </td></tr>
-
-          </table>
-        </td></tr>
+        <!-- Footer -->
+        <tr>
+          <td bgcolor="#0a0620" style="background-color:#0a0620;padding:18px 36px 24px 36px;">
+            <p style="margin:0 0 4px 0;font-size:11px;color:#6b5a8a;font-family:Arial,sans-serif;">
+              Need help? <a href="mailto:support@gustilk.com" style="color:#c9a84c;text-decoration:none;">support@gustilk.com</a>
+            </p>
+            <p style="margin:0;font-size:10px;color:#4a3a6a;font-family:Arial,sans-serif;">
+              &copy; ${new Date().getFullYear()} Gustilk &middot; <a href="https://www.gustilk.com" style="color:#7a6535;text-decoration:none;">www.gustilk.com</a>
+            </p>
+          </td>
+        </tr>
 
       </table>
     </td></tr>
   </table>
+  <!--[if mso]></td></tr></table><![endif]-->
 </body>
 </html>`;
 }
@@ -90,10 +79,10 @@ export async function sendActivationCodeEmail(to: string, firstName: string, cod
           Hi ${firstName}, enter the code below to activate your Gûstîlk account.
           This code expires in <strong style="color:#c9a84c;">15 minutes</strong>.
         </p>
-        <div style="margin:0 auto 28px;max-width:220px;text-align:center;padding:20px 28px;background:rgba(201,168,76,0.1);border-radius:16px;border:1.5px solid rgba(201,168,76,0.35);">
+        <div style="margin:0 auto 28px;max-width:220px;text-align:center;padding:20px 28px;background-color:#1a1030;border-radius:16px;border:2px solid #6a5020;">
           <p style="margin:0;font-size:38px;font-weight:bold;letter-spacing:10px;color:#c9a84c;font-family:monospace;">${code}</p>
         </div>
-        <p style="margin:0 0 8px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+        <p style="margin:0 0 8px;font-size:12px;color:#a090c0;line-height:1.6;">
           If you didn't create an account, you can safely ignore this email.
         </p>
       `),
@@ -120,7 +109,7 @@ export async function sendMagicLinkEmail(to: string, magicLink: string): Promise
           </a>
         </td></tr>
       </table>
-      <p style="margin:0 0 28px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      <p style="margin:0 0 28px;font-size:12px;color:#a090c0;line-height:1.6;">
         Or copy and paste this link into your browser:<br>
         <span style="color:rgba(201,168,76,0.6);word-break:break-all;">${magicLink}</span>
       </p>
@@ -167,7 +156,7 @@ export async function sendAccountDeletedEmail(to: string, name: string, wasPremi
           All your profile data, photos, matches, and messages have been deleted.
         </p>
         ${wasPremium ? `
-        <div style="margin:0 0 24px;padding:16px;background:rgba(201,168,76,0.08);border-radius:12px;border:1px solid rgba(201,168,76,0.2);">
+        <div style="margin:0 0 24px;padding:16px;background-color:#1a1030;border-radius:12px;border:1px solid #3a2a10;">
           <p style="margin:0 0 6px;font-size:12px;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;">Premium Subscription</p>
           <p style="margin:0;font-size:14px;color:#ffffff;line-height:1.6;">
             Your active premium subscription has been cancelled immediately.
@@ -175,11 +164,11 @@ export async function sendAccountDeletedEmail(to: string, name: string, wasPremi
             <a href="mailto:support@gustilk.com" style="color:#c9a84c;">support@gustilk.com</a>.
           </p>
         </div>` : ""}
-        <p style="margin:0 0 12px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.7;">
+        <p style="margin:0 0 12px;font-size:14px;color:#c8b8e8;line-height:1.7;">
           If you believe this was a mistake, please contact our support team.
         </p>
         <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-          <tr><td style="border-radius:12px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);">
+          <tr><td style="border-radius:12px;background:rgba(201,168,76,0.15);border:1px solid #4a3515;">
             <a href="mailto:support@gustilk.com" style="display:inline-block;padding:12px 28px;font-size:14px;font-weight:bold;color:#c9a84c;text-decoration:none;border-radius:12px;font-family:sans-serif;">
               Contact Support
             </a>
@@ -201,13 +190,13 @@ export async function sendSupportMessageAlertEmail(userDisplayName: string, mess
       subject: `New support message from ${userDisplayName}`,
       html: emailShell(`
         <h2 style="margin:0 0 12px;font-size:20px;color:#ffffff;font-weight:normal;">New Support Message</h2>
-        <p style="margin:0 0 8px;font-size:13px;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:1px;">From</p>
+        <p style="margin:0 0 8px;font-size:13px;color:#c8b8e8;text-transform:uppercase;letter-spacing:1px;">From</p>
         <p style="margin:0 0 20px;font-size:15px;color:#c9a84c;font-weight:bold;">${userDisplayName}</p>
-        <p style="margin:0 0 8px;font-size:13px;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:1px;">Message</p>
-        <div style="margin:0 0 28px;padding:16px;background:rgba(255,255,255,0.04);border-radius:12px;border:1px solid rgba(255,255,255,0.08);">
+        <p style="margin:0 0 8px;font-size:13px;color:#c8b8e8;text-transform:uppercase;letter-spacing:1px;">Message</p>
+        <div style="margin:0 0 28px;padding:16px;background-color:#140830;border-radius:12px;border:1px solid #2a1a4a;">
           <p style="margin:0;font-size:14px;color:#ffffff;line-height:1.7;">${preview}</p>
         </div>
-        <p style="margin:0 0 8px;font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;">
+        <p style="margin:0 0 8px;font-size:13px;color:#b0a0d0;line-height:1.6;">
           The AI assistant has already sent an automatic reply. Log in as the support account to respond manually if needed.
         </p>
         <table cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
@@ -238,7 +227,7 @@ export async function sendAdminApprovalNeededEmail(
       subject: `New profile pending approval — ${applicantName}`,
       html: emailShell(`
         <h2 style="margin:0 0 12px;font-size:20px;color:#ffffff;font-weight:normal;">New Profile Awaiting Approval</h2>
-        <p style="margin:0 0 8px;font-size:13px;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:1px;">Applicant</p>
+        <p style="margin:0 0 8px;font-size:13px;color:#c8b8e8;text-transform:uppercase;letter-spacing:1px;">Applicant</p>
         <p style="margin:0 0 6px;font-size:16px;color:#c9a84c;font-weight:bold;">${applicantName}</p>
         <p style="margin:0 0 24px;font-size:13px;color:#ffffff;">${applicantEmail}</p>
         <p style="margin:0 0 20px;font-size:14px;color:#ffffff;line-height:1.7;">
@@ -277,7 +266,7 @@ export async function sendRoleAssignedEmail(to: string, name: string, role: stri
           Hi ${name}, you've been granted <strong style="color:#c9a84c;">${roleLabel}</strong> access on Gûstîlk.
           Log in with your existing account credentials to access the admin panel.
         </p>
-        <div style="margin:0 0 24px;padding:16px;background:rgba(201,168,76,0.08);border-radius:12px;border:1px solid rgba(201,168,76,0.2);">
+        <div style="margin:0 0 24px;padding:16px;background-color:#1a1030;border-radius:12px;border:1px solid #3a2a10;">
           <p style="margin:0 0 6px;font-size:12px;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;">How to access the admin panel</p>
           <p style="margin:0;font-size:14px;color:#ffffff;line-height:1.6;">
             1. Go to <strong>www.gustilk.com</strong> and log in with your existing email and password.<br>
@@ -291,7 +280,7 @@ export async function sendRoleAssignedEmail(to: string, name: string, role: stri
             </a>
           </td></tr>
         </table>
-        <p style="margin:0 0 8px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+        <p style="margin:0 0 8px;font-size:12px;color:#a090c0;line-height:1.6;">
           If you didn't expect this or believe it was sent in error, contact support@gustilk.com.
         </p>
       `),
@@ -314,7 +303,7 @@ export async function sendPhotoRejectedEmail(to: string, name: string, reason: s
         </p>
         ${reason ? `
         <div style="margin:0 0 20px;padding:16px;background:rgba(212,96,138,0.1);border-radius:12px;border:1px solid rgba(212,96,138,0.25);">
-          <p style="margin:0 0 6px;font-size:12px;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:1px;">Reason</p>
+          <p style="margin:0 0 6px;font-size:12px;color:#c8b8e8;text-transform:uppercase;letter-spacing:1px;">Reason</p>
           <p style="margin:0;font-size:14px;color:#ffffff;line-height:1.6;">${reason}</p>
         </div>` : ""}
         <p style="margin:0 0 28px;font-size:14px;color:#ffffff;line-height:1.7;">
