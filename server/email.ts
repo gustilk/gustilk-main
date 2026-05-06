@@ -212,6 +212,48 @@ export async function sendAdminApprovalNeededEmail(
   }
 }
 
+export async function sendRoleAssignedEmail(to: string, name: string, role: string): Promise<void> {
+  const roleLabels: Record<string, string> = {
+    moderator:   "Moderator",
+    admin:       "Admin",
+    super_admin: "Super Admin",
+  };
+  const roleLabel = roleLabels[role] ?? role;
+  try {
+    const resend = getResend();
+    await resend.emails.send({
+      from: "Gûstîlk <noreply@gustilk.com>",
+      to,
+      subject: `You've been added to the Gûstîlk team as ${roleLabel}`,
+      html: emailShell(`
+        <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">You're now a ${roleLabel}</h2>
+        <p style="margin:0 0 20px;font-size:14px;color:rgba(253,248,240,0.6);line-height:1.7;">
+          Hi ${name}, you've been granted <strong style="color:#c9a84c;">${roleLabel}</strong> access on Gûstîlk.
+          Log in with your existing account credentials to access the admin panel.
+        </p>
+        <div style="margin:0 0 24px;padding:16px;background:rgba(201,168,76,0.08);border-radius:12px;border:1px solid rgba(201,168,76,0.2);">
+          <p style="margin:0 0 6px;font-size:12px;color:rgba(201,168,76,0.7);text-transform:uppercase;letter-spacing:1px;">How to access the admin panel</p>
+          <p style="margin:0;font-size:14px;color:rgba(253,248,240,0.7);line-height:1.6;">
+            1. Go to <strong>www.gustilk.com</strong> and log in with your existing email and password.<br>
+            2. Once logged in, navigate to <strong>/admin</strong> to access the panel.
+          </p>
+        </div>
+        <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+          <tr><td style="border-radius:12px;background:linear-gradient(135deg,#c9a84c,#e8c97a);">
+            <a href="https://www.gustilk.com/admin" style="display:inline-block;padding:14px 36px;font-size:15px;font-weight:bold;color:#1a0a2e;text-decoration:none;border-radius:12px;font-family:sans-serif;">
+              Open Admin Panel
+            </a>
+          </td></tr>
+        </table>
+        <p style="margin:0 0 8px;font-size:12px;color:rgba(253,248,240,0.3);line-height:1.6;">
+          If you didn't expect this or believe it was sent in error, contact support@gustilk.com.
+        </p>
+      `),
+    });
+  } catch {
+  }
+}
+
 export async function sendPhotoRejectedEmail(to: string, name: string, reason: string): Promise<void> {
   try {
     const resend = getResend();

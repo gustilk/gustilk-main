@@ -43,17 +43,22 @@ export default function TeamPage({ user }: { user: User }) {
   const [inviteRole, setInviteRole] = useState<AdminRole>("moderator");
   const [inviteError, setInviteError] = useState("");
 
+  const [inviteSuccess, setInviteSuccess] = useState("");
+
   const inviteMutation = useMutation({
     mutationFn: (body: { email: string; role: AdminRole }) =>
       apiRequest("POST", "/api/admin/team/invite", body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/team"] });
+      setInviteSuccess(`Done! ${inviteEmail.trim()} has been added and notified by email.`);
       setInviteEmail("");
       setInviteError("");
+      setTimeout(() => setInviteSuccess(""), 6000);
     },
     onError: async (err: any) => {
       const body = await err.response?.json().catch(() => ({}));
       setInviteError(body?.error ?? "Something went wrong");
+      setInviteSuccess("");
     },
   });
 
@@ -116,7 +121,11 @@ export default function TeamPage({ user }: { user: User }) {
                 {inviteMutation.isPending ? "Adding…" : "Add"}
               </button>
             </div>
+            <p className="text-cream/30 text-xs leading-relaxed">
+              The person must already have a Gûstîlk account. They'll receive an email with instructions on how to log in and access the admin panel.
+            </p>
             {inviteError && <p className="text-red-400 text-xs">{inviteError}</p>}
+            {inviteSuccess && <p className="text-emerald-400 text-xs">{inviteSuccess}</p>}
           </div>
         </div>
       )}
