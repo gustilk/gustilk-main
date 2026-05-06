@@ -269,6 +269,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 </body></html>`);
   });
 
+
   // ─── GEO DETECT (public — used on login screen) ───────────
   app.get("/api/geo/detect", async (req, res) => {
     try {

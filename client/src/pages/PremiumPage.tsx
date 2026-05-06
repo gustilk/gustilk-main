@@ -1,5 +1,4 @@
-﻿import newLogo from "@assets/IMG_1611_transparent.png";
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "wouter";
 import { ArrowLeft, Star, Check, Eye, Heart, MessageCircle, Users, Globe, CreditCard, Smartphone } from "lucide-react";
@@ -175,8 +174,7 @@ export default function PremiumPage({ user }: Props) {
           <ArrowLeft size={22} />
         </button>
         <div className="flex items-center gap-2.5 flex-1">
-          <img src={newLogo} alt="" className="flex-shrink-0" style={{ width: "64px", height: "64px", objectFit: "contain" }} />
-          <h1 className="font-serif text-2xl text-gold">Premium</h1>
+          <h1 className="font-serif text-3xl font-bold text-gold">Premium</h1>
         </div>
       </div>
 

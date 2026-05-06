@@ -7,6 +7,7 @@ import {
 import { eq, desc, sql, count, and, or, gte } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { z } from "zod";
+import { sendRoleAssignedEmail } from "./email";
 
 function getUserId(req: any): string { return req.session?.userId; }
 
@@ -525,6 +526,10 @@ export function registerAdminRoutes(app: Express, isAuthenticated: any, requireA
 
     const [adminUser] = await db.select({ email: users.email }).from(users).where(eq(users.id, adminId));
     await writeAuditLog(adminId, adminUser?.email ?? "", `team:invite`, "user", target.id, `Assigned role '${role}' to ${email}`);
+
+    // Notify the user by email so they know their credentials and where to log in
+    const displayName = target.fullName ?? email.split("@")[0];
+    sendRoleAssignedEmail(target.email ?? email, displayName, role).catch(() => {});
 
     res.json({ ok: true });
   });

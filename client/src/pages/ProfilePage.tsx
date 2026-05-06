@@ -1,4 +1,3 @@
-import newLogo from "@assets/IMG_1611_transparent.png";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -457,28 +456,25 @@ export default function ProfilePage({ user }: Props) {
       <ProfilePreviewModal user={me} onClose={() => setPreviewOpen(false)} />
     )}
     <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
-      <div className="pt-12 pb-2 px-5 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <img src={newLogo} alt="" className="flex-shrink-0" style={{ width: "64px", height: "64px", objectFit: "contain" }} />
-          <h1 className="font-serif text-2xl text-gold">{t("profile.title")}</h1>
-        </div>
+      <div className="pt-12 pb-4 px-5 flex items-center justify-between">
+        <h1 className="font-serif text-3xl font-bold text-gold">{t("profile.title")}</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setPreviewOpen(true)}
             data-testid="button-preview-profile"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold"
-            style={{ border: "1.5px solid rgba(201,168,76,0.2)", color: "rgba(201,168,76,0.6)" }}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold"
+            style={{ border: "1.5px solid rgba(201,168,76,0.35)", color: "rgba(201,168,76,0.75)" }}
           >
-            <Eye size={13} />
+            <Eye size={15} />
             {t("profile.preview")}
           </button>
           <button
             onClick={() => setLocation("/profile/edit")}
             data-testid="button-edit-profile"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold"
-            style={{ border: "1.5px solid rgba(201,168,76,0.35)", color: "#c9a84c" }}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold"
+            style={{ background: "rgba(201,168,76,0.12)", border: "1.5px solid rgba(201,168,76,0.5)", color: "#c9a84c" }}
           >
-            <Edit2 size={13} />
+            <Edit2 size={15} />
             {t("profile.edit")}
           </button>
         </div>

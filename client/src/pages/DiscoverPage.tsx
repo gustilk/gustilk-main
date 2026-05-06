@@ -1,4 +1,3 @@
-import newLogo from "@assets/IMG_1611_transparent.png";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -207,8 +206,7 @@ export default function DiscoverPage({ user }: Props) {
 
       <div className="flex items-center justify-between px-5 pt-12 pb-4">
         <div className="flex items-center gap-2.5">
-          <img src={newLogo} alt="" className="flex-shrink-0" style={{ width: "64px", height: "64px", objectFit: "contain" }} />
-          <h1 className="font-serif text-2xl text-gold">Gûstîlk</h1>
+          <h1 className="font-serif text-3xl font-bold text-gold">Gûstîlk</h1>
         </div>
         <button
           onClick={() => setShowFilters(f => !f)}

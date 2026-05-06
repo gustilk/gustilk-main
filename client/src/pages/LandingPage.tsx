@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { LANGUAGE_LIST } from "@/i18n";
 import i18n from "@/i18n";
 import { COUNTRY_LIST, PINNED_COUNTRY_ISOS } from "@shared/countries";
-import newLogo from "@assets/IMG_1611_transparent.png";
+import newLogo from "@assets/IMG_1901_transparent.png";
 
 function triggerLangPicker() {
   window.dispatchEvent(new Event("gustilk:pick-language"));
@@ -101,7 +101,7 @@ export default function LandingPage() {
 function Logo() {
   return (
     <div className="text-center mb-5">
-      <div className="inline-flex items-center justify-center mb-1">
+      <div className="inline-flex items-center justify-center mb-2">
         <img
           src={newLogo}
           alt="Gûstîlk"
@@ -112,6 +112,7 @@ function Logo() {
           }}
         />
       </div>
+
       <h1 className="font-serif text-5xl font-bold text-gold tracking-wide">Gûstîlk</h1>
       <p className="text-cream/30 text-xs tracking-[0.3em] uppercase mt-1">Yezidi · Community</p>
     </div>
