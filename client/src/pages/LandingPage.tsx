@@ -112,13 +112,7 @@ function Logo() {
           }}
         />
       </div>
-      <div className="flex justify-center mb-3">
-        <div className="flex overflow-hidden" style={{ width: "110px", height: "4px", borderRadius: "4px" }}>
-          <div style={{ flex: 1, background: "#c8102e" }} />
-          <div style={{ flex: 1, background: "#ffd700" }} />
-          <div style={{ flex: 1, background: "#ffffff" }} />
-        </div>
-      </div>
+
       <h1 className="font-serif text-5xl font-bold text-gold tracking-wide">Gûstîlk</h1>
       <p className="text-cream/30 text-xs tracking-[0.3em] uppercase mt-1">Yezidi · Community</p>
     </div>
