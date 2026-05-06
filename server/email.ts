@@ -8,22 +8,68 @@ function getResend(): Resend {
 
 function emailShell(body: string): string {
   return `<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#0d0618;font-family:Georgia,serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0d0618;padding:40px 20px;">
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Gûstîlk</title>
+</head>
+<body style="margin:0;padding:0;background:#060612;font-family:'Georgia',serif;-webkit-font-smoothing:antialiased;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#060612;padding:48px 16px;">
     <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#1a0a2e;border-radius:20px;overflow:hidden;border:1px solid rgba(201,168,76,0.15);">
-        <tr><td style="padding:36px 36px 0;">
-          <p style="margin:0 0 4px;font-size:26px;color:#c9a84c;font-weight:bold;letter-spacing:1px;">Gûstîlk</p>
-          <p style="margin:0 0 32px;font-size:12px;color:rgba(253,248,240,0.35);letter-spacing:2px;text-transform:uppercase;">Yezidi Community</p>
-          ${body}
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:500px;">
+
+        <!-- Logo / Header -->
+        <tr><td align="center" style="padding-bottom:28px;">
+          <table cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="padding:0 12px 0 0;vertical-align:middle;">
+                <!-- Decorative peacock-feather divider left -->
+                <div style="width:40px;height:1px;background:linear-gradient(to right,transparent,rgba(201,168,76,0.5));"></div>
+              </td>
+              <td align="center" style="vertical-align:middle;">
+                <p style="margin:0;font-size:30px;font-weight:bold;letter-spacing:2px;color:#c9a84c;font-family:'Georgia',serif;">Gûstîlk</p>
+                <p style="margin:2px 0 0;font-size:10px;color:rgba(201,168,76,0.45);letter-spacing:4px;text-transform:uppercase;font-family:Arial,sans-serif;">Yezidi Community</p>
+              </td>
+              <td style="padding:0 0 0 12px;vertical-align:middle;">
+                <div style="width:40px;height:1px;background:linear-gradient(to left,transparent,rgba(201,168,76,0.5));"></div>
+              </td>
+            </tr>
+          </table>
         </td></tr>
-        <tr><td style="padding:20px 36px 32px;border-top:1px solid rgba(255,255,255,0.06);">
-          <p style="margin:0;font-size:11px;color:rgba(253,248,240,0.2);line-height:1.6;">
-            Questions? Contact us at support@gustilk.com
-          </p>
+
+        <!-- Card -->
+        <tr><td>
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(160deg,#12062a 0%,#0d0520 100%);border-radius:24px;overflow:hidden;border:1px solid rgba(201,168,76,0.18);box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+
+            <!-- Gold top accent bar -->
+            <tr><td style="height:3px;background:linear-gradient(to right,#7b3fa0,#c9a84c,#d4608a);font-size:0;">&nbsp;</td></tr>
+
+            <!-- Body content -->
+            <tr><td style="padding:36px 36px 32px;">
+              ${body}
+            </td></tr>
+
+            <!-- Footer -->
+            <tr><td style="padding:20px 36px 28px;border-top:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.15);">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td>
+                    <p style="margin:0 0 4px;font-size:11px;color:rgba(253,248,240,0.25);line-height:1.7;font-family:Arial,sans-serif;">
+                      Need help? <a href="mailto:support@gustilk.com" style="color:rgba(201,168,76,0.6);text-decoration:none;">support@gustilk.com</a>
+                    </p>
+                    <p style="margin:0;font-size:10px;color:rgba(253,248,240,0.15);font-family:Arial,sans-serif;">
+                      © ${new Date().getFullYear()} Gûstîlk · <a href="https://www.gustilk.com" style="color:rgba(201,168,76,0.35);text-decoration:none;">www.gustilk.com</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td></tr>
+
+          </table>
         </td></tr>
+
       </table>
     </td></tr>
   </table>
