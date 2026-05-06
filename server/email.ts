@@ -85,15 +85,15 @@ export async function sendActivationCodeEmail(to: string, firstName: string, cod
       to,
       subject: `Your Gûstîlk activation code: ${code}`,
       html: emailShell(`
-        <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">Verify your email</h2>
-        <p style="margin:0 0 24px;font-size:14px;color:rgba(253,248,240,0.6);line-height:1.7;">
+        <h2 style="margin:0 0 12px;font-size:20px;color:#ffffff;font-weight:normal;">Verify your email</h2>
+        <p style="margin:0 0 24px;font-size:14px;color:#ffffff;line-height:1.7;">
           Hi ${firstName}, enter the code below to activate your Gûstîlk account.
           This code expires in <strong style="color:#c9a84c;">15 minutes</strong>.
         </p>
         <div style="margin:0 auto 28px;max-width:220px;text-align:center;padding:20px 28px;background:rgba(201,168,76,0.1);border-radius:16px;border:1.5px solid rgba(201,168,76,0.35);">
           <p style="margin:0;font-size:38px;font-weight:bold;letter-spacing:10px;color:#c9a84c;font-family:monospace;">${code}</p>
         </div>
-        <p style="margin:0 0 8px;font-size:12px;color:rgba(253,248,240,0.3);line-height:1.6;">
+        <p style="margin:0 0 8px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
           If you didn't create an account, you can safely ignore this email.
         </p>
       `),
@@ -109,8 +109,8 @@ export async function sendMagicLinkEmail(to: string, magicLink: string): Promise
     to,
     subject: "Sign in to Gûstîlk",
     html: emailShell(`
-      <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">Sign in to your account</h2>
-      <p style="margin:0 0 28px;font-size:14px;color:rgba(253,248,240,0.6);line-height:1.7;">
+      <h2 style="margin:0 0 12px;font-size:20px;color:#ffffff;font-weight:normal;">Sign in to your account</h2>
+      <p style="margin:0 0 28px;font-size:14px;color:#ffffff;line-height:1.7;">
         Click the button below to sign in instantly. This link expires in <strong style="color:#c9a84c;">15 minutes</strong> and can only be used once — no password needed.
       </p>
       <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
@@ -120,7 +120,7 @@ export async function sendMagicLinkEmail(to: string, magicLink: string): Promise
           </a>
         </td></tr>
       </table>
-      <p style="margin:0 0 28px;font-size:12px;color:rgba(253,248,240,0.3);line-height:1.6;">
+      <p style="margin:0 0 28px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
         Or copy and paste this link into your browser:<br>
         <span style="color:rgba(201,168,76,0.6);word-break:break-all;">${magicLink}</span>
       </p>
@@ -136,8 +136,8 @@ export async function sendPhotoApprovedEmail(to: string, name: string): Promise<
       to,
       subject: "Your photo has been approved — Gûstîlk",
       html: emailShell(`
-        <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">Photo Approved ✓</h2>
-        <p style="margin:0 0 20px;font-size:14px;color:rgba(253,248,240,0.6);line-height:1.7;">
+        <h2 style="margin:0 0 12px;font-size:20px;color:#ffffff;font-weight:normal;">Photo Approved ✓</h2>
+        <p style="margin:0 0 20px;font-size:14px;color:#ffffff;line-height:1.7;">
           Hi ${name}, your photo has been reviewed and <strong style="color:#10b981;">approved</strong>. It is now visible to other members.
         </p>
         <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
@@ -161,21 +161,21 @@ export async function sendAccountDeletedEmail(to: string, name: string, wasPremi
       to,
       subject: "Your Gûstîlk account has been removed",
       html: emailShell(`
-        <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">Account Removed</h2>
-        <p style="margin:0 0 20px;font-size:14px;color:rgba(253,248,240,0.6);line-height:1.7;">
+        <h2 style="margin:0 0 12px;font-size:20px;color:#ffffff;font-weight:normal;">Account Removed</h2>
+        <p style="margin:0 0 20px;font-size:14px;color:#ffffff;line-height:1.7;">
           Hi ${name}, your Gûstîlk account has been permanently removed by an administrator.
           All your profile data, photos, matches, and messages have been deleted.
         </p>
         ${wasPremium ? `
         <div style="margin:0 0 24px;padding:16px;background:rgba(201,168,76,0.08);border-radius:12px;border:1px solid rgba(201,168,76,0.2);">
-          <p style="margin:0 0 6px;font-size:12px;color:rgba(201,168,76,0.7);text-transform:uppercase;letter-spacing:1px;">Premium Subscription</p>
-          <p style="margin:0;font-size:14px;color:rgba(253,248,240,0.7);line-height:1.6;">
+          <p style="margin:0 0 6px;font-size:12px;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;">Premium Subscription</p>
+          <p style="margin:0;font-size:14px;color:#ffffff;line-height:1.6;">
             Your active premium subscription has been cancelled immediately.
             If you believe you are owed a refund, please contact us at
             <a href="mailto:support@gustilk.com" style="color:#c9a84c;">support@gustilk.com</a>.
           </p>
         </div>` : ""}
-        <p style="margin:0 0 12px;font-size:14px;color:rgba(253,248,240,0.4);line-height:1.7;">
+        <p style="margin:0 0 12px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.7;">
           If you believe this was a mistake, please contact our support team.
         </p>
         <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
@@ -200,14 +200,14 @@ export async function sendSupportMessageAlertEmail(userDisplayName: string, mess
       to: "support@gustilk.com",
       subject: `New support message from ${userDisplayName}`,
       html: emailShell(`
-        <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">New Support Message</h2>
-        <p style="margin:0 0 8px;font-size:13px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:1px;">From</p>
+        <h2 style="margin:0 0 12px;font-size:20px;color:#ffffff;font-weight:normal;">New Support Message</h2>
+        <p style="margin:0 0 8px;font-size:13px;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:1px;">From</p>
         <p style="margin:0 0 20px;font-size:15px;color:#c9a84c;font-weight:bold;">${userDisplayName}</p>
-        <p style="margin:0 0 8px;font-size:13px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:1px;">Message</p>
+        <p style="margin:0 0 8px;font-size:13px;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:1px;">Message</p>
         <div style="margin:0 0 28px;padding:16px;background:rgba(255,255,255,0.04);border-radius:12px;border:1px solid rgba(255,255,255,0.08);">
-          <p style="margin:0;font-size:14px;color:rgba(253,248,240,0.8);line-height:1.7;">${preview}</p>
+          <p style="margin:0;font-size:14px;color:#ffffff;line-height:1.7;">${preview}</p>
         </div>
-        <p style="margin:0 0 8px;font-size:13px;color:rgba(253,248,240,0.35);line-height:1.6;">
+        <p style="margin:0 0 8px;font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;">
           The AI assistant has already sent an automatic reply. Log in as the support account to respond manually if needed.
         </p>
         <table cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
@@ -237,11 +237,11 @@ export async function sendAdminApprovalNeededEmail(
       to: adminEmail,
       subject: `New profile pending approval — ${applicantName}`,
       html: emailShell(`
-        <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">New Profile Awaiting Approval</h2>
-        <p style="margin:0 0 8px;font-size:13px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:1px;">Applicant</p>
+        <h2 style="margin:0 0 12px;font-size:20px;color:#ffffff;font-weight:normal;">New Profile Awaiting Approval</h2>
+        <p style="margin:0 0 8px;font-size:13px;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:1px;">Applicant</p>
         <p style="margin:0 0 6px;font-size:16px;color:#c9a84c;font-weight:bold;">${applicantName}</p>
-        <p style="margin:0 0 24px;font-size:13px;color:rgba(253,248,240,0.5);">${applicantEmail}</p>
-        <p style="margin:0 0 20px;font-size:14px;color:rgba(253,248,240,0.6);line-height:1.7;">
+        <p style="margin:0 0 24px;font-size:13px;color:#ffffff;">${applicantEmail}</p>
+        <p style="margin:0 0 20px;font-size:14px;color:#ffffff;line-height:1.7;">
           A new member has submitted their profile and selfie for review.
           Please visit the admin panel to approve or reject the application.
         </p>
@@ -272,14 +272,14 @@ export async function sendRoleAssignedEmail(to: string, name: string, role: stri
       to,
       subject: `You've been added to the Gûstîlk team as ${roleLabel}`,
       html: emailShell(`
-        <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">You're now a ${roleLabel}</h2>
-        <p style="margin:0 0 20px;font-size:14px;color:rgba(253,248,240,0.6);line-height:1.7;">
+        <h2 style="margin:0 0 12px;font-size:20px;color:#ffffff;font-weight:normal;">You're now a ${roleLabel}</h2>
+        <p style="margin:0 0 20px;font-size:14px;color:#ffffff;line-height:1.7;">
           Hi ${name}, you've been granted <strong style="color:#c9a84c;">${roleLabel}</strong> access on Gûstîlk.
           Log in with your existing account credentials to access the admin panel.
         </p>
         <div style="margin:0 0 24px;padding:16px;background:rgba(201,168,76,0.08);border-radius:12px;border:1px solid rgba(201,168,76,0.2);">
-          <p style="margin:0 0 6px;font-size:12px;color:rgba(201,168,76,0.7);text-transform:uppercase;letter-spacing:1px;">How to access the admin panel</p>
-          <p style="margin:0;font-size:14px;color:rgba(253,248,240,0.7);line-height:1.6;">
+          <p style="margin:0 0 6px;font-size:12px;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;">How to access the admin panel</p>
+          <p style="margin:0;font-size:14px;color:#ffffff;line-height:1.6;">
             1. Go to <strong>www.gustilk.com</strong> and log in with your existing email and password.<br>
             2. Once logged in, navigate to <strong>/admin</strong> to access the panel.
           </p>
@@ -291,7 +291,7 @@ export async function sendRoleAssignedEmail(to: string, name: string, role: stri
             </a>
           </td></tr>
         </table>
-        <p style="margin:0 0 8px;font-size:12px;color:rgba(253,248,240,0.3);line-height:1.6;">
+        <p style="margin:0 0 8px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
           If you didn't expect this or believe it was sent in error, contact support@gustilk.com.
         </p>
       `),
@@ -308,16 +308,16 @@ export async function sendPhotoRejectedEmail(to: string, name: string, reason: s
       to,
       subject: "Action required: Photo rejected — Gûstîlk",
       html: emailShell(`
-        <h2 style="margin:0 0 12px;font-size:20px;color:#fdf8f0;font-weight:normal;">Photo Not Approved</h2>
-        <p style="margin:0 0 16px;font-size:14px;color:rgba(253,248,240,0.6);line-height:1.7;">
+        <h2 style="margin:0 0 12px;font-size:20px;color:#ffffff;font-weight:normal;">Photo Not Approved</h2>
+        <p style="margin:0 0 16px;font-size:14px;color:#ffffff;line-height:1.7;">
           Hi ${name}, unfortunately one of your photos could not be approved.
         </p>
         ${reason ? `
         <div style="margin:0 0 20px;padding:16px;background:rgba(212,96,138,0.1);border-radius:12px;border:1px solid rgba(212,96,138,0.25);">
-          <p style="margin:0 0 6px;font-size:12px;color:rgba(253,248,240,0.4);text-transform:uppercase;letter-spacing:1px;">Reason</p>
-          <p style="margin:0;font-size:14px;color:#fdf8f0;line-height:1.6;">${reason}</p>
+          <p style="margin:0 0 6px;font-size:12px;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:1px;">Reason</p>
+          <p style="margin:0;font-size:14px;color:#ffffff;line-height:1.6;">${reason}</p>
         </div>` : ""}
-        <p style="margin:0 0 28px;font-size:14px;color:rgba(253,248,240,0.6);line-height:1.7;">
+        <p style="margin:0 0 28px;font-size:14px;color:#ffffff;line-height:1.7;">
           Please log in and upload a replacement photo that meets our community guidelines.
         </p>
         <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
