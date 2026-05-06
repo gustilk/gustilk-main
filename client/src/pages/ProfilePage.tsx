@@ -456,30 +456,28 @@ export default function ProfilePage({ user }: Props) {
       <ProfilePreviewModal user={me} onClose={() => setPreviewOpen(false)} />
     )}
     <div className="flex flex-col min-h-screen pb-24" style={{ background: "#060612" }}>
-      <div className="pt-12 pb-4 px-5">
-        <div className="flex justify-end mb-2">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPreviewOpen(true)}
-              data-testid="button-preview-profile"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold"
-              style={{ border: "1.5px solid rgba(201,168,76,0.2)", color: "rgba(201,168,76,0.6)" }}
-            >
-              <Eye size={13} />
-              {t("profile.preview")}
-            </button>
-            <button
-              onClick={() => setLocation("/profile/edit")}
-              data-testid="button-edit-profile"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold"
-              style={{ border: "1.5px solid rgba(201,168,76,0.35)", color: "#c9a84c" }}
-            >
-              <Edit2 size={13} />
-              {t("profile.edit")}
-            </button>
-          </div>
-        </div>
+      <div className="pt-12 pb-4 px-5 flex items-center justify-between">
         <h1 className="font-serif text-3xl font-bold text-gold">{t("profile.title")}</h1>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setPreviewOpen(true)}
+            data-testid="button-preview-profile"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold"
+            style={{ border: "1.5px solid rgba(201,168,76,0.35)", color: "rgba(201,168,76,0.75)" }}
+          >
+            <Eye size={15} />
+            {t("profile.preview")}
+          </button>
+          <button
+            onClick={() => setLocation("/profile/edit")}
+            data-testid="button-edit-profile"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold"
+            style={{ background: "rgba(201,168,76,0.12)", border: "1.5px solid rgba(201,168,76,0.5)", color: "#c9a84c" }}
+          >
+            <Edit2 size={15} />
+            {t("profile.edit")}
+          </button>
+        </div>
       </div>
 
       {/* Rejection re-upload banner */}

@@ -87,7 +87,7 @@ export default function BottomNav() {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 flex"
-      style={{ background: "rgba(13,6,24,0.97)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(201,168,76,0.15)", paddingBottom: "env(safe-area-inset-bottom)" }}
+      style={{ background: "rgba(6,6,18,0.97)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(201,168,76,0.15)", paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       {NAV_ITEMS.map(({ href, icon: Icon, tKey, id }) => {
         const isActive = location === href || (href === "/discover" && location === "/");
