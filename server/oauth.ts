@@ -1,4 +1,3 @@
-console.log("FACEBOOK_CALLBACK_URL:", process.env.FACEBOOK_CALLBACK_URL);
 import type { Express, Request } from "express";
 import passport from "passport";
 import { Strategy as FacebookStrategy } from "passport-facebook";

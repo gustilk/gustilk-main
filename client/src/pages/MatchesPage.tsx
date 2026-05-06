@@ -1,4 +1,4 @@
-import newLogo from "@assets/IMG_1611_transparent.png";
+import newLogo from "@assets/IMG_1895_transparent.png";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Lock, MessageCircle } from "lucide-react";

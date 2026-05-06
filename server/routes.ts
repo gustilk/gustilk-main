@@ -246,32 +246,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // Ensure support account exists on startup
   getOrCreateSupportAccount().catch(e => console.error("[startup] support account error:", e));
 
-  // ─── DATA DELETION INSTRUCTIONS (public — required by Facebook, Apple, Google) ───────────
-  app.get("/data-deletion", (_req, res) => {
-    res.send(`<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Data Deletion Instructions – Gûstîlk</title>
-<style>body{font-family:sans-serif;max-width:640px;margin:40px auto;padding:0 20px;color:#222;line-height:1.6}h1{font-size:1.5rem}h2{font-size:1.1rem;margin-top:2rem}a{color:#7c3aed}</style>
-</head>
-<body>
-<h1>Data Deletion Instructions</h1>
-<p><em>Last updated: May 2026</em></p>
-<p>This page explains how to request deletion of your Gûstîlk account and all associated personal data, in compliance with Facebook Platform Policy, Apple App Store, and Google Play Store requirements.</p>
-<h2>1. Delete Your Account In-App</h2>
-<p>Open Gûstîlk → Settings → Account → <strong>Delete Account</strong>. This permanently removes your profile, photos, matches, messages, and all personal data. This action cannot be undone.</p>
-<h2>2. Request Deletion by Email</h2>
-<p>If you cannot access the app, email <a href="mailto:support@gustilk.com">support@gustilk.com</a> with the subject line <strong>Data Deletion Request</strong>. Include your registered email address or phone number. We will process your request and confirm deletion within 30 days.</p>
-<h2>3. What Gets Deleted</h2>
-<p>Upon deletion we permanently remove: your profile and photos, all matches and messages, likes, gifts, event attendance, login credentials, and linked social accounts (including Facebook).</p>
-<h2>4. Retention Period</h2>
-<p>Deleted data is removed from active systems within 30 days. Encrypted backups may retain data for up to 90 days before being purged. We do not sell or share your data.</p>
-<h2>5. Facebook Login Users</h2>
-<p>If you signed up with Facebook Login, deleting your Gûstîlk account also removes the connection to Facebook. You can also revoke access directly in Facebook: Settings → Apps and Websites → Gûstîlk.</p>
-<h2>6. Contact</h2>
-<p>Questions? Email <a href="mailto:support@gustilk.com">support@gustilk.com</a></p>
-</body></html>`);
-  });
-
   // ─── GEO DETECT (public — used on login screen) ───────────
   app.get("/api/geo/detect", async (req, res) => {
     try {
