@@ -1,4 +1,4 @@
-﻿import newLogo from "@assets/IMG_1895_transparent.png";
+﻿import newLogo from "@assets/IMG_1901_transparent.png";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "wouter";

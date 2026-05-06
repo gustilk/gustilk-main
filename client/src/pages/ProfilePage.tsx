@@ -1,4 +1,4 @@
-import newLogo from "@assets/IMG_1895_transparent.png";
+import newLogo from "@assets/IMG_1901_transparent.png";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
