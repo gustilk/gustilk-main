@@ -101,7 +101,7 @@ export default function LandingPage() {
 function Logo() {
   return (
     <div className="text-center mb-5">
-      <div className="inline-flex items-center justify-center mb-1">
+      <div className="inline-flex items-center justify-center" style={{ marginBottom: "-22px" }}>
         <img
           src={newLogo}
           alt="Gûstîlk"
