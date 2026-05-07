@@ -307,6 +307,7 @@ export default function SocialSetupPage({ user }: Props) {
                     <option value="" disabled>{t("setup.caste")}</option>
                     {CASTES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                   </GoldSelect>
+                  {showStep1Errors && !data.caste && <p className="text-xs mt-1 pl-1" style={{ color: "#ef4444" }}>Please select your caste</p>}
                 </div>
                 <div>
                   <Label>{t("setup.gender")}</Label>
@@ -315,6 +316,7 @@ export default function SocialSetupPage({ user }: Props) {
                     <option value="female">{t("setup.female")}</option>
                     <option value="male">{t("setup.male")}</option>
                   </GoldSelect>
+                  {showStep1Errors && !data.gender && <p className="text-xs mt-1 pl-1" style={{ color: "#ef4444" }}>Please select your gender</p>}
                 </div>
               </div>
 
@@ -383,10 +385,11 @@ export default function SocialSetupPage({ user }: Props) {
                   onChange={e => setData(d => ({ ...d, dateOfBirth: e.target.value }))}
                   data-testid="input-date-of-birth"
                   className="w-full px-3 py-3 rounded-xl text-sm text-cream outline-none"
-                  style={{ background: "rgba(255,255,255,0.07)", border: `1.5px solid ${data.dateOfBirth && !isAtLeast18(data.dateOfBirth) ? "rgba(212,96,138,0.6)" : "rgba(201,168,76,0.25)"}`, colorScheme: "dark" }}
+                  style={{ background: "rgba(255,255,255,0.07)", border: `1.5px solid ${(showStep1Errors && !data.dateOfBirth) || (data.dateOfBirth && !isAtLeast18(data.dateOfBirth)) ? "rgba(239,68,68,0.6)" : "rgba(201,168,76,0.25)"}`, colorScheme: "dark" }}
                 />
+                {showStep1Errors && !data.dateOfBirth && <p className="text-xs mt-1 pl-1" style={{ color: "#ef4444" }}>Please enter your date of birth</p>}
                 {data.dateOfBirth && !isAtLeast18(data.dateOfBirth) && (
-                  <p className="text-xs mt-1" style={{ color: "#d4608a" }}>{t("setup.minAge18")}</p>
+                  <p className="text-xs mt-1" style={{ color: "#ef4444" }}>{t("setup.minAge18")}</p>
                 )}
               </div>
 
@@ -396,7 +399,8 @@ export default function SocialSetupPage({ user }: Props) {
                   onChange={e => setData(d => ({ ...d, city: e.target.value }))}
                   data-testid="input-city"
                   className="w-full px-3 py-3 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
-                  style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.25)" }} />
+                  style={{ background: "rgba(255,255,255,0.07)", border: `1.5px solid ${showStep1Errors && !data.city.trim() ? "rgba(239,68,68,0.6)" : "rgba(201,168,76,0.25)"}` }} />
+                {showStep1Errors && !data.city.trim() && <p className="text-xs mt-1 pl-1" style={{ color: "#ef4444" }}>Please enter your city</p>}
               </div>
 
               <button
@@ -426,27 +430,14 @@ export default function SocialSetupPage({ user }: Props) {
                 </div>
                 <ChevronDown size={16} color="rgba(201,168,76,0.4)" />
               </button>
+              {showStep1Errors && !agreedGuidelines && <p className="text-xs mt-1 pl-1" style={{ color: "#ef4444" }}>Please read and agree to the Community Guidelines</p>}
 
               <div className="space-y-3">
                 <Checkbox checked={agreedTruthful} onChange={setAgreedTruthful} testId="checkbox-truthful">
                   {t("agreement.truthfulCheckbox")}
                 </Checkbox>
+                {showStep1Errors && !agreedTruthful && <p className="text-xs pl-1" style={{ color: "#ef4444" }}>Please confirm your information is truthful</p>}
               </div>
-
-              {showStep1Errors && !step1Valid && (
-                <div className="rounded-xl p-3 space-y-1" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)" }}>
-                  <p className="text-xs font-semibold" style={{ color: "#ef4444" }}>Please complete the following:</p>
-                  {!data.caste && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· Select your caste</p>}
-                  {!data.gender && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· Select your gender</p>}
-                  {!data.dateOfBirth && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· Enter your date of birth</p>}
-                  {data.dateOfBirth && !isAtLeast18(data.dateOfBirth) && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· You must be at least 18 years old</p>}
-                  {!data.country && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· Select your country</p>}
-                  {data.country && countryHasStates && !data.state && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· Select your state / province</p>}
-                  {!data.city.trim() && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· Enter your city</p>}
-                  {!agreedGuidelines && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· Read and agree to Community Guidelines</p>}
-                  {!agreedTruthful && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· Check the truthful information box</p>}
-                </div>
-              )}
 
               <button
                 onClick={() => { if (!step1Valid) { setShowStep1Errors(true); return; } setStep(2); }}
