@@ -132,6 +132,7 @@ export default function DiscoverPage({ user }: Props) {
     },
     onSuccess: (result, userId) => {
       const liked = profiles.find(p => p.id === userId);
+      queryClient.invalidateQueries({ queryKey: ["/api/discover"] });
       if (result.matched && liked) {
         setMatchData({ user: liked, matchId: result.matchId });
         queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
@@ -146,6 +147,7 @@ export default function DiscoverPage({ user }: Props) {
     },
     onSuccess: (_, userId) => {
       const passed = profiles.find(p => p.id === userId);
+      queryClient.invalidateQueries({ queryKey: ["/api/discover"] });
       advanceCard("left", passed);
     },
   });
