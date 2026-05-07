@@ -4,7 +4,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupSession, registerAuthRoutes, isAuthenticated, sessionMiddleware } from "./auth";
 import { profileUpdateSchema, privacySettingsSchema, users, matches, messages, events, eventAttendees, magicLinkTokens } from "@shared/schema";
-import { verifyCountryFromRequest, verifyIraqFromRequest, getClientIp } from "./geo";
+import { verifyCountryFromRequest, verifyIraqFromRequest, getClientIp, lookupIpCountry } from "./geo";
 import { setupWs } from "./ws";
 import { z } from "zod";
 import { checkFacePresent } from "./moderation";
