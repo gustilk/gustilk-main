@@ -31,6 +31,7 @@ import GuidelinesPage from "@/pages/GuidelinesPage";
 import CookiePolicyPage from "@/pages/CookiePolicyPage";
 import GdprPage from "@/pages/GdprPage";
 import SafetyTipsPage from "@/pages/SafetyTipsPage";
+import DataDeletionPage from "@/pages/DataDeletionPage";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import { Clock, X } from "lucide-react";
 import type { User } from "@shared/schema";
@@ -94,6 +95,7 @@ const PUBLIC_POLICY_ROUTES: Record<string, React.ComponentType> = {
   "/gdpr": GdprPage,
   "/safety-tips": SafetyTipsPage,
   "/safety": SafetyTipsPage,
+  "/data-deletion": DataDeletionPage,
 };
 
 function useGustilkUser() {

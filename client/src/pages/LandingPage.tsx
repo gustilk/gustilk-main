@@ -132,7 +132,6 @@ function HomeScreen({ onEmail, onPhone }: { onEmail: () => void; onPhone: () => 
     <div className="w-full animate-slide-up">
       <Logo />
 
-
       <p className="text-cream/50 text-sm text-center mb-8 leading-relaxed">
         {t("auth.tagline")}
       </p>

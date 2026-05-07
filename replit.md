@@ -26,14 +26,6 @@ A culturally sensitive dating platform designed exclusively for the Yezidi commu
 - **PostgreSQL** via Drizzle ORM
 - **@simplewebauthn/server** v13 for WebAuthn/Passkeys biometric auth
 
-## Social OAuth
-Configured via environment secrets. Providers activate automatically when keys are set:
-- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` → Google OAuth (passport-google-oauth20)
-- `FACEBOOK_APP_ID` / `FACEBOOK_APP_SECRET` → Facebook OAuth (passport-facebook)
-- `INSTAGRAM_CLIENT_ID` / `INSTAGRAM_CLIENT_SECRET` → Instagram manual OAuth
-- `SNAPCHAT_CLIENT_ID` / `SNAPCHAT_CLIENT_SECRET` → Snapchat manual OAuth
-Callback URLs: `https://<domain>/api/auth/<provider>/callback`
-New social users (empty city) are shown `SocialSetupPage` to fill caste, gender, country, city.
 
 ## Key Features
 1. **Caste-based matching** — users only see profiles from their own caste

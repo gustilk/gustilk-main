@@ -1,9 +1,10 @@
 ﻿import type { Express } from "express";
+import rateLimit from "express-rate-limit";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupSession, registerAuthRoutes, isAuthenticated, sessionMiddleware } from "./auth";
 import { profileUpdateSchema, privacySettingsSchema, users, matches, messages, events, eventAttendees, magicLinkTokens } from "@shared/schema";
-import { verifyCountryFromRequest, verifyIraqFromRequest, getClientIp, lookupIpCountry } from "./geo";
+import { verifyCountryFromRequest, verifyIraqFromRequest, getClientIp } from "./geo";
 import { setupWs } from "./ws";
 import { z } from "zod";
 import { checkFacePresent } from "./moderation";
@@ -258,7 +259,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   // â"€â"€â"€ MAGIC LINK AUTH â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
-  app.post("/api/auth/forgot-password", async (req, res) => {
+  const forgotPasswordLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5, standardHeaders: true, legacyHeaders: false });
+  app.post("/api/auth/forgot-password", forgotPasswordLimiter, async (req, res) => {
     try {
       const { email } = z.object({ email: z.string().email() }).parse(req.body);
       const [user] = await db
