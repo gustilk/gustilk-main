@@ -65,6 +65,7 @@ export default function SocialSetupPage({ user }: Props) {
   const [agreedGuidelines, setAgreedGuidelines] = useState(false);
   const [showGuidelinesModal, setShowGuidelinesModal] = useState(true);
   const [agreedTruthful, setAgreedTruthful] = useState(false);
+  const [showStep1Errors, setShowStep1Errors] = useState(false);
   const [geoState, setGeoState] = useState<GeoState>("loading");
   const [detectedCountryName, setDetectedCountryName] = useState("");
 
@@ -432,9 +433,24 @@ export default function SocialSetupPage({ user }: Props) {
                 </Checkbox>
               </div>
 
+              {showStep1Errors && !step1Valid && (
+                <div className="rounded-xl p-3 space-y-1" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)" }}>
+                  <p className="text-xs font-semibold" style={{ color: "#ef4444" }}>Please complete the following:</p>
+                  {!data.caste && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· Select your caste</p>}
+                  {!data.gender && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· Select your gender</p>}
+                  {!data.dateOfBirth && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· Enter your date of birth</p>}
+                  {data.dateOfBirth && !isAtLeast18(data.dateOfBirth) && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· You must be at least 18 years old</p>}
+                  {!data.country && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· Select your country</p>}
+                  {data.country && countryHasStates && !data.state && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· Select your state / province</p>}
+                  {!data.city.trim() && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· Enter your city</p>}
+                  {!agreedGuidelines && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· Read and agree to Community Guidelines</p>}
+                  {!agreedTruthful && <p className="text-xs" style={{ color: "rgba(239,68,68,0.8)" }}>· Check the truthful information box</p>}
+                </div>
+              )}
+
               <button
-                onClick={() => setStep(2)}
-                disabled={!step1Valid || geoState === "loading"}
+                onClick={() => { if (!step1Valid) { setShowStep1Errors(true); return; } setStep(2); }}
+                disabled={geoState === "loading"}
                 data-testid="button-next-step"
                 className="w-full py-4 rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
                 style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e", boxShadow: "0 6px 20px rgba(201,168,76,0.3)" }}
