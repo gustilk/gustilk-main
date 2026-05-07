@@ -61,7 +61,7 @@ export default function SocialSetupPage({ user }: Props) {
   });
 
   // Step 1 state
-  const [data, setData] = useState({ caste: "", gender: "female", country: "", state: "", city: "", dateOfBirth: "" });
+  const [data, setData] = useState({ caste: "", gender: "", country: "", state: "", city: "", dateOfBirth: "" });
   const [agreedGuidelines, setAgreedGuidelines] = useState(false);
   const [showGuidelinesModal, setShowGuidelinesModal] = useState(true);
   const [agreedTruthful, setAgreedTruthful] = useState(false);
@@ -218,7 +218,7 @@ export default function SocialSetupPage({ user }: Props) {
   const countryHasStates = !!COUNTRY_STATES[data.country];
   const isFemale = data.gender === "female";
   const totalSteps = isFemale ? 3 : 2;
-  const step1Valid = data.caste && data.country && (!countryHasStates || data.state) && data.city.trim() && agreedGuidelines && agreedTruthful && isAtLeast18(data.dateOfBirth);
+  const step1Valid = data.caste && data.gender && data.country && (!countryHasStates || data.state) && data.city.trim() && agreedGuidelines && agreedTruthful && isAtLeast18(data.dateOfBirth);
   const step2Valid = photos.filter(Boolean).length >= 1 && selfie;
   const canSubmit = step2Valid && !cropTarget && !selfieChecking;
 
@@ -310,6 +310,7 @@ export default function SocialSetupPage({ user }: Props) {
                 <div>
                   <Label>{t("setup.gender")}</Label>
                   <GoldSelect value={data.gender} onChange={e => setData(d => ({ ...d, gender: e.target.value }))} data-testid="select-gender">
+                    <option value="" disabled>{t("setup.gender")}</option>
                     <option value="female">{t("setup.female")}</option>
                     <option value="male">{t("setup.male")}</option>
                   </GoldSelect>
