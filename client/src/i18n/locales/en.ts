@@ -621,30 +621,4 @@ export default {
     logoutButton: "Sign Out",
     contactSupport: "Contact Support",
   },
-  dataDeletion: {
-    pageTitle: "Data Deletion",
-    intro: "Last updated: May 2026 · This page explains how to request deletion of your Gûstîlk account and all associated personal data, in compliance with Apple App Store and Google Play Store requirements.",
-    sections: [
-      {
-        title: "1. Delete Your Account In-App",
-        body: "The easiest way to delete your account and all data is directly inside the app: open Gûstîlk → Settings → Account → Delete Account. This permanently removes your profile, photos, matches, messages, and all personal data from our systems. This action cannot be undone.",
-      },
-      {
-        title: "2. Request Deletion by Email",
-        body: "If you are unable to access the app, you can request deletion by emailing support@gustilk.com with the subject line 'Data Deletion Request'. Include your registered email address or phone number. We will process your request and confirm deletion within 30 days.",
-      },
-      {
-        title: "3. What Gets Deleted",
-        body: "Upon deletion we permanently remove: your profile and photos, all matches and messages, likes, gifts, and event attendance, login credentials, and any other personal data associated with your account.",
-      },
-      {
-        title: "4. Retention Period",
-        body: "Deleted data is removed from our active systems within 30 days. Encrypted backups may retain data for up to 90 days before being purged. We do not sell or share your data with third parties.",
-      },
-      {
-        title: "5. Contact Us",
-        body: "For any questions about data deletion or your privacy rights, contact us at support@gustilk.com.",
-      },
-    ],
-  },
 };
