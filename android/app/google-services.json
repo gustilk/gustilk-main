@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "834040374524",
+    "project_id": "gustilk-206de",
+    "storage_bucket": "gustilk-206de.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:834040374524:android:8ae6b08727b6adff31a379",
+        "android_client_info": {
+          "package_name": "com.gustilk.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnkLuLxq4feK1fZd-CYlxJpiZigKRzN0Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

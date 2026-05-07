@@ -217,7 +217,7 @@ export default function SocialSetupPage({ user }: Props) {
   };
   const maxDobDate = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().split("T")[0]; })();
   const countryHasStates = !!COUNTRY_STATES[data.country];
-  const STATE_REQUIRED_COUNTRIES = new Set(["United States", "Canada", "Australia", "United Kingdom", "Germany", "France", "Sweden", "Belgium", "Holland", "Russia", "Armenia", "Georgia"]);
+  const STATE_REQUIRED_COUNTRIES = new Set(["USA", "Canada", "Australia", "UK", "Germany", "France", "Sweden", "Belgium", "Holland", "Russia", "Armenia", "Georgia"]);
   const stateRequired = countryHasStates && STATE_REQUIRED_COUNTRIES.has(data.country) && data.country !== "Iraq";
   const isFemale = data.gender === "female";
   const totalSteps = isFemale ? 3 : 2;
