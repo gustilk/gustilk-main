@@ -217,9 +217,11 @@ export default function SocialSetupPage({ user }: Props) {
   };
   const maxDobDate = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().split("T")[0]; })();
   const countryHasStates = !!COUNTRY_STATES[data.country];
+  const STATE_REQUIRED_COUNTRIES = new Set(["USA", "Canada", "Australia", "Germany", "UK", "Russia"]);
+  const stateRequired = countryHasStates && STATE_REQUIRED_COUNTRIES.has(data.country) && data.country !== "Iraq";
   const isFemale = data.gender === "female";
   const totalSteps = isFemale ? 3 : 2;
-  const step1Valid = data.caste && data.gender && data.country && (!countryHasStates || data.state) && data.city.trim() && agreedGuidelines && agreedTruthful && isAtLeast18(data.dateOfBirth);
+  const step1Valid = data.caste && data.gender && data.country && (!stateRequired || data.state) && data.city.trim() && agreedGuidelines && agreedTruthful && isAtLeast18(data.dateOfBirth);
   const step2Valid = photos.filter(Boolean).length >= 1 && selfie;
   const canSubmit = step2Valid && !cropTarget && !selfieChecking;
 
@@ -363,7 +365,7 @@ export default function SocialSetupPage({ user }: Props) {
 
               {countryHasStates && (
                 <div>
-                  <Label>{t("setup.stateProvince")}</Label>
+                  <Label>{t("setup.stateProvince")}{!stateRequired && <span className="text-cream/30 text-xs ml-1">(optional)</span>}</Label>
                   <GoldSelect
                     value={data.state}
                     onChange={e => setData(d => ({ ...d, state: e.target.value }))}
@@ -371,7 +373,9 @@ export default function SocialSetupPage({ user }: Props) {
                   >
                     <option value="" disabled>{t("setup.selectState")}</option>
                     {COUNTRY_STATES[data.country].map(s => <option key={s} value={s}>{s}</option>)}
+                    <option value="Other">Other</option>
                   </GoldSelect>
+                  {showStep1Errors && stateRequired && !data.state && <p className="text-xs mt-1 pl-1" style={{ color: "#ef4444" }}>Please select your state / province</p>}
                 </div>
               )}
 
