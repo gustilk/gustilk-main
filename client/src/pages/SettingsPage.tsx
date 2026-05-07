@@ -7,10 +7,11 @@ import { isNative, restoreIAPPurchases } from "@/lib/purchases";
 import { useTranslation } from "react-i18next";
 import { LANGUAGE_LIST, LangCode, setLanguage } from "@/i18n";
 import {
-  ChevronLeft, ChevronRight, Shield,
-  LogOut, Trash2, AlertTriangle,
-  Star, Mail, KeyRound, Phone, Eye, EyeOff, CheckCircle2, ShieldX, UserX,
-  ImageOff, RefreshCw, Send,
+  ChevronLeft, ChevronRight, Globe, Bell, FileText, Shield,
+  LogOut, Trash2, AlertTriangle, Lock, Heart, MessageCircle,
+  Star, CalendarDays, Smartphone, Mail, KeyRound, Phone, Eye, EyeOff, CheckCircle2, ShieldX, UserX,
+  Cookie, ShieldCheck, ShieldAlert, ImageOff, LifeBuoy, RefreshCw, Crown,
+  Lightbulb, ThumbsUp, HelpCircle, ScrollText, Info, Settings2, Send,
 } from "lucide-react";
 import type { SafeUser } from "@shared/schema";
 
