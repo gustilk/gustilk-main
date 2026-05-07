@@ -132,12 +132,6 @@ function HomeScreen({ onEmail, onPhone }: { onEmail: () => void; onPhone: () => 
     <div className="w-full animate-slide-up">
       <Logo />
 
-      {oauthError && (
-        <div className="mb-4 px-4 py-2.5 rounded-xl text-sm text-center"
-          style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", color: "#ef4444" }}>
-          Sign-in failed — please try again or use email instead.
-        </div>
-      )}
 
       <p className="text-cream/50 text-sm text-center mb-8 leading-relaxed">
         {t("auth.tagline")}
