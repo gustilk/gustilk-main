@@ -660,16 +660,15 @@ export default function ProfilePage({ user }: Props) {
         {/* Photo action sheet */}
         {selectedPhotoIdx !== null && (
           <div
-            className="fixed inset-0 z-50 flex items-end"
+            className="fixed inset-0 z-[200] flex items-center justify-center px-5"
             style={{ background: "rgba(0,0,0,0.72)" }}
             onClick={() => setSelectedPhotoIdx(null)}
           >
             <div
-              className="w-full rounded-t-3xl px-5 pt-3 pb-10"
+              className="w-full rounded-3xl px-5 pt-5 pb-6"
               style={{ background: "#1a0a2e", border: "1px solid rgba(201,168,76,0.15)" }}
               onClick={e => e.stopPropagation()}
             >
-              <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: "rgba(255,255,255,0.12)" }} />
               <p className="text-center text-xs font-semibold mb-4 uppercase tracking-wider" style={{ color: "rgba(253,248,240,0.35)" }}>
                 Photo {selectedPhotoIdx + 1}
               </p>
