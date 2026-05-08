@@ -53,4 +53,7 @@
     <!-- Receive FCM push notifications when app is in background -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Required for RevenueCat and Android 13+ advertising ID -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+
 </manifest>
