@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   webDir: "dist/public",
 
   server: {
-    url: "https://gustilk.com",
+    url: "https://www.gustilk.com",
     cleartext: false,
   },
 
