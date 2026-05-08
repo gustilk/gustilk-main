@@ -2,20 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body, #root {
+html {
+  height: 100%;
+  overflow: hidden;
+  background-color: #0d0618;
+  color-scheme: dark;
+}
+
+body {
+  height: 100%;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
   width: 100%;
   -webkit-text-size-adjust: 100%;
   background-color: #0d0618;
-  color-scheme: dark;
-  overscroll-behavior: none;
+}
+
+#root {
+  min-height: 100%;
+  overflow-x: hidden;
 }
 
 * {
   -webkit-tap-highlight-color: transparent;
   box-sizing: border-box;
+  touch-action: pan-y pinch-zoom;
 }
 
 /* LIGHT MODE */

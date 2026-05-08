@@ -508,8 +508,8 @@ export default function ProfilePage({ user }: Props) {
             className="h-52 relative flex items-center justify-center"
             style={{ background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}
           >
-            {me.photos && me.photos.length > 0 ? (
-              <img src={me.photos[0]} alt={me.fullName ?? ""} className="w-full h-full object-cover" />
+            {(localSlots[0]?.url || (me.photos && me.photos.length > 0)) ? (
+              <img src={localSlots[0]?.url ?? me.photos[0]} alt={me.fullName ?? ""} className="w-full h-full object-cover" />
             ) : (
               <div
                 className="w-24 h-24 rounded-full flex items-center justify-center font-serif text-4xl font-bold text-gold"
