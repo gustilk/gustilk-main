@@ -166,7 +166,7 @@ export default function AdminPage({ user }: Props) {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen pb-24" style={{ background: "#0d0618" }}>
+    <div className="min-h-screen pb-24" style={{ background: "#0d0618" }}>
       <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
         <button onClick={() => setLocation("/profile")} data-testid="button-back" className="text-cream/60">
           <ArrowLeft size={22} />
@@ -201,7 +201,7 @@ export default function AdminPage({ user }: Props) {
         ))}
       </div>
 
-      <div className="px-4 pt-2 flex-1 overflow-y-auto pb-20">
+      <div className="px-4 pt-2 pb-4">
         {activeTab === "overview" && <OverviewTab stats={statsData} />}
         {activeTab === "users" && (
           <UsersTab

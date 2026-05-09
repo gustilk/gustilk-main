@@ -678,19 +678,31 @@ export default function ProfilePage({ user }: Props) {
               onClick={e => e.stopPropagation()}
             >
               <p className="text-center text-xs font-semibold mb-4 uppercase tracking-wider" style={{ color: "rgba(253,248,240,0.35)" }}>
-                Photo {selectedPhotoIdx + 1}
+                {selectedPhotoIdx === 0 ? "Cover Photo" : `Photo ${selectedPhotoIdx + 1}`}
               </p>
               <div className="flex flex-col gap-2">
-                {selectedPhotoIdx !== 0 && localSlots[selectedPhotoIdx]?.status === "approved" && (
+                {selectedPhotoIdx === 0 ? (
                   <button
-                    data-testid="button-set-cover"
-                    onClick={() => { setAsMain(selectedPhotoIdx!); setSelectedPhotoIdx(null); }}
+                    data-testid="button-replace-cover"
+                    onClick={() => { setSelectedPhotoIdx(null); openPicker(0); }}
                     className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.98]"
                     style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}
                   >
-                    <Star size={16} color="#c9a84c" />
-                    Set as Cover Photo
+                    <Camera size={16} color="#c9a84c" />
+                    Replace Cover Photo
                   </button>
+                ) : (
+                  localSlots[selectedPhotoIdx]?.status === "approved" && (
+                    <button
+                      data-testid="button-set-cover"
+                      onClick={() => { setAsMain(selectedPhotoIdx!); setSelectedPhotoIdx(null); }}
+                      className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.98]"
+                      style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}
+                    >
+                      <Star size={16} color="#c9a84c" />
+                      Set as Cover Photo
+                    </button>
+                  )
                 )}
                 <button
                   data-testid="button-delete-photo"
@@ -699,7 +711,7 @@ export default function ProfilePage({ user }: Props) {
                   style={{ background: "rgba(212,96,138,0.1)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.2)" }}
                 >
                   <Trash2 size={16} color="#d4608a" />
-                  Delete Photo
+                  Remove Photo
                 </button>
                 <button
                   data-testid="button-cancel-photo-action"

@@ -5,6 +5,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { CalendarDays, MapPin, Users, ChevronLeft, ChevronRight, Plus, Edit2, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { useToast } from "@/hooks/use-toast";
 import type { SafeUser, EventWithAttendance } from "@shared/schema";
 
 interface Props { user: SafeUser }
@@ -43,6 +44,7 @@ type FormData = typeof EMPTY_FORM;
 export default function EventsPage({ user }: Props) {
   const [, setLocation] = useLocation();
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [activeType, setActiveType] = useState("all");
   const [formView, setFormView] = useState<"list" | "create" | "edit">("list");
   const [editingEvent, setEditingEvent] = useState<EventWithAttendance | null>(null);
@@ -72,6 +74,10 @@ export default function EventsPage({ user }: Props) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       setFormView("list");
+      toast({
+        title: "Event submitted for review",
+        description: "Your event will appear once an admin approves it.",
+      });
     },
   });
 
