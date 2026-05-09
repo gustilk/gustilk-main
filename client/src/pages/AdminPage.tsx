@@ -201,7 +201,7 @@ export default function AdminPage({ user }: Props) {
         ))}
       </div>
 
-      <div className="px-4 pt-2 flex-1">
+      <div className="px-4 pt-2 flex-1 overflow-y-auto pb-20">
         {activeTab === "overview" && <OverviewTab stats={statsData} />}
         {activeTab === "users" && (
           <UsersTab
@@ -351,7 +351,7 @@ function UserCard({ u, isMe, isPending, onTogglePremium, onToggleBan, onToggleAp
         {isMe && <p className="text-cream/20 text-xs italic px-1">This is your account</p>}
       </div>
       {confirmDelete && (
-        <div className="fixed inset-0 flex items-end justify-center z-50 pb-8 px-4" style={{ background: "rgba(0,0,0,0.7)" }}>
+        <div className="fixed inset-0 flex items-end justify-center z-[200] pb-8 px-4" style={{ background: "rgba(0,0,0,0.7)" }}>
           <div className="w-full max-w-sm rounded-2xl p-6 space-y-4" style={{ background: "#1a0a2e", border: "1px solid rgba(239,68,68,0.3)" }}>
             <h3 className="font-serif text-lg text-cream">Delete user?</h3>
             <p className="text-cream/50 text-sm">This will permanently delete the account and all associated data.</p>
@@ -635,7 +635,7 @@ function EventsTab({ events, isLoading, onCreate, onUpdate, onDelete, isPending 
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 flex items-end justify-center z-50" style={{ background: "rgba(0,0,0,0.75)" }}>
+        <div className="fixed inset-0 flex items-end justify-center z-[200]" style={{ background: "rgba(0,0,0,0.75)" }}>
           <div className="w-full max-w-lg rounded-t-3xl pb-8 overflow-y-auto max-h-[90vh]" style={{ background: "#130826", border: "1px solid rgba(201,168,76,0.2)" }}>
             <div className="sticky top-0 flex items-center justify-between px-5 py-4" style={{ background: "#130826", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
               <h3 className="font-serif text-lg text-gold">{editEvent ? "Edit Event" : "New Event"}</h3>
@@ -714,7 +714,7 @@ function EventsTab({ events, isLoading, onCreate, onUpdate, onDelete, isPending 
       )}
 
       {confirmDelete && (
-        <div className="fixed inset-0 flex items-end justify-center z-50 pb-8 px-4" style={{ background: "rgba(0,0,0,0.7)" }}>
+        <div className="fixed inset-0 flex items-end justify-center z-[200] pb-8 px-4" style={{ background: "rgba(0,0,0,0.7)" }}>
           <div className="w-full max-w-sm rounded-2xl p-6 space-y-4" style={{ background: "#1a0a2e", border: "1px solid rgba(239,68,68,0.3)" }}>
             <h3 className="font-serif text-lg text-cream">Delete event?</h3>
             <p className="text-cream/50 text-sm">This will permanently remove the event and all RSVPs.</p>

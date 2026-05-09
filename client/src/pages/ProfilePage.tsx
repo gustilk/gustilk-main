@@ -362,9 +362,7 @@ export default function ProfilePage({ user }: Props) {
 
   const savePhotosMutation = useMutation({
     mutationFn: async () => {
-      const approved = localSlots.filter(s => s?.status === "approved").map(s => s!.url);
-      const newUploads = localSlots.filter(s => s?.status === "new").map(s => s!.url);
-      const photos = [...approved, ...newUploads];
+      const photos = localSlots.filter(s => s !== null).map(s => s!.url);
       const res = await apiRequest("PUT", "/api/profile", { photos });
       return res.json();
     },
@@ -520,6 +518,16 @@ export default function ProfilePage({ user }: Props) {
               </div>
             )}
             <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.85) 0%, transparent 60%)" }} />
+            {localSlots.some(s => s !== null) && (
+              <button
+                onClick={() => setSelectedPhotoIdx(0)}
+                className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold"
+                style={{ background: "rgba(0,0,0,0.5)", color: "white", border: "1px solid rgba(255,255,255,0.2)" }}
+              >
+                <ImagePlus size={12} />
+                Change Cover
+              </button>
+            )}
             <div className="absolute bottom-4 left-4 right-4">
               <div className="flex items-end justify-between">
                 <div>
