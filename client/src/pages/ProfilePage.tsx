@@ -368,9 +368,9 @@ export default function ProfilePage({ user }: Props) {
     },
     onSuccess: (data) => {
       const updatedSlots = ((data.user as any).photoSlots ?? []) as PhotoSlot[];
-      const approvedSlots = updatedSlots.filter(s => s.status === "approved");
+      const photosInOrder: string[] = (data.user as any).photos ?? [];
       const arr: LocalSlot[] = Array(6).fill(null);
-      approvedSlots.forEach((s, i) => { arr[i] = { url: s.url, status: "approved" }; });
+      photosInOrder.forEach((url, i) => { arr[i] = { url, status: "approved" }; });
       setLocalSlots(arr);
       setRejectedSlots(updatedSlots.filter(s => s.status === "rejected"));
       setPhotosEdited(false);

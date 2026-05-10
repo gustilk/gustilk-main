@@ -167,17 +167,18 @@ export default function AdminPage({ user }: Props) {
 
   return (
     <div className="min-h-screen pb-24" style={{ background: "#0d0618" }}>
-      <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
-        <button onClick={() => setLocation("/profile")} data-testid="button-back" className="text-cream/60">
-          <ArrowLeft size={22} />
-        </button>
-        <div className="flex items-center gap-2">
-          <Shield size={18} color="#c9a84c" />
-          <h1 className="font-serif text-xl text-gold">Admin Panel</h1>
+      <div className="sticky top-0 z-10" style={{ background: "#0d0618" }}>
+        <div className="flex items-center gap-3 px-5 pt-12 pb-4" style={{ borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
+          <button onClick={() => setLocation("/profile")} data-testid="button-back"
+            className="p-2 -ml-2 text-cream/60">
+            <ArrowLeft size={22} />
+          </button>
+          <div className="flex items-center gap-2">
+            <Shield size={18} color="#c9a84c" />
+            <h1 className="font-serif text-xl text-gold">Admin Panel</h1>
+          </div>
         </div>
-      </div>
-
-      <div className="flex px-4 pt-3 gap-1.5 pb-2 overflow-x-auto scrollbar-none">
+        <div className="flex px-4 pt-3 gap-1.5 pb-2 overflow-x-auto scrollbar-none">
         {TABS.map(({ id, label, Icon, badge }) => (
           <button
             key={id}
@@ -199,6 +200,7 @@ export default function AdminPage({ user }: Props) {
             )}
           </button>
         ))}
+        </div>
       </div>
 
       <div className="px-4 pt-2 pb-4">
