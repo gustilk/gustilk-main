@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { ZoomIn, ZoomOut } from "lucide-react";
 
 export async function compressImage(file: File, maxPx = 800, quality = 0.70): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -54,6 +55,7 @@ export function PhotoCropModal({
   const rafId = useRef<number | null>(null);
 
   const [ready, setReady] = useState(false);
+  const [sliderScale, setSliderScale] = useState(1);
 
   // Apply transform via direct DOM mutation — no React re-render per frame
   const applyTransform = () => {
@@ -80,6 +82,13 @@ export function PhotoCropModal({
     ty.current = Math.max(-halfExcessY, Math.min(halfExcessY, ty.current));
   };
 
+  const setScaleFromSlider = (newScale: number) => {
+    scale.current = newScale;
+    clampTranslate();
+    scheduleApply();
+    setSliderScale(newScale);
+  };
+
   // Load image, calculate cover fill size, centre it
   useEffect(() => {
     const container = containerRef.current;
@@ -99,6 +108,7 @@ export function PhotoCropModal({
       tx.current = 0;
       ty.current = 0;
       minScale.current = 1;
+      setSliderScale(1);
 
       const imgEl = imgRef.current;
       if (imgEl) {
@@ -170,6 +180,7 @@ export function PhotoCropModal({
 
         clampTranslate();
         scheduleApply();
+        setSliderScale(newScale);
       }
     };
 
@@ -257,7 +268,7 @@ export function PhotoCropModal({
       <div className="w-full max-w-sm rounded-2xl overflow-hidden" style={{ background: "#1a0a2e", border: "1px solid rgba(201,168,76,0.35)" }}>
         <div className="px-4 py-3 text-center" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
           <p className="text-gold font-serif font-semibold">Position your photo</p>
-          <p className="text-cream/40 text-xs mt-0.5">Drag to reposition · Pinch to zoom</p>
+          <p className="text-cream/40 text-xs mt-0.5">Drag to reposition · Zoom to adjust</p>
         </div>
 
         <div
@@ -295,6 +306,37 @@ export function PhotoCropModal({
           }} />
           {/* Border */}
           <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 0 2px rgba(201,168,76,0.5)" }} />
+        </div>
+
+        {/* Zoom slider */}
+        <div className="flex items-center gap-3 px-4 pt-3 pb-1">
+          <button
+            onClick={() => setScaleFromSlider(Math.max(minScale.current, sliderScale - 0.1))}
+            className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+          >
+            <ZoomOut size={15} color="rgba(253,248,240,0.6)" />
+          </button>
+          <input
+            type="range"
+            min={1}
+            max={3}
+            step={0.01}
+            value={sliderScale}
+            onChange={e => setScaleFromSlider(Number(e.target.value))}
+            className="flex-1 h-1.5 rounded-full appearance-none outline-none"
+            style={{
+              background: `linear-gradient(to right, #c9a84c ${((sliderScale - 1) / 2) * 100}%, rgba(255,255,255,0.12) ${((sliderScale - 1) / 2) * 100}%)`,
+              accentColor: "#c9a84c",
+            }}
+          />
+          <button
+            onClick={() => setScaleFromSlider(Math.min(3, sliderScale + 0.1))}
+            className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+          >
+            <ZoomIn size={15} color="rgba(253,248,240,0.6)" />
+          </button>
         </div>
 
         <div className="flex gap-2 px-4 py-4">
