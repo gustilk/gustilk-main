@@ -376,7 +376,14 @@ export default function DiscoverPage({ user }: Props) {
                     {/* Gradient + info overlay */}
                     <div className="absolute bottom-0 left-0 right-0 h-56 pointer-events-none"
                       style={{ background: "linear-gradient(to top, rgba(13,6,24,1), rgba(13,6,24,0.7) 50%, transparent)" }} />
-                    <div className="absolute bottom-0 left-0 right-0 px-5 pb-5 pointer-events-none">
+                    <button
+                      className="absolute bottom-0 left-0 right-0 px-5 pb-5 text-left z-20"
+                      onClick={() => {
+                        sessionStorage.setItem("profile_back_to", "/discover");
+                        sessionStorage.setItem("discover_return_index", String(currentIndex));
+                        setLocation(`/profile/${current.id}`);
+                      }}
+                    >
                       <div className="flex items-end justify-between gap-2">
                         <div className="flex-1">
                           <h2 className="font-serif text-2xl text-white font-bold leading-tight" data-testid={`text-name-${current.id}`}>
@@ -416,7 +423,7 @@ export default function DiscoverPage({ user }: Props) {
                           ))}
                         </div>
                       )}
-                    </div>
+                    </button>
                   </div>
                 );
               })()}

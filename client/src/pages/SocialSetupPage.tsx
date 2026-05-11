@@ -62,6 +62,9 @@ export default function SocialSetupPage({ user }: Props) {
 
   // Step 1 state
   const [data, setData] = useState({ caste: "", gender: "", country: "", state: "", city: "", dateOfBirth: "" });
+  const [dobMonth, setDobMonth] = useState("");
+  const [dobDay, setDobDay] = useState("");
+  const [dobYear, setDobYear] = useState("");
   const [agreedGuidelines, setAgreedGuidelines] = useState(false);
   const [showGuidelinesModal, setShowGuidelinesModal] = useState(true);
   const [agreedTruthful, setAgreedTruthful] = useState(false);
@@ -83,6 +86,16 @@ export default function SocialSetupPage({ user }: Props) {
   const photoInputRefs = [
     useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null),
   ];
+
+  useEffect(() => {
+    if (dobMonth && dobDay && dobYear) {
+      const m = dobMonth.padStart(2, "0");
+      const d = dobDay.padStart(2, "0");
+      setData(prev => ({ ...prev, dateOfBirth: `${dobYear}-${m}-${d}` }));
+    } else {
+      setData(prev => ({ ...prev, dateOfBirth: "" }));
+    }
+  }, [dobMonth, dobDay, dobYear]);
 
   useEffect(() => {
     let cancelled = false;
@@ -216,6 +229,14 @@ export default function SocialSetupPage({ user }: Props) {
     return d <= cutoff;
   };
   const maxDobDate = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().split("T")[0]; })();
+  const DOB_MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const maxDobYear = new Date().getFullYear() - 18;
+  const DOB_YEARS = Array.from({ length: maxDobYear - 1930 + 1 }, (_, i) => maxDobYear - i);
+  const daysInSelectedMonth = (() => {
+    if (!dobMonth || !dobYear) return 31;
+    return new Date(Number(dobYear), Number(dobMonth), 0).getDate();
+  })();
+  const DOB_DAYS = Array.from({ length: daysInSelectedMonth }, (_, i) => i + 1);
   const countryHasStates = !!COUNTRY_STATES[data.country];
   const STATE_REQUIRED_COUNTRIES = new Set(["USA", "Canada", "Australia", "UK", "Germany", "France", "Sweden", "Belgium", "Holland", "Russia", "Armenia", "Georgia"]);
   const stateRequired = countryHasStates && STATE_REQUIRED_COUNTRIES.has(data.country) && data.country !== "Iraq";
@@ -381,16 +402,32 @@ export default function SocialSetupPage({ user }: Props) {
 
               <div>
                 <Label>Date of Birth</Label>
-                <input
-                  type="date"
-                  value={data.dateOfBirth}
-                  max={maxDobDate}
-                  min="1930-01-01"
-                  onChange={e => setData(d => ({ ...d, dateOfBirth: e.target.value }))}
-                  data-testid="input-date-of-birth"
-                  className="w-full px-3 py-3 rounded-xl text-sm text-cream outline-none"
-                  style={{ background: "rgba(255,255,255,0.07)", border: `1.5px solid ${(showStep1Errors && !data.dateOfBirth) || (data.dateOfBirth && !isAtLeast18(data.dateOfBirth)) ? "rgba(239,68,68,0.6)" : "rgba(201,168,76,0.25)"}`, colorScheme: "dark" }}
-                />
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { label: "Month", value: dobMonth, onChange: setDobMonth, options: DOB_MONTHS.map((m, i) => ({ value: String(i + 1), label: m })) },
+                    { label: "Day", value: dobDay, onChange: setDobDay, options: DOB_DAYS.map(d => ({ value: String(d), label: String(d) })) },
+                    { label: "Year", value: dobYear, onChange: setDobYear, options: DOB_YEARS.map(y => ({ value: String(y), label: String(y) })) },
+                  ].map(({ label, value, onChange, options }) => (
+                    <select
+                      key={label}
+                      value={value}
+                      onChange={e => onChange(e.target.value)}
+                      data-testid={`input-dob-${label.toLowerCase()}`}
+                      className="w-full px-2 py-3 rounded-xl text-sm text-cream outline-none"
+                      style={{
+                        background: "rgba(255,255,255,0.07)",
+                        border: `1.5px solid ${showStep1Errors && !data.dateOfBirth ? "rgba(239,68,68,0.6)" : "rgba(201,168,76,0.25)"}`,
+                        colorScheme: "dark",
+                        appearance: "none",
+                      }}
+                    >
+                      <option value="" style={{ background: "#1a0a2e" }}>{label}</option>
+                      {options.map(o => (
+                        <option key={o.value} value={o.value} style={{ background: "#1a0a2e" }}>{o.label}</option>
+                      ))}
+                    </select>
+                  ))}
+                </div>
                 {showStep1Errors && !data.dateOfBirth && <p className="text-xs mt-1 pl-1" style={{ color: "#ef4444" }}>Please enter your date of birth</p>}
                 {data.dateOfBirth && !isAtLeast18(data.dateOfBirth) && (
                   <p className="text-xs mt-1" style={{ color: "#ef4444" }}>{t("setup.minAge18")}</p>
