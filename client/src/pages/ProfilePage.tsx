@@ -303,9 +303,11 @@ export default function ProfilePage({ user }: Props) {
 
   const allSlots = ((user as any).photoSlots ?? []) as PhotoSlot[];
   const [localSlots, setLocalSlots] = useState<LocalSlot[]>(() => {
-    const approved = allSlots.filter(s => s.status === "approved");
+    const photosInOrder: string[] = (user as any).photos ?? [];
     const arr: LocalSlot[] = Array(6).fill(null);
-    approved.forEach((s, i) => { arr[i] = { url: s.url, status: "approved" }; });
+    photosInOrder.forEach((url, i) => { if (i < 6) arr[i] = { url, status: "approved" }; });
+    let pi = photosInOrder.length;
+    allSlots.forEach(s => { if (s.status === "pending" && pi < 6) arr[pi++] = { url: s.url, status: "new" }; });
     return arr;
   });
   const [pendingSlots] = useState<PhotoSlot[]>(() => allSlots.filter(s => s.status === "pending"));
@@ -383,7 +385,9 @@ export default function ProfilePage({ user }: Props) {
       setLocalSlots(arr);
       setRejectedSlots(updatedSlots.filter((s: any) => s.status === "rejected"));
       setPhotosEdited(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      queryClient.setQueryData(["/api/auth/me"], (old: any) =>
+        old ? { ...old, user: { ...old.user, ...savedUser } } : old
+      );
       toast({ title: t("profile.photosUpdated") });
     },
     onError: (err: Error) => {
