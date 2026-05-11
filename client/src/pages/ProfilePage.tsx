@@ -362,17 +362,26 @@ export default function ProfilePage({ user }: Props) {
 
   const savePhotosMutation = useMutation({
     mutationFn: async () => {
-      const photos = localSlots.filter(s => s !== null).map(s => s!.url);
+      const snapshot = [...localSlots];
+      const photos = snapshot.filter(s => s !== null).map(s => s!.url);
       const res = await apiRequest("PUT", "/api/profile", { photos });
-      return res.json();
+      const json = await res.json();
+      return { savedUser: json.user, snapshot };
     },
-    onSuccess: (data) => {
-      const updatedSlots = ((data.user as any).photoSlots ?? []) as PhotoSlot[];
-      const photosInOrder: string[] = (data.user as any).photos ?? [];
-      const arr: LocalSlot[] = Array(6).fill(null);
-      photosInOrder.forEach((url, i) => { arr[i] = { url, status: "approved" }; });
+    onSuccess: ({ savedUser, snapshot }) => {
+      const updatedSlots = ((savedUser as any).photoSlots ?? []) as PhotoSlot[];
+      const approvedUrls = new Set<string>((savedUser as any).photos ?? []);
+      const pendingUrls = new Set<string>(
+        updatedSlots.filter((s: any) => s.status === "pending").map((s: any) => s.url)
+      );
+      const arr: LocalSlot[] = snapshot.map(slot => {
+        if (!slot) return null;
+        if (approvedUrls.has(slot.url)) return { url: slot.url, status: "approved" };
+        if (pendingUrls.has(slot.url)) return { url: slot.url, status: "new" };
+        return null;
+      });
       setLocalSlots(arr);
-      setRejectedSlots(updatedSlots.filter(s => s.status === "rejected"));
+      setRejectedSlots(updatedSlots.filter((s: any) => s.status === "rejected"));
       setPhotosEdited(false);
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       toast({ title: t("profile.photosUpdated") });
