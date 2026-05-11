@@ -189,7 +189,7 @@ function AppShell({ user }: { user: User }) {
               <Route path="/matches" component={() => <MatchesPage user={user} />} />
               <Route path="/chat/:matchId" component={({ params }) => <ChatPage user={user} matchId={params.matchId} />} />
               <Route path="/profile/edit" component={() => <EditProfilePage user={user} />} />
-              <Route path="/profile"><ProfilePage user={user} /></Route>
+              <Route path="/profile" component={() => <ProfilePage user={user} />} />
               <Route path="/premium" component={() => <PremiumPage user={user} />} />
               <Route path="/events/:eventId" component={({ params }) => <EventDetailPage user={user} eventId={params.eventId} />} />
               <Route path="/events" component={() => <EventsPage user={user} />} />
