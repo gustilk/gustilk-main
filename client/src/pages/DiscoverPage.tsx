@@ -195,10 +195,15 @@ export default function DiscoverPage({ user }: Props) {
         </div>
       )}
 
-      {/* ── Fixed transparent header overlaid on photo ── */}
-      <div className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-5 pt-12 pb-3"
-        style={{ background: "linear-gradient(to bottom, rgba(13,6,24,0.75) 0%, transparent 100%)", pointerEvents: "none" }}>
-        <h1 className="font-serif text-3xl font-bold text-white" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.6)", pointerEvents: "auto" }}>
+      {/* ── Fixed solid header ── */}
+      <div className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-5 pb-3"
+        style={{
+          background: "#0d0618",
+          paddingTop: "calc(12px + env(safe-area-inset-top))",
+          height: "calc(56px + env(safe-area-inset-top))",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+        }}>
+        <h1 className="font-serif text-2xl font-bold text-white">
           Gûstîlk
         </h1>
         <button
@@ -206,12 +211,9 @@ export default function DiscoverPage({ user }: Props) {
           data-testid="button-filters"
           className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold"
           style={{
-            background: "rgba(13,6,24,0.5)",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-            border: "1.5px solid rgba(255,255,255,0.2)",
+            background: "rgba(255,255,255,0.08)",
+            border: "1.5px solid rgba(255,255,255,0.15)",
             color: "rgba(253,248,240,0.85)",
-            pointerEvents: "auto",
           }}
         >
           <SlidersHorizontal size={14} />
@@ -223,7 +225,7 @@ export default function DiscoverPage({ user }: Props) {
       {showFilters && (
         <div className="fixed left-4 right-4 z-40 p-4 rounded-2xl"
           style={{
-            top: 104,
+            top: "calc(56px + env(safe-area-inset-top) + 8px)",
             background: "rgba(13,6,24,0.95)",
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
@@ -274,7 +276,11 @@ export default function DiscoverPage({ user }: Props) {
       <div
         ref={scrollRef}
         className="h-full overflow-y-auto"
-        style={{ opacity: fading ? 0 : 1, transition: "opacity 0.25s ease" }}
+        style={{
+          opacity: fading ? 0 : 1,
+          transition: "opacity 0.25s ease",
+          paddingTop: "calc(56px + env(safe-area-inset-top))",
+        }}
       >
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-full gap-4">
@@ -317,9 +323,9 @@ export default function DiscoverPage({ user }: Props) {
                     </div>
                   )}
 
-                  {/* Photo progress bars — below header */}
+                  {/* Photo progress bars */}
                   {photos.length > 1 && (
-                    <div className="absolute left-3 right-3 flex gap-1 z-20" style={{ top: 100 }}>
+                    <div className="absolute left-3 right-3 flex gap-1 z-20" style={{ top: 10 }}>
                       {photos.map((_, i) => (
                         <div key={i} className="flex-1 h-[3px] rounded-full overflow-hidden"
                           style={{ background: "rgba(255,255,255,0.3)" }}>
@@ -338,7 +344,7 @@ export default function DiscoverPage({ user }: Props) {
                   {photos.length > 1 && (
                     <div className="absolute right-3 z-20 px-2 py-1 rounded-full text-xs"
                       style={{
-                        top: 108,
+                        top: 18,
                         background: "rgba(13,6,24,0.55)",
                         backdropFilter: "blur(6px)",
                         WebkitBackdropFilter: "blur(6px)",
@@ -374,55 +380,53 @@ export default function DiscoverPage({ user }: Props) {
                     />
                   )}
 
-                  {/* Bottom gradient with name/location overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 z-20 px-5"
-                    style={{
-                      paddingBottom: "7rem",
-                      background: "linear-gradient(to top, rgba(13,6,24,0.97) 0%, rgba(13,6,24,0.7) 35%, transparent 65%)",
-                    }}>
-                    <h2 className="font-serif text-4xl text-white font-bold leading-tight"
-                      style={{ textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}
-                      data-testid={`text-name-${current.id}`}>
-                      {current.fullName ?? current.firstName ?? "Member"}{age ? `, ${age}` : ""}
-                    </h2>
-
-                    <div className="flex items-center flex-wrap gap-2 mt-2">
-                      {current.isVerified && (
-                        <span className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-semibold"
-                          style={{ background: "rgba(59,130,246,0.85)", color: "white" }}>
-                          <Shield size={9} /> Verified
-                        </span>
-                      )}
-                      {current.caste && (
-                        <span className="text-[11px] px-2.5 py-0.5 rounded-full font-bold"
-                          style={{ background: "rgba(201,168,76,0.85)", color: "#1a0a2e" }}
-                          data-testid={`badge-caste-${current.id}`}>
-                          {casteLabel(current.caste)}
-                        </span>
-                      )}
-                      <span className="flex items-center gap-1.5 text-sm"
-                        style={{ color: "rgba(253,248,240,0.75)" }}>
-                        <MapPin size={13} color="rgba(201,168,76,0.8)" />
-                        {current.city}{current.state ? `, ${current.state}` : ""}, {current.country}
-                      </span>
-                    </div>
-
-                    {getActiveLabel(current.activitySeenAt) && (
-                      <div className="flex items-center gap-1.5 mt-2" data-testid={`status-active-${current.id}`}>
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"
-                          style={{ boxShadow: "0 0 6px #34d399" }} />
-                        <span className="text-emerald-400 text-xs font-medium">
-                          {getActiveLabel(current.activitySeenAt)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
                 </div>
               );
             })()}
 
+            {/* ── Name / badges / location — immediately below photo ── */}
+            <div className="px-5 pt-4 pb-3" style={{ background: "#0d0618" }}>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="font-serif text-2xl text-white font-bold leading-tight"
+                  data-testid={`text-name-${current.id}`}>
+                  {current.fullName ?? current.firstName ?? "Member"}{age ? `, ${age}` : ""}
+                </h2>
+                {current.isVerified && (
+                  <span className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-semibold"
+                    style={{ background: "rgba(59,130,246,0.85)", color: "white" }}>
+                    <Shield size={9} /> Verified
+                  </span>
+                )}
+                {current.caste && (
+                  <span className="text-[11px] px-2.5 py-0.5 rounded-full font-bold"
+                    style={{ background: "rgba(201,168,76,0.85)", color: "#1a0a2e" }}
+                    data-testid={`badge-caste-${current.id}`}>
+                    {casteLabel(current.caste)}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                {(current.city || current.country) && (
+                  <span className="flex items-center gap-1.5 text-sm"
+                    style={{ color: "rgba(253,248,240,0.7)" }}>
+                    <MapPin size={13} color="rgba(201,168,76,0.8)" />
+                    {[current.city, current.state, current.country].filter(Boolean).join(", ")}
+                  </span>
+                )}
+                {getActiveLabel(current.activitySeenAt) && (
+                  <div className="flex items-center gap-1.5" data-testid={`status-active-${current.id}`}>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"
+                      style={{ boxShadow: "0 0 6px #34d399" }} />
+                    <span className="text-emerald-400 text-xs font-medium">
+                      {getActiveLabel(current.activitySeenAt)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* ── Profile info below the photo (scroll down to see) ── */}
-            <div className="px-5 pt-5 pb-44 space-y-4" style={{ background: "#0d0618" }}>
+            <div className="px-5 pt-1 pb-44 space-y-4" style={{ background: "#0d0618" }}>
 
               {/* About */}
               {current.bio && (
@@ -575,7 +579,7 @@ export default function DiscoverPage({ user }: Props) {
                 background: "#1a0a2e",
                 boxShadow: "0 4px 20px rgba(0,0,0,0.45)",
               }}>
-              <X size={26} color="white" strokeWidth={3} />
+              <X size={26} color="#ef4444" strokeWidth={3} />
             </button>
 
             <button
@@ -587,7 +591,7 @@ export default function DiscoverPage({ user }: Props) {
                 background: "#1a0a2e",
                 boxShadow: "0 4px 20px rgba(0,0,0,0.45)",
               }}>
-              <Heart size={26} fill="white" color="white" strokeWidth={2} />
+              <Heart size={26} fill="#ef4444" color="#ef4444" strokeWidth={2} />
             </button>
           </div>
         </div>
