@@ -296,15 +296,13 @@ export default function DiscoverPage({ user }: Props) {
               <Heart size={32} color="#c9a84c" />
             </div>
             <div>
-              <h3 className="font-serif text-2xl font-bold text-gold mb-2">You're all caught up!</h3>
-              <p className="text-cream/60 text-sm leading-relaxed">
-                New members join every day — check back soon.{"\n"}Try adjusting your filters to discover more people.
-              </p>
+              <h3 className="font-serif text-2xl font-bold text-gold mb-2">{t("discover.noMore")}</h3>
+              <p className="text-cream/60 text-sm leading-relaxed">{t("discover.noMoreSub")}</p>
             </div>
             <button onClick={handleRefresh} data-testid="button-refresh"
               className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold mt-1"
               style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
-              <RefreshCw size={15} /> Refresh Profiles
+              <RefreshCw size={15} /> {t("discover.refresh")}
             </button>
           </div>
         ) : (

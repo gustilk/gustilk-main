@@ -153,8 +153,8 @@ export default {
   },
   discover: {
     title: "Entdecken",
-    noMore: "Gerade keine weiteren Profile.",
-    noMoreSub: "Schau später für neue Mitglieder vorbei.",
+    noMore: "Du hast alle Profile gesehen!",
+    noMoreSub: "Täglich kommen neue Mitglieder dazu — schau bald wieder vorbei oder passe deine Filter an.",
     pass: "Überspringen",
     like: "Gefällt mir",
     superLike: "Super-Like",
@@ -167,7 +167,7 @@ export default {
     maxAge: "Höchstalter",
     applyFilters: "Filter anwenden",
     finding: "Profile werden gesucht…",
-    refresh: "Aktualisieren",
+    refresh: "Profile aktualisieren",
     undo: "Rückgängig",
   },
   matches: {
