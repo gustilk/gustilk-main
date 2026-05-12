@@ -1,5 +1,5 @@
 import newLogo from "@assets/IMG_1901_transparent.png";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { useLocation } from "wouter";
 import type { SafeUser } from "@shared/schema";
@@ -222,6 +222,8 @@ function GlowAvatar({ user }: { user: SafeUser }) {
 
 export default function MatchModal({ matchedUser, currentUser, matchId, onClose }: MatchModalProps) {
   const [, setLocation] = useLocation();
+  const [photoIdx, setPhotoIdx] = useState(0);
+  const photos = matchedUser.photos ?? [];
 
   const handleChat = () => {
     onClose();
@@ -230,11 +232,10 @@ export default function MatchModal({ matchedUser, currentUser, matchId, onClose 
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-6"
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
       style={{ background: "rgba(0,0,0,0.88)", backdropFilter: "blur(6px)" }}
       data-testid="match-modal"
     >
-      {/* Keyframe injection */}
       <style>{`
         @keyframes glow-pulse {
           0%   { box-shadow: 0 0 0 0 rgba(201,168,76,0.8), 0 0 12px rgba(201,168,76,0.5); }
@@ -247,15 +248,12 @@ export default function MatchModal({ matchedUser, currentUser, matchId, onClose 
         }
       `}</style>
 
-      {/* Fireworks layer — behind everything */}
       <FireworksCanvas />
-
-      {/* Confetti layer — above fireworks, below card */}
       <ConfettiCanvas />
 
       {/* Modal card */}
       <div
-        className="relative w-full max-w-sm rounded-3xl p-8 text-center"
+        className="relative w-full max-w-sm rounded-3xl overflow-hidden"
         style={{
           background: "linear-gradient(160deg, #2d0f4a, #1a0a2e)",
           border: "1px solid rgba(201,168,76,0.35)",
@@ -263,67 +261,118 @@ export default function MatchModal({ matchedUser, currentUser, matchId, onClose 
           zIndex: 2,
         }}
       >
-        <button
-          onClick={onClose}
-          data-testid="button-close-modal"
-          className="absolute top-4 right-4 z-10"
-          style={{ color: "rgba(253,248,240,0.4)" }}
-        >
-          <X size={20} />
-        </button>
-
-        {/* Photos row */}
-        <div className="flex justify-center items-center gap-5 mb-6">
-          <GlowAvatar user={currentUser} />
-
-          {/* Gûstîlk logo centrepiece */}
-          <div
-            className="flex-shrink-0 flex items-center justify-center"
-            style={{ animation: "logo-bounce 2s ease-in-out infinite" }}
-          >
-            <img
-              src={newLogo}
-              alt="Gûstîlk"
-              style={{
-                width: 80,
-                height: 80,
-                objectFit: "contain",
-              }}
+        {/* ── Photo carousel ── */}
+        <div className="relative" style={{ height: 300, background: "#0d0618" }}>
+          {photos.length > 0 ? (
+            <ProtectedPhoto
+              src={photos[photoIdx]}
+              alt={matchedUser.fullName ?? ""}
+              className="w-full h-full object-contain"
+              blurred={matchedUser.gender === "female" && !!matchedUser.photosBlurred}
             />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, #2d0f4a, #7b3fa0)" }}>
+              <span className="font-serif text-7xl text-gold/30">
+                {(matchedUser.fullName ?? matchedUser.firstName ?? "M").charAt(0)}
+              </span>
+            </div>
+          )}
+
+          {/* Tap zones */}
+          {photos.length > 1 && (
+            <>
+              <button
+                className="absolute left-0 top-0 bottom-0 w-1/2 z-10"
+                onClick={() => setPhotoIdx(i => Math.max(0, i - 1))}
+              />
+              <button
+                className="absolute right-0 top-0 bottom-0 w-1/2 z-10"
+                onClick={() => setPhotoIdx(i => Math.min(photos.length - 1, i + 1))}
+              />
+            </>
+          )}
+
+          {/* Dot indicators */}
+          {photos.length > 1 && (
+            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-20">
+              {photos.map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-full transition-all"
+                  style={{
+                    width: i === photoIdx ? 18 : 6,
+                    height: 6,
+                    background: i === photoIdx ? "white" : "rgba(255,255,255,0.4)",
+                  }}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Current user's avatar — top-left */}
+          <div className="absolute top-3 left-3 z-20">
+            <GlowAvatar user={currentUser} />
           </div>
 
-          <GlowAvatar user={matchedUser} />
-        </div>
+          {/* Logo — top-right */}
+          <div className="absolute top-3 right-10 z-20 flex items-center justify-center"
+            style={{ animation: "logo-bounce 2s ease-in-out infinite" }}>
+            <img src={newLogo} alt="Gûstîlk" style={{ width: 44, height: 44, objectFit: "contain" }} />
+          </div>
 
-        <h2 className="font-serif text-3xl font-bold text-gold mb-2" style={{ textShadow: "0 0 20px rgba(201,168,76,0.5)" }}>
-          It's a Match!
-        </h2>
-        <p className="text-cream/60 text-sm mb-6">
-          You and{" "}
-          <span className="text-gold font-semibold">
-            {matchedUser.fullName ?? matchedUser.firstName ?? "your match"}
-          </span>{" "}
-          have liked each other
-        </p>
-
-        <div className="flex flex-col gap-3">
-          <button
-            onClick={handleChat}
-            data-testid="button-send-message"
-            className="flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-sm"
-            style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
-          >
-            <MessageCircle size={18} />
-            Send a Message
-          </button>
+          {/* Close button */}
           <button
             onClick={onClose}
-            data-testid="button-keep-swiping"
-            className="py-3 rounded-xl text-sm font-semibold"
-            style={{ background: "rgba(255,255,255,0.07)", color: "rgba(253,248,240,0.6)", border: "1px solid rgba(201,168,76,0.2)" }}
+            data-testid="button-close-modal"
+            className="absolute top-3 right-3 z-30 w-7 h-7 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(0,0,0,0.45)" }}
           >
-            Keep Discovering
+            <X size={16} color="white" />
           </button>
+
+          {/* Name gradient overlay */}
+          <div className="absolute bottom-0 left-0 right-0 z-10 px-4 pb-8 pt-10"
+            style={{ background: "linear-gradient(to top, rgba(13,6,24,0.85) 0%, transparent 100%)" }}>
+            <p className="text-white font-bold text-lg leading-tight">
+              {matchedUser.fullName ?? matchedUser.firstName ?? "Your match"}
+            </p>
+          </div>
+        </div>
+
+        {/* ── Text + buttons ── */}
+        <div className="px-6 pt-5 pb-6 text-center">
+          <h2 className="font-serif text-2xl font-bold text-gold mb-1"
+            style={{ textShadow: "0 0 20px rgba(201,168,76,0.5)" }}>
+            It's a Match!
+          </h2>
+          <p className="text-cream/60 text-sm mb-5">
+            You and{" "}
+            <span className="text-gold font-semibold">
+              {matchedUser.firstName ?? matchedUser.fullName?.split(" ")[0] ?? "your match"}
+            </span>{" "}
+            have liked each other
+          </p>
+
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={handleChat}
+              data-testid="button-send-message"
+              className="flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-sm"
+              style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
+            >
+              <MessageCircle size={18} />
+              Send a Message
+            </button>
+            <button
+              onClick={onClose}
+              data-testid="button-keep-swiping"
+              className="py-3 rounded-xl text-sm font-semibold"
+              style={{ background: "rgba(255,255,255,0.07)", color: "rgba(253,248,240,0.6)", border: "1px solid rgba(201,168,76,0.2)" }}
+            >
+              Keep Discovering
+            </button>
+          </div>
         </div>
       </div>
     </div>
