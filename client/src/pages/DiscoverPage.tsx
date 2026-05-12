@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { SlidersHorizontal, X, Heart, RefreshCw, MapPin, Info, Undo2 } from "lucide-react";
+import { SlidersHorizontal, X, Heart, RefreshCw, MapPin, Undo2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import MatchModal from "@/components/MatchModal";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
 import LottieAnimation from "@/components/LottieAnimation";
 import { Slider } from "@/components/ui/slider";
+import DiscoverProfileSheet from "@/components/DiscoverProfileSheet";
 import type { SafeUser } from "@shared/schema";
 
 function getActiveLabel(ts: Date | string | null | undefined): string | null {
@@ -30,8 +30,7 @@ interface Props { user: SafeUser }
 
 export default function DiscoverPage({ user }: Props) {
   const { t } = useTranslation();
-  const [, setLocation] = useLocation();
-  const [showFilters, setShowFilters] = useState(false);
+const [showFilters, setShowFilters] = useState(false);
   const [minAge, setMinAge] = useState(18);
   const [maxAge, setMaxAge] = useState(60);
   const [pendingMin, setPendingMin] = useState(18);
@@ -48,6 +47,7 @@ export default function DiscoverPage({ user }: Props) {
   const [undoProgress, setUndoProgress] = useState(100);
   const [returningFrom, setReturningFrom] = useState<"left" | "right" | null>(null);
   const [cardPhotoIdx, setCardPhotoIdx] = useState(0);
+  const [sheetProfile, setSheetProfile] = useState<SafeUser | null>(null);
   const undoTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const undoStartRef = useRef<number>(0);
   const lastVisitedId = useRef<string | null>(null);
@@ -179,6 +179,18 @@ export default function DiscoverPage({ user }: Props) {
     setMaxAge(pendingMax);
     setCurrentIndex(0);
     setShowFilters(false);
+  };
+
+  const handleSheetLike = () => {
+    const p = sheetProfile;
+    setSheetProfile(null);
+    if (p) likeMutation.mutate(p.id);
+  };
+
+  const handleSheetPass = () => {
+    const p = sheetProfile;
+    setSheetProfile(null);
+    if (p) dislikeMutation.mutate(p.id);
   };
 
   const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[c] ?? c);
@@ -352,18 +364,14 @@ export default function DiscoverPage({ user }: Props) {
                       onClick={() => setCardPhotoIdx(i => Math.min(totalPhotos - 1, i + 1))}
                     />
 
-                    {/* View full profile — centre tap zone */}
+                    {/* View full profile — info button */}
                     <button
-                      onClick={() => {
-                        sessionStorage.setItem("profile_back_to", "/discover");
-                        sessionStorage.setItem("discover_return_index", String(currentIndex));
-                        setLocation(`/profile/${current.id}`);
-                      }}
+                      onClick={() => setSheetProfile(current)}
                       data-testid={`button-view-profile-${current.id}`}
                       className="absolute top-10 right-3 w-9 h-9 rounded-full flex items-center justify-center z-20 transition-all active:scale-95"
                       style={{ background: "rgba(13,6,24,0.75)", border: "1.5px solid rgba(201,168,76,0.4)", backdropFilter: "blur(4px)" }}
                     >
-                      <Info size={17} color="#c9a84c" />
+                      <Heart size={16} color="#c9a84c" />
                     </button>
 
                     {/* Caste badge */}
@@ -378,11 +386,7 @@ export default function DiscoverPage({ user }: Props) {
                       style={{ background: "linear-gradient(to top, rgba(13,6,24,1), rgba(13,6,24,0.7) 50%, transparent)" }} />
                     <button
                       className="absolute bottom-0 left-0 right-0 px-5 pb-5 text-left z-20"
-                      onClick={() => {
-                        sessionStorage.setItem("profile_back_to", "/discover");
-                        sessionStorage.setItem("discover_return_index", String(currentIndex));
-                        setLocation(`/profile/${current.id}`);
-                      }}
+                      onClick={() => setSheetProfile(current)}
                     >
                       <div className="flex items-end justify-between gap-2">
                         <div className="flex-1">
@@ -496,6 +500,17 @@ export default function DiscoverPage({ user }: Props) {
           </>
         )}
       </div>
+
+      {sheetProfile && (
+        <DiscoverProfileSheet
+          profile={sheetProfile}
+          onClose={() => setSheetProfile(null)}
+          onLike={handleSheetLike}
+          onPass={handleSheetPass}
+          isLikePending={likeMutation.isPending}
+          isPassPending={dislikeMutation.isPending}
+        />
+      )}
 
       {matchData && (
         <MatchModal
