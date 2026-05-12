@@ -546,10 +546,10 @@ export default function DiscoverPage({ user }: Props) {
               data-testid="button-dislike"
               className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
               style={{
-                background: "white",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.35)",
+                background: "#000000",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.45)",
               }}>
-              <X size={26} color="white" strokeWidth={3} style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))" }} />
+              <X size={26} color="white" strokeWidth={3} />
             </button>
 
             <button
@@ -558,10 +558,10 @@ export default function DiscoverPage({ user }: Props) {
               data-testid="button-like"
               className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
               style={{
-                background: "white",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.35)",
+                background: "#000000",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.45)",
               }}>
-              <Heart size={26} fill="white" color="white" strokeWidth={2} style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.45))" }} />
+              <Heart size={26} fill="white" color="white" strokeWidth={2} />
             </button>
           </div>
         </div>
