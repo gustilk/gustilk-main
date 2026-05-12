@@ -157,7 +157,6 @@ export default {
     noMoreSub: "ينضم أعضاء جدد كل يوم — تحقق مجدداً قريباً أو عدّل الفلاتر لاكتشاف المزيد.",
     pass: "تجاوز",
     like: "إعجاب",
-    superLike: "إعجاب خاص",
     age: "{{age}} سنة",
     verifiedMember: "عضو موثق",
     pendingVerification: "قيد التحقق",

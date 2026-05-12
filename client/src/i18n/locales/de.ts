@@ -157,7 +157,6 @@ export default {
     noMoreSub: "Täglich kommen neue Mitglieder dazu — schau bald wieder vorbei oder passe deine Filter an.",
     pass: "Überspringen",
     like: "Gefällt mir",
-    superLike: "Super-Like",
     age: "{{age}} Jahre alt",
     verifiedMember: "Verifiziertes Mitglied",
     pendingVerification: "Verifizierung ausstehend",

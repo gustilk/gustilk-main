@@ -164,7 +164,6 @@ export default {
     noMoreSub: "New members join every day — check back soon or adjust your filters to discover more people.",
     pass: "Pass",
     like: "Like",
-    superLike: "Super Like",
     age: "{{age}} years old",
     verifiedMember: "Verified Member",
     pendingVerification: "Pending Verification",

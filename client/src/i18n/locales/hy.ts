@@ -164,7 +164,6 @@ export default {
     noMoreSub: "Ամեն օր նոր անդամներ են միանում — շուտ ստուգեք կամ հարմարեցրեք ֆիլտրերը:",
     pass: "Բաց թողնել",
     like: "Հավանել",
-    superLike: "Super Like",
     age: "{{age}} տարեկան",
     verifiedMember: "Հաստատված",
     pendingVerification: "Ընթացքի մեջ",
