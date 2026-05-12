@@ -10,7 +10,7 @@ export interface IStorage {
   updateUser(id: string, data: Partial<InsertUser>): Promise<SafeUser>;
   deleteUser(id: string): Promise<void>;
 
-  getDiscoverProfiles(userId: string, caste: string, gender: string, minAge: number, maxAge: number): Promise<SafeUser[]>;
+  getDiscoverProfiles(userId: string, caste: string, gender: string, minAge: number, maxAge: number, country?: string): Promise<SafeUser[]>;
 
   likeUser(fromUserId: string, toUserId: string, comment?: string): Promise<{ matched: boolean; matchId?: string }>;
   dislikeUser(fromUserId: string, toUserId: string): Promise<void>;
@@ -220,8 +220,8 @@ export class DatabaseStorage implements IStorage {
     await db.delete(users).where(eq(users.id, id));
   }
 
-  async getDiscoverProfiles(userId: string, caste: string, gender: string, minAge: number, maxAge: number): Promise<SafeUser[]> {
-    const ck = `discover:${userId}:${caste}:${gender}:${minAge}:${maxAge}`;
+  async getDiscoverProfiles(userId: string, caste: string, gender: string, minAge: number, maxAge: number, country?: string): Promise<SafeUser[]> {
+    const ck = `discover:${userId}:${caste}:${gender}:${minAge}:${maxAge}:${country ?? ""}`;
     const cached = cacheGet<SafeUser[]>(ck);
     if (cached !== undefined) return cached;
 
@@ -248,6 +248,7 @@ export class DatabaseStorage implements IStorage {
         eq(users.profileVisible, true),
         isNotNull(users.mainPhotoUrl),
         ne(users.isSystemAccount, true),
+        ...(country ? [eq(users.country, country)] : []),
       )
     ).limit(50);
 

@@ -499,7 +499,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (!user || !user.caste || !user.gender) return res.status(400).json({ error: "Profile incomplete" });
     const minAge = parseInt(req.query.minAge as string) || 18;
     const maxAge = parseInt(req.query.maxAge as string) || 80;
-    const profiles = await storage.getDiscoverProfiles(userId, user.caste as string, user.gender as string, minAge, maxAge);
+    const country = ((req.query.country as string) || "").trim() || undefined;
+    const profiles = await storage.getDiscoverProfiles(userId, user.caste as string, user.gender as string, minAge, maxAge, country);
     res.json({ profiles });
   });
 

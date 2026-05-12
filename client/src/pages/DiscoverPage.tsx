@@ -35,6 +35,8 @@ export default function DiscoverPage({ user }: Props) {
   const [maxAge, setMaxAge] = useState(60);
   const [pendingMin, setPendingMin] = useState(18);
   const [pendingMax, setPendingMax] = useState(60);
+  const [country, setCountry] = useState("");
+  const [pendingCountry, setPendingCountry] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [matchData, setMatchData] = useState<{ user: SafeUser; matchId: string } | null>(null);
   const [swipeAnim, setSwipeAnim] = useState<"like" | "dislike" | null>(null);
@@ -51,9 +53,11 @@ export default function DiscoverPage({ user }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading } = useQuery<{ profiles: SafeUser[] }>({
-    queryKey: ["/api/discover", minAge, maxAge],
+    queryKey: ["/api/discover", minAge, maxAge, country],
     queryFn: async () => {
-      const res = await fetch(`/api/discover?minAge=${minAge}&maxAge=${maxAge}`, { credentials: "include" });
+      const params = new URLSearchParams({ minAge: String(minAge), maxAge: String(maxAge) });
+      if (country) params.set("country", country);
+      const res = await fetch(`/api/discover?${params}`, { credentials: "include" });
       return res.json();
     },
   });
@@ -157,6 +161,7 @@ export default function DiscoverPage({ user }: Props) {
   const handleRefresh = () => {
     setMinAge(pendingMin);
     setMaxAge(pendingMax);
+    setCountry(pendingCountry);
     setCurrentIndex(0);
     setShowFilters(false);
   };
@@ -233,9 +238,30 @@ export default function DiscoverPage({ user }: Props) {
             data-testid="filter-age-range"
             className="[&_[role=slider]]:bg-[#c9a84c] [&_[role=slider]]:border-[#c9a84c] [&_.relative]:bg-white/10 [&_[data-orientation=horizontal]]:h-1.5 [&_.absolute]:bg-[#c9a84c]"
           />
-          <div className="flex justify-between text-xs text-cream/30 mt-1.5 mb-3">
+          <div className="flex justify-between text-xs text-cream/30 mt-1.5 mb-4">
             <span>18</span><span>80</span>
           </div>
+
+          <div className="mb-4">
+            <p className="text-xs text-cream/50 uppercase tracking-wider font-semibold mb-2">Country</p>
+            <select
+              value={pendingCountry}
+              onChange={e => setPendingCountry(e.target.value)}
+              data-testid="filter-country"
+              className="w-full px-3 py-2.5 rounded-xl text-sm font-medium outline-none"
+              style={{
+                background: "rgba(255,255,255,0.07)",
+                border: "1px solid rgba(201,168,76,0.25)",
+                color: pendingCountry ? "rgba(253,248,240,0.9)" : "rgba(253,248,240,0.35)",
+              }}
+            >
+              <option value="">All countries</option>
+              {["USA","Canada","Australia","Germany","Holland","Sweden","Belgium","France","Turkey","Iraq","Armenia","Georgia","Russia","UK"].map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+
           <button onClick={handleRefresh} data-testid="button-apply-filters"
             className="w-full py-2.5 rounded-xl text-sm font-bold"
             style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
@@ -280,7 +306,7 @@ export default function DiscoverPage({ user }: Props) {
                 <div className="relative" style={{ height: "100dvh", minHeight: "100vh" }}>
                   {photo ? (
                     <ProtectedPhoto src={photo} alt={current.fullName ?? ""}
-                      className="absolute inset-0 w-full h-full object-cover"
+                      className="absolute inset-0 w-full h-full object-contain"
                       blurred={current.gender === "female" && !!current.photosBlurred} />
                   ) : (
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center"
