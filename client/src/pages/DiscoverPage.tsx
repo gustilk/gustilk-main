@@ -303,10 +303,10 @@ export default function DiscoverPage({ user }: Props) {
               const photos = current.photos ?? [];
               const photo = photos[photoIdx] ?? photos[0] ?? null;
               return (
-                <div className="relative" style={{ height: "100dvh", minHeight: "100vh" }}>
+                <div className="relative" style={{ height: "72dvh", minHeight: 480 }}>
                   {photo ? (
                     <ProtectedPhoto src={photo} alt={current.fullName ?? ""}
-                      className="absolute inset-0 w-full h-full object-contain"
+                      className="absolute inset-0 w-full h-full object-cover object-top"
                       blurred={current.gender === "female" && !!current.photosBlurred} />
                   ) : (
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center"
