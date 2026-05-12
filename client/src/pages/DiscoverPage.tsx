@@ -177,7 +177,7 @@ export default function DiscoverPage({ user }: Props) {
   const isPending = likeMutation.isPending || dislikeMutation.isPending;
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: "#0d0618" }}>
+    <div className="relative h-screen overflow-hidden" style={{ background: "#0d0618" }}>
 
       {/* Lottie overlay */}
       {swipeAnim && (
@@ -189,25 +189,40 @@ export default function DiscoverPage({ user }: Props) {
         </div>
       )}
 
-      {/* ── Fixed header ── */}
-      <div className="flex-shrink-0 flex items-center justify-between px-5 pt-12 pb-3"
-        style={{ background: "#0d0618", zIndex: 10 }}>
-        <h1 className="font-serif text-3xl font-bold text-gold">Gûstîlk</h1>
+      {/* ── Fixed transparent header overlaid on photo ── */}
+      <div className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-5 pt-12 pb-3"
+        style={{ background: "linear-gradient(to bottom, rgba(13,6,24,0.75) 0%, transparent 100%)", pointerEvents: "none" }}>
+        <h1 className="font-serif text-3xl font-bold text-white" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.6)", pointerEvents: "auto" }}>
+          Gûstîlk
+        </h1>
         <button
           onClick={() => setShowFilters(f => !f)}
           data-testid="button-filters"
           className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold"
-          style={{ border: "1.5px solid rgba(201,168,76,0.25)", background: "rgba(255,255,255,0.05)", color: "rgba(253,248,240,0.6)" }}
+          style={{
+            background: "rgba(13,6,24,0.5)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            border: "1.5px solid rgba(255,255,255,0.2)",
+            color: "rgba(253,248,240,0.85)",
+            pointerEvents: "auto",
+          }}
         >
           <SlidersHorizontal size={14} />
           {t("discover.filters")}
         </button>
       </div>
 
-      {/* Filters panel */}
+      {/* Filters panel — floats below header */}
       {showFilters && (
-        <div className="flex-shrink-0 mx-5 mb-3 p-4 rounded-2xl"
-          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(201,168,76,0.2)" }}>
+        <div className="fixed left-4 right-4 z-40 p-4 rounded-2xl"
+          style={{
+            top: 104,
+            background: "rgba(13,6,24,0.95)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            border: "1px solid rgba(201,168,76,0.2)",
+          }}>
           <div className="flex justify-between text-xs text-cream/50 uppercase tracking-wider mb-3 font-semibold">
             <span>{t("discover.minAge")}: {pendingMin}</span>
             <span>{t("discover.maxAge")}: {pendingMax}</span>
@@ -228,10 +243,12 @@ export default function DiscoverPage({ user }: Props) {
         </div>
       )}
 
-      {/* ── Scrollable profile content ── */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto"
-        style={{ opacity: fading ? 0 : 1, transition: "opacity 0.25s ease" }}>
-
+      {/* ── Scrollable content ── */}
+      <div
+        ref={scrollRef}
+        className="h-full overflow-y-auto"
+        style={{ opacity: fading ? 0 : 1, transition: "opacity 0.25s ease" }}
+      >
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-full gap-4">
             <div className="w-12 h-12 border-2 border-gold border-t-transparent rounded-full animate-spin" />
@@ -254,18 +271,18 @@ export default function DiscoverPage({ user }: Props) {
         ) : (
           <div data-testid={`card-profile-${current.id}`}>
 
-            {/* ── Photo section ── */}
+            {/* ── Full-screen photo ── */}
             {(() => {
               const photos = current.photos ?? [];
               const photo = photos[photoIdx] ?? photos[0] ?? null;
               return (
-                <div className="relative" style={{ height: "65vh" }}>
+                <div className="relative" style={{ height: "100dvh", minHeight: "100vh" }}>
                   {photo ? (
                     <ProtectedPhoto src={photo} alt={current.fullName ?? ""}
-                      className="w-full h-full object-cover"
+                      className="absolute inset-0 w-full h-full object-cover"
                       blurred={current.gender === "female" && !!current.photosBlurred} />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center"
+                    <div className="absolute inset-0 w-full h-full flex items-center justify-center"
                       style={{ background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}>
                       <span className="font-serif text-8xl text-gold/20">
                         {(current.fullName ?? current.firstName ?? "M").charAt(0)}
@@ -273,20 +290,38 @@ export default function DiscoverPage({ user }: Props) {
                     </div>
                   )}
 
-                  {/* Progress bars */}
+                  {/* Photo progress bars — below header */}
                   {photos.length > 1 && (
-                    <div className="absolute top-3 left-3 right-3 flex gap-1 z-20">
+                    <div className="absolute left-3 right-3 flex gap-1 z-20" style={{ top: 100 }}>
                       {photos.map((_, i) => (
                         <div key={i} className="flex-1 h-[3px] rounded-full overflow-hidden"
-                          style={{ background: "rgba(255,255,255,0.25)" }}>
+                          style={{ background: "rgba(255,255,255,0.3)" }}>
                           <div className="h-full rounded-full"
-                            style={{ background: i <= photoIdx ? "rgba(255,255,255,0.9)" : "transparent", width: i <= photoIdx ? "100%" : "0%", transition: "width 0.15s" }} />
+                            style={{
+                              background: i <= photoIdx ? "rgba(255,255,255,0.95)" : "transparent",
+                              width: i <= photoIdx ? "100%" : "0%",
+                              transition: "width 0.15s",
+                            }} />
                         </div>
                       ))}
                     </div>
                   )}
 
-                  {/* Tap zones */}
+                  {/* Photo count */}
+                  {photos.length > 1 && (
+                    <div className="absolute right-3 z-20 px-2 py-1 rounded-full text-xs"
+                      style={{
+                        top: 108,
+                        background: "rgba(13,6,24,0.55)",
+                        backdropFilter: "blur(6px)",
+                        WebkitBackdropFilter: "blur(6px)",
+                        color: "rgba(255,255,255,0.7)",
+                      }}>
+                      {photoIdx + 1}/{photos.length}
+                    </div>
+                  )}
+
+                  {/* Tap zones for photo navigation */}
                   {photos.length > 1 && (
                     <>
                       <button className="absolute left-0 top-0 bottom-0 w-1/3 z-10"
@@ -296,62 +331,55 @@ export default function DiscoverPage({ user }: Props) {
                     </>
                   )}
 
-                  {/* Caste badge */}
-                  {current.caste && (
-                    <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold z-20"
-                      style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
-                      data-testid={`badge-caste-${current.id}`}>
-                      {casteLabel(current.caste)}
-                    </div>
-                  )}
+                  {/* Bottom gradient with name/location overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 z-20 px-5"
+                    style={{
+                      paddingBottom: "7rem",
+                      background: "linear-gradient(to top, rgba(13,6,24,0.97) 0%, rgba(13,6,24,0.7) 35%, transparent 65%)",
+                    }}>
+                    <h2 className="font-serif text-4xl text-white font-bold leading-tight"
+                      style={{ textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}
+                      data-testid={`text-name-${current.id}`}>
+                      {current.fullName ?? current.firstName ?? "Member"}{age ? `, ${age}` : ""}
+                    </h2>
 
-                  {/* Photo count */}
-                  {photos.length > 1 && (
-                    <div className="absolute top-3 right-3 px-2 py-1 rounded-full text-xs z-20"
-                      style={{ background: "rgba(13,6,24,0.65)", color: "rgba(255,255,255,0.6)" }}>
-                      {photoIdx + 1}/{photos.length}
+                    <div className="flex items-center flex-wrap gap-2 mt-2">
+                      {current.isVerified && (
+                        <span className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-semibold"
+                          style={{ background: "rgba(59,130,246,0.85)", color: "white" }}>
+                          <Shield size={9} /> Verified
+                        </span>
+                      )}
+                      {current.caste && (
+                        <span className="text-[11px] px-2.5 py-0.5 rounded-full font-bold"
+                          style={{ background: "rgba(201,168,76,0.85)", color: "#1a0a2e" }}
+                          data-testid={`badge-caste-${current.id}`}>
+                          {casteLabel(current.caste)}
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1.5 text-sm"
+                        style={{ color: "rgba(253,248,240,0.75)" }}>
+                        <MapPin size={13} color="rgba(201,168,76,0.8)" />
+                        {current.city}{current.state ? `, ${current.state}` : ""}, {current.country}
+                      </span>
                     </div>
-                  )}
 
-                  {/* Bottom gradient */}
-                  <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
-                    style={{ background: "linear-gradient(to top, rgba(13,6,24,1), transparent)" }} />
+                    {getActiveLabel(current.activitySeenAt) && (
+                      <div className="flex items-center gap-1.5 mt-2" data-testid={`status-active-${current.id}`}>
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"
+                          style={{ boxShadow: "0 0 6px #34d399" }} />
+                        <span className="text-emerald-400 text-xs font-medium">
+                          {getActiveLabel(current.activitySeenAt)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })()}
 
-            {/* ── Profile info ── */}
-            <div className="px-5 pt-5 pb-40 space-y-4">
-
-              {/* Name + active status */}
-              <div>
-                <h2 className="font-serif text-3xl text-white font-bold leading-tight"
-                  data-testid={`text-name-${current.id}`}>
-                  {current.fullName ?? current.firstName ?? "Member"}{age ? `, ${age}` : ""}
-                </h2>
-                <div className="flex items-center flex-wrap gap-2 mt-2">
-                  {current.isVerified && (
-                    <span className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-semibold"
-                      style={{ background: "rgba(59,130,246,0.85)", color: "white" }}>
-                      <Shield size={9} /> Verified
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1.5 text-sm"
-                    style={{ color: "rgba(253,248,240,0.55)" }}>
-                    <MapPin size={13} color="rgba(201,168,76,0.8)" />
-                    {current.city}{current.state ? `, ${current.state}` : ""}, {current.country}
-                  </span>
-                </div>
-                {getActiveLabel(current.activitySeenAt) && (
-                  <div className="flex items-center gap-1.5 mt-2" data-testid={`status-active-${current.id}`}>
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"
-                      style={{ boxShadow: "0 0 6px #34d399" }} />
-                    <span className="text-emerald-400 text-xs font-medium">
-                      {getActiveLabel(current.activitySeenAt)}
-                    </span>
-                  </div>
-                )}
-              </div>
+            {/* ── Profile info below the photo (scroll down to see) ── */}
+            <div className="px-5 pt-5 pb-44 space-y-4" style={{ background: "#0d0618" }}>
 
               {/* About */}
               {current.bio && (
@@ -365,9 +393,9 @@ export default function DiscoverPage({ user }: Props) {
               {/* Info chips */}
               {(() => {
                 const chips = [
-                  current.caste && `${casteLabel(current.caste)} · Yezidi`,
                   age && `${age} years old`,
                   current.gender && current.gender.charAt(0).toUpperCase() + current.gender.slice(1),
+                  current.occupation && current.occupation,
                 ].filter(Boolean) as string[];
                 if (!chips.length) return null;
                 return (
@@ -461,13 +489,10 @@ export default function DiscoverPage({ user }: Props) {
         )}
       </div>
 
-      {/* ── Sticky Like / Pass bar ── */}
+      {/* ── Fixed glass Pass / Like buttons ── */}
       {current && (
-        <div className="fixed left-0 right-0 z-40 flex flex-col items-center gap-3 pb-20 pt-4"
-          style={{
-            bottom: 0,
-            background: "linear-gradient(to top, #0d0618 60%, rgba(13,6,24,0.85) 85%, transparent 100%)",
-          }}>
+        <div className="fixed left-0 right-0 z-40 flex flex-col items-center gap-3 pb-24 pt-3"
+          style={{ bottom: 0, pointerEvents: "none" }}>
 
           {/* Undo pill */}
           <div style={{
@@ -479,7 +504,13 @@ export default function DiscoverPage({ user }: Props) {
             <button onClick={handleUndo} disabled={undoMutation.isPending}
               data-testid="button-undo"
               className="relative flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold overflow-hidden"
-              style={{ background: "rgba(13,6,24,0.95)", border: "1.5px solid rgba(201,168,76,0.6)", color: "#c9a84c" }}>
+              style={{
+                background: "rgba(13,6,24,0.85)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "1.5px solid rgba(201,168,76,0.6)",
+                color: "#c9a84c",
+              }}>
               <span className="absolute inset-0 rounded-full"
                 style={{ background: "rgba(201,168,76,0.1)", transformOrigin: "left center", transform: `scaleX(${undoProgress / 100})`, transition: "transform 0.05s linear" }} />
               <Undo2 size={14} />
@@ -489,23 +520,35 @@ export default function DiscoverPage({ user }: Props) {
             </button>
           </div>
 
-          {/* Pass / Like */}
-          <div className="flex items-center gap-10">
+          {/* Pass / Like — glass transparent */}
+          <div className="flex items-center gap-10" style={{ pointerEvents: "auto" }}>
             <button
               onClick={() => dislikeMutation.mutate({ userId: current.id })}
               disabled={isPending}
               data-testid="button-dislike"
               className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
-              style={{ background: "rgba(255,255,255,0.08)", border: "2px solid rgba(255,255,255,0.14)" }}>
-              <X size={26} color="rgba(253,248,240,0.7)" />
+              style={{
+                background: "rgba(255,255,255,0.12)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+                border: "2px solid rgba(255,255,255,0.28)",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+              }}>
+              <X size={26} color="white" />
             </button>
             <button
               onClick={() => likeMutation.mutate({ userId: current.id })}
               disabled={isPending}
               data-testid="button-like"
               className="w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
-              style={{ background: "linear-gradient(135deg, #7b3fa0, #d4608a)", boxShadow: "0 8px 28px rgba(212,96,138,0.45)" }}>
-              <Heart size={30} fill="white" color="white" />
+              style={{
+                background: "rgba(212,96,138,0.18)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+                border: "2px solid rgba(212,96,138,0.55)",
+                boxShadow: "0 4px 24px rgba(212,96,138,0.3)",
+              }}>
+              <Heart size={30} fill="rgba(212,96,138,0.8)" color="#d4608a" />
             </button>
           </div>
         </div>
@@ -521,7 +564,9 @@ export default function DiscoverPage({ user }: Props) {
             onClick={e => e.stopPropagation()}>
             <div className="w-10 h-1 rounded-full mx-auto mb-1" style={{ background: "rgba(255,255,255,0.2)" }} />
             <div>
-              <p className="text-cream/50 text-xs uppercase tracking-wider mb-1">Replying to {current.firstName ?? current.fullName?.split(" ")[0]}'s {replyTo.label}</p>
+              <p className="text-cream/50 text-xs uppercase tracking-wider mb-1">
+                Replying to {current.firstName ?? current.fullName?.split(" ")[0]}'s {replyTo.label}
+              </p>
               <p className="text-gold font-semibold text-sm">"{replyTo.topic}"</p>
             </div>
             <textarea
