@@ -27,7 +27,10 @@ export default function EditProfilePage({ user }: Props) {
     bio: user.bio ?? "",
     occupation: user.occupation ?? "",
     languages: user.languages ?? [],
+    interests: ((user as any).interests as string[] | undefined) ?? [],
+    moviesAndTv: ((user as any).moviesAndTv as string[] | undefined) ?? [],
   });
+  const [movieInput, setMovieInput] = useState("");
   const countryHasStates = !!COUNTRY_STATES[form.country];
 
   const saveMutation = useMutation({
@@ -45,11 +48,33 @@ export default function EditProfilePage({ user }: Props) {
     },
   });
 
+  const PRESET_INTERESTS = ["Travel", "Music", "Cooking", "Sports", "Reading", "Photography", "Hiking", "Gaming", "Art", "Fitness", "Nature", "Dancing"];
+
   const toggleLang = (lang: string) => {
     setForm(f => ({
       ...f,
       languages: f.languages.includes(lang) ? f.languages.filter(l => l !== lang) : [...f.languages, lang]
     }));
+  };
+
+  const toggleInterest = (interest: string) => {
+    setForm(f => ({
+      ...f,
+      interests: f.interests.includes(interest)
+        ? f.interests.filter(i => i !== interest)
+        : f.interests.length < 10 ? [...f.interests, interest] : f.interests,
+    }));
+  };
+
+  const addMovie = () => {
+    const val = movieInput.trim();
+    if (!val || form.moviesAndTv.includes(val) || form.moviesAndTv.length >= 10) return;
+    setForm(f => ({ ...f, moviesAndTv: [...f.moviesAndTv, val] }));
+    setMovieInput("");
+  };
+
+  const removeMovie = (title: string) => {
+    setForm(f => ({ ...f, moviesAndTv: f.moviesAndTv.filter(m => m !== title) }));
   };
 
   const inp = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -214,6 +239,55 @@ export default function EditProfilePage({ user }: Props) {
               </button>
             ))}
           </div>
+        </FieldGroup>
+
+        <FieldGroup label="Interests (up to 10)">
+          <div className="flex flex-wrap gap-2 mt-1">
+            {PRESET_INTERESTS.map(interest => (
+              <button
+                key={interest}
+                onClick={() => toggleInterest(interest)}
+                className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+                style={form.interests.includes(interest)
+                  ? { background: "#c9a84c", color: "#1a0a2e" }
+                  : { background: "rgba(255,255,255,0.07)", border: "1px solid rgba(201,168,76,0.25)", color: "rgba(253,248,240,0.7)" }
+                }
+              >
+                {interest}
+              </button>
+            ))}
+          </div>
+        </FieldGroup>
+
+        <FieldGroup label="Favourite Movies & TV Shows (up to 10)">
+          <div className="flex gap-2 mb-2">
+            <input
+              value={movieInput}
+              onChange={e => setMovieInput(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addMovie(); } }}
+              placeholder="e.g. Inception, Breaking Bad…"
+              className="flex-1 px-3 py-2.5 rounded-xl text-sm text-cream placeholder-cream/25 outline-none"
+              style={{ background: "rgba(255,255,255,0.07)", border: "1.5px solid rgba(201,168,76,0.25)" }}
+            />
+            <button
+              onClick={addMovie}
+              className="px-3 py-2.5 rounded-xl text-sm font-bold flex-shrink-0"
+              style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
+            >
+              Add
+            </button>
+          </div>
+          {form.moviesAndTv.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {form.moviesAndTv.map(title => (
+                <span key={title} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                  style={{ background: "rgba(123,63,160,0.18)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.25)" }}>
+                  {title}
+                  <button onClick={() => removeMovie(title)} className="ml-0.5 opacity-70">×</button>
+                </span>
+              ))}
+            </div>
+          )}
         </FieldGroup>
       </div>
     </div>

@@ -50,6 +50,8 @@ export const users = pgTable("users", {
   mainPhotoUrl: text("main_photo_url"),
   profileVisible: boolean("profile_visible").default(false),
   languages: text("languages").array().default([]),
+  interests: text("interests").array().default([]),
+  moviesAndTv: text("movies_and_tv").array().default([]),
 
   isVerified: boolean("is_verified").default(false),
   verificationStatus: verificationStatusEnum("verification_status").default("none"),

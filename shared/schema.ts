@@ -40,6 +40,7 @@ export const likes = pgTable("likes", {
   id: varchar("id", { length: 36 }).primaryKey(),
   fromUserId: varchar("from_user_id").notNull().references(() => users.id),
   toUserId: varchar("to_user_id").notNull().references(() => users.id),
+  comment: text("comment"),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   uniqueLike: uniqueIndex("likes_from_to_unique").on(table.fromUserId, table.toUserId),
@@ -207,6 +208,8 @@ export const profileUpdateSchema = z.object({
   bio: z.string().max(500).optional(),
   occupation: z.string().max(100).optional(),
   languages: z.array(z.string()).optional(),
+  interests: z.array(z.string()).max(10).optional(),
+  moviesAndTv: z.array(z.string()).max(10).optional(),
   photos: z.array(z.string()).optional(),
   removedRejectedUrls: z.array(z.string()).optional(),
   verificationSelfie: z.string().optional(),

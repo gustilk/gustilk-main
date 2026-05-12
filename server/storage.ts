@@ -12,7 +12,7 @@ export interface IStorage {
 
   getDiscoverProfiles(userId: string, caste: string, gender: string, minAge: number, maxAge: number): Promise<SafeUser[]>;
 
-  likeUser(fromUserId: string, toUserId: string): Promise<{ matched: boolean; matchId?: string }>;
+  likeUser(fromUserId: string, toUserId: string, comment?: string): Promise<{ matched: boolean; matchId?: string }>;
   dislikeUser(fromUserId: string, toUserId: string): Promise<void>;
   unlikeUser(fromUserId: string, toUserId: string): Promise<void>;
   undislikeUser(fromUserId: string, toUserId: string): Promise<void>;
@@ -256,10 +256,8 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async likeUser(fromUserId: string, toUserId: string): Promise<{ matched: boolean; matchId?: string }> {
-    await db.insert(likes).values({ id: randomUUID(), fromUserId, toUserId }).onConflictDoNothing();
-    // Bust both caches: liker no longer sees the liked profile; liked user no
-    // longer sees the liker in discover (they'll find them in "Likes You" instead).
+  async likeUser(fromUserId: string, toUserId: string, comment?: string): Promise<{ matched: boolean; matchId?: string }> {
+    await db.insert(likes).values({ id: randomUUID(), fromUserId, toUserId, comment: comment ?? null }).onConflictDoNothing();
     cacheDelPrefix(`discover:${fromUserId}:`);
     cacheDelPrefix(`discover:${toUserId}:`);
     cacheDel(`matches:${fromUserId}`);
@@ -280,6 +278,11 @@ export class DatabaseStorage implements IStorage {
 
       const matchId = randomUUID();
       await db.insert(matches).values({ id: matchId, user1Id: fromUserId, user2Id: toUserId });
+
+      // Send reply comments as opening messages (other person's comment first, then current user's)
+      if (mutual.comment) await this.sendMessage(matchId, toUserId, mutual.comment);
+      if (comment) await this.sendMessage(matchId, fromUserId, comment);
+
       return { matched: true, matchId };
     }
     return { matched: false };

@@ -508,7 +508,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const userId = getUserId(req);
     const targetId = req.params.targetId as string;
     if (targetId === userId) return res.status(400).json({ error: "You cannot like yourself." });
-    const result = await storage.likeUser(userId, targetId);
+    const comment = typeof req.body?.comment === "string" && req.body.comment.trim() ? req.body.comment.trim().slice(0, 300) : undefined;
+    const result = await storage.likeUser(userId, targetId, comment);
     res.json(result);
   });
 

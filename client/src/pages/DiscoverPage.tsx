@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { SlidersHorizontal, X, Heart, RefreshCw, MapPin, Shield, Undo2 } from "lucide-react";
+import { SlidersHorizontal, X, Heart, RefreshCw, MapPin, Shield, Undo2, MessageCircle, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import MatchModal from "@/components/MatchModal";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
@@ -41,6 +41,8 @@ export default function DiscoverPage({ user }: Props) {
   const [undoProgress, setUndoProgress] = useState(100);
   const [photoIdx, setPhotoIdx] = useState(0);
   const [fading, setFading] = useState(false);
+  const [replyTo, setReplyTo] = useState<{ topic: string; label: string } | null>(null);
+  const [replyText, setReplyText] = useState("");
 
   const undoTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const undoStartRef = useRef<number>(0);
@@ -120,11 +122,11 @@ export default function DiscoverPage({ user }: Props) {
   });
 
   const likeMutation = useMutation({
-    mutationFn: async (userId: string) => {
-      const res = await apiRequest("POST", `/api/like/${userId}`);
+    mutationFn: async ({ userId, comment }: { userId: string; comment?: string }) => {
+      const res = await apiRequest("POST", `/api/like/${userId}`, comment ? { comment } : undefined);
       return res.json();
     },
-    onSuccess: (result, userId) => {
+    onSuccess: (result, { userId }) => {
       const liked = profiles.find(p => p.id === userId);
       queryClient.invalidateQueries({ queryKey: ["/api/discover"] });
       if (result.matched && liked) {
@@ -136,10 +138,10 @@ export default function DiscoverPage({ user }: Props) {
   });
 
   const dislikeMutation = useMutation({
-    mutationFn: async (userId: string) => {
+    mutationFn: async ({ userId }: { userId: string }) => {
       await apiRequest("POST", `/api/dislike/${userId}`);
     },
-    onSuccess: (_, userId) => {
+    onSuccess: (_, { userId }) => {
       const passed = profiles.find(p => p.id === userId);
       queryClient.invalidateQueries({ queryKey: ["/api/discover"] });
       advanceProfile("dislike", passed);
@@ -403,10 +405,48 @@ export default function DiscoverPage({ user }: Props) {
                   <h3 className="text-white font-semibold text-sm mb-2.5">Interests</h3>
                   <div className="flex flex-wrap gap-2">
                     {((current as any).interests ?? []).map((it: string) => (
-                      <span key={it} className="px-3 py-1.5 rounded-full text-xs font-semibold"
-                        style={{ background: "rgba(123,63,160,0.18)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.25)" }}>
-                        {it}
-                      </span>
+                      user.isPremium ? (
+                        <button
+                          key={it}
+                          onClick={() => { setReplyTo({ topic: it, label: "interest" }); setReplyText(""); }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
+                          style={{ background: "rgba(123,63,160,0.18)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.25)" }}>
+                          {it}
+                          <MessageCircle size={11} />
+                        </button>
+                      ) : (
+                        <span key={it} className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                          style={{ background: "rgba(123,63,160,0.18)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.25)" }}>
+                          {it}
+                        </span>
+                      )
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Movies & TV */}
+              {((current as any).moviesAndTv ?? []).length > 0 && (
+                <div className="rounded-2xl p-4"
+                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <h3 className="text-white font-semibold text-sm mb-2.5">Movies & TV Shows</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {((current as any).moviesAndTv ?? []).map((title: string) => (
+                      user.isPremium ? (
+                        <button
+                          key={title}
+                          onClick={() => { setReplyTo({ topic: title, label: "movie/show" }); setReplyText(""); }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
+                          style={{ background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.22)" }}>
+                          🎬 {title}
+                          <MessageCircle size={11} />
+                        </button>
+                      ) : (
+                        <span key={title} className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                          style={{ background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.22)" }}>
+                          🎬 {title}
+                        </span>
+                      )
                     ))}
                   </div>
                 </div>
@@ -452,7 +492,7 @@ export default function DiscoverPage({ user }: Props) {
           {/* Pass / Like */}
           <div className="flex items-center gap-10">
             <button
-              onClick={() => dislikeMutation.mutate(current.id)}
+              onClick={() => dislikeMutation.mutate({ userId: current.id })}
               disabled={isPending}
               data-testid="button-dislike"
               className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
@@ -460,12 +500,49 @@ export default function DiscoverPage({ user }: Props) {
               <X size={26} color="rgba(253,248,240,0.7)" />
             </button>
             <button
-              onClick={() => likeMutation.mutate(current.id)}
+              onClick={() => likeMutation.mutate({ userId: current.id })}
               disabled={isPending}
               data-testid="button-like"
               className="w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
               style={{ background: "linear-gradient(135deg, #7b3fa0, #d4608a)", boxShadow: "0 8px 28px rgba(212,96,138,0.45)" }}>
               <Heart size={30} fill="white" color="white" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Reply modal */}
+      {replyTo && current && (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end"
+          style={{ background: "rgba(0,0,0,0.6)" }}
+          onClick={() => setReplyTo(null)}>
+          <div className="rounded-t-3xl px-5 pt-5 pb-8 flex flex-col gap-4"
+            style={{ background: "#1a0a2e", border: "1px solid rgba(201,168,76,0.2)" }}
+            onClick={e => e.stopPropagation()}>
+            <div className="w-10 h-1 rounded-full mx-auto mb-1" style={{ background: "rgba(255,255,255,0.2)" }} />
+            <div>
+              <p className="text-cream/50 text-xs uppercase tracking-wider mb-1">Replying to {current.firstName ?? current.fullName?.split(" ")[0]}'s {replyTo.label}</p>
+              <p className="text-gold font-semibold text-sm">"{replyTo.topic}"</p>
+            </div>
+            <textarea
+              autoFocus
+              value={replyText}
+              onChange={e => setReplyText(e.target.value)}
+              placeholder={`Say something about ${replyTo.topic}…`}
+              rows={3}
+              className="w-full px-4 py-3 rounded-xl text-sm text-cream placeholder-cream/30 outline-none resize-none"
+              style={{ background: "rgba(255,255,255,0.06)", border: "1.5px solid rgba(201,168,76,0.25)" }}
+            />
+            <button
+              disabled={!replyText.trim() || isPending}
+              onClick={() => {
+                const comment = `Re: ${replyTo.topic} — ${replyText.trim()}`;
+                setReplyTo(null);
+                likeMutation.mutate({ userId: current.id, comment });
+              }}
+              className="w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+              style={{ background: "linear-gradient(135deg, #7b3fa0, #d4608a)", boxShadow: "0 6px 20px rgba(212,96,138,0.35)" }}>
+              <Send size={15} /> Like & Send
             </button>
           </div>
         </div>
