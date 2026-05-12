@@ -1,29 +1,36 @@
 import type { Request } from "express";
 
 export function getClientIp(req: Request): string | null {
+  // Railway sets x-real-ip to the actual client IP — prefer it over x-forwarded-for
+  const realIp = req.headers["x-real-ip"];
+  if (realIp) {
+    const ip = (Array.isArray(realIp) ? realIp[0] : realIp).trim();
+    if (ip) return ip;
+  }
+
   const forwarded = req.headers["x-forwarded-for"];
   if (forwarded) {
     const raw = Array.isArray(forwarded) ? forwarded[0] : forwarded;
     const parts = raw.split(",").map(s => s.trim()).filter(Boolean);
-    // Read the LAST entry — this is appended by the trusted reverse proxy (Railway/Nginx)
-    // and cannot be forged by the client, unlike the first entry which the client controls.
-    const last = parts[parts.length - 1];
-    if (last) return last;
+    // Use the first non-private entry — the original client IP before any proxy IPs
+    for (const ip of parts) {
+      if (!isPrivateIp(ip)) return ip;
+    }
   }
   return req.socket?.remoteAddress ?? null;
 }
 
 function isPrivateIp(ip: string): boolean {
-  return (
-    ip === "127.0.0.1" ||
-    ip === "::1" ||
-    ip.startsWith("10.") ||
-    ip.startsWith("192.168.") ||
-    ip.startsWith("172.") ||
-    ip.startsWith("::ffff:127.") ||
-    ip.startsWith("fc") ||
-    ip.startsWith("fd")
-  );
+  if (ip === "127.0.0.1" || ip === "::1") return true;
+  if (ip.startsWith("10.") || ip.startsWith("192.168.") || ip.startsWith("::ffff:127.")) return true;
+  if (ip.startsWith("fc") || ip.startsWith("fd")) return true;
+  // 172.16.0.0 – 172.31.255.255 only (not all of 172.x which includes public IPs)
+  const m = ip.match(/^172\.(\d+)\./);
+  if (m) {
+    const b = parseInt(m[1], 10);
+    if (b >= 16 && b <= 31) return true;
+  }
+  return false;
 }
 
 type GeoResult = { countryCode: string; countryName: string; ip: string };
