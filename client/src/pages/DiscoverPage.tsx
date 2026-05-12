@@ -164,6 +164,7 @@ export default function DiscoverPage({ user }: Props) {
     setCountry(pendingCountry);
     setCurrentIndex(0);
     setShowFilters(false);
+    queryClient.invalidateQueries({ queryKey: ["/api/discover"] });
   };
 
   const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[c] ?? c);
@@ -288,17 +289,22 @@ export default function DiscoverPage({ user }: Props) {
             <p className="text-cream/40 text-sm">{t("discover.finding")}</p>
           </div>
         ) : !current ? (
-          <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-8">
+          <div className="flex flex-col items-center justify-center gap-5 text-center px-8"
+            style={{ minHeight: "calc(100dvh - 56px - 62px - env(safe-area-inset-top) - env(safe-area-inset-bottom))" }}>
             <div className="w-20 h-20 rounded-full flex items-center justify-center"
-              style={{ border: "2px solid rgba(201,168,76,0.3)" }}>
-              <Heart size={32} color="rgba(201,168,76,0.5)" />
+              style={{ background: "rgba(201,168,76,0.08)", border: "2px solid rgba(201,168,76,0.3)" }}>
+              <Heart size={32} color="#c9a84c" />
             </div>
-            <h3 className="font-serif text-xl text-gold">{t("discover.noMore")}</h3>
-            <p className="text-cream/40 text-sm">{t("discover.noMoreSub")}</p>
+            <div>
+              <h3 className="font-serif text-2xl font-bold text-gold mb-2">You're all caught up!</h3>
+              <p className="text-cream/60 text-sm leading-relaxed">
+                New members join every day — check back soon.{"\n"}Try adjusting your filters to discover more people.
+              </p>
+            </div>
             <button onClick={handleRefresh} data-testid="button-refresh"
-              className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold mt-2"
-              style={{ border: "1.5px solid rgba(201,168,76,0.4)", color: "#c9a84c" }}>
-              <RefreshCw size={15} />{t("discover.refresh")}
+              className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold mt-1"
+              style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
+              <RefreshCw size={15} /> Refresh Profiles
             </button>
           </div>
         ) : (
@@ -600,7 +606,7 @@ export default function DiscoverPage({ user }: Props) {
                 background: "#1a0a2e",
                 boxShadow: "0 4px 20px rgba(0,0,0,0.45)",
               }}>
-              <Heart size={26} fill="#ffd700" color="#ffd700" strokeWidth={2} />
+              <Heart size={26} fill="#c9a84c" color="#c9a84c" strokeWidth={2} />
             </button>
           </div>
         </div>

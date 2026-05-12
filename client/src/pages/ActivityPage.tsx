@@ -278,9 +278,9 @@ function ActivityCard({ item, isPremium, blurred, tab, onBeforeNavigate, onActed
               disabled={busy}
               onClick={(e) => { e.stopPropagation(); likeMutation.mutate(); }}
               className="flex-1 flex items-center justify-center gap-1 rounded-xl py-2 text-xs font-semibold transition-opacity disabled:opacity-50"
-              style={{ background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.4)", color: "#ffd700" }}
+              style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.4)", color: "#c9a84c" }}
             >
-              <Heart size={13} strokeWidth={2.5} color="#ffd700" />
+              <Heart size={13} strokeWidth={2.5} color="#c9a84c" />
               Like
             </button>
           </div>

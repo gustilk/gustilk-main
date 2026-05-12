@@ -367,7 +367,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
                 data-testid="button-like-from-likes"
                 className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
                 style={{ background: "#1a0a2e", boxShadow: "0 4px 20px rgba(0,0,0,0.45)" }}>
-                <Heart size={26} fill="#ffd700" color="#ffd700" strokeWidth={2} />
+                <Heart size={26} fill="#c9a84c" color="#c9a84c" strokeWidth={2} />
               </button>
             </>
           ) : (
@@ -376,12 +376,12 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
                 disabled={isPremium && (!match || callState !== "idle")}
                 className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-40"
                 style={{ background: "#1a0a2e", boxShadow: "0 4px 20px rgba(0,0,0,0.45)", border: "1.5px solid rgba(201,168,76,0.35)" }}>
-                {isPremium ? <Video size={22} color="#ffd700" /> : <Lock size={20} color="#ffd700" />}
+                {isPremium ? <Video size={22} color="#c9a84c" /> : <Lock size={20} color="#c9a84c" />}
               </button>
               <button onClick={handleMessage} data-testid="button-message-user"
                 className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90"
                 style={{ background: "#1a0a2e", boxShadow: "0 4px 20px rgba(0,0,0,0.45)", border: "1.5px solid rgba(201,168,76,0.35)" }}>
-                {isPremium ? <MessageCircle size={22} color="#ffd700" /> : <Lock size={20} color="#ffd700" />}
+                {isPremium ? <MessageCircle size={22} color="#c9a84c" /> : <Lock size={20} color="#c9a84c" />}
               </button>
             </>
           )}
