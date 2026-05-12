@@ -82,6 +82,14 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Apply any missing columns before routes/seed run
+  const { pool } = await import("./db");
+  await pool.query(`
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS interests text[] DEFAULT '{}';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS movies_and_tv text[] DEFAULT '{}';
+    ALTER TABLE likes ADD COLUMN IF NOT EXISTS comment text;
+  `).catch(e => console.error("[migration] column add failed:", e.message));
+
   await registerRoutes(httpServer, app);
   const { seedDatabase } = await import("./seed");
   await seedDatabase();
