@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { ArrowLeft, MessageCircle, Video, Star, Lock, MapPin, Shield, Flag, Crown, Heart, X } from "lucide-react";
+import { ArrowLeft, MessageCircle, Video, Star, Lock, MapPin, Flag, Crown, Heart, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { SafeUser, MatchWithUser } from "@shared/schema";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
@@ -210,32 +210,13 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
           </>
         )}
 
-        {/* Name + location over photo bottom */}
+        {/* Name over photo bottom */}
         <div className="absolute bottom-0 left-0 right-0 px-5 pb-4 pointer-events-none z-20">
           <div className="flex items-end justify-between">
             <div>
               <h1 className="font-serif text-2xl text-white font-bold" data-testid="text-profile-name">
                 {displayName}{profile.age ? `, ${profile.age}` : ""}
               </h1>
-              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                {profile.caste && (
-                  <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold"
-                    style={{ background: "rgba(201,168,76,0.85)", color: "#1a0a2e" }}>
-                    {casteLabel(profile.caste)}
-                  </span>
-                )}
-                {profile.isVerified && (
-                  <span className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-semibold"
-                    style={{ background: "rgba(59,130,246,0.85)", color: "white" }}>
-                    <Shield size={9} /> Verified
-                  </span>
-                )}
-                {location && (
-                  <span className="flex items-center gap-1 text-[11px] text-white/60">
-                    <MapPin size={10} color="rgba(201,168,76,0.8)" /> {location}
-                  </span>
-                )}
-              </div>
             </div>
             {profile.isPremium && (
               <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"

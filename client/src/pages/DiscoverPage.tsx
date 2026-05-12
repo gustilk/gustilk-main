@@ -354,15 +354,6 @@ export default function DiscoverPage({ user }: Props) {
                     </div>
                   )}
 
-                  {/* Minimal name + age overlay at bottom of photo */}
-                  <div className="absolute bottom-0 left-0 right-0 z-20 px-4 pb-4 pt-16"
-                    style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)" }}>
-                    <h2 className="font-bold text-3xl text-white leading-tight"
-                      data-testid={`text-name-${current.id}`}>
-                      {current.fullName ?? current.firstName ?? "Member"}{age ? `, ${age}` : ""}
-                    </h2>
-                  </div>
-
                   {/* Swipe + tap zone for photo navigation */}
                   {photos.length > 1 && (
                     <motion.div
