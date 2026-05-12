@@ -311,6 +311,8 @@ export default {
     reportTitle: "الإبلاغ عن {{name}}",
     reason: "السبب",
     fake: "ملف وهمي",
+    misleading: "معلومات مضللة",
+    inappropriatePhotos: "صور غير لائقة",
     behavior: "سلوك غير لائق",
     casteIssue: "تمثيل كاذب للطائفة",
     harassment: "تحرش",

@@ -311,6 +311,8 @@ export default {
     reportTitle: "Հաղորդել {{name}}-ի մասին",
     reason: "Պատճառ",
     fake: "Կեղծ պրոֆիլ",
+    misleading: "Մոլորեցնող տեղեկություններ",
+    inappropriatePhotos: "Անհամապատասխան լուսանկարներ",
     behavior: "Անհամապատասխան վարքագիծ",
     casteIssue: "Կաստայի կեղծ ներկայացում",
     harassment: "Ոտնձգություն",

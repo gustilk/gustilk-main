@@ -19,12 +19,14 @@ export default function ReportModal({ reportedUserId, reportedUserName, onClose,
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const REASONS = [
-    { key: "fake",       label: t("report.fake") },
-    { key: "behavior",   label: t("report.behavior") },
-    { key: "casteIssue", label: t("report.casteIssue") },
-    { key: "harassment", label: t("report.harassment") },
-    { key: "offensive",  label: t("report.offensive") },
-    { key: "other",      label: t("report.other") },
+    { key: "fake",               label: t("report.fake") },
+    { key: "misleading",         label: t("report.misleading") },
+    { key: "inappropriatePhotos",label: t("report.inappropriatePhotos") },
+    { key: "behavior",           label: t("report.behavior") },
+    { key: "casteIssue",         label: t("report.casteIssue") },
+    { key: "harassment",         label: t("report.harassment") },
+    { key: "offensive",          label: t("report.offensive") },
+    { key: "other",              label: t("report.other") },
   ];
 
   const reportMutation = useMutation({

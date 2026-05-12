@@ -311,6 +311,8 @@ export default {
     reportTitle: "Report {{name}}",
     reason: "Reason",
     fake: "Fake profile",
+    misleading: "Misleading information",
+    inappropriatePhotos: "Inappropriate photos",
     behavior: "Inappropriate behavior",
     casteIssue: "Misrepresentation of caste",
     harassment: "Harassment",

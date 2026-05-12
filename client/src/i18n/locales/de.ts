@@ -311,6 +311,8 @@ export default {
     reportTitle: "{{name}} melden",
     reason: "Grund",
     fake: "Gefälschtes Profil",
+    misleading: "Irreführende Informationen",
+    inappropriatePhotos: "Unangemessene Fotos",
     behavior: "Unangemessenes Verhalten",
     casteIssue: "Falsche Kastenangabe",
     harassment: "Belästigung",
