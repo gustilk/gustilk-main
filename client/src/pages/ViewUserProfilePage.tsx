@@ -337,22 +337,6 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
         )}
 
         {/* Photo thumbnails card — premium */}
-        {isPremium && allPhotos.length > 1 && (
-          <div className="rounded-2xl p-4"
-            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <h3 className="text-white font-bold text-base mb-3">All Photos</h3>
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {allPhotos.map((p, i) => (
-                <button key={i} onClick={() => setPhotoIdx(i)} data-testid={`thumb-photo-${i}`}
-                  className="flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden transition-all"
-                  style={{ border: i === photoIdx ? "2px solid #c9a84c" : "2px solid transparent", opacity: i === photoIdx ? 1 : 0.6 }}>
-                  <ProtectedPhoto src={p} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" blurred={shouldBlurPhotos} />
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Premium upgrade CTA */}
         {!isPremium && (
           <button onClick={() => setLocation("/premium")} data-testid="button-upgrade-profile"
@@ -396,15 +380,8 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
               </button>
               <button onClick={handleMessage} data-testid="button-message-user"
                 className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90"
-                style={{
-                  background: isPremium && match
-                    ? "linear-gradient(135deg, #7b3fa0, #d4608a)"
-                    : "linear-gradient(135deg, #c9a84c, #e8c97a)",
-                  boxShadow: isPremium && match
-                    ? "0 8px 26px rgba(123,63,160,0.5)"
-                    : "0 8px 26px rgba(201,168,76,0.5)",
-                }}>
-                {isPremium ? <MessageCircle size={28} color="white" /> : <Lock size={24} color="#1a0a2e" />}
+                style={{ background: "#1a0a2e", boxShadow: "0 4px 20px rgba(0,0,0,0.45)", border: "1.5px solid rgba(201,168,76,0.35)" }}>
+                {isPremium ? <MessageCircle size={22} color="#c9a84c" /> : <Lock size={20} color="#c9a84c" />}
               </button>
             </>
           )}
