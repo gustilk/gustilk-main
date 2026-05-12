@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { SlidersHorizontal, X, Heart, Star, RefreshCw, MapPin, Shield, Undo2, MessageCircle, Send } from "lucide-react";
+import { SlidersHorizontal, X, Heart, RefreshCw, MapPin, Shield, Undo2, MessageCircle, Send } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import MatchModal from "@/components/MatchModal";
@@ -506,11 +506,12 @@ export default function DiscoverPage({ user }: Props) {
         )}
       </div>
 
-      {/* ── Fixed glass Pass / Like buttons ── */}
+      {/* ── Action buttons — fixed just above the bottom nav bar ── */}
       {current && (
-        <div className="fixed left-0 right-0 z-40 flex flex-col items-center gap-3 pb-24 pt-3"
-          style={{ bottom: 0, pointerEvents: "none" }}>
-
+        <div
+          className="fixed left-0 right-0 z-40 flex flex-col items-center gap-3 py-3"
+          style={{ bottom: "calc(62px + env(safe-area-inset-bottom))", pointerEvents: "none" }}
+        >
           {/* Undo pill */}
           <div style={{
             opacity: undoState ? 1 : 0,
@@ -537,52 +538,30 @@ export default function DiscoverPage({ user }: Props) {
             </button>
           </div>
 
-          {/* Pass / Like / Super-like */}
-          <div className="flex items-center gap-6" style={{ pointerEvents: "auto" }}>
-            {/* Pass */}
+          {/* Pass / Like — same size, white background */}
+          <div className="flex items-center gap-8" style={{ pointerEvents: "auto" }}>
             <button
               onClick={() => dislikeMutation.mutate({ userId: current.id })}
               disabled={isPending}
               data-testid="button-dislike"
               className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
               style={{
-                background: "rgba(255,255,255,0.12)",
-                backdropFilter: "blur(16px)",
-                WebkitBackdropFilter: "blur(16px)",
-                border: "2px solid rgba(255,255,255,0.28)",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+                background: "white",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.35)",
               }}>
-              <X size={26} color="white" />
+              <X size={26} color="white" strokeWidth={3} style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))" }} />
             </button>
 
-            {/* Main Like — solid Gustilk gradient */}
             <button
               onClick={() => likeMutation.mutate({ userId: current.id })}
               disabled={isPending}
               data-testid="button-like"
-              className="w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
-              style={{
-                background: "linear-gradient(135deg, #7b3fa0, #d4608a)",
-                boxShadow: "0 6px 28px rgba(212,96,138,0.45)",
-                border: "2px solid rgba(212,96,138,0.4)",
-              }}>
-              <Heart size={32} fill="white" color="white" />
-            </button>
-
-            {/* Super Like — Gustilk gold */}
-            <button
-              onClick={() => likeMutation.mutate({ userId: current.id })}
-              disabled={isPending}
-              data-testid="button-superlike"
               className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
               style={{
-                background: "rgba(201,168,76,0.15)",
-                backdropFilter: "blur(16px)",
-                WebkitBackdropFilter: "blur(16px)",
-                border: "2px solid rgba(201,168,76,0.5)",
-                boxShadow: "0 4px 20px rgba(201,168,76,0.25)",
+                background: "white",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.35)",
               }}>
-              <Star size={24} color="#c9a84c" fill="rgba(201,168,76,0.5)" />
+              <Heart size={26} fill="white" color="white" strokeWidth={2} style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.45))" }} />
             </button>
           </div>
         </div>
