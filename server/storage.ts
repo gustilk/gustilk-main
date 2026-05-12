@@ -315,6 +315,11 @@ export class DatabaseStorage implements IStorage {
     cacheDelPrefix("discover:" + fromUserId + ":");
   }
 
+  async clearAllDislikes(fromUserId: string): Promise<void> {
+    await db.delete(dislikes).where(eq(dislikes.fromUserId, fromUserId));
+    cacheDelPrefix("discover:" + fromUserId + ":");
+  }
+
   async getMatches(userId: string): Promise<MatchWithUser[]> {
     const ck = `matches:${userId}`;
     const cached = cacheGet<MatchWithUser[]>(ck);

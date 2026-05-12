@@ -153,8 +153,10 @@ export default {
   },
   discover: {
     title: "Entdecken",
-    noMore: "Du hast alle Profile gesehen!",
-    noMoreSub: "Täglich kommen neue Mitglieder dazu — schau bald wieder vorbei oder passe deine Filter an.",
+    noMore: "Du hast alle verfügbaren Nutzer gesehen.",
+    noMoreSub: "Zurücksetzen, um neu zu beginnen und Profile zu entdecken, die du vielleicht verpasst hast.",
+    resetStart: "Zurücksetzen & neu starten",
+    resetting: "Wird zurückgesetzt…",
     pass: "Überspringen",
     like: "Gefällt mir",
     age: "{{age}} Jahre alt",
@@ -166,7 +168,6 @@ export default {
     maxAge: "Höchstalter",
     applyFilters: "Filter anwenden",
     finding: "Profile werden gesucht…",
-    refresh: "Profile aktualisieren",
     undo: "Rückgängig",
   },
   matches: {

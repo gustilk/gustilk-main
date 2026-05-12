@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { SlidersHorizontal, X, Heart, RefreshCw, MapPin, Shield, Undo2, MessageCircle, Send } from "lucide-react";
+import { SlidersHorizontal, X, Heart, RotateCcw, MapPin, Shield, Undo2, MessageCircle, Send } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import MatchModal from "@/components/MatchModal";
@@ -158,7 +158,7 @@ export default function DiscoverPage({ user }: Props) {
     undoMutation.mutate({ action: undoState.action, profileId: undoState.profile.id });
   };
 
-  const handleRefresh = () => {
+  const handleApplyFilters = () => {
     setMinAge(pendingMin);
     setMaxAge(pendingMax);
     setCountry(pendingCountry);
@@ -166,6 +166,15 @@ export default function DiscoverPage({ user }: Props) {
     setShowFilters(false);
     queryClient.invalidateQueries({ queryKey: ["/api/discover"] });
   };
+
+  const resetMutation = useMutation({
+    mutationFn: () => apiRequest("DELETE", "/api/dislikes"),
+    onSuccess: () => {
+      setCurrentIndex(0);
+      setPhotoIdx(0);
+      queryClient.invalidateQueries({ queryKey: ["/api/discover"] });
+    },
+  });
 
   const casteLabel = (c: string) => ({ sheikh: "Sheikh", pir: "Pir", murid: "Mirid" }[c] ?? c);
 
@@ -265,7 +274,7 @@ export default function DiscoverPage({ user }: Props) {
             </select>
           </div>
 
-          <button onClick={handleRefresh} data-testid="button-apply-filters"
+          <button onClick={handleApplyFilters} data-testid="button-apply-filters"
             className="w-full py-2.5 rounded-xl text-sm font-bold"
             style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
             {t("discover.applyFilters")}
@@ -299,10 +308,14 @@ export default function DiscoverPage({ user }: Props) {
               <h3 className="font-serif text-2xl font-bold text-gold mb-2">{t("discover.noMore")}</h3>
               <p className="text-cream/60 text-sm leading-relaxed">{t("discover.noMoreSub")}</p>
             </div>
-            <button onClick={handleRefresh} data-testid="button-refresh"
-              className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold mt-1"
-              style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
-              <RefreshCw size={15} /> {t("discover.refresh")}
+            <button
+              onClick={() => resetMutation.mutate()}
+              disabled={resetMutation.isPending}
+              data-testid="button-reset-discover"
+              className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold mt-1 disabled:opacity-60"
+              style={{ background: "#c9a84c", color: "#1a0a2e" }}>
+              <RotateCcw size={15} />
+              {resetMutation.isPending ? t("discover.resetting") : t("discover.resetStart")}
             </button>
           </div>
         ) : (
@@ -604,7 +617,7 @@ export default function DiscoverPage({ user }: Props) {
                 background: "#1a0a2e",
                 boxShadow: "0 4px 20px rgba(0,0,0,0.45)",
               }}>
-              <Heart size={26} fill="#c9a84c" color="#c9a84c" strokeWidth={2} />
+              <Heart size={26} fill="white" color="white" strokeWidth={2} />
             </button>
           </div>
         </div>

@@ -536,6 +536,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ ok: true });
   });
 
+  app.delete("/api/dislikes", isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    await storage.clearAllDislikes(userId);
+    res.json({ ok: true });
+  });
+
   // â"€â"€â"€ MATCHES â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   app.get("/api/matches", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
