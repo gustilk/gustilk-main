@@ -86,6 +86,7 @@ const CARD_COLUMNS = {
   occupation: users.occupation,
   languages: users.languages,
   mainPhotoUrl: users.mainPhotoUrl,
+  photos: users.photos,
   profileVisible: users.profileVisible,
   isVerified: users.isVerified,
   verificationStatus: users.verificationStatus,
@@ -114,7 +115,12 @@ function enrichCardUser(row: CardRow): SafeUser {
   return {
     ...row,
     passwordHash: null,
-    photos: row.mainPhotoUrl ? [row.mainPhotoUrl] : [],
+    photos: (() => {
+      const arr: string[] = row.photos ?? [];
+      const main: string | null = row.mainPhotoUrl ?? null;
+      if (main && !arr.includes(main)) return [main, ...arr];
+      return arr.length > 0 ? arr : main ? [main] : [];
+    })(),
     pendingPhotos: [],
     photoSlots: [],
     verificationSelfie: "",
