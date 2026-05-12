@@ -393,69 +393,89 @@ export default function DiscoverPage({ user }: Props) {
               );
             })()}
 
-            {/* ── Badges / location / active status — below photo card ── */}
-            <div className="px-5 pt-3 pb-2" style={{ background: "#0d0618" }}>
-              <div className="flex items-center gap-2 flex-wrap">
-                {current.isVerified && (
-                  <span className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-semibold"
-                    style={{ background: "rgba(59,130,246,0.85)", color: "white" }}>
-                    <Shield size={9} /> Verified
-                  </span>
-                )}
-                {current.caste && (
-                  <span className="text-[11px] px-2.5 py-0.5 rounded-full font-bold"
-                    style={{ background: "rgba(201,168,76,0.85)", color: "#1a0a2e" }}
-                    data-testid={`badge-caste-${current.id}`}>
-                    {casteLabel(current.caste)}
-                  </span>
-                )}
-                {(current.city || current.country) && (
-                  <span className="flex items-center gap-1.5 text-sm"
-                    style={{ color: "rgba(253,248,240,0.7)" }}>
-                    <MapPin size={13} color="rgba(201,168,76,0.8)" />
-                    {[current.city, current.state, current.country].filter(Boolean).join(", ")}
-                  </span>
-                )}
-                {getActiveLabel(current.activitySeenAt) && (
-                  <div className="flex items-center gap-1.5" data-testid={`status-active-${current.id}`}>
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"
-                      style={{ boxShadow: "0 0 6px #34d399" }} />
-                    <span className="text-emerald-400 text-xs font-medium">
-                      {getActiveLabel(current.activitySeenAt)}
-                    </span>
-                  </div>
-                )}
-              </div>
+            {/* ── Sticky name + age — sticks below header when photo scrolls away ── */}
+            <div className="sticky z-20 px-5 py-3"
+              style={{
+                top: "calc(56px + env(safe-area-inset-top))",
+                background: "#0d0618",
+                borderBottom: "1px solid rgba(255,255,255,0.06)",
+              }}>
+              <h2 className="font-serif text-2xl text-white font-bold leading-tight"
+                data-testid={`text-name-${current.id}`}>
+                {current.fullName ?? current.firstName ?? "Member"}{age ? `, ${age}` : ""}
+              </h2>
             </div>
 
-            {/* ── Profile info below the photo (scroll down to see) ── */}
-            <div className="px-5 pt-1 pb-44 space-y-4" style={{ background: "#0d0618" }}>
+            {/* ── Profile info cards — same layout as ViewUserProfilePage ── */}
+            <div className="px-4 pt-3 pb-44 space-y-3" style={{ background: "#0d0618" }}>
 
-              {/* About */}
+              {/* Active status */}
+              {getActiveLabel(current.activitySeenAt) && (
+                <div className="flex items-center gap-2 px-1" data-testid={`status-active-${current.id}`}>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" style={{ boxShadow: "0 0 6px #34d399" }} />
+                  <span className="text-emerald-400 text-xs font-medium">{getActiveLabel(current.activitySeenAt)}</span>
+                </div>
+              )}
+
+              {/* Location */}
+              {(current.city || current.country) && (
+                <div className="rounded-2xl px-4 py-3.5 flex items-center gap-3"
+                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <MapPin size={18} color="#c9a84c" />
+                  <span className="text-cream/85 text-sm font-medium">
+                    {[current.city, current.state, current.country].filter(Boolean).join(", ")}
+                  </span>
+                </div>
+              )}
+
+              {/* About me */}
               {current.bio && (
                 <div className="rounded-2xl p-4"
                   style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                  <h3 className="text-white font-semibold text-sm mb-2">About</h3>
+                  <h3 className="text-white font-bold text-base mb-2">About me</h3>
                   <p className="text-cream/75 text-sm leading-relaxed">{current.bio}</p>
                 </div>
               )}
 
-              {/* Info chips */}
+              {/* Faith & Caste */}
+              {current.caste && (
+                <div className="rounded-2xl p-4"
+                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <h3 className="text-white font-bold text-base mb-3">Faith & Caste</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                      style={{ background: "rgba(201,168,76,0.18)", color: "#e8c97a", border: "1px solid rgba(201,168,76,0.35)" }}
+                      data-testid={`badge-caste-${current.id}`}>
+                      {casteLabel(current.caste)}
+                    </span>
+                    <span className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                      style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.75)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                      Yezidi
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* General info */}
               {(() => {
                 const chips = [
                   age && `${age} years old`,
                   current.gender && current.gender.charAt(0).toUpperCase() + current.gender.slice(1),
-                  current.occupation && current.occupation,
+                  (current as any).occupation,
                 ].filter(Boolean) as string[];
                 if (!chips.length) return null;
                 return (
-                  <div className="flex flex-wrap gap-2">
-                    {chips.map(c => (
-                      <span key={c} className="px-3 py-1.5 rounded-full text-xs font-medium"
-                        style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.8)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                        {c}
-                      </span>
-                    ))}
+                  <div className="rounded-2xl p-4"
+                    style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                    <h3 className="text-white font-bold text-base mb-3">General info</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {chips.map(c => (
+                        <span key={c} className="px-3 py-1.5 rounded-full text-xs font-medium"
+                          style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.85)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                          {c}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 );
               })()}
@@ -464,7 +484,7 @@ export default function DiscoverPage({ user }: Props) {
               {(current.languages ?? []).length > 0 && (
                 <div className="rounded-2xl p-4"
                   style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                  <h3 className="text-white font-semibold text-sm mb-2.5">Languages</h3>
+                  <h3 className="text-white font-bold text-base mb-3">Languages</h3>
                   <div className="flex flex-wrap gap-2">
                     {(current.languages ?? []).map((lang: string) => (
                       <span key={lang} className="px-3 py-1.5 rounded-full text-xs font-semibold"
@@ -480,17 +500,15 @@ export default function DiscoverPage({ user }: Props) {
               {((current as any).interests ?? []).length > 0 && (
                 <div className="rounded-2xl p-4"
                   style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                  <h3 className="text-white font-semibold text-sm mb-2.5">Interests</h3>
+                  <h3 className="text-white font-bold text-base mb-3">Interests</h3>
                   <div className="flex flex-wrap gap-2">
                     {((current as any).interests ?? []).map((it: string) => (
                       user.isPremium ? (
-                        <button
-                          key={it}
+                        <button key={it}
                           onClick={() => { setReplyTo({ topic: it, label: "interest" }); setReplyText(""); }}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
                           style={{ background: "rgba(123,63,160,0.18)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.25)" }}>
-                          {it}
-                          <MessageCircle size={11} />
+                          {it} <MessageCircle size={11} />
                         </button>
                       ) : (
                         <span key={it} className="px-3 py-1.5 rounded-full text-xs font-semibold"
@@ -507,17 +525,15 @@ export default function DiscoverPage({ user }: Props) {
               {((current as any).moviesAndTv ?? []).length > 0 && (
                 <div className="rounded-2xl p-4"
                   style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                  <h3 className="text-white font-semibold text-sm mb-2.5">Movies & TV Shows</h3>
+                  <h3 className="text-white font-bold text-base mb-3">Movies & TV Shows</h3>
                   <div className="flex flex-wrap gap-2">
                     {((current as any).moviesAndTv ?? []).map((title: string) => (
                       user.isPremium ? (
-                        <button
-                          key={title}
+                        <button key={title}
                           onClick={() => { setReplyTo({ topic: title, label: "movie/show" }); setReplyText(""); }}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
                           style={{ background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.22)" }}>
-                          🎬 {title}
-                          <MessageCircle size={11} />
+                          🎬 {title} <MessageCircle size={11} />
                         </button>
                       ) : (
                         <span key={title} className="px-3 py-1.5 rounded-full text-xs font-semibold"
@@ -530,7 +546,6 @@ export default function DiscoverPage({ user }: Props) {
                 </div>
               )}
 
-              {/* Profiles remaining */}
               <p className="text-center text-cream/20 text-xs pt-2">
                 {profiles.length - currentIndex - 1} more profile{profiles.length - currentIndex - 1 !== 1 ? "s" : ""} to discover
               </p>
