@@ -2,6 +2,7 @@
 import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { parseApiError } from "@/lib/apiError";
 import { useToast } from "@/hooks/use-toast";
 import { isNative, restoreIAPPurchases } from "@/lib/purchases";
 import { useTranslation } from "react-i18next";
@@ -678,27 +679,22 @@ function AccountSecurityScreen({ user, onBack }: { user: SafeUser; onBack: () =>
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [phoneDone, setPhoneDone] = useState(false);
 
-  const parseError = async (err: any) => {
-    const raw: string = err.message?.match(/\d+: (.+)/)?.[1] || err.message || "Something went wrong";
-    try { return JSON.parse(raw).message || raw; } catch { return raw; }
-  };
-
   const emailMutation = useMutation({
     mutationFn: () => apiRequest("PATCH", "/api/auth/change-email", emailForm).then(r => r.json()),
     onSuccess: () => { setEmailDone(true); setEmailError(null); queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] }); },
-    onError: async (err: any) => setEmailError(await parseError(err)),
+    onError: (err: any) => setEmailError(parseApiError(err)),
   });
 
   const pwMutation = useMutation({
     mutationFn: () => apiRequest("PATCH", "/api/auth/change-password", { currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword }).then(r => r.json()),
     onSuccess: () => { setPwDone(true); setPwError(null); },
-    onError: async (err: any) => setPwError(await parseError(err)),
+    onError: (err: any) => setPwError(parseApiError(err)),
   });
 
   const phoneMutation = useMutation({
     mutationFn: () => apiRequest("PATCH", "/api/auth/change-phone", { newPhone: phoneForm.newPhone }).then(r => r.json()),
     onSuccess: () => { setPhoneDone(true); setPhoneError(null); queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] }); },
-    onError: async (err: any) => setPhoneError(await parseError(err)),
+    onError: (err: any) => setPhoneError(parseApiError(err)),
   });
 
   const inputStyle = {

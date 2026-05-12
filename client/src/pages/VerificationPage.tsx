@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { parseApiError } from "@/lib/apiError";
 import { Camera, CheckCircle, ArrowRight, Shield, RotateCcw, Sun, AlertCircle } from "lucide-react";
 import type { SafeUser } from "@shared/schema";
 
@@ -124,7 +125,7 @@ export default function VerificationPage({ user }: Props) {
       setStep("done");
     },
     onError: (err: any) => {
-      setSubmitError(err.message ?? "Submission failed. Please try again.");
+      setSubmitError(parseApiError(err, "Submission failed. Please try again."));
       setStep("preview");
     },
   });

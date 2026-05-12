@@ -572,7 +572,7 @@ export default function DiscoverPage({ user }: Props) {
               data-testid="button-dislike"
               className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
               style={{
-                background: "#000000",
+                background: "#1a0a2e",
                 boxShadow: "0 4px 20px rgba(0,0,0,0.45)",
               }}>
               <X size={26} color="white" strokeWidth={3} />
@@ -584,7 +584,7 @@ export default function DiscoverPage({ user }: Props) {
               data-testid="button-like"
               className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
               style={{
-                background: "#000000",
+                background: "#1a0a2e",
                 boxShadow: "0 4px 20px rgba(0,0,0,0.45)",
               }}>
               <Heart size={26} fill="white" color="white" strokeWidth={2} />

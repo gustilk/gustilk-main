@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { parseApiError } from "@/lib/apiError";
 import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, MapPin, ChevronLeft, Shield, AlertTriangle, XCircle, GripVertical, Trash2 } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
@@ -391,17 +392,7 @@ export default function ProfilePage({ user }: Props) {
       toast({ title: t("profile.photosUpdated") });
     },
     onError: (err: Error) => {
-      try {
-        const jsonStart = err.message.indexOf("{");
-        if (jsonStart !== -1) {
-          const parsed = JSON.parse(err.message.slice(jsonStart));
-          setPhotoError(parsed.error || t("profile.couldNotSavePhotos"));
-        } else {
-          setPhotoError(err.message || t("profile.couldNotSavePhotos"));
-        }
-      } catch {
-        setPhotoError(err.message || t("profile.couldNotSavePhotos"));
-      }
+      setPhotoError(parseApiError(err, t("profile.couldNotSavePhotos")));
     },
   });
 

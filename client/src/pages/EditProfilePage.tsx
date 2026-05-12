@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { parseApiError } from "@/lib/apiError";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Check, XCircle } from "lucide-react";
 import type { User } from "@shared/schema";
@@ -44,7 +45,7 @@ export default function EditProfilePage({ user }: Props) {
       setLocation("/profile");
     },
     onError: (e: Error) => {
-      setSaveError(e.message || "Save failed. Please try again.");
+      setSaveError(parseApiError(e));
     },
   });
 

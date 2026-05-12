@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { parseApiError } from "@/lib/apiError";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 
@@ -154,17 +155,7 @@ export default function SocialSetupPage({ user }: Props) {
       }
     },
     onError: (err: Error) => {
-      try {
-        const jsonStart = err.message.indexOf("{");
-        if (jsonStart !== -1) {
-          const parsed = JSON.parse(err.message.slice(jsonStart));
-          setSaveError(parsed.error || t("setup.couldNotSave"));
-        } else {
-          setSaveError(err.message || t("setup.couldNotSave"));
-        }
-      } catch {
-        setSaveError(err.message || t("setup.couldNotSave"));
-      }
+      setSaveError(parseApiError(err, t("setup.couldNotSave")));
     },
   });
 
