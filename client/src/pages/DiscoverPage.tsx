@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { SlidersHorizontal, X, Heart, RefreshCw, MapPin, Shield, Undo2, MessageCircle, Send } from "lucide-react";
+import { SlidersHorizontal, X, Heart, Star, RefreshCw, MapPin, Shield, Undo2, MessageCircle, Send } from "lucide-react";
+import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import MatchModal from "@/components/MatchModal";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
@@ -321,14 +322,30 @@ export default function DiscoverPage({ user }: Props) {
                     </div>
                   )}
 
-                  {/* Tap zones for photo navigation */}
+                  {/* Swipe + tap zone for photo navigation */}
                   {photos.length > 1 && (
-                    <>
-                      <button className="absolute left-0 top-0 bottom-0 w-1/3 z-10"
-                        onClick={() => setPhotoIdx(i => Math.max(0, i - 1))} />
-                      <button className="absolute right-0 top-0 bottom-0 w-1/3 z-10"
-                        onClick={() => setPhotoIdx(i => Math.min(photos.length - 1, i + 1))} />
-                    </>
+                    <motion.div
+                      className="absolute inset-0 z-10"
+                      drag="x"
+                      dragConstraints={{ left: 0, right: 0 }}
+                      dragElastic={0.15}
+                      style={{ touchAction: "pan-y" }}
+                      onDragEnd={(_, info) => {
+                        if (info.offset.x < -50)
+                          setPhotoIdx(i => Math.min(photos.length - 1, i + 1));
+                        else if (info.offset.x > 50)
+                          setPhotoIdx(i => Math.max(0, i - 1));
+                      }}
+                      onTap={(e) => {
+                        const el = e.target as HTMLElement;
+                        const rect = el.getBoundingClientRect();
+                        const x = (e as PointerEvent).clientX - rect.left;
+                        if (x < rect.width / 3)
+                          setPhotoIdx(i => Math.max(0, i - 1));
+                        else if (x > (rect.width * 2) / 3)
+                          setPhotoIdx(i => Math.min(photos.length - 1, i + 1));
+                      }}
+                    />
                   )}
 
                   {/* Bottom gradient with name/location overlay */}
@@ -520,8 +537,9 @@ export default function DiscoverPage({ user }: Props) {
             </button>
           </div>
 
-          {/* Pass / Like — glass transparent */}
-          <div className="flex items-center gap-10" style={{ pointerEvents: "auto" }}>
+          {/* Pass / Like / Super-like */}
+          <div className="flex items-center gap-6" style={{ pointerEvents: "auto" }}>
+            {/* Pass */}
             <button
               onClick={() => dislikeMutation.mutate({ userId: current.id })}
               disabled={isPending}
@@ -536,19 +554,35 @@ export default function DiscoverPage({ user }: Props) {
               }}>
               <X size={26} color="white" />
             </button>
+
+            {/* Main Like — solid Gustilk gradient */}
             <button
               onClick={() => likeMutation.mutate({ userId: current.id })}
               disabled={isPending}
               data-testid="button-like"
               className="w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
               style={{
-                background: "rgba(212,96,138,0.18)",
+                background: "linear-gradient(135deg, #7b3fa0, #d4608a)",
+                boxShadow: "0 6px 28px rgba(212,96,138,0.45)",
+                border: "2px solid rgba(212,96,138,0.4)",
+              }}>
+              <Heart size={32} fill="white" color="white" />
+            </button>
+
+            {/* Super Like — Gustilk gold */}
+            <button
+              onClick={() => likeMutation.mutate({ userId: current.id })}
+              disabled={isPending}
+              data-testid="button-superlike"
+              className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
+              style={{
+                background: "rgba(201,168,76,0.15)",
                 backdropFilter: "blur(16px)",
                 WebkitBackdropFilter: "blur(16px)",
-                border: "2px solid rgba(212,96,138,0.55)",
-                boxShadow: "0 4px 24px rgba(212,96,138,0.3)",
+                border: "2px solid rgba(201,168,76,0.5)",
+                boxShadow: "0 4px 20px rgba(201,168,76,0.25)",
               }}>
-              <Heart size={30} fill="rgba(212,96,138,0.8)" color="#d4608a" />
+              <Star size={24} color="#c9a84c" fill="rgba(201,168,76,0.5)" />
             </button>
           </div>
         </div>
