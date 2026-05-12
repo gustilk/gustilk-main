@@ -213,7 +213,7 @@ export default function DiscoverPage({ user }: Props) {
           height: "calc(56px + env(safe-area-inset-top))",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}>
-        <h1 className="font-serif text-2xl font-bold text-white">
+        <h1 className="font-serif text-2xl font-bold" style={{ color: "#c9a84c" }}>
           Gûstîlk
         </h1>
         <button
@@ -321,15 +321,22 @@ export default function DiscoverPage({ user }: Props) {
         ) : (
           <div data-testid={`card-profile-${current.id}`}>
 
-            {/* ── Full-screen photo ── */}
+            {/* ── Full-screen photo card with overlays ── */}
             {(() => {
               const photos = current.photos ?? [];
               const photo = photos[photoIdx] ?? photos[0] ?? null;
               return (
-                <div className="relative mx-3 rounded-3xl overflow-hidden" style={{ aspectRatio: "3/4", maxHeight: "80vh" }}>
+                <div
+                  className="relative mx-3 overflow-hidden"
+                  style={{
+                    borderRadius: 16,
+                    height: "calc(100dvh - 56px - env(safe-area-inset-top) - 62px - env(safe-area-inset-bottom) - 16px)",
+                  }}
+                >
+                  {/* Photo */}
                   {photo ? (
                     <ProtectedPhoto src={photo} alt={current.fullName ?? ""}
-                      className="absolute inset-0 w-full h-full object-contain"
+                      className="absolute inset-0 w-full h-full object-cover object-top"
                       blurred={current.gender === "female" && !!current.photosBlurred} />
                   ) : (
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center"
@@ -340,9 +347,13 @@ export default function DiscoverPage({ user }: Props) {
                     </div>
                   )}
 
-                  {/* Photo progress bars */}
+                  {/* Bottom gradient for name/button readability */}
+                  <div className="absolute inset-0 pointer-events-none"
+                    style={{ background: "linear-gradient(to bottom, transparent 48%, rgba(13,6,24,0.95) 100%)" }} />
+
+                  {/* Progress bars — leave right side clear for caste badge */}
                   {photos.length > 1 && (
-                    <div className="absolute left-3 right-3 flex gap-1 z-20" style={{ top: 10 }}>
+                    <div className="absolute left-3 flex gap-1 z-20" style={{ top: 10, right: 80 }}>
                       {photos.map((_, i) => (
                         <div key={i} className="flex-1 h-[3px] rounded-full overflow-hidden"
                           style={{ background: "rgba(255,255,255,0.3)" }}>
@@ -357,21 +368,22 @@ export default function DiscoverPage({ user }: Props) {
                     </div>
                   )}
 
-                  {/* Photo count */}
-                  {photos.length > 1 && (
-                    <div className="absolute right-3 z-20 px-2 py-1 rounded-full text-xs"
+                  {/* Caste badge — top right corner */}
+                  {current.caste && (
+                    <div className="absolute z-20 px-3 py-1.5"
                       style={{
-                        top: 18,
-                        background: "rgba(13,6,24,0.55)",
-                        backdropFilter: "blur(6px)",
-                        WebkitBackdropFilter: "blur(6px)",
-                        color: "rgba(255,255,255,0.7)",
+                        top: 8, right: 10,
+                        background: "rgba(13,6,24,0.85)",
+                        border: "0.5px solid rgba(201,168,76,0.4)",
+                        borderRadius: 12,
                       }}>
-                      {photoIdx + 1}/{photos.length}
+                      <span className="text-xs font-semibold" style={{ color: "#c9a84c" }}>
+                        {casteLabel(current.caste)}
+                      </span>
                     </div>
                   )}
 
-                  {/* Swipe + tap zone for photo navigation */}
+                  {/* Photo nav — drag or tap thirds */}
                   {photos.length > 1 && (
                     <motion.div
                       className="absolute inset-0 z-10"
@@ -397,25 +409,51 @@ export default function DiscoverPage({ user }: Props) {
                     />
                   )}
 
+                  {/* Name — centered above buttons */}
+                  <div className="absolute left-0 right-0 z-20 flex justify-center pointer-events-none"
+                    style={{ bottom: 70 }}>
+                    <h2 className="font-serif text-2xl text-white font-bold text-center px-6"
+                      style={{ textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}
+                      data-testid={`text-name-${current.id}`}>
+                      {current.fullName ?? current.firstName ?? "Member"}{age ? `, ${age}` : ""}
+                    </h2>
+                  </div>
+
+                  {/* Pass + Like buttons — centered inside photo */}
+                  <div className="absolute left-0 right-0 z-30 flex justify-center items-center gap-8"
+                    style={{ bottom: 16 }}>
+                    <button
+                      onClick={() => dislikeMutation.mutate({ userId: current.id })}
+                      disabled={isPending}
+                      data-testid="button-dislike"
+                      className="flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
+                      style={{
+                        width: 50, height: 50, borderRadius: "50%",
+                        background: "rgba(13,6,24,0.75)",
+                        border: "1.5px solid rgba(136,136,136,0.5)",
+                      }}>
+                      <X size={22} color="#888888" strokeWidth={2.5} />
+                    </button>
+                    <button
+                      onClick={() => likeMutation.mutate({ userId: current.id })}
+                      disabled={isPending}
+                      data-testid="button-like"
+                      className="flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
+                      style={{
+                        width: 50, height: 50, borderRadius: "50%",
+                        background: "rgba(13,6,24,0.75)",
+                        border: "1.5px solid rgba(255,255,255,0.4)",
+                      }}>
+                      <Heart size={22} fill="white" color="white" strokeWidth={2} />
+                    </button>
+                  </div>
+
                 </div>
               );
             })()}
 
-            {/* ── Sticky name + age — sticks below header when photo scrolls away ── */}
-            <div className="sticky z-20 px-5 py-3"
-              style={{
-                top: "calc(56px + env(safe-area-inset-top))",
-                background: "#0d0618",
-                borderBottom: "1px solid rgba(255,255,255,0.06)",
-              }}>
-              <h2 className="font-serif text-2xl text-white font-bold leading-tight"
-                data-testid={`text-name-${current.id}`}>
-                {current.fullName ?? current.firstName ?? "Member"}{age ? `, ${age}` : ""}
-              </h2>
-            </div>
-
             {/* ── Profile info cards ── */}
-            <div className="px-4 pt-3 pb-44 space-y-3" style={{ background: "#0d0618" }}>
+            <div className="px-4 pt-3 pb-10 space-y-3" style={{ background: "#0d0618" }}>
 
               {/* Active status */}
               {getActiveLabel(current.activitySeenAt) && (
@@ -556,12 +594,12 @@ export default function DiscoverPage({ user }: Props) {
       </div>
 
       {/* ── Action buttons — fixed just above the bottom nav bar ── */}
+      {/* Undo pill — fixed above bottom nav */}
       {current && (
         <div
-          className="fixed left-0 right-0 z-40 flex flex-col items-center gap-3 py-3"
+          className="fixed left-0 right-0 z-40 flex justify-center py-3"
           style={{ bottom: "calc(62px + env(safe-area-inset-bottom))", pointerEvents: "none" }}
         >
-          {/* Undo pill */}
           <div style={{
             opacity: undoState ? 1 : 0,
             transform: undoState ? "translateY(0)" : "translateY(6px)",
@@ -584,33 +622,6 @@ export default function DiscoverPage({ user }: Props) {
               <span className="relative z-10">
                 {t("discover.undo")}{undoState ? ` — ${undoState.profile.fullName ?? undoState.profile.firstName ?? ""}` : ""}
               </span>
-            </button>
-          </div>
-
-          {/* Pass / Like — same size, white background */}
-          <div className="flex items-center gap-8" style={{ pointerEvents: "auto" }}>
-            <button
-              onClick={() => dislikeMutation.mutate({ userId: current.id })}
-              disabled={isPending}
-              data-testid="button-dislike"
-              className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
-              style={{
-                background: "#1a0a2e",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.45)",
-              }}>
-              <X size={26} color="#888888" strokeWidth={3} />
-            </button>
-
-            <button
-              onClick={() => likeMutation.mutate({ userId: current.id })}
-              disabled={isPending}
-              data-testid="button-like"
-              className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
-              style={{
-                background: "#1a0a2e",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.45)",
-              }}>
-              <Heart size={26} fill="white" color="white" strokeWidth={2} />
             </button>
           </div>
         </div>
