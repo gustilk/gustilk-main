@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { ArrowLeft, MessageCircle, Video, Star, Lock, MapPin, Flag, Crown, Heart, X } from "lucide-react";
+import { ArrowLeft, MessageCircle, Video, Star, Lock, MapPin, Cake, User, Briefcase, Flag, Crown, Heart, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { SafeUser, MatchWithUser } from "@shared/schema";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
@@ -229,7 +229,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
 
       </div>
 
-      {/* ── Profile info — Hily-style clean cards ──────────── */}
+      {/* ── Profile info cards ──────────── */}
       <div className="px-4 pt-4 pb-32 space-y-3">
 
         {/* Active status pill */}
@@ -244,28 +244,51 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
           );
         })()}
 
-        {/* Location card */}
-        {location && (
-          <div className="rounded-2xl px-4 py-3.5 flex items-center gap-3"
-            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <MapPin size={18} color="#c9a84c" />
-            <span className="text-cream/85 text-sm font-medium" data-testid="text-profile-location">{location}</span>
+        {/* Location + Age — 2-column grid */}
+        {(location || profile.age) && (
+          <div className="grid grid-cols-2 gap-3">
+            {location && (
+              <div className="flex items-center gap-2.5 px-3.5 py-3"
+                style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                <MapPin size={15} color="#c9a84c" className="shrink-0" />
+                <span className="text-cream/85 text-xs font-medium leading-tight" data-testid="text-profile-location">{location}</span>
+              </div>
+            )}
+            {profile.age && (
+              <div className="flex items-center gap-2.5 px-3.5 py-3"
+                style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                <Cake size={15} color="#c9a84c" className="shrink-0" />
+                <span className="text-cream/85 text-xs font-medium">{profile.age} years old</span>
+              </div>
+            )}
           </div>
         )}
 
-        {/* About me card */}
+        {/* About me */}
         {profile.bio && (
-          <div className="rounded-2xl p-4"
-            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <h3 className="text-white font-bold text-base mb-2">About me</h3>
+          <div className="p-4"
+            style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+            <div className="flex items-center gap-2 mb-2">
+              <User size={15} color="#c9a84c" />
+              <h3 className="text-white font-bold text-base">About me</h3>
+            </div>
             <p className="text-cream/75 text-sm leading-relaxed" data-testid="text-profile-bio">{profile.bio}</p>
           </div>
         )}
 
-        {/* Faith & Caste card */}
+        {/* Occupation */}
+        {(profile as any).occupation && (
+          <div className="flex items-center gap-2.5 px-4 py-3.5"
+            style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+            <Briefcase size={15} color="#c9a84c" className="shrink-0" />
+            <span className="text-cream/85 text-sm font-medium">{(profile as any).occupation}</span>
+          </div>
+        )}
+
+        {/* Faith & Caste */}
         {profile.caste && (
-          <div className="rounded-2xl p-4"
-            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="p-4"
+            style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
             <h3 className="text-white font-bold text-base mb-3">Faith & Caste</h3>
             <div className="flex flex-wrap gap-2">
               <span className="px-3 py-1.5 rounded-full text-xs font-semibold"
@@ -280,39 +303,32 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
           </div>
         )}
 
-        {/* General info card */}
-        {(() => {
-          const chips = [
-            profile.age && `${profile.age} years old`,
-            profile.gender && profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1),
-            (profile as any).occupation,
-          ].filter(Boolean) as string[];
-          if (!chips.length) return null;
-          return (
-            <div className="rounded-2xl p-4"
-              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
-              <h3 className="text-white font-bold text-base mb-3">General info</h3>
-              <div className="flex flex-wrap gap-2">
-                {chips.map(c => (
-                  <span key={c} className="px-3 py-1.5 rounded-full text-xs font-medium"
-                    style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.85)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                    {c}
-                  </span>
-                ))}
-              </div>
+        {/* General info — gender only */}
+        {profile.gender && (
+          <div className="p-4"
+            style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+            <h3 className="text-white font-bold text-base mb-3">General info</h3>
+            <div className="flex flex-wrap gap-2">
+              <span className="px-3 py-1.5 rounded-full text-xs font-medium"
+                style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.85)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                {profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1)}
+              </span>
             </div>
-          );
-        })()}
+          </div>
+        )}
 
-        {/* Languages card */}
+        {/* Languages */}
         {(profile.languages ?? []).length > 0 && (
-          <div className="rounded-2xl p-4"
-            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <h3 className="text-white font-bold text-base mb-3">Languages</h3>
+          <div className="p-4"
+            style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+            <div className="flex items-center gap-2 mb-3">
+              <MessageCircle size={15} color="#c9a84c" />
+              <h3 className="text-white font-bold text-base">Languages</h3>
+            </div>
             <div className="flex flex-wrap gap-2">
               {(profile.languages ?? []).map((lang: string) => (
-                <span key={lang} className="px-3 py-1.5 rounded-full text-xs font-semibold"
-                  style={{ background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.22)" }}>
+                <span key={lang} className="px-3 py-1 rounded-full text-xs font-semibold"
+                  style={{ color: "#c9a84c", border: "1px solid rgba(201,168,76,0.4)", background: "transparent" }}>
                   {lang}
                 </span>
               ))}
@@ -320,10 +336,10 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
           </div>
         )}
 
-        {/* Interests card */}
+        {/* Interests */}
         {((profile as any).interests ?? []).length > 0 && (
-          <div className="rounded-2xl p-4"
-            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="p-4"
+            style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
             <h3 className="text-white font-bold text-base mb-3">Interests</h3>
             <div className="flex flex-wrap gap-2">
               {((profile as any).interests ?? []).map((it: string) => (
@@ -336,7 +352,6 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
           </div>
         )}
 
-        {/* Photo thumbnails card — premium */}
         {/* Premium upgrade CTA */}
         {!isPremium && (
           <button onClick={() => setLocation("/premium")} data-testid="button-upgrade-profile"

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { SlidersHorizontal, X, Heart, RotateCcw, MapPin, Shield, Undo2, MessageCircle, Send } from "lucide-react";
+import { SlidersHorizontal, X, Heart, RotateCcw, MapPin, Cake, User, Briefcase, Undo2, MessageCircle, Send } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import MatchModal from "@/components/MatchModal";
@@ -414,7 +414,7 @@ export default function DiscoverPage({ user }: Props) {
               </h2>
             </div>
 
-            {/* ── Profile info cards — same layout as ViewUserProfilePage ── */}
+            {/* ── Profile info cards ── */}
             <div className="px-4 pt-3 pb-44 space-y-3" style={{ background: "#0d0618" }}>
 
               {/* Active status */}
@@ -425,30 +425,53 @@ export default function DiscoverPage({ user }: Props) {
                 </div>
               )}
 
-              {/* Location */}
-              {(current.city || current.country) && (
-                <div className="rounded-2xl px-4 py-3.5 flex items-center gap-3"
-                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                  <MapPin size={18} color="#c9a84c" />
-                  <span className="text-cream/85 text-sm font-medium">
-                    {[current.city, current.state, current.country].filter(Boolean).join(", ")}
-                  </span>
+              {/* Location + Age — 2-column grid */}
+              {(current.city || current.country || age) && (
+                <div className="grid grid-cols-2 gap-3">
+                  {(current.city || current.country) && (
+                    <div className="flex items-center gap-2.5 px-3.5 py-3"
+                      style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                      <MapPin size={15} color="#c9a84c" className="shrink-0" />
+                      <span className="text-cream/85 text-xs font-medium leading-tight">
+                        {[current.city, current.state, current.country].filter(Boolean).join(", ")}
+                      </span>
+                    </div>
+                  )}
+                  {age && (
+                    <div className="flex items-center gap-2.5 px-3.5 py-3"
+                      style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                      <Cake size={15} color="#c9a84c" className="shrink-0" />
+                      <span className="text-cream/85 text-xs font-medium">{age} years old</span>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* About me */}
+              {/* About Me */}
               {current.bio && (
-                <div className="rounded-2xl p-4"
-                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                  <h3 className="text-white font-bold text-base mb-2">About me</h3>
+                <div className="p-4"
+                  style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <User size={15} color="#c9a84c" />
+                    <h3 className="text-white font-bold text-base">About me</h3>
+                  </div>
                   <p className="text-cream/75 text-sm leading-relaxed">{current.bio}</p>
+                </div>
+              )}
+
+              {/* Occupation */}
+              {(current as any).occupation && (
+                <div className="flex items-center gap-2.5 px-4 py-3.5"
+                  style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                  <Briefcase size={15} color="#c9a84c" className="shrink-0" />
+                  <span className="text-cream/85 text-sm font-medium">{(current as any).occupation}</span>
                 </div>
               )}
 
               {/* Faith & Caste */}
               {current.caste && (
-                <div className="rounded-2xl p-4"
-                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div className="p-4"
+                  style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
                   <h3 className="text-white font-bold text-base mb-3">Faith & Caste</h3>
                   <div className="flex flex-wrap gap-2">
                     <span className="px-3 py-1.5 rounded-full text-xs font-semibold"
@@ -464,39 +487,32 @@ export default function DiscoverPage({ user }: Props) {
                 </div>
               )}
 
-              {/* General info */}
-              {(() => {
-                const chips = [
-                  age && `${age} years old`,
-                  current.gender && current.gender.charAt(0).toUpperCase() + current.gender.slice(1),
-                  (current as any).occupation,
-                ].filter(Boolean) as string[];
-                if (!chips.length) return null;
-                return (
-                  <div className="rounded-2xl p-4"
-                    style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                    <h3 className="text-white font-bold text-base mb-3">General info</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {chips.map(c => (
-                        <span key={c} className="px-3 py-1.5 rounded-full text-xs font-medium"
-                          style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.85)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                          {c}
-                        </span>
-                      ))}
-                    </div>
+              {/* General info — gender only */}
+              {current.gender && (
+                <div className="p-4"
+                  style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                  <h3 className="text-white font-bold text-base mb-3">General info</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-3 py-1.5 rounded-full text-xs font-medium"
+                      style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.85)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                      {current.gender.charAt(0).toUpperCase() + current.gender.slice(1)}
+                    </span>
                   </div>
-                );
-              })()}
+                </div>
+              )}
 
               {/* Languages */}
               {(current.languages ?? []).length > 0 && (
-                <div className="rounded-2xl p-4"
-                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                  <h3 className="text-white font-bold text-base mb-3">Languages</h3>
+                <div className="p-4"
+                  style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <MessageCircle size={15} color="#c9a84c" />
+                    <h3 className="text-white font-bold text-base">Languages</h3>
+                  </div>
                   <div className="flex flex-wrap gap-2">
                     {(current.languages ?? []).map((lang: string) => (
-                      <span key={lang} className="px-3 py-1.5 rounded-full text-xs font-semibold"
-                        style={{ background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.22)" }}>
+                      <span key={lang} className="px-3 py-1 rounded-full text-xs font-semibold"
+                        style={{ color: "#c9a84c", border: "1px solid rgba(201,168,76,0.4)", background: "transparent" }}>
                         {lang}
                       </span>
                     ))}
@@ -506,8 +522,8 @@ export default function DiscoverPage({ user }: Props) {
 
               {/* Interests */}
               {((current as any).interests ?? []).length > 0 && (
-                <div className="rounded-2xl p-4"
-                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div className="p-4"
+                  style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
                   <h3 className="text-white font-bold text-base mb-3">Interests</h3>
                   <div className="flex flex-wrap gap-2">
                     {((current as any).interests ?? []).map((it: string) => (
@@ -531,8 +547,8 @@ export default function DiscoverPage({ user }: Props) {
 
               {/* Movies & TV */}
               {((current as any).moviesAndTv ?? []).length > 0 && (
-                <div className="rounded-2xl p-4"
-                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div className="p-4"
+                  style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
                   <h3 className="text-white font-bold text-base mb-3">Movies & TV Shows</h3>
                   <div className="flex flex-wrap gap-2">
                     {((current as any).moviesAndTv ?? []).map((title: string) => (
