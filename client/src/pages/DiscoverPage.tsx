@@ -309,7 +309,7 @@ export default function DiscoverPage({ user }: Props) {
               const photos = current.photos ?? [];
               const photo = photos[photoIdx] ?? photos[0] ?? null;
               return (
-                <div className="relative" style={{ height: "72dvh", minHeight: 480 }}>
+                <div className="relative mx-3 rounded-3xl overflow-hidden" style={{ height: "72dvh", minHeight: 480 }}>
                   {photo ? (
                     <ProtectedPhoto src={photo} alt={current.fullName ?? ""}
                       className="absolute inset-0 w-full h-full object-cover object-top"
@@ -354,6 +354,15 @@ export default function DiscoverPage({ user }: Props) {
                     </div>
                   )}
 
+                  {/* Minimal name + age overlay at bottom of photo */}
+                  <div className="absolute bottom-0 left-0 right-0 z-20 px-4 pb-4 pt-16"
+                    style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)" }}>
+                    <h2 className="font-bold text-3xl text-white leading-tight"
+                      data-testid={`text-name-${current.id}`}>
+                      {current.fullName ?? current.firstName ?? "Member"}{age ? `, ${age}` : ""}
+                    </h2>
+                  </div>
+
                   {/* Swipe + tap zone for photo navigation */}
                   {photos.length > 1 && (
                     <motion.div
@@ -384,13 +393,9 @@ export default function DiscoverPage({ user }: Props) {
               );
             })()}
 
-            {/* ── Name / badges / location — immediately below photo ── */}
-            <div className="px-5 pt-4 pb-3" style={{ background: "#0d0618" }}>
+            {/* ── Badges / location / active status — below photo card ── */}
+            <div className="px-5 pt-3 pb-2" style={{ background: "#0d0618" }}>
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="font-serif text-2xl text-white font-bold leading-tight"
-                  data-testid={`text-name-${current.id}`}>
-                  {current.fullName ?? current.firstName ?? "Member"}{age ? `, ${age}` : ""}
-                </h2>
                 {current.isVerified && (
                   <span className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-semibold"
                     style={{ background: "rgba(59,130,246,0.85)", color: "white" }}>
@@ -404,8 +409,6 @@ export default function DiscoverPage({ user }: Props) {
                     {casteLabel(current.caste)}
                   </span>
                 )}
-              </div>
-              <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                 {(current.city || current.country) && (
                   <span className="flex items-center gap-1.5 text-sm"
                     style={{ color: "rgba(253,248,240,0.7)" }}>
