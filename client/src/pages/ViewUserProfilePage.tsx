@@ -360,14 +360,14 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
                 data-testid="button-pass-from-likes"
                 className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
                 style={{ background: "#1a0a2e", boxShadow: "0 4px 20px rgba(0,0,0,0.45)" }}>
-                <X size={26} color="white" strokeWidth={3} />
+                <X size={26} color="#888888" strokeWidth={3} />
               </button>
               <button onClick={() => likeMutation.mutate()}
                 disabled={likeMutation.isPending || dislikeMutation.isPending}
                 data-testid="button-like-from-likes"
                 className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
                 style={{ background: "#1a0a2e", boxShadow: "0 4px 20px rgba(0,0,0,0.45)" }}>
-                <Heart size={26} fill="white" color="white" strokeWidth={2} />
+                <Heart size={26} fill="#ffd700" color="#ffd700" strokeWidth={2} />
               </button>
             </>
           ) : (
@@ -376,12 +376,12 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
                 disabled={isPremium && (!match || callState !== "idle")}
                 className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-40"
                 style={{ background: "#1a0a2e", boxShadow: "0 4px 20px rgba(0,0,0,0.45)", border: "1.5px solid rgba(201,168,76,0.35)" }}>
-                {isPremium ? <Video size={22} color="#c9a84c" /> : <Lock size={20} color="#c9a84c" />}
+                {isPremium ? <Video size={22} color="#ffd700" /> : <Lock size={20} color="#ffd700" />}
               </button>
               <button onClick={handleMessage} data-testid="button-message-user"
                 className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90"
                 style={{ background: "#1a0a2e", boxShadow: "0 4px 20px rgba(0,0,0,0.45)", border: "1.5px solid rgba(201,168,76,0.35)" }}>
-                {isPremium ? <MessageCircle size={22} color="#c9a84c" /> : <Lock size={20} color="#c9a84c" />}
+                {isPremium ? <MessageCircle size={22} color="#ffd700" /> : <Lock size={20} color="#ffd700" />}
               </button>
             </>
           )}

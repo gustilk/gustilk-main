@@ -588,7 +588,7 @@ export default function DiscoverPage({ user }: Props) {
                 background: "#1a0a2e",
                 boxShadow: "0 4px 20px rgba(0,0,0,0.45)",
               }}>
-              <X size={26} color="white" strokeWidth={3} />
+              <X size={26} color="#888888" strokeWidth={3} />
             </button>
 
             <button
@@ -600,7 +600,7 @@ export default function DiscoverPage({ user }: Props) {
                 background: "#1a0a2e",
                 boxShadow: "0 4px 20px rgba(0,0,0,0.45)",
               }}>
-              <Heart size={26} fill="white" color="white" strokeWidth={2} />
+              <Heart size={26} fill="#ffd700" color="#ffd700" strokeWidth={2} />
             </button>
           </div>
         </div>
