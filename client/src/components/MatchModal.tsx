@@ -223,7 +223,14 @@ function GlowAvatar({ user }: { user: SafeUser }) {
 export default function MatchModal({ matchedUser, currentUser, matchId, onClose }: MatchModalProps) {
   const [, setLocation] = useLocation();
   const [photoIdx, setPhotoIdx] = useState(0);
-  const photos = matchedUser.photos ?? [];
+
+  // Build deduplicated photo array, always leading with mainPhotoUrl
+  const photos = (() => {
+    const main = matchedUser.mainPhotoUrl;
+    const arr = matchedUser.photos ?? [];
+    if (main && !arr.includes(main)) return [main, ...arr];
+    return arr.length > 0 ? arr : main ? [main] : [];
+  })();
 
   const handleChat = () => {
     onClose();
@@ -267,7 +274,7 @@ export default function MatchModal({ matchedUser, currentUser, matchId, onClose 
             <ProtectedPhoto
               src={photos[photoIdx]}
               alt={matchedUser.fullName ?? ""}
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover object-top"
               blurred={matchedUser.gender === "female" && !!matchedUser.photosBlurred}
             />
           ) : (

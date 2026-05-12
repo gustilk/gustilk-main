@@ -382,33 +382,35 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
         )}
       </div>
 
-      {/* ── Floating action bar — Hily-style ────────────────── */}
-      <div className="fixed bottom-0 left-0 right-0 px-4 pt-6 pb-5 z-40 pointer-events-none"
-        style={{ background: "linear-gradient(to top, #0d0618 55%, rgba(13,6,24,0.6) 85%, transparent 100%)" }}>
-        <div className="flex items-center justify-center gap-5 max-w-sm mx-auto pointer-events-auto">
+      {/* ── Floating action bar — same style and position as DiscoverPage ── */}
+      <div
+        className="fixed left-0 right-0 z-40 flex justify-center py-3 pointer-events-none"
+        style={{ bottom: "calc(62px + env(safe-area-inset-bottom))" }}
+      >
+        <div className="flex items-center gap-8 pointer-events-auto">
           {showLikeActions && !actedOnLike ? (
             <>
               <button onClick={() => dislikeMutation.mutate()}
                 disabled={dislikeMutation.isPending || likeMutation.isPending}
                 data-testid="button-pass-from-likes"
-                className="w-14 h-14 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
-                style={{ background: "rgba(30,15,45,0.95)", border: "1.5px solid rgba(255,255,255,0.12)", boxShadow: "0 6px 20px rgba(0,0,0,0.5)" }}>
-                <X size={26} color="rgba(253,248,240,0.85)" strokeWidth={2.5} />
+                className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
+                style={{ background: "#1a0a2e", boxShadow: "0 4px 20px rgba(0,0,0,0.45)" }}>
+                <X size={26} color="white" strokeWidth={3} />
               </button>
               <button onClick={() => likeMutation.mutate()}
                 disabled={likeMutation.isPending || dislikeMutation.isPending}
                 data-testid="button-like-from-likes"
                 className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
-                style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", boxShadow: "0 8px 26px rgba(201,168,76,0.5)" }}>
-                <Heart size={28} color="#1a0a2e" fill="#1a0a2e" strokeWidth={2.5} />
+                style={{ background: "#1a0a2e", boxShadow: "0 4px 20px rgba(0,0,0,0.45)" }}>
+                <Heart size={26} fill="white" color="white" strokeWidth={2} />
               </button>
             </>
           ) : (
             <>
               <button onClick={handleCall} data-testid="button-videocall-user"
                 disabled={isPremium && (!match || callState !== "idle")}
-                className="w-14 h-14 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-40"
-                style={{ background: "rgba(30,15,45,0.95)", border: "1.5px solid rgba(201,168,76,0.35)", boxShadow: "0 6px 20px rgba(0,0,0,0.5)" }}>
+                className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-40"
+                style={{ background: "#1a0a2e", boxShadow: "0 4px 20px rgba(0,0,0,0.45)", border: "1.5px solid rgba(201,168,76,0.35)" }}>
                 {isPremium ? <Video size={22} color="#c9a84c" /> : <Lock size={20} color="#c9a84c" />}
               </button>
               <button onClick={handleMessage} data-testid="button-message-user"
