@@ -326,10 +326,10 @@ export default function DiscoverPage({ user }: Props) {
               const photos = current.photos ?? [];
               const photo = photos[photoIdx] ?? photos[0] ?? null;
               return (
-                <div className="relative mx-3 rounded-3xl overflow-hidden" style={{ height: "72dvh", minHeight: 480 }}>
+                <div className="relative mx-3 rounded-3xl overflow-hidden" style={{ aspectRatio: "3/4", maxHeight: "80vh" }}>
                   {photo ? (
                     <ProtectedPhoto src={photo} alt={current.fullName ?? ""}
-                      className="absolute inset-0 w-full h-full object-cover object-top"
+                      className="absolute inset-0 w-full h-full object-contain"
                       blurred={current.gender === "female" && !!current.photosBlurred} />
                   ) : (
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center"
@@ -425,12 +425,22 @@ export default function DiscoverPage({ user }: Props) {
                 </div>
               )}
 
+              {/* Caste — most prominent, top of section */}
+              {current.caste && (
+                <div className="px-4 py-4"
+                  style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.4)", borderRadius: 12 }}
+                  data-testid={`badge-caste-${current.id}`}>
+                  <p className="text-xs uppercase tracking-wider mb-1" style={{ color: "rgba(201,168,76,0.6)" }}>Caste</p>
+                  <p className="font-serif text-xl font-bold text-gold">{casteLabel(current.caste)}</p>
+                </div>
+              )}
+
               {/* Location + Age — 2-column grid */}
               {(current.city || current.country || age) && (
                 <div className="grid grid-cols-2 gap-3">
                   {(current.city || current.country) && (
                     <div className="flex items-center gap-2.5 px-3.5 py-3"
-                      style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                      style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
                       <MapPin size={15} color="#c9a84c" className="shrink-0" />
                       <span className="text-cream/85 text-xs font-medium leading-tight">
                         {[current.city, current.state, current.country].filter(Boolean).join(", ")}
@@ -439,7 +449,7 @@ export default function DiscoverPage({ user }: Props) {
                   )}
                   {age && (
                     <div className="flex items-center gap-2.5 px-3.5 py-3"
-                      style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                      style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
                       <Cake size={15} color="#c9a84c" className="shrink-0" />
                       <span className="text-cream/85 text-xs font-medium">{age} years old</span>
                     </div>
@@ -450,7 +460,7 @@ export default function DiscoverPage({ user }: Props) {
               {/* About Me */}
               {current.bio && (
                 <div className="p-4"
-                  style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                  style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
                   <div className="flex items-center gap-2 mb-2">
                     <User size={15} color="#c9a84c" />
                     <h3 className="text-white font-bold text-base">About me</h3>
@@ -462,49 +472,16 @@ export default function DiscoverPage({ user }: Props) {
               {/* Occupation */}
               {(current as any).occupation && (
                 <div className="flex items-center gap-2.5 px-4 py-3.5"
-                  style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                  style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
                   <Briefcase size={15} color="#c9a84c" className="shrink-0" />
                   <span className="text-cream/85 text-sm font-medium">{(current as any).occupation}</span>
-                </div>
-              )}
-
-              {/* Faith & Caste */}
-              {current.caste && (
-                <div className="p-4"
-                  style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                  <h3 className="text-white font-bold text-base mb-3">Faith & Caste</h3>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="px-3 py-1.5 rounded-full text-xs font-semibold"
-                      style={{ background: "rgba(201,168,76,0.18)", color: "#e8c97a", border: "1px solid rgba(201,168,76,0.35)" }}
-                      data-testid={`badge-caste-${current.id}`}>
-                      {casteLabel(current.caste)}
-                    </span>
-                    <span className="px-3 py-1.5 rounded-full text-xs font-semibold"
-                      style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.75)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                      Yezidi
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {/* General info — gender only */}
-              {current.gender && (
-                <div className="p-4"
-                  style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                  <h3 className="text-white font-bold text-base mb-3">General info</h3>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="px-3 py-1.5 rounded-full text-xs font-medium"
-                      style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.85)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                      {current.gender.charAt(0).toUpperCase() + current.gender.slice(1)}
-                    </span>
-                  </div>
                 </div>
               )}
 
               {/* Languages */}
               {(current.languages ?? []).length > 0 && (
                 <div className="p-4"
-                  style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                  style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
                   <div className="flex items-center gap-2 mb-3">
                     <MessageCircle size={15} color="#c9a84c" />
                     <h3 className="text-white font-bold text-base">Languages</h3>
@@ -523,7 +500,7 @@ export default function DiscoverPage({ user }: Props) {
               {/* Interests */}
               {((current as any).interests ?? []).length > 0 && (
                 <div className="p-4"
-                  style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                  style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
                   <h3 className="text-white font-bold text-base mb-3">Interests</h3>
                   <div className="flex flex-wrap gap-2">
                     {((current as any).interests ?? []).map((it: string) => (
@@ -548,7 +525,7 @@ export default function DiscoverPage({ user }: Props) {
               {/* Movies & TV */}
               {((current as any).moviesAndTv ?? []).length > 0 && (
                 <div className="p-4"
-                  style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                  style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
                   <h3 className="text-white font-bold text-base mb-3">Movies & TV Shows</h3>
                   <div className="flex flex-wrap gap-2">
                     {((current as any).moviesAndTv ?? []).map((title: string) => (

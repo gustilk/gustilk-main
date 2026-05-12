@@ -244,19 +244,28 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
           );
         })()}
 
+        {/* Caste — most prominent, top of section */}
+        {profile.caste && (
+          <div className="px-4 py-4"
+            style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.4)", borderRadius: 12 }}>
+            <p className="text-xs uppercase tracking-wider mb-1" style={{ color: "rgba(201,168,76,0.6)" }}>Caste</p>
+            <p className="font-serif text-xl font-bold text-gold">{casteLabel(profile.caste)}</p>
+          </div>
+        )}
+
         {/* Location + Age — 2-column grid */}
         {(location || profile.age) && (
           <div className="grid grid-cols-2 gap-3">
             {location && (
               <div className="flex items-center gap-2.5 px-3.5 py-3"
-                style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
                 <MapPin size={15} color="#c9a84c" className="shrink-0" />
                 <span className="text-cream/85 text-xs font-medium leading-tight" data-testid="text-profile-location">{location}</span>
               </div>
             )}
             {profile.age && (
               <div className="flex items-center gap-2.5 px-3.5 py-3"
-                style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
                 <Cake size={15} color="#c9a84c" className="shrink-0" />
                 <span className="text-cream/85 text-xs font-medium">{profile.age} years old</span>
               </div>
@@ -264,10 +273,10 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
           </div>
         )}
 
-        {/* About me */}
+        {/* About Me */}
         {profile.bio && (
           <div className="p-4"
-            style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+            style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
             <div className="flex items-center gap-2 mb-2">
               <User size={15} color="#c9a84c" />
               <h3 className="text-white font-bold text-base">About me</h3>
@@ -279,48 +288,16 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
         {/* Occupation */}
         {(profile as any).occupation && (
           <div className="flex items-center gap-2.5 px-4 py-3.5"
-            style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+            style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
             <Briefcase size={15} color="#c9a84c" className="shrink-0" />
             <span className="text-cream/85 text-sm font-medium">{(profile as any).occupation}</span>
-          </div>
-        )}
-
-        {/* Faith & Caste */}
-        {profile.caste && (
-          <div className="p-4"
-            style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-            <h3 className="text-white font-bold text-base mb-3">Faith & Caste</h3>
-            <div className="flex flex-wrap gap-2">
-              <span className="px-3 py-1.5 rounded-full text-xs font-semibold"
-                style={{ background: "rgba(201,168,76,0.18)", color: "#e8c97a", border: "1px solid rgba(201,168,76,0.35)" }}>
-                {casteLabel(profile.caste)}
-              </span>
-              <span className="px-3 py-1.5 rounded-full text-xs font-semibold"
-                style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.75)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                Yezidi
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* General info — gender only */}
-        {profile.gender && (
-          <div className="p-4"
-            style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-            <h3 className="text-white font-bold text-base mb-3">General info</h3>
-            <div className="flex flex-wrap gap-2">
-              <span className="px-3 py-1.5 rounded-full text-xs font-medium"
-                style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.85)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                {profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1)}
-              </span>
-            </div>
           </div>
         )}
 
         {/* Languages */}
         {(profile.languages ?? []).length > 0 && (
           <div className="p-4"
-            style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+            style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
             <div className="flex items-center gap-2 mb-3">
               <MessageCircle size={15} color="#c9a84c" />
               <h3 className="text-white font-bold text-base">Languages</h3>
@@ -339,7 +316,7 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
         {/* Interests */}
         {((profile as any).interests ?? []).length > 0 && (
           <div className="p-4"
-            style={{ background: "rgba(201,168,76,0.07)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+            style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
             <h3 className="text-white font-bold text-base mb-3">Interests</h3>
             <div className="flex flex-wrap gap-2">
               {((profile as any).interests ?? []).map((it: string) => (
