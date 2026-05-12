@@ -117,179 +117,201 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
     }
     return user.age;
   })();
+  const location = [user.city, user.state, user.country].filter(Boolean).join(", ");
+  const HEADER_H = 56;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col"
-      style={{ background: "rgba(13,6,24,0.97)" }}
-      data-testid="modal-profile-preview"
-    >
-      <div className="flex items-center justify-between px-5 pt-12 pb-3 shrink-0">
+    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: "#0d0618" }} data-testid="modal-profile-preview">
+
+      {/* Header */}
+      <div className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-5 pb-3"
+        style={{
+          background: "#0d0618",
+          paddingTop: "calc(12px + env(safe-area-inset-top))",
+          height: `calc(${HEADER_H}px + env(safe-area-inset-top))`,
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+        }}>
         <div className="flex items-center gap-2">
-          <Eye size={16} color="#c9a84c" />
+          <Eye size={15} color="#c9a84c" />
           <span className="text-gold text-sm font-semibold">{t("profile.howOthersSeeYou")}</span>
         </div>
-        <button
-          onClick={onClose}
-          data-testid="button-close-preview"
+        <button onClick={onClose} data-testid="button-close-preview"
           className="w-9 h-9 rounded-full flex items-center justify-center"
-          style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)" }}
-        >
+          style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)" }}>
           <X size={16} color="rgba(253,248,240,0.7)" />
         </button>
       </div>
 
-      <div className="flex-1 px-4 pb-8 overflow-y-auto">
-        <div
-          className="rounded-3xl overflow-hidden"
-          style={{
-            border: "1.5px solid rgba(201,168,76,0.2)",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(74,30,107,0.3)",
-          }}
-        >
-          <div
-            className="relative flex items-center justify-center"
-            style={{ height: "min(440px, 55vh)", background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}
-          >
-            {photos.length > 0 ? (
-              <img
-                src={photos[photoIdx]}
-                alt={user.fullName ?? ""}
-                className="w-full h-full object-cover"
-                data-testid="preview-main-photo"
-              />
-            ) : (
-              <div
-                className="w-28 h-28 rounded-full flex items-center justify-center text-5xl font-serif text-gold"
-                style={{ background: "rgba(201,168,76,0.12)", border: "2px solid rgba(201,168,76,0.25)" }}
-              >
+      {/* Scrollable content — same layout as Discovery */}
+      <div className="flex-1 overflow-y-auto"
+        style={{ paddingTop: `calc(${HEADER_H}px + env(safe-area-inset-top))` }}>
+
+        {/* Photo card */}
+        <div className="relative mx-3 rounded-3xl overflow-hidden" style={{ height: "72dvh", minHeight: 480 }}>
+          {photos.length > 0 ? (
+            <img src={photos[photoIdx]} alt={user.fullName ?? ""}
+              className="absolute inset-0 w-full h-full object-cover object-top"
+              data-testid="preview-main-photo" />
+          ) : (
+            <div className="absolute inset-0 w-full h-full flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}>
+              <span className="font-serif text-8xl text-gold/20">
                 {(user.fullName ?? user.firstName ?? "M").charAt(0)}
-              </div>
-            )}
-
-            {photos.length > 1 && (
-              <>
-                <button
-                  onClick={() => setPhotoIdx(i => Math.max(0, i - 1))}
-                  data-testid="button-preview-photo-prev"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center z-10"
-                  style={{ background: "rgba(13,6,24,0.6)", border: "1px solid rgba(255,255,255,0.15)" }}
-                  disabled={photoIdx === 0}
-                >
-                  <ChevronLeft size={18} color={photoIdx === 0 ? "rgba(255,255,255,0.2)" : "white"} />
-                </button>
-                <button
-                  onClick={() => setPhotoIdx(i => Math.min(photos.length - 1, i + 1))}
-                  data-testid="button-preview-photo-next"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center z-10"
-                  style={{ background: "rgba(13,6,24,0.6)", border: "1px solid rgba(255,255,255,0.15)" }}
-                  disabled={photoIdx === photos.length - 1}
-                >
-                  <ChevronRight size={18} color={photoIdx === photos.length - 1 ? "rgba(255,255,255,0.2)" : "white"} />
-                </button>
-                <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-                  {photos.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setPhotoIdx(i)}
-                      data-testid={`button-preview-dot-${i}`}
-                      className="rounded-full transition-all"
-                      style={{
-                        width: i === photoIdx ? "18px" : "6px",
-                        height: "6px",
-                        background: i === photoIdx ? "#c9a84c" : "rgba(255,255,255,0.35)",
-                      }}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-
-            <div
-              className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold"
-              style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
-              data-testid="preview-badge-caste"
-            >
-              {casteLabel(user.caste ?? "murid")}
+              </span>
             </div>
+          )}
 
-            <div className="absolute bottom-0 left-0 right-0 h-52 pointer-events-none" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.98), transparent)" }} />
-            <div className="absolute bottom-0 left-0 right-0 p-5">
-              <h2 className="font-serif text-2xl text-white font-bold leading-tight" data-testid="preview-text-name">
-                {user.fullName ?? user.firstName ?? "Member"}{age ? `, ${age}` : ""}
-              </h2>
-              {(user.city || user.country) && (
-                <div className="flex items-center gap-1.5 mt-1.5">
-                  <MapPin size={13} color="rgba(201,168,76,0.8)" />
-                  <p className="text-white/60 text-sm">{user.city}{user.state ? `, ${user.state}` : ""}{user.country ? `, ${user.country}` : ""}</p>
+          {/* Progress bars */}
+          {photos.length > 1 && (
+            <div className="absolute left-3 right-3 flex gap-1 z-20" style={{ top: 10 }}>
+              {photos.map((_, i) => (
+                <div key={i} className="flex-1 h-[3px] rounded-full overflow-hidden"
+                  style={{ background: "rgba(255,255,255,0.3)" }}>
+                  <div className="h-full rounded-full"
+                    style={{
+                      background: i <= photoIdx ? "rgba(255,255,255,0.95)" : "transparent",
+                      width: i <= photoIdx ? "100%" : "0%",
+                      transition: "width 0.15s",
+                    }} />
                 </div>
-              )}
-              {user.bio && (
-                <p className="text-white/50 text-xs mt-2 line-clamp-2 leading-relaxed">{user.bio}</p>
-              )}
-              {(user.languages ?? []).length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2.5">
-                  {(user.languages ?? []).slice(0, 3).map(lang => (
-                    <span
-                      key={lang}
-                      className="px-2 py-0.5 rounded-full text-[11px]"
-                      style={{ background: "rgba(201,168,76,0.15)", color: "rgba(201,168,76,0.9)", border: "1px solid rgba(201,168,76,0.2)" }}
-                    >
-                      {lang}
-                    </span>
-                  ))}
-                </div>
-              )}
+              ))}
             </div>
-          </div>
+          )}
 
-          <div className="p-5 space-y-4">
-            {user.occupation && (
-              <div>
-                <div className="text-xs text-cream/40 uppercase tracking-wider mb-1 font-semibold">{t("profile.occupation")}</div>
-                <p className="text-cream/70 text-sm" data-testid="preview-text-occupation">{user.occupation}</p>
-              </div>
-            )}
-            {(user.languages ?? []).length > 3 && (
-              <div>
-                <div className="text-xs text-cream/40 uppercase tracking-wider mb-2 font-semibold">{t("profile.languages")}</div>
-                <div className="flex flex-wrap gap-2">
-                  {(user.languages ?? []).map(lang => (
-                    <span
-                      key={lang}
-                      className="px-3 py-1 rounded-full text-xs"
-                      style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}
-                    >
-                      {lang}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-            <div className="flex gap-2">
-              {user.isVerified && (
-                <span
-                  className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold"
-                  style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.3)" }}
-                >
-                  <CheckCircle size={11} />
-                  {t("profile.verified")}
-                </span>
-              )}
-              {user.isPremium && (
-                <span
-                  className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold"
-                  style={{ background: "linear-gradient(135deg, #f59e0b, #f97316)", color: "white" }}
-                >
-                  <Star size={11} fill="white" />
-                  Premium
-                </span>
-              )}
+          {/* Photo count */}
+          {photos.length > 1 && (
+            <div className="absolute right-3 z-20 px-2 py-1 rounded-full text-xs"
+              style={{ top: 18, background: "rgba(13,6,24,0.55)", backdropFilter: "blur(6px)", color: "rgba(255,255,255,0.7)" }}>
+              {photoIdx + 1}/{photos.length}
             </div>
-          </div>
+          )}
+
+          {/* Tap zones */}
+          {photos.length > 1 && (
+            <>
+              <button className="absolute left-0 top-0 bottom-0 w-1/2 z-10"
+                onClick={() => setPhotoIdx(i => Math.max(0, i - 1))} />
+              <button className="absolute right-0 top-0 bottom-0 w-1/2 z-10"
+                onClick={() => setPhotoIdx(i => Math.min(photos.length - 1, i + 1))} />
+            </>
+          )}
         </div>
 
-        <p className="text-center text-cream/25 text-xs mt-4">{t("profile.previewNote")}</p>
+        {/* Sticky name + age */}
+        <div className="sticky z-20 px-5 py-3"
+          style={{ top: 0, background: "#0d0618", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          <h2 className="font-serif text-2xl text-white font-bold leading-tight" data-testid="preview-text-name">
+            {user.fullName ?? user.firstName ?? "Member"}{age ? `, ${age}` : ""}
+          </h2>
+        </div>
+
+        {/* Info cards — identical to Discovery */}
+        <div className="px-4 pt-3 pb-16 space-y-3" style={{ background: "#0d0618" }}>
+
+          {location && (
+            <div className="rounded-2xl px-4 py-3.5 flex items-center gap-3"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <MapPin size={18} color="#c9a84c" />
+              <span className="text-cream/85 text-sm font-medium">{location}</span>
+            </div>
+          )}
+
+          {user.bio && (
+            <div className="rounded-2xl p-4"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <h3 className="text-white font-bold text-base mb-2">About me</h3>
+              <p className="text-cream/75 text-sm leading-relaxed">{user.bio}</p>
+            </div>
+          )}
+
+          {user.caste && (
+            <div className="rounded-2xl p-4"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <h3 className="text-white font-bold text-base mb-3">Faith & Caste</h3>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                  style={{ background: "rgba(201,168,76,0.18)", color: "#e8c97a", border: "1px solid rgba(201,168,76,0.35)" }}
+                  data-testid="preview-badge-caste">
+                  {casteLabel(user.caste)}
+                </span>
+                <span className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                  style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.75)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  Yezidi
+                </span>
+              </div>
+            </div>
+          )}
+
+          {(() => {
+            const chips = [
+              age && `${age} years old`,
+              user.gender && user.gender.charAt(0).toUpperCase() + user.gender.slice(1),
+              (user as any).occupation,
+            ].filter(Boolean) as string[];
+            if (!chips.length) return null;
+            return (
+              <div className="rounded-2xl p-4"
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <h3 className="text-white font-bold text-base mb-3">General info</h3>
+                <div className="flex flex-wrap gap-2">
+                  {chips.map(c => (
+                    <span key={c} className="px-3 py-1.5 rounded-full text-xs font-medium"
+                      style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.85)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
+          {(user.languages ?? []).length > 0 && (
+            <div className="rounded-2xl p-4"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <h3 className="text-white font-bold text-base mb-3">Languages</h3>
+              <div className="flex flex-wrap gap-2">
+                {(user.languages ?? []).map(lang => (
+                  <span key={lang} className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                    style={{ background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.22)" }}>
+                    {lang}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {((user as any).interests ?? []).length > 0 && (
+            <div className="rounded-2xl p-4"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <h3 className="text-white font-bold text-base mb-3">Interests</h3>
+              <div className="flex flex-wrap gap-2">
+                {((user as any).interests ?? []).map((it: string) => (
+                  <span key={it} className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                    style={{ background: "rgba(123,63,160,0.18)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.25)" }}>
+                    {it}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {((user as any).moviesAndTv ?? []).length > 0 && (
+            <div className="rounded-2xl p-4"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <h3 className="text-white font-bold text-base mb-3">Movies & TV Shows</h3>
+              <div className="flex flex-wrap gap-2">
+                {((user as any).moviesAndTv ?? []).map((title: string) => (
+                  <span key={title} className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                    style={{ background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.22)" }}>
+                    🎬 {title}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <p className="text-center text-cream/25 text-xs pt-2">{t("profile.previewNote")}</p>
+        </div>
       </div>
     </div>
   );
