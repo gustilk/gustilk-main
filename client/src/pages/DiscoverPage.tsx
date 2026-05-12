@@ -409,13 +409,13 @@ export default function DiscoverPage({ user }: Props) {
                     />
                   )}
 
-                  {/* Name — centered above buttons */}
+                  {/* Name — centered above buttons (no age, shown in info section) */}
                   <div className="absolute left-0 right-0 z-20 flex justify-center pointer-events-none"
-                    style={{ bottom: 70 }}>
+                    style={{ bottom: 76 }}>
                     <h2 className="font-serif text-2xl text-white font-bold text-center px-6"
                       style={{ textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}
                       data-testid={`text-name-${current.id}`}>
-                      {current.fullName ?? current.firstName ?? "Member"}{age ? `, ${age}` : ""}
+                      {current.fullName ?? current.firstName ?? "Member"}
                     </h2>
                   </div>
 
@@ -428,11 +428,11 @@ export default function DiscoverPage({ user }: Props) {
                       data-testid="button-dislike"
                       className="flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
                       style={{
-                        width: 50, height: 50, borderRadius: "50%",
+                        width: 62, height: 62, borderRadius: "50%",
                         background: "rgba(13,6,24,0.75)",
                         border: "1.5px solid rgba(136,136,136,0.5)",
                       }}>
-                      <X size={22} color="#888888" strokeWidth={2.5} />
+                      <X size={26} color="#888888" strokeWidth={2.5} />
                     </button>
                     <button
                       onClick={() => likeMutation.mutate({ userId: current.id })}
@@ -440,11 +440,11 @@ export default function DiscoverPage({ user }: Props) {
                       data-testid="button-like"
                       className="flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
                       style={{
-                        width: 50, height: 50, borderRadius: "50%",
+                        width: 62, height: 62, borderRadius: "50%",
                         background: "rgba(13,6,24,0.75)",
                         border: "1.5px solid rgba(255,255,255,0.4)",
                       }}>
-                      <Heart size={22} fill="white" color="white" strokeWidth={2} />
+                      <Heart size={26} fill="white" color="white" strokeWidth={2} />
                     </button>
                   </div>
 
@@ -466,7 +466,7 @@ export default function DiscoverPage({ user }: Props) {
               {/* Caste — most prominent, top of section */}
               {current.caste && (
                 <div className="px-4 py-4"
-                  style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.4)", borderRadius: 12 }}
+                  style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}
                   data-testid={`badge-caste-${current.id}`}>
                   <p className="text-xs uppercase tracking-wider mb-1" style={{ color: "rgba(201,168,76,0.6)" }}>Caste</p>
                   <p className="font-serif text-xl font-bold text-gold">{casteLabel(current.caste)}</p>
