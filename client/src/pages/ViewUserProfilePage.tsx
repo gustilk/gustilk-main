@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { ArrowLeft, MessageCircle, Video, Star, Lock, MapPin, Cake, User, Briefcase, Flag, Crown, Heart, X } from "lucide-react";
+import { ArrowLeft, MessageCircle, Video, Star, Lock, Flag, Crown, Heart, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { SafeUser, MatchWithUser } from "@shared/schema";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
@@ -232,80 +232,68 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
       {/* ── Profile info cards ──────────── */}
       <div className="px-4 pt-4 pb-32 space-y-3">
 
-        {/* Active status pill */}
-        {(profile as any).activitySeenAt && (() => {
-          const hours = (Date.now() - new Date((profile as any).activitySeenAt).getTime()) / 3_600_000;
-          if (hours > 72) return null;
-          return (
-            <div className="flex items-center gap-2 px-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" style={{ boxShadow: "0 0 6px #34d399" }} />
-              <span className="text-emerald-400 text-xs font-medium">{hours < 24 ? "Active today" : "Active recently"}</span>
+        {/* Identity card */}
+        {(profile.caste || location || profile.age) && (
+          <div className="p-4" style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+            <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Identity</p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+              {profile.caste && (
+                <div>
+                  <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Caste</p>
+                  <p className="text-white text-sm font-medium">{casteLabel(profile.caste)}</p>
+                </div>
+              )}
+              {location && (
+                <div>
+                  <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Location</p>
+                  <p className="text-white text-sm font-medium leading-tight" data-testid="text-profile-location">{location}</p>
+                </div>
+              )}
+              {profile.age && (
+                <div>
+                  <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Age</p>
+                  <p className="text-white text-sm font-medium">{profile.age}</p>
+                </div>
+              )}
             </div>
-          );
-        })()}
-
-        {/* Caste — most prominent, top of section */}
-        {profile.caste && (
-          <div className="px-4 py-4"
-            style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.4)", borderRadius: 12 }}>
-            <p className="text-xs uppercase tracking-wider mb-1" style={{ color: "rgba(201,168,76,0.6)" }}>Caste</p>
-            <p className="font-serif text-xl font-bold text-gold">{casteLabel(profile.caste)}</p>
           </div>
         )}
 
-        {/* Location + Age — 2-column grid */}
-        {(location || profile.age) && (
-          <div className="grid grid-cols-2 gap-3">
-            {location && (
-              <div className="flex items-center gap-2.5 px-3.5 py-3"
-                style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                <MapPin size={15} color="#c9a84c" className="shrink-0" />
-                <span className="text-cream/85 text-xs font-medium leading-tight" data-testid="text-profile-location">{location}</span>
+        {/* About card */}
+        {(profile.bio || (profile as any).occupation || (profile as any).education) && (
+          <div className="p-4" style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+            <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>About</p>
+            {profile.bio && <p className="text-cream/75 text-sm leading-relaxed" data-testid="text-profile-bio">{profile.bio}</p>}
+            {profile.bio && ((profile as any).occupation || (profile as any).education) && (
+              <div className="my-3" style={{ height: 1, background: "rgba(255,255,255,0.08)" }} />
+            )}
+            {((profile as any).occupation || (profile as any).education) && (
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                {(profile as any).occupation && (
+                  <div>
+                    <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Occupation</p>
+                    <p className="text-white text-sm font-medium">{(profile as any).occupation}</p>
+                  </div>
+                )}
+                {(profile as any).education && (
+                  <div>
+                    <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Education</p>
+                    <p className="text-white text-sm font-medium">{(profile as any).education}</p>
+                  </div>
+                )}
               </div>
             )}
-            {profile.age && (
-              <div className="flex items-center gap-2.5 px-3.5 py-3"
-                style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                <Cake size={15} color="#c9a84c" className="shrink-0" />
-                <span className="text-cream/85 text-xs font-medium">{profile.age} years old</span>
-              </div>
-            )}
           </div>
         )}
 
-        {/* About Me */}
-        {profile.bio && (
-          <div className="p-4"
-            style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-            <div className="flex items-center gap-2 mb-2">
-              <User size={15} color="#c9a84c" />
-              <h3 className="text-white font-bold text-base">About me</h3>
-            </div>
-            <p className="text-cream/75 text-sm leading-relaxed" data-testid="text-profile-bio">{profile.bio}</p>
-          </div>
-        )}
-
-        {/* Occupation */}
-        {(profile as any).occupation && (
-          <div className="flex items-center gap-2.5 px-4 py-3.5"
-            style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-            <Briefcase size={15} color="#c9a84c" className="shrink-0" />
-            <span className="text-cream/85 text-sm font-medium">{(profile as any).occupation}</span>
-          </div>
-        )}
-
-        {/* Languages */}
+        {/* Languages card */}
         {(profile.languages ?? []).length > 0 && (
-          <div className="p-4"
-            style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-            <div className="flex items-center gap-2 mb-3">
-              <MessageCircle size={15} color="#c9a84c" />
-              <h3 className="text-white font-bold text-base">Languages</h3>
-            </div>
+          <div className="p-4" style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+            <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Languages</p>
             <div className="flex flex-wrap gap-2">
               {(profile.languages ?? []).map((lang: string) => (
                 <span key={lang} className="px-3 py-1 rounded-full text-xs font-semibold"
-                  style={{ color: "#c9a84c", border: "1px solid rgba(201,168,76,0.4)", background: "transparent" }}>
+                  style={{ color: "#ffffff", border: "1px solid rgba(201,168,76,0.4)", background: "transparent" }}>
                   {lang}
                 </span>
               ))}
@@ -313,15 +301,14 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
           </div>
         )}
 
-        {/* Interests */}
+        {/* Interests card */}
         {((profile as any).interests ?? []).length > 0 && (
-          <div className="p-4"
-            style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-            <h3 className="text-white font-bold text-base mb-3">Interests</h3>
+          <div className="p-4" style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+            <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Interests</p>
             <div className="flex flex-wrap gap-2">
               {((profile as any).interests ?? []).map((it: string) => (
                 <span key={it} className="px-3 py-1.5 rounded-full text-xs font-semibold"
-                  style={{ background: "rgba(123,63,160,0.18)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.25)" }}>
+                  style={{ color: "#ffffff", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.06)" }}>
                   {it}
                 </span>
               ))}
@@ -364,12 +351,14 @@ export default function ViewUserProfilePage({ viewer, userId }: Props) {
             </>
           ) : (
             <>
-              <button onClick={handleCall} data-testid="button-videocall-user"
-                disabled={isPremium && (!match || callState !== "idle")}
-                className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-40"
-                style={{ background: "#1a0a2e", boxShadow: "0 4px 20px rgba(0,0,0,0.45)", border: "1.5px solid rgba(201,168,76,0.35)" }}>
-                {isPremium ? <Video size={22} color="#c9a84c" /> : <Lock size={20} color="#c9a84c" />}
-              </button>
+              {isPremium && (
+                <button onClick={handleCall} data-testid="button-videocall-user"
+                  disabled={!match || callState !== "idle"}
+                  className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-40"
+                  style={{ background: "#1a0a2e", boxShadow: "0 4px 20px rgba(0,0,0,0.45)", border: "1.5px solid rgba(201,168,76,0.35)" }}>
+                  <Video size={22} color="#c9a84c" />
+                </button>
+              )}
               <button onClick={handleMessage} data-testid="button-message-user"
                 className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90"
                 style={{ background: "#1a0a2e", boxShadow: "0 4px 20px rgba(0,0,0,0.45)", border: "1.5px solid rgba(201,168,76,0.35)" }}>

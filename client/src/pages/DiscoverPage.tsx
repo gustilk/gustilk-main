@@ -455,69 +455,65 @@ export default function DiscoverPage({ user }: Props) {
             {/* ── Profile info cards ── */}
             <div className="px-4 pt-3 pb-10 space-y-3" style={{ background: "#0d0618" }}>
 
-              {/* Active status */}
-              {getActiveLabel(current.activitySeenAt) && (
-                <div className="flex items-center gap-2 px-1" data-testid={`status-active-${current.id}`}>
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" style={{ boxShadow: "0 0 6px #34d399" }} />
-                  <span className="text-emerald-400 text-xs font-medium">{getActiveLabel(current.activitySeenAt)}</span>
-                </div>
-              )}
-
-              {/* Caste — most prominent, top of section */}
-              {current.caste && (
-                <div className="px-4 py-4"
-                  style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}
+              {/* Identity card */}
+              {(current.caste || current.city || current.country || age) && (
+                <div className="p-4" style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}
                   data-testid={`badge-caste-${current.id}`}>
-                  <p className="text-xs uppercase tracking-wider mb-1" style={{ color: "rgba(201,168,76,0.6)" }}>Caste</p>
-                  <p className="font-serif text-xl font-bold text-gold">{casteLabel(current.caste)}</p>
+                  <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Identity</p>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                    {current.caste && (
+                      <div>
+                        <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Caste</p>
+                        <p className="text-white text-sm font-medium">{casteLabel(current.caste)}</p>
+                      </div>
+                    )}
+                    {(current.city || current.country) && (
+                      <div>
+                        <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Location</p>
+                        <p className="text-white text-sm font-medium leading-tight">{[current.city, current.state, current.country].filter(Boolean).join(", ")}</p>
+                      </div>
+                    )}
+                    {age && (
+                      <div>
+                        <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Age</p>
+                        <p className="text-white text-sm font-medium">{age}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
-              {/* Location + Age — 2-column grid */}
-              {(current.city || current.country || age) && (
-                <div className="grid grid-cols-2 gap-3">
-                  {(current.city || current.country) && (
-                    <div className="px-3.5 py-3"
-                      style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                      <p className="text-xs mb-1" style={{ color: "rgba(201,168,76,0.6)" }}>Location</p>
-                      <span className="text-cream/85 text-xs font-medium leading-tight">
-                        {[current.city, current.state, current.country].filter(Boolean).join(", ")}
-                      </span>
+              {/* About card */}
+              {(current.bio || (current as any).occupation || (current as any).education) && (
+                <div className="p-4" style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                  <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>About</p>
+                  {current.bio && <p className="text-cream/75 text-sm leading-relaxed">{current.bio}</p>}
+                  {current.bio && ((current as any).occupation || (current as any).education) && (
+                    <div className="my-3" style={{ height: 1, background: "rgba(255,255,255,0.08)" }} />
+                  )}
+                  {((current as any).occupation || (current as any).education) && (
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                      {(current as any).occupation && (
+                        <div>
+                          <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Occupation</p>
+                          <p className="text-white text-sm font-medium">{(current as any).occupation}</p>
+                        </div>
+                      )}
+                      {(current as any).education && (
+                        <div>
+                          <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Education</p>
+                          <p className="text-white text-sm font-medium">{(current as any).education}</p>
+                        </div>
+                      )}
                     </div>
                   )}
-                  {age && (
-                    <div className="px-3.5 py-3"
-                      style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                      <p className="text-xs mb-1" style={{ color: "rgba(201,168,76,0.6)" }}>Age</p>
-                      <span className="text-cream/85 text-xs font-medium">{age} years old</span>
-                    </div>
-                  )}
                 </div>
               )}
 
-              {/* About Me */}
-              {current.bio && (
-                <div className="p-4"
-                  style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                  <p className="text-xs mb-2" style={{ color: "rgba(201,168,76,0.6)" }}>About me</p>
-                  <p className="text-cream/75 text-sm leading-relaxed">{current.bio}</p>
-                </div>
-              )}
-
-              {/* Occupation */}
-              {(current as any).occupation && (
-                <div className="px-4 py-3"
-                  style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                  <p className="text-xs mb-1" style={{ color: "rgba(201,168,76,0.6)" }}>Occupation</p>
-                  <span className="text-cream/85 text-sm">{(current as any).occupation}</span>
-                </div>
-              )}
-
-              {/* Languages */}
+              {/* Languages card */}
               {(current.languages ?? []).length > 0 && (
-                <div className="p-4"
-                  style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                  <p className="text-xs mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Languages</p>
+                <div className="p-4" style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                  <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Languages</p>
                   <div className="flex flex-wrap gap-2">
                     {(current.languages ?? []).map((lang: string) => (
                       <span key={lang} className="px-3 py-1 rounded-full text-xs font-semibold"
@@ -529,11 +525,10 @@ export default function DiscoverPage({ user }: Props) {
                 </div>
               )}
 
-              {/* Interests */}
+              {/* Interests card */}
               {((current as any).interests ?? []).length > 0 && (
-                <div className="p-4"
-                  style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                  <p className="text-xs mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Interests</p>
+                <div className="p-4" style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+                  <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Interests</p>
                   <div className="flex flex-wrap gap-2">
                     {((current as any).interests ?? []).map((it: string) => (
                       user.isPremium ? (

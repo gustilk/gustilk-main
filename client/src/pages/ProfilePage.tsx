@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { parseApiError } from "@/lib/apiError";
-import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, MapPin, Cake, User, Briefcase, MessageCircle, ChevronLeft, Shield, AlertTriangle, XCircle, GripVertical, Trash2 } from "lucide-react";
+import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, ChevronLeft, Shield, AlertTriangle, XCircle, GripVertical, Trash2 } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, useSortable, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable";
@@ -208,69 +208,69 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
         {/* Info cards */}
         <div className="px-4 pt-3 pb-16 space-y-3" style={{ background: "#0d0618" }}>
 
-          {/* Caste — most prominent, top of section */}
-          {user.caste && (
-            <div className="px-4 py-4"
-              style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.4)", borderRadius: 12 }}
+          {/* Identity card */}
+          {(user.caste || location || age) && (
+            <div className="p-4" style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}
               data-testid="preview-badge-caste">
-              <p className="text-xs uppercase tracking-wider mb-1" style={{ color: "rgba(201,168,76,0.6)" }}>Caste</p>
-              <p className="font-serif text-xl font-bold text-gold">{casteLabel(user.caste)}</p>
-            </div>
-          )}
-
-          {/* Location + Age — 2-column grid */}
-          {(location || age) && (
-            <div className="grid grid-cols-2 gap-3">
-              {location && (
-                <div className="flex items-center gap-2.5 px-3.5 py-3"
-                  style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                  <MapPin size={15} color="#c9a84c" className="shrink-0" />
-                  <span className="text-cream/85 text-xs font-medium leading-tight">{location}</span>
-                </div>
-              )}
-              {age && (
-                <div className="flex items-center gap-2.5 px-3.5 py-3"
-                  style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                  <Cake size={15} color="#c9a84c" className="shrink-0" />
-                  <span className="text-cream/85 text-xs font-medium">{age} years old</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* About Me */}
-          {user.bio && (
-            <div className="p-4"
-              style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-              <div className="flex items-center gap-2 mb-2">
-                <User size={15} color="#c9a84c" />
-                <h3 className="text-white font-bold text-base">About me</h3>
+              <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Identity</p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                {user.caste && (
+                  <div>
+                    <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Caste</p>
+                    <p className="text-white text-sm font-medium">{casteLabel(user.caste)}</p>
+                  </div>
+                )}
+                {location && (
+                  <div>
+                    <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Location</p>
+                    <p className="text-white text-sm font-medium leading-tight">{location}</p>
+                  </div>
+                )}
+                {age && (
+                  <div>
+                    <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Age</p>
+                    <p className="text-white text-sm font-medium">{age}</p>
+                  </div>
+                )}
               </div>
-              <p className="text-cream/75 text-sm leading-relaxed">{user.bio}</p>
             </div>
           )}
 
-          {/* Occupation */}
-          {(user as any).occupation && (
-            <div className="flex items-center gap-2.5 px-4 py-3.5"
-              style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-              <Briefcase size={15} color="#c9a84c" className="shrink-0" />
-              <span className="text-cream/85 text-sm font-medium">{(user as any).occupation}</span>
+          {/* About card */}
+          {(user.bio || (user as any).occupation || (user as any).education) && (
+            <div className="p-4" style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+              <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>About</p>
+              {user.bio && <p className="text-cream/75 text-sm leading-relaxed">{user.bio}</p>}
+              {user.bio && ((user as any).occupation || (user as any).education) && (
+                <div className="my-3" style={{ height: 1, background: "rgba(255,255,255,0.08)" }} />
+              )}
+              {((user as any).occupation || (user as any).education) && (
+                <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                  {(user as any).occupation && (
+                    <div>
+                      <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Occupation</p>
+                      <p className="text-white text-sm font-medium">{(user as any).occupation}</p>
+                    </div>
+                  )}
+                  {(user as any).education && (
+                    <div>
+                      <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Education</p>
+                      <p className="text-white text-sm font-medium">{(user as any).education}</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
-          {/* Languages */}
+          {/* Languages card */}
           {(user.languages ?? []).length > 0 && (
-            <div className="p-4"
-              style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-              <div className="flex items-center gap-2 mb-3">
-                <MessageCircle size={15} color="#c9a84c" />
-                <h3 className="text-white font-bold text-base">Languages</h3>
-              </div>
+            <div className="p-4" style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+              <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Languages</p>
               <div className="flex flex-wrap gap-2">
                 {(user.languages ?? []).map(lang => (
                   <span key={lang} className="px-3 py-1 rounded-full text-xs font-semibold"
-                    style={{ color: "#c9a84c", border: "1px solid rgba(201,168,76,0.4)", background: "transparent" }}>
+                    style={{ color: "#ffffff", border: "1px solid rgba(201,168,76,0.4)", background: "transparent" }}>
                     {lang}
                   </span>
                 ))}
@@ -278,15 +278,14 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
             </div>
           )}
 
-          {/* Interests */}
+          {/* Interests card */}
           {((user as any).interests ?? []).length > 0 && (
-            <div className="p-4"
-              style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-              <h3 className="text-white font-bold text-base mb-3">Interests</h3>
+            <div className="p-4" style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
+              <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Interests</p>
               <div className="flex flex-wrap gap-2">
                 {((user as any).interests ?? []).map((it: string) => (
                   <span key={it} className="px-3 py-1.5 rounded-full text-xs font-semibold"
-                    style={{ background: "rgba(123,63,160,0.18)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.25)" }}>
+                    style={{ color: "#ffffff", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.06)" }}>
                     {it}
                   </span>
                 ))}
@@ -612,58 +611,111 @@ export default function ProfilePage({ user }: Props) {
               )}
             </div>
 
-            {/* Caste — most prominent */}
-            {me.caste && (
-              <div className="px-4 py-4"
-                style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.4)", borderRadius: 12 }}
-                data-testid="badge-caste">
-                <p className="text-xs uppercase tracking-wider mb-1" style={{ color: "rgba(201,168,76,0.6)" }}>Caste</p>
-                <p className="font-serif text-xl font-bold text-gold">{casteLabel(me.caste)}</p>
-              </div>
-            )}
-
-            {/* About Me */}
-            {me.bio && (
-              <div className="p-4"
-                style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                <div className="flex items-center gap-2 mb-2">
-                  <User size={15} color="#c9a84c" />
-                  <span className="text-white font-bold text-base">About me</span>
+            {/* Identity card */}
+            {(me.caste || me.city || me.country || me.age || (me as any).dateOfBirth) && (
+              <button className="w-full text-left p-4 transition-all active:scale-[0.99]"
+                style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}
+                onClick={() => setLocation("/profile/edit")}
+                data-testid="card-identity">
+                <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Identity</p>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                  {me.caste && (
+                    <div>
+                      <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Caste</p>
+                      <p className="text-white text-sm font-medium">{casteLabel(me.caste)}</p>
+                    </div>
+                  )}
+                  {(me.city || me.country) && (
+                    <div>
+                      <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Location</p>
+                      <p className="text-white text-sm font-medium leading-tight">{[me.city, me.state, me.country].filter(Boolean).join(", ")}</p>
+                    </div>
+                  )}
+                  {(() => {
+                    const ageVal = (me as any).dateOfBirth ? (() => {
+                      const dob = new Date((me as any).dateOfBirth);
+                      const today = new Date();
+                      let a = today.getFullYear() - dob.getFullYear();
+                      const m = today.getMonth() - dob.getMonth();
+                      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) a--;
+                      return a;
+                    })() : me.age;
+                    return ageVal ? (
+                      <div>
+                        <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Age</p>
+                        <p className="text-white text-sm font-medium">{ageVal}</p>
+                      </div>
+                    ) : null;
+                  })()}
                 </div>
-                <p className="text-cream/70 text-sm leading-relaxed" data-testid="text-bio">{me.bio}</p>
-              </div>
+              </button>
             )}
 
-            {/* Occupation */}
-            {me.occupation && (
-              <div className="flex items-center gap-2.5 px-4 py-3.5"
-                style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                <Briefcase size={15} color="#c9a84c" className="shrink-0" />
-                <span className="text-cream/85 text-sm font-medium" data-testid="text-occupation">{me.occupation}</span>
-              </div>
+            {/* About card */}
+            {(me.bio || me.occupation || (me as any).education) && (
+              <button className="w-full text-left p-4 transition-all active:scale-[0.99]"
+                style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}
+                onClick={() => setLocation("/profile/edit")}
+                data-testid="card-about">
+                <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>About</p>
+                {me.bio && <p className="text-cream/75 text-sm leading-relaxed" data-testid="text-bio">{me.bio}</p>}
+                {me.bio && (me.occupation || (me as any).education) && (
+                  <div className="my-3" style={{ height: 1, background: "rgba(255,255,255,0.08)" }} />
+                )}
+                {(me.occupation || (me as any).education) && (
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                    {me.occupation && (
+                      <div>
+                        <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Occupation</p>
+                        <p className="text-white text-sm font-medium" data-testid="text-occupation">{me.occupation}</p>
+                      </div>
+                    )}
+                    {(me as any).education && (
+                      <div>
+                        <p className="text-xs mb-0.5" style={{ color: "rgba(253,248,240,0.4)" }}>Education</p>
+                        <p className="text-white text-sm font-medium">{(me as any).education}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </button>
             )}
 
-            {/* Languages */}
+            {/* Languages card */}
             {me.languages && me.languages.length > 0 && (
-              <div className="p-4"
-                style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                <div className="flex items-center gap-2 mb-3">
-                  <MessageCircle size={15} color="#c9a84c" />
-                  <span className="text-white font-bold text-base">{t("profile.languages")}</span>
-                </div>
+              <button className="w-full text-left p-4 transition-all active:scale-[0.99]"
+                style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}
+                onClick={() => setLocation("/profile/edit")}
+                data-testid="card-languages">
+                <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Languages</p>
                 <div className="flex flex-wrap gap-2">
                   {me.languages.map(lang => (
-                    <span
-                      key={lang}
-                      className="px-3 py-1 rounded-full text-xs font-semibold"
-                      style={{ color: "#c9a84c", border: "1px solid rgba(201,168,76,0.4)", background: "transparent" }}
-                      data-testid={`badge-lang-${lang}`}
-                    >
+                    <span key={lang} className="px-3 py-1 rounded-full text-xs font-semibold"
+                      style={{ color: "#ffffff", border: "1px solid rgba(201,168,76,0.4)", background: "transparent" }}
+                      data-testid={`badge-lang-${lang}`}>
                       {lang}
                     </span>
                   ))}
                 </div>
-              </div>
+              </button>
+            )}
+
+            {/* Interests card */}
+            {(me as any).interests && ((me as any).interests as string[]).length > 0 && (
+              <button className="w-full text-left p-4 transition-all active:scale-[0.99]"
+                style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}
+                onClick={() => setLocation("/profile/edit")}
+                data-testid="card-interests">
+                <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Interests</p>
+                <div className="flex flex-wrap gap-2">
+                  {((me as any).interests as string[]).map((it: string) => (
+                    <span key={it} className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                      style={{ color: "#ffffff", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.06)" }}>
+                      {it}
+                    </span>
+                  ))}
+                </div>
+              </button>
             )}
           </div>
         </div>
