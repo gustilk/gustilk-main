@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { SlidersHorizontal, X, Heart, RotateCcw, Undo2, MessageCircle, Send } from "lucide-react";
+import { SlidersHorizontal, X, Heart, RotateCcw, Undo2, MessageCircle, Send, BadgeCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import MatchModal from "@/components/MatchModal";
@@ -409,14 +409,20 @@ export default function DiscoverPage({ user }: Props) {
                     />
                   )}
 
-                  {/* Name — left-aligned, well above buttons */}
+                  {/* Name — left-aligned, just above buttons */}
                   <div className="absolute left-4 right-4 z-20 pointer-events-none"
-                    style={{ bottom: 130 }}>
-                    <h2 className="font-serif text-2xl text-white font-bold"
-                      style={{ textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}
-                      data-testid={`text-name-${current.id}`}>
-                      {current.fullName ?? current.firstName ?? "Member"}
-                    </h2>
+                    style={{ bottom: 96 }}>
+                    <div className="flex items-center gap-2">
+                      <h2 className="font-serif text-2xl text-white font-bold"
+                        style={{ textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}
+                        data-testid={`text-name-${current.id}`}>
+                        {current.fullName ?? current.firstName ?? "Member"}
+                      </h2>
+                      {current.isVerified && (
+                        <BadgeCheck size={22} fill="#3b82f6" color="white" strokeWidth={1.5}
+                          style={{ filter: "drop-shadow(0 1px 4px rgba(59,130,246,0.5))", flexShrink: 0 }} />
+                      )}
+                    </div>
                   </div>
 
                   {/* Pass + Like buttons — centered inside photo */}
