@@ -543,31 +543,23 @@ export default function ProfilePage({ user }: Props) {
               </div>
             )}
             <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.85) 0%, transparent 60%)" }} />
-            {localSlots.some(s => s !== null) && (
-              <button
-                onClick={() => setSelectedPhotoIdx(0)}
-                className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold"
-                style={{ background: "rgba(0,0,0,0.5)", color: "white", border: "1px solid rgba(255,255,255,0.2)" }}
-              >
-                <ImagePlus size={12} />
-                Change Cover
-              </button>
-            )}
             <div className="absolute bottom-4 left-4 right-4">
               <div className="flex items-end justify-between">
-                <div>
-                  <h2 className="font-serif text-2xl text-white font-bold" data-testid="text-profile-name">{me.fullName ?? me.firstName ?? "Member"}</h2>
-                  <p className="text-white/60 text-sm">{me.city}{me.state ? `, ${me.state}` : ""}, {me.country} · {(me as any).dateOfBirth ? (() => {
-                    const dob = new Date((me as any).dateOfBirth);
-                    const today = new Date();
-                    let a = today.getFullYear() - dob.getFullYear();
-                    const m = today.getMonth() - dob.getMonth();
-                    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) a--;
-                    return a;
-                  })() : me.age}</p>
-                </div>
+                <h2 className="font-serif text-2xl text-white font-bold" data-testid="text-profile-name">
+                  {me.fullName ?? me.firstName ?? "Member"}{(() => {
+                    const a = (me as any).dateOfBirth ? (() => {
+                      const dob = new Date((me as any).dateOfBirth);
+                      const today = new Date();
+                      let age = today.getFullYear() - dob.getFullYear();
+                      const m = today.getMonth() - dob.getMonth();
+                      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+                      return age;
+                    })() : me.age;
+                    return a ? `, ${a}` : "";
+                  })()}
+                </h2>
                 <div
-                  className="px-3 py-1 rounded-full text-xs font-bold"
+                  className="px-3 py-1 rounded-full text-xs font-bold flex-shrink-0"
                   style={{ background: "rgba(201,168,76,0.9)", color: "#1a0a2e" }}
                   data-testid="badge-caste"
                 >
@@ -577,7 +569,199 @@ export default function ProfilePage({ user }: Props) {
             </div>
           </div>
 
-          <div className="p-5 space-y-3">
+          {/* ── Photo slots — directly under cover ── */}
+          <div className="px-4 pt-4 pb-3">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs text-cream/40 uppercase tracking-wider font-semibold">{t("profile.photos")}</h3>
+              {photosEdited && (
+                <button
+                  onClick={() => { setPhotoError(null); savePhotosMutation.mutate(); }}
+                  disabled={savePhotosMutation.isPending}
+                  data-testid="button-save-photos"
+                  className="px-4 py-1.5 rounded-full text-xs font-bold disabled:opacity-50"
+                  style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
+                >
+                  {savePhotosMutation.isPending ? t("profile.savingPhotos") : t("profile.savePhotos")}
+                </button>
+              )}
+            </div>
+            {photoError && (
+              <p className="text-xs mt-2 font-medium" style={{ color: "#d4608a" }}>{photoError}</p>
+            )}
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={Array.from({ length: 6 }, (_, i) => `slot-${i}`)} strategy={rectSortingStrategy}>
+                <div className="grid grid-cols-3 gap-2">
+                  {Array.from({ length: 6 }, (_, idx) => (
+                    <SortablePhotoItem
+                      key={`slot-${idx}`}
+                      id={`slot-${idx}`}
+                      slot={localSlots[idx]}
+                      idx={idx}
+                      onTap={i => setSelectedPhotoIdx(i)}
+                      onAdd={openPicker}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+            <p className="text-xs mt-2" style={{ color: "rgba(253,248,240,0.2)" }}>{t("profile.photoInstruction")}</p>
+
+            {/* Photo action sheet */}
+            {selectedPhotoIdx !== null && (
+              <div
+                className="fixed inset-0 z-[200] flex items-center justify-center px-5"
+                style={{ background: "rgba(0,0,0,0.72)" }}
+                onClick={() => setSelectedPhotoIdx(null)}
+              >
+                <div
+                  className="w-full rounded-3xl px-5 pt-5 pb-6"
+                  style={{ background: "#1a0a2e", border: "1px solid rgba(201,168,76,0.15)" }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <p className="text-center text-xs font-semibold mb-4 uppercase tracking-wider" style={{ color: "rgba(253,248,240,0.35)" }}>
+                    {selectedPhotoIdx === 0 ? "Cover Photo" : `Photo ${selectedPhotoIdx + 1}`}
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {selectedPhotoIdx === 0 ? (
+                      <button
+                        data-testid="button-replace-cover"
+                        onClick={() => { setSelectedPhotoIdx(null); openPicker(0); }}
+                        className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.98]"
+                        style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}
+                      >
+                        <Camera size={16} color="#c9a84c" />
+                        Replace Cover Photo
+                      </button>
+                    ) : (
+                      localSlots[selectedPhotoIdx]?.status === "approved" && (
+                        <button
+                          data-testid="button-set-cover"
+                          onClick={() => { setAsMain(selectedPhotoIdx!); setSelectedPhotoIdx(null); }}
+                          className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.98]"
+                          style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}
+                        >
+                          <Star size={16} color="#c9a84c" />
+                          Set as Cover Photo
+                        </button>
+                      )
+                    )}
+                    <button
+                      data-testid="button-delete-photo"
+                      onClick={() => { removePhoto(selectedPhotoIdx!); setSelectedPhotoIdx(null); }}
+                      className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.98]"
+                      style={{ background: "rgba(212,96,138,0.1)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.2)" }}
+                    >
+                      <Trash2 size={16} color="#d4608a" />
+                      Remove Photo
+                    </button>
+                    <button
+                      data-testid="button-cancel-photo-action"
+                      onClick={() => setSelectedPhotoIdx(null)}
+                      className="w-full flex items-center justify-center px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.98]"
+                      style={{ background: "rgba(255,255,255,0.04)", color: "rgba(253,248,240,0.45)" }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Pending review */}
+            {pendingSlots.length > 0 && (
+              <div className="mt-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Clock size={12} color="rgba(201,168,76,0.6)" />
+                  <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(201,168,76,0.6)" }}>
+                    Pending Admin Review
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {pendingSlots.map((slot, idx) => (
+                    <div key={idx} className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
+                      <img src={slot.url} alt={`Pending ${idx + 1}`} className="w-full h-full object-cover" style={{ filter: "brightness(0.6)" }} />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="px-2 py-1 rounded-full text-center" style={{ background: "rgba(201,168,76,0.85)" }}>
+                          <Clock size={10} color="#1a0a2e" />
+                          <p className="text-[9px] font-bold mt-0.5" style={{ color: "#1a0a2e" }}>Pending</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs mt-1.5" style={{ color: "rgba(201,168,76,0.4)" }}>
+                  These photos are under review and will appear after admin approval.
+                </p>
+              </div>
+            )}
+
+            {/* Rejected photos */}
+            {rejectedSlots.length > 0 && (
+              <div className="mt-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <XCircle size={12} color="#d4608a" />
+                  <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#d4608a" }}>
+                    Rejected Photos
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {rejectedSlots.map((slot, idx) => {
+                    const timeLeft = formatTimeLeft(slot.rejectedAt);
+                    return (
+                      <div key={idx} data-testid={`rejected-photo-${idx}`}>
+                        <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1 / 1", border: "1.5px solid rgba(212,96,138,0.4)" }}>
+                          <img
+                            src={slot.url}
+                            alt={`Rejected ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                            style={{ filter: "brightness(0.4) saturate(0.2)" }}
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center"
+                            style={{ background: "rgba(212,96,138,0.18)" }}>
+                            <XCircle size={22} color="rgba(212,96,138,0.9)" />
+                          </div>
+                        </div>
+                        {slot.reason && (
+                          <p
+                            className="text-[9px] text-center mt-1 leading-snug px-0.5 font-medium"
+                            data-testid={`text-rejection-reason-${idx}`}
+                            style={{ color: "rgba(212,96,138,0.8)" }}
+                          >
+                            {slot.reason}
+                          </p>
+                        )}
+                        {timeLeft && (
+                          <p
+                            className="flex items-center justify-center gap-0.5 text-[9px] mt-0.5 font-medium"
+                            data-testid={`text-rejection-timer-${idx}`}
+                            style={{ color: "rgba(212,96,138,0.5)" }}
+                          >
+                            <Clock size={8} />
+                            {timeLeft}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="text-xs mt-2" style={{ color: "rgba(212,96,138,0.5)" }}>
+                  These photos were removed by our admin. Use the empty slots above to upload replacements.
+                </p>
+              </div>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              data-testid="input-photo-upload"
+              onChange={handleFileChange}
+            />
+          </div>
+
+          {/* ── Info cards ── */}
+          <div className="px-4 pt-2 pb-5 space-y-3">
             {/* Status badges row */}
             <div className="flex flex-wrap gap-2">
               {me.isPremium && (
@@ -719,199 +903,6 @@ export default function ProfilePage({ user }: Props) {
             )}
           </div>
         </div>
-      </div>
-
-      {/* ── Photo Gallery ── */}
-      <div className="px-5 mt-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs text-cream/40 uppercase tracking-wider font-semibold">{t("profile.photos")}</h3>
-          {photosEdited && (
-            <button
-              onClick={() => { setPhotoError(null); savePhotosMutation.mutate(); }}
-              disabled={savePhotosMutation.isPending}
-              data-testid="button-save-photos"
-              className="px-4 py-1.5 rounded-full text-xs font-bold disabled:opacity-50"
-              style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}
-            >
-              {savePhotosMutation.isPending ? t("profile.savingPhotos") : t("profile.savePhotos")}
-            </button>
-          )}
-        </div>
-        {photoError && (
-          <p className="text-xs mt-2 font-medium" style={{ color: "#d4608a" }}>{photoError}</p>
-        )}
-
-        {/* Approved + new upload slots — drag to reorder, tap for options */}
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={Array.from({ length: 6 }, (_, i) => `slot-${i}`)} strategy={rectSortingStrategy}>
-            <div className="grid grid-cols-3 gap-2">
-              {Array.from({ length: 6 }, (_, idx) => (
-                <SortablePhotoItem
-                  key={`slot-${idx}`}
-                  id={`slot-${idx}`}
-                  slot={localSlots[idx]}
-                  idx={idx}
-                  onTap={i => setSelectedPhotoIdx(i)}
-                  onAdd={openPicker}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
-        <p className="text-xs mt-2" style={{ color: "rgba(253,248,240,0.2)" }}>{t("profile.photoInstruction")}</p>
-
-        {/* Photo action sheet */}
-        {selectedPhotoIdx !== null && (
-          <div
-            className="fixed inset-0 z-[200] flex items-center justify-center px-5"
-            style={{ background: "rgba(0,0,0,0.72)" }}
-            onClick={() => setSelectedPhotoIdx(null)}
-          >
-            <div
-              className="w-full rounded-3xl px-5 pt-5 pb-6"
-              style={{ background: "#1a0a2e", border: "1px solid rgba(201,168,76,0.15)" }}
-              onClick={e => e.stopPropagation()}
-            >
-              <p className="text-center text-xs font-semibold mb-4 uppercase tracking-wider" style={{ color: "rgba(253,248,240,0.35)" }}>
-                {selectedPhotoIdx === 0 ? "Cover Photo" : `Photo ${selectedPhotoIdx + 1}`}
-              </p>
-              <div className="flex flex-col gap-2">
-                {selectedPhotoIdx === 0 ? (
-                  <button
-                    data-testid="button-replace-cover"
-                    onClick={() => { setSelectedPhotoIdx(null); openPicker(0); }}
-                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.98]"
-                    style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}
-                  >
-                    <Camera size={16} color="#c9a84c" />
-                    Replace Cover Photo
-                  </button>
-                ) : (
-                  localSlots[selectedPhotoIdx]?.status === "approved" && (
-                    <button
-                      data-testid="button-set-cover"
-                      onClick={() => { setAsMain(selectedPhotoIdx!); setSelectedPhotoIdx(null); }}
-                      className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.98]"
-                      style={{ background: "rgba(201,168,76,0.1)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}
-                    >
-                      <Star size={16} color="#c9a84c" />
-                      Set as Cover Photo
-                    </button>
-                  )
-                )}
-                <button
-                  data-testid="button-delete-photo"
-                  onClick={() => { removePhoto(selectedPhotoIdx!); setSelectedPhotoIdx(null); }}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.98]"
-                  style={{ background: "rgba(212,96,138,0.1)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.2)" }}
-                >
-                  <Trash2 size={16} color="#d4608a" />
-                  Remove Photo
-                </button>
-                <button
-                  data-testid="button-cancel-photo-action"
-                  onClick={() => setSelectedPhotoIdx(null)}
-                  className="w-full flex items-center justify-center px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.98]"
-                  style={{ background: "rgba(255,255,255,0.04)", color: "rgba(253,248,240,0.45)" }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Pending review */}
-        {pendingSlots.length > 0 && (
-          <div className="mt-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Clock size={12} color="rgba(201,168,76,0.6)" />
-              <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(201,168,76,0.6)" }}>
-                Pending Admin Review
-              </span>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {pendingSlots.map((slot, idx) => (
-                <div key={idx} className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
-                  <img src={slot.url} alt={`Pending ${idx + 1}`} className="w-full h-full object-cover" style={{ filter: "brightness(0.6)" }} />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="px-2 py-1 rounded-full text-center" style={{ background: "rgba(201,168,76,0.85)" }}>
-                      <Clock size={10} color="#1a0a2e" />
-                      <p className="text-[9px] font-bold mt-0.5" style={{ color: "#1a0a2e" }}>Pending</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <p className="text-xs mt-1.5" style={{ color: "rgba(201,168,76,0.4)" }}>
-              These photos are under review and will appear after admin approval.
-            </p>
-          </div>
-        )}
-
-        {/* Rejected photos */}
-        {rejectedSlots.length > 0 && (
-          <div className="mt-4">
-            <div className="flex items-center gap-2 mb-2">
-              <XCircle size={12} color="#d4608a" />
-              <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#d4608a" }}>
-                Rejected Photos
-              </span>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {rejectedSlots.map((slot, idx) => {
-                const timeLeft = formatTimeLeft(slot.rejectedAt);
-                return (
-                  <div key={idx} data-testid={`rejected-photo-${idx}`}>
-                    <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "1 / 1", border: "1.5px solid rgba(212,96,138,0.4)" }}>
-                      <img
-                        src={slot.url}
-                        alt={`Rejected ${idx + 1}`}
-                        className="w-full h-full object-cover"
-                        style={{ filter: "brightness(0.4) saturate(0.2)" }}
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center"
-                        style={{ background: "rgba(212,96,138,0.18)" }}>
-                        <XCircle size={22} color="rgba(212,96,138,0.9)" />
-                      </div>
-                    </div>
-                    {slot.reason && (
-                      <p
-                        className="text-[9px] text-center mt-1 leading-snug px-0.5 font-medium"
-                        data-testid={`text-rejection-reason-${idx}`}
-                        style={{ color: "rgba(212,96,138,0.8)" }}
-                      >
-                        {slot.reason}
-                      </p>
-                    )}
-                    {timeLeft && (
-                      <p
-                        className="flex items-center justify-center gap-0.5 text-[9px] mt-0.5 font-medium"
-                        data-testid={`text-rejection-timer-${idx}`}
-                        style={{ color: "rgba(212,96,138,0.5)" }}
-                      >
-                        <Clock size={8} />
-                        {timeLeft}
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            <p className="text-xs mt-2" style={{ color: "rgba(212,96,138,0.5)" }}>
-              These photos were removed by our admin. Use the empty slots above to upload replacements.
-            </p>
-          </div>
-        )}
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          data-testid="input-photo-upload"
-          onChange={handleFileChange}
-        />
       </div>
 
       <div className="px-5 mt-5 space-y-3">
