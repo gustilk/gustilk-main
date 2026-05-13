@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { SlidersHorizontal, X, Heart, RotateCcw, MapPin, Cake, User, Briefcase, Undo2, MessageCircle, Send } from "lucide-react";
+import { SlidersHorizontal, X, Heart, RotateCcw, Undo2, MessageCircle, Send } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import MatchModal from "@/components/MatchModal";
@@ -373,11 +373,11 @@ export default function DiscoverPage({ user }: Props) {
                     <div className="absolute z-20 px-3 py-1.5"
                       style={{
                         top: 8, right: 10,
-                        background: "rgba(13,6,24,0.85)",
-                        border: "0.5px solid rgba(201,168,76,0.4)",
+                        background: "rgba(13,6,24,0.8)",
+                        border: "0.5px solid rgba(201,168,76,0.3)",
                         borderRadius: 12,
                       }}>
-                      <span className="text-xs font-semibold" style={{ color: "#c9a84c" }}>
+                      <span className="text-xs font-semibold" style={{ color: "rgba(201,168,76,0.6)" }}>
                         {casteLabel(current.caste)}
                       </span>
                     </div>
@@ -409,10 +409,10 @@ export default function DiscoverPage({ user }: Props) {
                     />
                   )}
 
-                  {/* Name — centered above buttons (no age, shown in info section) */}
-                  <div className="absolute left-0 right-0 z-20 flex justify-center pointer-events-none"
-                    style={{ bottom: 76 }}>
-                    <h2 className="font-serif text-2xl text-white font-bold text-center px-6"
+                  {/* Name — left-aligned, well above buttons */}
+                  <div className="absolute left-4 right-4 z-20 pointer-events-none"
+                    style={{ bottom: 130 }}>
+                    <h2 className="font-serif text-2xl text-white font-bold"
                       style={{ textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}
                       data-testid={`text-name-${current.id}`}>
                       {current.fullName ?? current.firstName ?? "Member"}
@@ -477,18 +477,18 @@ export default function DiscoverPage({ user }: Props) {
               {(current.city || current.country || age) && (
                 <div className="grid grid-cols-2 gap-3">
                   {(current.city || current.country) && (
-                    <div className="flex items-center gap-2.5 px-3.5 py-3"
+                    <div className="px-3.5 py-3"
                       style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                      <MapPin size={15} color="#c9a84c" className="shrink-0" />
+                      <p className="text-xs mb-1" style={{ color: "rgba(201,168,76,0.6)" }}>Location</p>
                       <span className="text-cream/85 text-xs font-medium leading-tight">
                         {[current.city, current.state, current.country].filter(Boolean).join(", ")}
                       </span>
                     </div>
                   )}
                   {age && (
-                    <div className="flex items-center gap-2.5 px-3.5 py-3"
+                    <div className="px-3.5 py-3"
                       style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                      <Cake size={15} color="#c9a84c" className="shrink-0" />
+                      <p className="text-xs mb-1" style={{ color: "rgba(201,168,76,0.6)" }}>Age</p>
                       <span className="text-cream/85 text-xs font-medium">{age} years old</span>
                     </div>
                   )}
@@ -499,20 +499,17 @@ export default function DiscoverPage({ user }: Props) {
               {current.bio && (
                 <div className="p-4"
                   style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <User size={15} color="#c9a84c" />
-                    <h3 className="text-white font-bold text-base">About me</h3>
-                  </div>
+                  <p className="text-xs mb-2" style={{ color: "rgba(201,168,76,0.6)" }}>About me</p>
                   <p className="text-cream/75 text-sm leading-relaxed">{current.bio}</p>
                 </div>
               )}
 
               {/* Occupation */}
               {(current as any).occupation && (
-                <div className="flex items-center gap-2.5 px-4 py-3.5"
+                <div className="px-4 py-3"
                   style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                  <Briefcase size={15} color="#c9a84c" className="shrink-0" />
-                  <span className="text-cream/85 text-sm font-medium">{(current as any).occupation}</span>
+                  <p className="text-xs mb-1" style={{ color: "rgba(201,168,76,0.6)" }}>Occupation</p>
+                  <span className="text-cream/85 text-sm">{(current as any).occupation}</span>
                 </div>
               )}
 
@@ -520,14 +517,11 @@ export default function DiscoverPage({ user }: Props) {
               {(current.languages ?? []).length > 0 && (
                 <div className="p-4"
                   style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <MessageCircle size={15} color="#c9a84c" />
-                    <h3 className="text-white font-bold text-base">Languages</h3>
-                  </div>
+                  <p className="text-xs mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Languages</p>
                   <div className="flex flex-wrap gap-2">
                     {(current.languages ?? []).map((lang: string) => (
                       <span key={lang} className="px-3 py-1 rounded-full text-xs font-semibold"
-                        style={{ color: "#c9a84c", border: "1px solid rgba(201,168,76,0.4)", background: "transparent" }}>
+                        style={{ color: "#ffffff", border: "1px solid rgba(201,168,76,0.4)", background: "transparent" }}>
                         {lang}
                       </span>
                     ))}
@@ -539,19 +533,19 @@ export default function DiscoverPage({ user }: Props) {
               {((current as any).interests ?? []).length > 0 && (
                 <div className="p-4"
                   style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-                  <h3 className="text-white font-bold text-base mb-3">Interests</h3>
+                  <p className="text-xs mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Interests</p>
                   <div className="flex flex-wrap gap-2">
                     {((current as any).interests ?? []).map((it: string) => (
                       user.isPremium ? (
                         <button key={it}
                           onClick={() => { setReplyTo({ topic: it, label: "interest" }); setReplyText(""); }}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
-                          style={{ background: "rgba(123,63,160,0.18)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.25)" }}>
+                          style={{ color: "#ffffff", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.06)" }}>
                           {it} <MessageCircle size={11} />
                         </button>
                       ) : (
                         <span key={it} className="px-3 py-1.5 rounded-full text-xs font-semibold"
-                          style={{ background: "rgba(123,63,160,0.18)", color: "#d4608a", border: "1px solid rgba(212,96,138,0.25)" }}>
+                          style={{ color: "#ffffff", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.06)" }}>
                           {it}
                         </span>
                       )
