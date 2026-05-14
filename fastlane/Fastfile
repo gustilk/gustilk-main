@@ -22,7 +22,7 @@ platform :ios do
       use_automatic_signing: false,
       path: "ios/App/App.xcodeproj",
       code_sign_identity: "iPhone Distribution",
-      profile_name: "gustilk AppStore"
+      profile_name: "Gustilk_Provision"
     )
 
     build_app(
