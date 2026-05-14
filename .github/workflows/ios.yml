@@ -24,18 +24,15 @@ jobs:
       - name: Build web app
         run: npm run build
 
-      - name: Install Capacitor CLI
-        run: npm install -g @capacitor/cli
-
       - name: Cap sync iOS
         run: npx cap sync ios
 
-      - name: Install CocoaPods
+      - name: Install CocoaPods dependencies
         run: |
           cd ios/App
           pod install --repo-update
 
-      - name: Setup Ruby
+      - name: Setup Ruby & Fastlane
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
@@ -44,12 +41,19 @@ jobs:
       - name: Install Fastlane
         run: gem install fastlane
 
+      - name: Decode signing certificate
+        env:
+          CERT_P12_BASE64: ${{ secrets.APPLE_SIGNING_CERTIFICATE_P12 }}
+          PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
+        run: |
+          mkdir -p signing
+          echo "$CERT_P12_BASE64" | base64 --decode > signing/cert.p12
+          echo "$PROFILE_BASE64" | base64 --decode > signing/profile.mobileprovision
+
       - name: Run Fastlane deploy
         env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          APP_STORE_CONNECT_PASSWORD: ${{ secrets.APP_STORE_CONNECT_PASSWORD }}
-          MATCH_REPO_URL: ${{ secrets.MATCH_REPO_URL }}
-          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APP_STORE_CONNECT_PASSWORD }}
+          APPLE_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_SIGNING_CERTIFICATE_PASSWORD }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
         run: fastlane ios deploy
