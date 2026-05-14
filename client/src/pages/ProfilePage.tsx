@@ -485,20 +485,20 @@ export default function ProfilePage({ user }: Props) {
           <button
             onClick={() => setPreviewOpen(true)}
             data-testid="button-preview-profile"
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold"
+            title={t("profile.preview")}
+            className="w-10 h-10 flex items-center justify-center rounded-full"
             style={{ border: "1.5px solid rgba(201,168,76,0.35)", color: "rgba(201,168,76,0.75)" }}
           >
-            <Eye size={15} />
-            {t("profile.preview")}
+            <Eye size={17} />
           </button>
           <button
             onClick={() => setLocation("/profile/edit")}
             data-testid="button-edit-profile"
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold"
+            title={t("profile.edit")}
+            className="w-10 h-10 flex items-center justify-center rounded-full"
             style={{ background: "rgba(201,168,76,0.12)", border: "1.5px solid rgba(201,168,76,0.5)", color: "#c9a84c" }}
           >
-            <Edit2 size={15} />
-            {t("profile.edit")}
+            <Edit2 size={17} />
           </button>
         </div>
       </div>
