@@ -416,7 +416,7 @@ export default function DiscoverPage({ user }: Props) {
                       <h2 className="font-serif text-2xl text-white font-bold"
                         style={{ textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}
                         data-testid={`text-name-${current.id}`}>
-                        {current.fullName ?? current.firstName ?? "Member"}
+                        {current.fullName ?? current.firstName ?? "Member"}{current.age ? `, ${current.age}` : ""}
                       </h2>
                       {current.isVerified && (
                         <div className="flex items-center justify-center rounded-full flex-shrink-0"
