@@ -901,6 +901,24 @@ export default function ProfilePage({ user }: Props) {
                 </div>
               </button>
             )}
+
+            {/* Movies & TV card */}
+            {(me as any).moviesAndTv && ((me as any).moviesAndTv as string[]).length > 0 && (
+              <button className="w-full text-left p-4 transition-all active:scale-[0.99]"
+                style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}
+                onClick={() => setLocation("/profile/edit")}
+                data-testid="card-movies-tv">
+                <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Movies &amp; TV</p>
+                <div className="flex flex-wrap gap-2">
+                  {((me as any).moviesAndTv as string[]).map((title: string) => (
+                    <span key={title} className="px-3 py-1.5 rounded-full text-xs font-semibold"
+                      style={{ color: "#ffffff", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.06)" }}>
+                      🎬 {title}
+                    </span>
+                  ))}
+                </div>
+              </button>
+            )}
           </div>
         </div>
       </div>
