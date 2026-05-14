@@ -10,8 +10,8 @@ platform :ios do
     import_certificate(
       certificate_path: "signing/cert.p12",
       certificate_password: ENV["APPLE_SIGNING_CERTIFICATE_PASSWORD"],
-      keychain_name: "build.keychain",
-      keychain_password: "temp1234"
+      keychain_name: "fastlane_tmp_keychain",
+      keychain_password: ""
     )
 
     install_provisioning_profile(
