@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { SlidersHorizontal, X, Heart, RotateCcw, Undo2, MessageCircle, Send, BadgeCheck } from "lucide-react";
+import { SlidersHorizontal, X, Heart, RotateCcw, Undo2, MessageCircle, Send, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import MatchModal from "@/components/MatchModal";
@@ -419,8 +419,10 @@ export default function DiscoverPage({ user }: Props) {
                         {current.fullName ?? current.firstName ?? "Member"}
                       </h2>
                       {current.isVerified && (
-                        <BadgeCheck size={22} fill="#3b82f6" color="white" strokeWidth={1.5}
-                          style={{ filter: "drop-shadow(0 1px 4px rgba(59,130,246,0.5))", flexShrink: 0 }} />
+                        <div className="flex items-center justify-center rounded-full flex-shrink-0"
+                          style={{ width: 22, height: 22, background: "#3b82f6", boxShadow: "0 1px 4px rgba(59,130,246,0.5)" }}>
+                          <Check size={13} color="white" strokeWidth={3} />
+                        </div>
                       )}
                     </div>
                   </div>
