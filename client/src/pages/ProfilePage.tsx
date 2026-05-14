@@ -297,11 +297,11 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
           {((user as any).moviesAndTv ?? []).length > 0 && (
             <div className="p-4"
               style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)", borderRadius: 12 }}>
-              <h3 className="text-white font-bold text-base mb-3">Movies & TV Shows</h3>
+              <p className="text-xs uppercase tracking-wider font-semibold mb-3" style={{ color: "rgba(201,168,76,0.6)" }}>Movies &amp; TV</p>
               <div className="flex flex-wrap gap-2">
                 {((user as any).moviesAndTv ?? []).map((title: string) => (
                   <span key={title} className="px-3 py-1.5 rounded-full text-xs font-semibold"
-                    style={{ background: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.22)" }}>
+                    style={{ color: "#ffffff", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.06)" }}>
                     🎬 {title}
                   </span>
                 ))}
