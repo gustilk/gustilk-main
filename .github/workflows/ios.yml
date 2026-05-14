@@ -47,8 +47,10 @@ jobs:
           PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
         run: |
           mkdir -p signing
-          echo "$CERT_P12_BASE64" | base64 --decode > signing/cert.p12
-          echo "$PROFILE_BASE64" | base64 --decode > signing/profile.mobileprovision
+          echo "$CERT_P12_BASE64" | tr -d ' \n\r' | base64 --decode > signing/cert.p12
+          echo "$PROFILE_BASE64" | tr -d ' \n\r' | base64 --decode > signing/profile.mobileprovision
+          echo "cert.p12 size: $(wc -c < signing/cert.p12) bytes"
+          echo "profile size: $(wc -c < signing/profile.mobileprovision) bytes"
 
       - name: Run Fastlane deploy
         env:
