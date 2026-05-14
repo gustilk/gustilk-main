@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { CalendarDays, MapPin, Users, ChevronLeft, ChevronRight, Plus, Edit2, Trash2 } from "lucide-react";
+import { CalendarDays, MapPin, Users, ChevronLeft, ChevronRight, Plus, Edit2, Trash2, ImagePlus, X } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
@@ -204,9 +204,22 @@ function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
   onSubmit: (data: FormData) => void;
 }) {
   const [form, setForm] = useState<FormData>(initial);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function set(key: keyof FormData, val: string) {
     setForm(f => ({ ...f, [key]: val }));
+  }
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const result = ev.target?.result;
+      if (typeof result === "string") set("imageUrl", result);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
   }
 
   const isValid = !!(form.title && form.description && form.date && form.location && form.country && form.organizer);
@@ -280,6 +293,47 @@ function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
               <span className="text-[11px] font-semibold">{opt.label}</span>
             </button>
           ))}
+        </div>
+
+        {/* Cover photo */}
+        <p className={labelCls}>Cover Photo</p>
+        <div className="mb-5">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handlePhotoChange}
+            data-testid="input-event-photo"
+          />
+          {form.imageUrl ? (
+            <div className="relative rounded-2xl overflow-hidden" style={{ height: 160 }}>
+              <img src={form.imageUrl} alt="Cover" className="w-full h-full object-cover" />
+              <button
+                onClick={() => set("imageUrl", "")}
+                className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ background: "rgba(13,6,24,0.8)", border: "1px solid rgba(255,255,255,0.2)" }}
+              >
+                <X size={14} color="rgba(253,248,240,0.8)" />
+              </button>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute bottom-2 right-2 px-3 py-1.5 rounded-full text-xs font-semibold"
+                style={{ background: "rgba(13,6,24,0.8)", border: "1px solid rgba(201,168,76,0.4)", color: "#c9a84c" }}
+              >
+                Change
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full flex flex-col items-center justify-center gap-2 rounded-2xl transition-all"
+              style={{ height: 120, background: "rgba(255,255,255,0.03)", border: "1.5px dashed rgba(201,168,76,0.25)" }}
+            >
+              <ImagePlus size={24} color="rgba(201,168,76,0.5)" />
+              <span className="text-xs font-medium" style={{ color: "rgba(253,248,240,0.35)" }}>Tap to add a cover photo</span>
+            </button>
+          )}
         </div>
 
         {/* Basic info */}
