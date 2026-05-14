@@ -98,7 +98,7 @@ export default function BottomNav() {
             key={href}
             href={href}
             onClick={() => handleNavClick(id)}
-            className="flex-1 flex flex-col items-center justify-center py-3 gap-0.5 transition-all relative"
+            className="flex-1 flex flex-col items-center justify-center py-3 transition-all relative"
             style={{ color: isActive ? "#c9a84c" : "rgba(253,248,240,0.3)" }}
             data-testid={`nav-${id}`}
           >
@@ -123,7 +123,6 @@ export default function BottomNav() {
                 </span>
               )}
             </div>
-            <span className="text-[10px] font-semibold uppercase tracking-wider truncate max-w-full px-1">{t(tKey, { defaultValue: id })}</span>
           </Link>
         );
       })}
