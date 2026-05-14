@@ -85,6 +85,8 @@ const CARD_COLUMNS = {
   bio: users.bio,
   occupation: users.occupation,
   languages: users.languages,
+  interests: users.interests,
+  moviesAndTv: users.moviesAndTv,
   mainPhotoUrl: users.mainPhotoUrl,
   photos: users.photos,
   profileVisible: users.profileVisible,
