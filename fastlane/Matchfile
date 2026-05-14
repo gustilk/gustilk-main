@@ -1,5 +1,0 @@
-git_url(ENV["MATCH_REPO_URL"])
-storage_mode("git")
-type("appstore")
-app_identifier("com.gustilk.app")
-username(ENV["APPLE_ID"])
