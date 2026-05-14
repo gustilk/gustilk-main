@@ -1,0 +1,35 @@
+default_platform(:ios)
+
+platform :ios do
+
+  desc "Sync signing certificates and profiles"
+  lane :certificates do
+    match(type: "appstore", readonly: true)
+  end
+
+  desc "Build and upload to App Store Connect"
+  lane :deploy do
+    match(type: "appstore", readonly: true)
+
+    build_app(
+      workspace: "ios/App/App.xcworkspace",
+      scheme: "App",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "gustilk.ipa",
+      export_options: {
+        provisioningProfiles: {
+          "com.gustilk.app" => "match AppStore com.gustilk.app"
+        }
+      }
+    )
+
+    upload_to_app_store(
+      skip_metadata: true,
+      skip_screenshots: true,
+      force: true
+    )
+  end
+
+end
