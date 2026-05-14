@@ -253,8 +253,8 @@ export default {
     language: "Язык",
     changeLanguage: "Изменить язык",
     deleteAccount: "Удалить аккаунт",
-    edit: "Редактировать",
-    preview: "Предпросмотр",
+    edit: "Изменить",
+    preview: "Просмотр",
     occupation: "Профессия",
     languages: "Языки",
     savePhotos: "Сохранить фото",
@@ -289,6 +289,7 @@ export default {
   nav: {
     discover: "Знакомства",
     matches: "Совпадения",
+    activity: "Активность",
     events: "Мероприятия",
     profile: "Профиль",
   },

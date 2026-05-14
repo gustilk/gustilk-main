@@ -289,6 +289,7 @@ export default {
   nav: {
     discover: "Discover",
     matches: "Matches",
+    activity: "Ակտիվություն",
     events: "Events",
     profile: "Profile",
   },

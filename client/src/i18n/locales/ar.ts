@@ -289,6 +289,7 @@ export default {
   nav: {
     discover: "اكتشاف",
     matches: "تطابقات",
+    activity: "النشاط",
     events: "فعاليات",
     profile: "الملف",
   },
