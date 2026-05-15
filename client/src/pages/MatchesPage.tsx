@@ -25,7 +25,8 @@ export default function MatchesPage({ user }: Props) {
 
   const { data, isLoading } = useQuery<{ matches: MatchWithUser[] }>({
     queryKey: ["/api/matches"],
-    refetchInterval: 60000,
+    refetchInterval: 30000,
+    staleTime: 0,
   });
 
   const allMatches = data?.matches ?? [];

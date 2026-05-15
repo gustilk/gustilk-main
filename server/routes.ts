@@ -545,8 +545,13 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // â"€â"€â"€ MATCHES â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   app.get("/api/matches", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
-    const matchList = await storage.getMatches(userId);
-    res.json({ matches: matchList });
+    try {
+      const matchList = await storage.getMatches(userId);
+      res.json({ matches: matchList });
+    } catch (err) {
+      console.error("[matches] getMatches failed for", userId, err);
+      res.status(500).json({ matches: [], error: "Failed to load matches" });
+    }
   });
 
   // â"€â"€â"€ MESSAGES â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
