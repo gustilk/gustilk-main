@@ -49,13 +49,23 @@ jobs:
       - name: Build and archive
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
         run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$ASC_KEY_CONTENT" > ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
+
           xcodebuild \
             -workspace ios/App/App.xcworkspace \
             -scheme App \
             -configuration Release \
             -archivePath $RUNNER_TEMP/App.xcarchive \
             -destination "generic/platform=iOS" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
             CODE_SIGN_STYLE=Automatic \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             archive
