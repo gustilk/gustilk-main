@@ -38,6 +38,27 @@ jobs:
           p12-file-base64: ${{ secrets.APPLE_SIGNING_CERTIFICATE_P12 }}
           p12-password: ${{ secrets.APPLE_SIGNING_CERTIFICATE_PASSWORD }}
 
+      - name: Install provisioning profile
+        env:
+          PROVISIONING_PROFILE: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
+        run: |
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          PROFILE_PATH="$HOME/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision"
+          python3 -c "
+import base64, os
+data = os.environ['PROVISIONING_PROFILE'].strip()
+decoded = base64.b64decode(data)
+with open('$HOME/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision', 'wb') as f:
+    f.write(decoded)
+print(f'Profile written: {len(decoded)} bytes')
+"
+          if [ ! -s "$PROFILE_PATH" ]; then
+            echo "ERROR: provisioning profile is empty"
+            exit 1
+          fi
+          PROFILE_UUID=$(security cms -D -i "$PROFILE_PATH" | /usr/libexec/PlistBuddy -c 'Print :UUID' /dev/stdin)
+          echo "Profile UUID: $PROFILE_UUID"
+
       - name: Set up App Store Connect API key
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
@@ -52,18 +73,18 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: |
+          PROFILE_PATH="$HOME/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision"
+          PROFILE_UUID=$(security cms -D -i "$PROFILE_PATH" | /usr/libexec/PlistBuddy -c 'Print :UUID' /dev/stdin)
+
           xcodebuild \
             -workspace ios/App/App.xcworkspace \
             -scheme App \
             -configuration Release \
             -archivePath $RUNNER_TEMP/App.xcarchive \
             -destination "generic/platform=iOS" \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8" \
-            -authenticationKeyID "$ASC_KEY_ID" \
-            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
-            CODE_SIGN_STYLE=Automatic \
+            CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            PROVISIONING_PROFILE="$PROFILE_UUID" \
             archive
 
       - name: Export IPA
@@ -72,16 +93,8 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: |
-          PROFILE_PATH=$(ls "$HOME/Library/MobileDevice/Provisioning Profiles/"*.mobileprovision 2>/dev/null | head -1)
-          echo "Found profile: $PROFILE_PATH"
-
-          if [ -z "$PROFILE_PATH" ]; then
-            echo "No provisioning profile found after archive step"
-            exit 1
-          fi
-
+          PROFILE_PATH="$HOME/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision"
           PROFILE_UUID=$(security cms -D -i "$PROFILE_PATH" | /usr/libexec/PlistBuddy -c 'Print :UUID' /dev/stdin)
-          echo "Profile UUID: $PROFILE_UUID"
 
           cat > $RUNNER_TEMP/ExportOptions.plist << PLIST
           <?xml version="1.0" encoding="UTF-8"?>
