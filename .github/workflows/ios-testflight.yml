@@ -47,6 +47,8 @@ jobs:
             "$HOME/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision"
 
       - name: Build and archive
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           xcodebuild \
             -workspace ios/App/App.xcworkspace \
@@ -55,6 +57,7 @@ jobs:
             -archivePath $RUNNER_TEMP/App.xcarchive \
             -destination "generic/platform=iOS" \
             CODE_SIGN_STYLE=Automatic \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             archive
 
       - name: Export IPA
