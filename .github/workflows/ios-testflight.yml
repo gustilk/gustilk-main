@@ -49,14 +49,7 @@ jobs:
             echo "ERROR: provisioning profile is empty"
             exit 1
           fi
-          python3 -c "
-import plistlib, sys
-data = open('$HOME/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision','rb').read()
-start = data.find(b'<?xml')
-plist = plistlib.loads(data[start:data.find(b'</plist>')+8])
-print('UUID=' + plist['UUID'])
-print('Name=' + plist['Name'])
-"
+          python3 -c "import plistlib; d=open('$HOME/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision','rb').read(); s=d.find(b'<?xml'); p=plistlib.loads(d[s:d.find(b'</plist>')+8]); print('UUID='+p['UUID']); print('Name='+p['Name'])"
 
       - name: Set up App Store Connect API key
         env:
