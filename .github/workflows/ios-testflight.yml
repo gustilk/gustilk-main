@@ -44,14 +44,7 @@ jobs:
         run: |
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
           PROFILE_PATH="$HOME/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision"
-          python3 -c "
-import base64, os
-data = os.environ['PROVISIONING_PROFILE'].strip()
-decoded = base64.b64decode(data)
-with open('$HOME/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision', 'wb') as f:
-    f.write(decoded)
-print(f'Profile written: {len(decoded)} bytes')
-"
+          python3 -c "import base64,os; data=base64.b64decode(os.environ['PROVISIONING_PROFILE'].strip()); open(os.environ['HOME']+'/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision','wb').write(data); print('Profile written:',len(data),'bytes')"
           if [ ! -s "$PROFILE_PATH" ]; then
             echo "ERROR: provisioning profile is empty"
             exit 1
