@@ -46,7 +46,7 @@ jobs:
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
 
-          echo "$CERTIFICATE_P12" | base64 --decode -o $RUNNER_TEMP/certificate.p12
+          printf '%s' "$CERTIFICATE_P12" | base64 -d > $RUNNER_TEMP/certificate.p12
           security import $RUNNER_TEMP/certificate.p12 \
             -k $KEYCHAIN_PATH \
             -P "$CERTIFICATE_PASSWORD" \
@@ -57,7 +57,7 @@ jobs:
             -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
 
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
-          echo "$PROVISIONING_PROFILE" | base64 --decode -o \
+          printf '%s' "$PROVISIONING_PROFILE" | base64 -d > \
             "$HOME/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision"
 
       - name: Build and archive
