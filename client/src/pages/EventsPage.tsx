@@ -61,6 +61,11 @@ export default function EventsPage({ user }: Props) {
     refetchInterval: 30000,
   });
 
+  const { data: pendingData } = useQuery<{ events: EventWithAttendance[] }>({
+    queryKey: ["/api/events/my-pending"],
+    refetchInterval: 60000,
+  });
+
   const attendMutation = useMutation({
     mutationFn: async ({ eventId, isAttending }: { eventId: string; isAttending: boolean }) => {
       if (isAttending) return (await apiRequest("DELETE", `/api/events/${eventId}/attend`)).json();
@@ -73,6 +78,7 @@ export default function EventsPage({ user }: Props) {
     mutationFn: async (data: FormData) => (await apiRequest("POST", "/api/events", data)).json(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/my-pending"] });
       setFormView("list");
       toast({
         title: "Event submitted for review",
@@ -93,10 +99,17 @@ export default function EventsPage({ user }: Props) {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => (await apiRequest("DELETE", `/api/events/${id}`)).json(),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/events"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events/my-pending"] });
+    },
   });
 
-  const allEvents = data?.events ?? [];
+  const approvedEvents = data?.events ?? [];
+  const myPending = (pendingData?.events ?? []).filter(
+    p => !approvedEvents.some(a => a.id === p.id)
+  );
+  const allEvents = [...myPending, ...approvedEvents];
   const filtered = activeType === "all" ? allEvents : allEvents.filter(e => e.type === activeType);
 
   if (formView === "create" || formView === "edit") {
@@ -473,13 +486,19 @@ function EventCard({ event, user, onAttend, onOpen, onEdit, onDelete, isPending 
             <span className="text-5xl">{emoji}</span>
           )}
           <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(13,6,24,0.8) 0%, transparent 60%)" }} />
-          <div className="absolute top-3 left-3">
+          <div className="absolute top-3 left-3 flex items-center gap-1.5">
             <span
               className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
               style={{ background: typeStyle.bg, color: typeStyle.text, border: `1px solid ${typeStyle.border}` }}
             >
               {event.type}
             </span>
+            {event.isCreator && !(event as any).isApproved && (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                style={{ background: "rgba(251,191,36,0.25)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.4)" }}>
+                ⏳ Pending
+              </span>
+            )}
           </div>
           <div className="absolute bottom-3 right-3 flex items-center gap-1">
             <Users size={11} color="rgba(253,248,240,0.6)" />

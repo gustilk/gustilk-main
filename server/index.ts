@@ -88,6 +88,8 @@ app.use((req, res, next) => {
     ALTER TABLE users ADD COLUMN IF NOT EXISTS interests text[] DEFAULT '{}';
     ALTER TABLE users ADD COLUMN IF NOT EXISTS movies_and_tv text[] DEFAULT '{}';
     ALTER TABLE likes ADD COLUMN IF NOT EXISTS comment text;
+    ALTER TABLE events ADD COLUMN IF NOT EXISTS is_approved boolean DEFAULT false;
+    UPDATE events SET is_approved = true WHERE creator_id IN (SELECT id FROM users WHERE is_admin = true) OR creator_id IS NULL;
   `).catch(e => console.error("[migration] column add failed:", e.message));
 
   await registerRoutes(httpServer, app);

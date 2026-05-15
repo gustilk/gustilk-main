@@ -85,6 +85,7 @@ export const events = pgTable("events", {
   imageUrl: text("image_url").default(""),
   attendeeCount: integer("attendee_count").default(0),
   creatorId: varchar("creator_id").references(() => users.id),
+  isApproved: boolean("is_approved").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

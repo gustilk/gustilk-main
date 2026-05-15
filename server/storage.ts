@@ -24,7 +24,7 @@ export interface IStorage {
   sendMessage(matchId: string, senderId: string, text: string): Promise<Message>;
   markMessagesRead(matchId: string, userId: string): Promise<void>;
 
-  listEvents(userId: string): Promise<EventWithAttendance[]>;
+  listEvents(userId: string, includeUnapproved?: boolean): Promise<EventWithAttendance[]>;
   getEvent(eventId: string, userId: string): Promise<EventWithAttendance | undefined>;
   attendEvent(eventId: string, userId: string): Promise<void>;
   unattendEvent(eventId: string, userId: string): Promise<void>;
@@ -452,12 +452,15 @@ export class DatabaseStorage implements IStorage {
     return expired.length;
   }
 
-  async listEvents(userId: string): Promise<EventWithAttendance[]> {
+  async listEvents(userId: string, includeUnapproved = false): Promise<EventWithAttendance[]> {
     // Cache the raw events list globally (same for all users), then merge per-user attendance cheaply.
-    const evtCk = "events:all";
+    const evtCk = includeUnapproved ? "events:all" : "events:approved";
     let allEvents = cacheGet<Event[]>(evtCk);
     if (!allEvents) {
-      allEvents = await db.select().from(events).orderBy(events.date);
+      const q = db.select().from(events);
+      allEvents = includeUnapproved
+        ? await q.orderBy(events.date)
+        : await q.where(eq(events.isApproved, true)).orderBy(events.date);
       cacheSet(evtCk, allEvents, TTL.EVENTS);
     }
     const attendedRows = await db.select().from(eventAttendees).where(eq(eventAttendees.userId, userId));

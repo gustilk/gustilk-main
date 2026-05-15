@@ -29,7 +29,7 @@ export async function writeAuditLog(
 let analyticsCache: { data: any; ts: number } | null = null;
 const ANALYTICS_TTL = 60 * 60 * 1000;
 
-export function registerAdminRoutes(app: Express, isAuthenticated: any, requireAdmin: any, requireSuperAdmin: any) {
+export function registerAdminRoutes(app: Express, isAuthenticated: any, requireAdmin: any, requireSuperAdmin: any, sendSupportBroadcast?: (message: string) => Promise<void>) {
 
   // ─── BLACKLIST ─────────────────────────────────────────────────────────────
   app.get("/api/admin/blacklist", isAuthenticated, requireAdmin, async (_req, res) => {
@@ -177,6 +177,13 @@ export function registerAdminRoutes(app: Express, isAuthenticated: any, requireA
     const [adminUser] = await db.select({ email: users.email }).from(users).where(eq(users.id, adminId));
     const [row] = await db.insert(announcements).values({ id: randomUUID(), ...data }).returning();
     await writeAuditLog(adminId, adminUser?.email ?? "", "announcement_create", "announcement", row.id, data.title);
+
+    // Broadcast to all users via support bot
+    if (sendSupportBroadcast) {
+      const broadcastMsg = `📢 ${data.title}\n\n${data.content}`;
+      sendSupportBroadcast(broadcastMsg).catch(e => console.error("[broadcast] failed:", e));
+    }
+
     res.json({ ok: true, announcement: row });
   });
 

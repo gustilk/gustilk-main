@@ -596,8 +596,17 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // â"€â"€â"€ EVENTS â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   app.get("/api/events", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
-    const evList = await storage.listEvents(userId);
+    const user = await storage.getUserById(userId);
+    const evList = await storage.listEvents(userId, !!user?.isAdmin);
     res.json({ events: evList });
+  });
+
+  app.get("/api/events/my-pending", isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const pending = await db.select().from(events)
+      .where(and(eq(events.creatorId, userId), eq(events.isApproved, false)))
+      .orderBy(events.date);
+    res.json({ events: pending.map(e => ({ ...e, isAttending: false, isCreator: true })) });
   });
 
   app.get("/api/events/:eventId", isAuthenticated, async (req, res) => {
@@ -621,6 +630,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.post("/api/events", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
+    const user = await storage.getUserById(userId);
     const schema = z.object({
       title: z.string().min(1), description: z.string().min(1),
       type: z.enum(["cultural", "meetup", "online"]),
@@ -629,11 +639,14 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       imageUrl: z.string().optional(),
     });
     const data = schema.parse(req.body);
+    const isApproved = !!user?.isAdmin;
     const [event] = await db.insert(events).values({
       id: randomUUID(), ...data,
       date: new Date(data.date), imageUrl: data.imageUrl ?? "",
-      attendeeCount: 0, creatorId: userId,
+      attendeeCount: 0, creatorId: userId, isApproved,
     }).returning();
+    cacheDel("events:all");
+    cacheDel("events:approved");
     res.json({ event });
   });
 
@@ -1212,6 +1225,17 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ events: allEvents });
   });
 
+  app.patch("/api/admin/events/:id/approve", isAuthenticated, requireAdmin, async (req, res) => {
+    const [event] = await db.update(events)
+      .set({ isApproved: true })
+      .where(eq(events.id, req.params.id as string))
+      .returning();
+    if (!event) return res.status(404).json({ error: "Event not found" });
+    cacheDel("events:all");
+    cacheDel("events:approved");
+    res.json({ ok: true });
+  });
+
   app.post("/api/admin/events", isAuthenticated, requireAdmin, async (req, res) => {
     const schema = z.object({
       title: z.string().min(1), description: z.string().min(1),
@@ -1223,8 +1247,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     const data = schema.parse(req.body);
     const [event] = await db.insert(events).values({
       id: randomUUID(), ...data,
-      date: new Date(data.date), imageUrl: data.imageUrl ?? "", attendeeCount: 0,
+      date: new Date(data.date), imageUrl: data.imageUrl ?? "", attendeeCount: 0, isApproved: true,
     }).returning();
+    cacheDel("events:all");
+    cacheDel("events:approved");
     res.json({ event });
   });
 
@@ -1333,7 +1359,34 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   // ─── EXTENDED ADMIN ROUTES ────────────────────────────────────────────────
-  registerAdminRoutes(app, isAuthenticated, requireAdmin, requireSuperAdmin);
+  async function broadcastSupportMessage(message: string): Promise<void> {
+    const supportAccount = await getOrCreateSupportAccount();
+    const verifiedUsers = await db.select({ id: users.id }).from(users)
+      .where(and(eq(users.isEmailVerified, true), eq(users.isSystemAccount, false)));
+    for (const { id: targetId } of verifiedUsers) {
+      if (targetId === supportAccount.id) continue;
+      try {
+        const existing = await db.select({ id: matches.id }).from(matches).where(
+          or(
+            and(eq(matches.user1Id, supportAccount.id), eq(matches.user2Id, targetId)),
+            and(eq(matches.user1Id, targetId), eq(matches.user2Id, supportAccount.id))
+          )
+        );
+        let matchId: string;
+        if (existing.length > 0) {
+          matchId = existing[0].id;
+        } else {
+          matchId = randomUUID();
+          await db.insert(matches).values({ id: matchId, user1Id: supportAccount.id, user2Id: targetId });
+        }
+        await storage.sendMessage(matchId, supportAccount.id, message);
+      } catch (e) {
+        console.error(`[broadcast] failed for user ${targetId}:`, e);
+      }
+    }
+  }
+
+  registerAdminRoutes(app, isAuthenticated, requireAdmin, requireSuperAdmin, broadcastSupportMessage);
 
   // ─── HOURLY MESSAGE EXPIRY CLEANUP ────────────────────────────────────────
   const runMsgCleanup = async () => {
