@@ -186,14 +186,14 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(201,168,76,0.12)" }}>
+      <div className="rounded-2xl overflow-x-auto" style={{ border: "1px solid rgba(201,168,76,0.12)" }}>
         {isLoading ? (
           <div className="flex items-center justify-center h-32 text-cream/40 text-sm">Loading…</div>
         ) : users.length === 0 ? (
           <div className="flex items-center justify-center h-32 text-cream/40 text-sm">No users found</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div>
+            <table className="min-w-[640px] w-full text-sm">
               <thead>
                 <tr style={{ background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(201,168,76,0.1)" }}>
                   <th className="text-left px-4 py-3 text-cream/50 font-medium text-xs">User</th>
@@ -311,6 +311,7 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
           </div>
         )}
       </div>
+
 
       {/* Pagination */}
       {totalPages > 1 && (
