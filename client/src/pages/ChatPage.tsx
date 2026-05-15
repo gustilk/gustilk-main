@@ -400,11 +400,17 @@ export default function ChatPage({ user, matchId }: Props) {
             )}
           </div>
         ) : (
-          timeline.map(item =>
-            item.kind === "message"
-              ? <MessageBubble key={`m-${item.data.id}`} msg={item.data} isMine={item.data.senderId === user.id} />
-              : <GiftBubble key={`g-${item.data.id}`} gift={item.data} isMine={item.data.senderId === user.id} viewerId={user.id} />
-          )
+          (() => {
+            const myMsgIds = timeline
+              .filter(i => i.kind === "message" && i.data.senderId === user.id)
+              .map(i => i.data.id);
+            const lastMineId = myMsgIds[myMsgIds.length - 1];
+            return timeline.map(item =>
+              item.kind === "message"
+                ? <MessageBubble key={`m-${item.data.id}`} msg={item.data} isMine={item.data.senderId === user.id} isLastMine={item.data.id === lastMineId} />
+                : <GiftBubble key={`g-${item.data.id}`} gift={item.data} isMine={item.data.senderId === user.id} viewerId={user.id} />
+            );
+          })()
         )}
         <div ref={bottomRef} />
       </div>
@@ -492,7 +498,7 @@ function msgTimeLeft(expiresAt: Date | string | null | undefined): string | null
 }
 
 // ─── Message bubble ────────────────────────────────────────────────────────
-function MessageBubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
+function MessageBubble({ msg, isMine, isLastMine }: { msg: Message; isMine: boolean; isLastMine?: boolean }) {
   const [, tick] = useState(0);
   useEffect(() => {
     if (!msg.expiresAt || msg.expired) return;
@@ -519,7 +525,7 @@ function MessageBubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
   const countdown = msgTimeLeft(msg.expiresAt);
 
   return (
-    <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+    <div className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}>
       <div className="max-w-[72%] px-4 py-2.5 rounded-2xl"
         style={isMine
           ? { background: "linear-gradient(135deg, #5a2080, #7b3fa0)", borderBottomRightRadius: "4px" }
@@ -544,6 +550,12 @@ function MessageBubble({ msg, isMine }: { msg: Message; isMine: boolean }) {
           )}
         </div>
       </div>
+      {isMine && isLastMine && (
+        <span className="text-[10px] mt-0.5 mr-1" style={{ color: msg.readAt ? "#10b981" : "rgba(253,248,240,0.25)" }}
+          data-testid={`message-read-${msg.id}`}>
+          {msg.readAt ? "✓✓ Read" : "✓ Sent"}
+        </span>
+      )}
     </div>
   );
 }

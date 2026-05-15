@@ -464,6 +464,22 @@ export function registerAdminRoutes(app: Express, isAuthenticated: any, requireA
   });
 
   // ─── NOTIFICATIONS ─────────────────────────────────────────────────────────
+  async function sendFcmPush(token: string, title: string, body: string): Promise<boolean> {
+    const serverKey = process.env.FIREBASE_SERVER_KEY;
+    if (!serverKey) return false;
+    try {
+      const r = await fetch("https://fcm.googleapis.com/fcm/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `key=${serverKey}` },
+        body: JSON.stringify({ to: token, notification: { title, body }, data: { title, body } }),
+      });
+      const json: any = await r.json();
+      return json.success === 1;
+    } catch {
+      return false;
+    }
+  }
+
   app.post("/api/admin/notifications/send", isAuthenticated, requireAdmin, async (req, res) => {
     const { title, body, segment } = z.object({
       title: z.string().min(1),
@@ -472,8 +488,24 @@ export function registerAdminRoutes(app: Express, isAuthenticated: any, requireA
     }).parse(req.body);
     const adminId = getUserId(req);
     const [adminUser] = await db.select({ email: users.email }).from(users).where(eq(users.id, adminId));
-    await writeAuditLog(adminId, adminUser?.email ?? "", "notification_send", "notification", "", `${segment}: ${title}`);
-    res.json({ ok: true, sent: true, note: "Push notification infrastructure not yet connected" });
+
+    const whereClause = segment === "premium"
+      ? and(eq(users.isPremium, true), sql`${users.pushToken} IS NOT NULL`)
+      : segment === "free"
+        ? and(eq(users.isPremium, false), sql`${users.pushToken} IS NOT NULL`)
+        : sql`${users.pushToken} IS NOT NULL`;
+
+    const targets = await db.select({ pushToken: users.pushToken }).from(users).where(whereClause);
+    const tokens = targets.map(t => t.pushToken).filter(Boolean) as string[];
+
+    let sent = 0;
+    if (process.env.FIREBASE_SERVER_KEY) {
+      const results = await Promise.all(tokens.map(t => sendFcmPush(t, title, body)));
+      sent = results.filter(Boolean).length;
+    }
+
+    await writeAuditLog(adminId, adminUser?.email ?? "", "notification_send", "notification", "", `${segment}: ${title} (${tokens.length} tokens, ${sent} sent)`);
+    res.json({ ok: true, tokens: tokens.length, sent, noKey: !process.env.FIREBASE_SERVER_KEY });
   });
 
   // ─── FEEDBACK ──────────────────────────────────────────────────────────────

@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { Lock, MessageCircle } from "lucide-react";
+import { Lock, MessageCircle, Search } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
 import type { SafeUser, MatchWithUser } from "@shared/schema";
@@ -20,6 +21,7 @@ export default function MatchesPage({ user }: Props) {
   const [, setLocation] = useLocation();
   const { t } = useTranslation();
   const isPremium = !!user.isPremium;
+  const [search, setSearch] = useState("");
 
   const { data, isLoading } = useQuery<{ matches: MatchWithUser[] }>({
     queryKey: ["/api/matches"],
@@ -29,14 +31,37 @@ export default function MatchesPage({ user }: Props) {
   const allMatches = data?.matches ?? [];
   const regularMatches = allMatches.filter(m => !m.otherUser?.isSystemAccount);
 
-  const newMatches = regularMatches.filter(m => !m.lastMessage);
-  const conversations = regularMatches.filter(m => !!m.lastMessage);
+  const q = search.toLowerCase().trim();
+  const filteredMatches = q
+    ? regularMatches.filter(m => {
+        const name = (m.otherUser?.firstName ?? m.otherUser?.fullName ?? "").toLowerCase();
+        return name.includes(q);
+      })
+    : regularMatches;
+
+  const newMatches = filteredMatches.filter(m => !m.lastMessage);
+  const conversations = filteredMatches.filter(m => !!m.lastMessage);
 
   return (
     <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>
       <div className="pt-12 pb-3 px-5">
         <h1 className="font-serif text-3xl font-bold text-gold">{t("matches.title")}</h1>
       </div>
+
+      {regularMatches.length > 0 && (
+        <div className="px-4 pb-3">
+          <div className="flex items-center gap-2 px-3 rounded-xl" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(201,168,76,0.15)" }}>
+            <Search size={14} color="rgba(201,168,76,0.5)" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search matches…"
+              className="flex-1 py-2.5 bg-transparent text-sm text-cream placeholder-cream/30 outline-none"
+              data-testid="input-search-matches"
+            />
+          </div>
+        </div>
+      )}
 
       {isLoading ? (
         <div className="flex items-center justify-center h-48">
@@ -50,6 +75,11 @@ export default function MatchesPage({ user }: Props) {
           </div>
           <h3 className="font-serif text-xl text-gold">{t("matches.noMatches")}</h3>
           <p className="text-cream/40 text-sm">{t("matches.noMatchesSub")}</p>
+        </div>
+      ) : filteredMatches.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-48 gap-3 text-center px-8">
+          <Search size={28} color="rgba(201,168,76,0.3)" />
+          <p className="text-cream/40 text-sm">No matches found for "{search}"</p>
         </div>
       ) : (
         <div>

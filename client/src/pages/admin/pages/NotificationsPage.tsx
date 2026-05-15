@@ -1,20 +1,19 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Bell, Send } from "lucide-react";
+import { Bell, Send, CheckCircle, AlertTriangle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
 import type { User } from "@shared/schema";
 
 export default function NotificationsPage({ user }: { user: User }) {
-  const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [segment, setSegment] = useState<"all" | "premium" | "free">("all");
+  const [result, setResult] = useState<{ tokens: number; sent: number; noKey: boolean } | null>(null);
 
   const sendMutation = useMutation({
     mutationFn: async () => (await apiRequest("POST", "/api/admin/notifications/send", { title, body, segment })).json(),
-    onSuccess: () => {
-      toast({ title: "Notification sent" });
+    onSuccess: (data) => {
+      setResult(data);
       setTitle(""); setBody("");
     },
   });
@@ -29,7 +28,7 @@ export default function NotificationsPage({ user }: { user: User }) {
     <div className="p-4 md:p-6 max-w-2xl mx-auto">
       <div className="mb-5">
         <h1 className="font-serif text-xl text-gold font-bold">Push Notifications</h1>
-        <p className="text-cream/40 text-xs mt-0.5">Send in-app notifications to user segments</p>
+        <p className="text-cream/40 text-xs mt-0.5">Send push notifications to user segments</p>
       </div>
 
       <div className="rounded-2xl p-5 mb-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(201,168,76,0.15)" }}>
@@ -69,12 +68,38 @@ export default function NotificationsPage({ user }: { user: User }) {
           data-testid="button-send-notification"
           className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-40"
           style={{ background: "rgba(201,168,76,0.2)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.3)" }}>
-          <Send size={14} /> Send Notification
+          <Send size={14} /> {sendMutation.isPending ? "Sending…" : "Send Notification"}
         </button>
       </div>
 
+      {result && (
+        <div className="p-4 rounded-2xl mb-4"
+          style={{ background: result.noKey ? "rgba(251,191,36,0.08)" : "rgba(16,185,129,0.08)", border: `1px solid ${result.noKey ? "rgba(251,191,36,0.2)" : "rgba(16,185,129,0.2)"}` }}>
+          {result.noKey ? (
+            <div className="flex items-start gap-2">
+              <AlertTriangle size={14} color="#fbbf24" className="flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-semibold" style={{ color: "#fbbf24" }}>No Firebase key configured</p>
+                <p className="text-xs text-cream/50 mt-0.5">
+                  Set <code className="text-gold">FIREBASE_SERVER_KEY</code> env var to enable real push delivery.
+                  Found <span className="text-cream/70 font-medium">{result.tokens}</span> device token{result.tokens !== 1 ? "s" : ""}.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-start gap-2">
+              <CheckCircle size={14} color="#10b981" className="flex-shrink-0 mt-0.5" />
+              <p className="text-xs" style={{ color: "#10b981" }}>
+                Sent to <span className="font-bold">{result.sent}</span> / {result.tokens} device{result.tokens !== 1 ? "s" : ""}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="p-4 rounded-2xl text-cream/40 text-xs" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
-        Push notification delivery requires a connected push service (Firebase/OneSignal). Currently notifications are logged in the audit trail only.
+        <p className="font-semibold text-cream/50 mb-1">Setup</p>
+        Requires <code className="text-gold/70">FIREBASE_SERVER_KEY</code> (legacy FCM server key from Firebase Console → Project Settings → Cloud Messaging). Users must have opened the app at least once with notifications enabled.
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { parseApiError } from "@/lib/apiError";
-import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, ChevronLeft, Shield, AlertTriangle, XCircle, GripVertical, Trash2 } from "lucide-react";
+import { Edit2, Star, CheckCircle, Clock, ChevronRight, X, Camera, ImagePlus, Settings, Eye, ChevronLeft, Shield, AlertTriangle, XCircle, GripVertical, Trash2, ChevronUp } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, useSortable, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable";
@@ -316,6 +316,25 @@ function ProfilePreviewModal({ user, onClose }: { user: SafeUser; onClose: () =>
   );
 }
 
+function getProfileCompleteness(me: SafeUser): { pct: number; missing: string[] } {
+  const checks: [boolean, string][] = [
+    [!!(me.fullName || me.firstName), "Full name"],
+    [!!me.caste, "Caste"],
+    [!!me.gender, "Gender"],
+    [!!me.country, "Country"],
+    [!!me.city, "City"],
+    [!!(me.age || (me as any).dateOfBirth), "Age"],
+    [!!(me.bio && me.bio.length > 10), "Bio"],
+    [!!(me.occupation && me.occupation.length > 0), "Occupation"],
+    [!!(me.languages && (me.languages as string[]).length > 0), "Languages"],
+    [!!(me.photos && (me.photos as string[]).length > 0), "Profile photo"],
+    [!!(me as any).interests && ((me as any).interests as string[]).length > 0, "Interests"],
+  ];
+  const done = checks.filter(([v]) => v);
+  const missing = checks.filter(([v]) => !v).map(([, label]) => label);
+  return { pct: Math.round((done.length / checks.length) * 100), missing };
+}
+
 interface Props { user: SafeUser }
 
 export default function ProfilePage({ user }: Props) {
@@ -383,6 +402,8 @@ export default function ProfilePage({ user }: Props) {
   });
 
   const me = data?.user ?? user;
+  const [completenessExpanded, setCompletenessExpanded] = useState(false);
+  const { pct: completePct, missing: completeMissing } = getProfileCompleteness(me);
 
   const savePhotosMutation = useMutation({
     mutationFn: async () => {
@@ -762,6 +783,47 @@ export default function ProfilePage({ user }: Props) {
 
           {/* ── Info cards ── */}
           <div className="px-4 pt-2 pb-5 space-y-3">
+            {/* Profile completeness */}
+            {completePct < 100 && (
+              <button
+                className="w-full text-left p-4 rounded-xl transition-all active:scale-[0.99]"
+                style={{ background: "rgba(13,6,24,0.8)", border: "0.5px solid rgba(201,168,76,0.3)" }}
+                onClick={() => setCompletenessExpanded(v => !v)}
+                data-testid="profile-completeness-bar"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(201,168,76,0.7)" }}>
+                    Profile Completeness
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold" style={{ color: completePct >= 80 ? "#10b981" : completePct >= 50 ? "#f59e0b" : "#ef4444" }}>
+                      {completePct}%
+                    </span>
+                    <ChevronUp size={13} color="rgba(201,168,76,0.5)"
+                      style={{ transform: completenessExpanded ? "rotate(0deg)" : "rotate(180deg)", transition: "transform 0.2s" }} />
+                  </div>
+                </div>
+                <div className="w-full rounded-full overflow-hidden" style={{ height: 6, background: "rgba(255,255,255,0.08)" }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${completePct}%`,
+                      background: completePct >= 80 ? "linear-gradient(90deg,#10b981,#34d399)" : completePct >= 50 ? "linear-gradient(90deg,#f59e0b,#fbbf24)" : "linear-gradient(90deg,#ef4444,#f87171)",
+                    }}
+                  />
+                </div>
+                {completenessExpanded && completeMissing.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {completeMissing.map(label => (
+                      <span key={label} className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                        style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }}>
+                        + {label}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </button>
+            )}
             {/* Status badges row */}
             <div className="flex flex-wrap gap-2">
               {me.isPremium && (
