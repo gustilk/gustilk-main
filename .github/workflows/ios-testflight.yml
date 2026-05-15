@@ -49,8 +49,14 @@ jobs:
             echo "ERROR: provisioning profile is empty"
             exit 1
           fi
-          PROFILE_UUID=$(security cms -D -i "$PROFILE_PATH" | /usr/libexec/PlistBuddy -c 'Print :UUID' /dev/stdin)
-          echo "Profile UUID: $PROFILE_UUID"
+          python3 -c "
+import plistlib, sys
+data = open('$HOME/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision','rb').read()
+start = data.find(b'<?xml')
+plist = plistlib.loads(data[start:data.find(b'</plist>')+8])
+print('UUID=' + plist['UUID'])
+print('Name=' + plist['Name'])
+"
 
       - name: Set up App Store Connect API key
         env:
@@ -67,7 +73,7 @@ jobs:
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: |
           PROFILE_PATH="$HOME/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision"
-          PROFILE_UUID=$(security cms -D -i "$PROFILE_PATH" | /usr/libexec/PlistBuddy -c 'Print :UUID' /dev/stdin)
+          PROFILE_UUID=$(python3 -c "import plistlib; data=open('$HOME/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision','rb').read(); start=data.find(b'<?xml'); plist=plistlib.loads(data[start:data.find(b'</plist>')+8]); print(plist['UUID'])")
 
           xcodebuild \
             -workspace ios/App/App.xcworkspace \
@@ -87,7 +93,7 @@ jobs:
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: |
           PROFILE_PATH="$HOME/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision"
-          PROFILE_UUID=$(security cms -D -i "$PROFILE_PATH" | /usr/libexec/PlistBuddy -c 'Print :UUID' /dev/stdin)
+          PROFILE_UUID=$(python3 -c "import plistlib; data=open('$HOME/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision','rb').read(); start=data.find(b'<?xml'); plist=plistlib.loads(data[start:data.find(b'</plist>')+8]); print(plist['UUID'])")
 
           cat > $RUNNER_TEMP/ExportOptions.plist << PLIST
           <?xml version="1.0" encoding="UTF-8"?>
