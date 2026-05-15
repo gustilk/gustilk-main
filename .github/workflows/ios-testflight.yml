@@ -43,8 +43,13 @@ jobs:
           PROVISIONING_PROFILE: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
         run: |
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
-          printf '%s' "$PROVISIONING_PROFILE" | base64 -d > \
-            "$HOME/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision"
+          PROFILE_PATH="$HOME/Library/MobileDevice/Provisioning Profiles/gustilk.mobileprovision"
+          echo "$PROVISIONING_PROFILE" | tr -d ' \n\r' | base64 -d > "$PROFILE_PATH"
+          echo "Profile size: $(wc -c < "$PROFILE_PATH") bytes"
+          if [ ! -s "$PROFILE_PATH" ]; then
+            echo "ERROR: provisioning profile is empty"
+            exit 1
+          fi
 
       - name: Build and archive
         env:
