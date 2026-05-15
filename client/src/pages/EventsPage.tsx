@@ -146,17 +146,15 @@ export default function EventsPage({ user }: Props) {
           <div className="flex items-center gap-2.5">
             <h1 className="font-serif text-3xl font-bold text-gold">{t("events.title")}</h1>
           </div>
-          {(user.isAdmin || user.isPremium) && (
-            <button
-              onClick={() => setFormView("create")}
-              data-testid="button-create-event"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all"
-              style={{ background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white" }}
-            >
-              <Plus size={14} />
-              Create
-            </button>
-          )}
+          <button
+            onClick={() => setFormView("create")}
+            data-testid="button-create-event"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all"
+            style={{ background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white" }}
+          >
+            <Plus size={14} />
+            Create
+          </button>
         </div>
         <p className="text-cream/40 text-sm mt-0.5 pl-0.5">{t("events.subtitle")}</p>
       </div>

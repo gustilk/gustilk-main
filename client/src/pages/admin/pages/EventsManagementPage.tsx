@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Calendar, Plus, Trash2, Edit2, X, CheckCircle, Clock } from "lucide-react";
+import { Calendar, Plus, Trash2, Edit2, X, CheckCircle, Clock, ImagePlus } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -14,6 +14,19 @@ export default function EventsManagementPage({ user }: { user: User }) {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [tab, setTab] = useState<"approved" | "pending">("pending");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const result = ev.target?.result;
+      if (typeof result === "string") setForm(p => ({ ...p, imageUrl: result }));
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }
 
   const { data, isLoading } = useQuery<{ events: Event[] }>({
     queryKey: ["/api/admin/events"],
@@ -110,9 +123,28 @@ export default function EventsManagementPage({ user }: { user: User }) {
         <input value={form.organizer} onChange={e => f("organizer", e.target.value)} placeholder="Organizer" data-testid="input-event-organizer"
           className="px-3 py-2 rounded-xl text-sm text-cream placeholder-cream/30 outline-none"
           style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }} />
-        <input value={form.imageUrl} onChange={e => f("imageUrl", e.target.value)} placeholder="Image URL (optional)" data-testid="input-event-image"
-          className="px-3 py-2 rounded-xl text-sm text-cream placeholder-cream/30 outline-none"
-          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }} />
+        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
+        {form.imageUrl ? (
+          <div className="relative rounded-xl overflow-hidden" style={{ height: 120 }}>
+            <img src={form.imageUrl} alt="Cover" className="w-full h-full object-cover" />
+            <button onClick={() => f("imageUrl", "")}
+              className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full flex items-center justify-center"
+              style={{ background: "rgba(13,6,24,0.85)" }}>
+              <X size={11} color="rgba(253,248,240,0.8)" />
+            </button>
+            <button onClick={() => fileInputRef.current?.click()}
+              className="absolute bottom-1.5 right-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+              style={{ background: "rgba(13,6,24,0.85)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.4)" }}>
+              Change
+            </button>
+          </div>
+        ) : (
+          <button onClick={() => fileInputRef.current?.click()}
+            className="w-full flex items-center justify-center gap-2 rounded-xl text-xs"
+            style={{ height: 72, background: "rgba(255,255,255,0.03)", border: "1.5px dashed rgba(201,168,76,0.2)", color: "rgba(201,168,76,0.5)" }}>
+            <ImagePlus size={14} /> Add Cover Photo
+          </button>
+        )}
         <button onClick={() => editId ? updateMutation.mutate() : createMutation.mutate()}
           disabled={createMutation.isPending || updateMutation.isPending}
           data-testid="button-submit-event"
