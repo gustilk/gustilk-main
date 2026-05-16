@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { SlidersHorizontal, X, Heart, RotateCcw, Undo2, MessageCircle, Send, Check } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import MatchModal from "@/components/MatchModal";
 import ProtectedPhoto from "@/components/ProtectedPhoto";
@@ -43,6 +43,7 @@ export default function DiscoverPage({ user }: Props) {
   const [undoState, setUndoState] = useState<UndoState | null>(null);
   const [undoProgress, setUndoProgress] = useState(100);
   const [photoIdx, setPhotoIdx] = useState(0);
+  const [photoSlideDir, setPhotoSlideDir] = useState<1 | -1>(1);
   const [fading, setFading] = useState(false);
   const [replyTo, setReplyTo] = useState<{ topic: string; label: string } | null>(null);
   const [replyText, setReplyText] = useState("");
@@ -359,24 +360,40 @@ export default function DiscoverPage({ user }: Props) {
                   onTouchEnd={(e) => {
                     if (!photoTouchRef.current.isHoriz || photos.length <= 1) return;
                     const dx = e.changedTouches[0].clientX - photoTouchRef.current.startX;
-                    if (dx < -40) setPhotoIdx(i => Math.min(photos.length - 1, i + 1));
-                    else if (dx > 40) setPhotoIdx(i => Math.max(0, i - 1));
+                    if (dx < -40) { setPhotoSlideDir(1); setPhotoIdx(i => Math.min(photos.length - 1, i + 1)); }
+                    else if (dx > 40) { setPhotoSlideDir(-1); setPhotoIdx(i => Math.max(0, i - 1)); }
                   }}
                 >
-                  {/* Photo */}
-                  {photo ? (
-                    <ProtectedPhoto src={photo} alt={current.fullName ?? ""}
-                      className="absolute inset-0 w-full h-full object-cover object-top"
-                      style={{ transition: "opacity 0.15s ease" }}
-                      blurred={current.gender === "female" && !!current.photosBlurred} />
-                  ) : (
-                    <div className="absolute inset-0 w-full h-full flex items-center justify-center"
-                      style={{ background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}>
-                      <span className="font-serif text-8xl text-gold/20">
-                        {(current.fullName ?? current.firstName ?? "M").charAt(0)}
-                      </span>
-                    </div>
-                  )}
+                  {/* Photo — animated slide between photos */}
+                  <AnimatePresence initial={false} custom={photoSlideDir}>
+                    <motion.div
+                      key={`${current.id}-${photoIdx}`}
+                      custom={photoSlideDir}
+                      variants={{
+                        enter: (dir: number) => ({ x: `${dir * 100}%`, opacity: 0.6 }),
+                        center: { x: 0, opacity: 1 },
+                        exit: (dir: number) => ({ x: `${dir * -100}%`, opacity: 0.6 }),
+                      }}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{ duration: 0.22, ease: "easeOut" }}
+                      className="absolute inset-0"
+                    >
+                      {photo ? (
+                        <ProtectedPhoto src={photo} alt={current.fullName ?? ""}
+                          className="absolute inset-0 w-full h-full object-cover object-top"
+                          blurred={current.gender === "female" && !!current.photosBlurred} />
+                      ) : (
+                        <div className="absolute inset-0 w-full h-full flex items-center justify-center"
+                          style={{ background: "linear-gradient(135deg, #2d0f4a, #4a1e6b, #7b3fa0)" }}>
+                          <span className="font-serif text-8xl text-gold/20">
+                            {(current.fullName ?? current.firstName ?? "M").charAt(0)}
+                          </span>
+                        </div>
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
 
                   {/* Bottom gradient for name/button readability */}
                   <div className="absolute inset-0 pointer-events-none"
@@ -422,10 +439,13 @@ export default function DiscoverPage({ user }: Props) {
                       onClick={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         const x = e.clientX - rect.left;
-                        if (x < rect.width / 3)
+                        if (x < rect.width / 3) {
+                          setPhotoSlideDir(-1);
                           setPhotoIdx(i => Math.max(0, i - 1));
-                        else if (x > (rect.width * 2) / 3)
+                        } else if (x > (rect.width * 2) / 3) {
+                          setPhotoSlideDir(1);
                           setPhotoIdx(i => Math.min(photos.length - 1, i + 1));
+                        }
                       }}
                     />
                   )}
