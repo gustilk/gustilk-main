@@ -60,10 +60,21 @@ export default function DiscoverPage({ user }: Props) {
       const res = await fetch(`/api/discover?${params}`, { credentials: "include" });
       return res.json();
     },
+    refetchInterval: 60_000,
+    staleTime: 30_000,
   });
 
   const profiles = (data?.profiles ?? []).filter(p => p.id !== user.id);
   const current = profiles[currentIndex];
+
+  const prevProfileCount = useRef(0);
+  useEffect(() => {
+    const newCount = profiles.length;
+    if (newCount > prevProfileCount.current && currentIndex >= prevProfileCount.current && prevProfileCount.current > 0) {
+      setCurrentIndex(prevProfileCount.current);
+    }
+    prevProfileCount.current = newCount;
+  }, [profiles.length]);
 
   useEffect(() => {
     if (current && current.id !== lastVisitedId.current) {
