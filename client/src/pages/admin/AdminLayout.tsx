@@ -298,7 +298,7 @@ export default function AdminLayout({ user }: { user: User }) {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile top bar */}
-        <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b flex-shrink-0" style={{ borderColor: "rgba(201,168,76,0.15)" }}>
+        <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b flex-shrink-0" style={{ borderColor: "rgba(201,168,76,0.15)", paddingTop: "calc(12px + env(safe-area-inset-top))" }}>
           <button onClick={() => setSidebarOpen(true)} className="text-cream/60 hover:text-cream" data-testid="button-admin-menu">
             <Menu size={20} />
           </button>
