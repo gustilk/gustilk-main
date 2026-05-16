@@ -538,7 +538,7 @@ function MessageBubble({ msg, isMine, isLastMine }: { msg: Message; isMine: bool
       <div className="max-w-[72%] px-4 py-2.5 rounded-2xl"
         style={isMine
           ? { background: "linear-gradient(135deg, #5a2080, #7b3fa0)", borderBottomRightRadius: "4px" }
-          : { background: "rgba(255,255,255,0.07)", border: "1px solid rgba(201,168,76,0.15)", borderBottomLeftRadius: "4px" }
+          : { background: "linear-gradient(135deg, #3a1428, #5c2040)", border: "1px solid rgba(212,96,138,0.25)", borderBottomLeftRadius: "4px" }
         }
         data-testid={`message-bubble-${msg.id}`}>
         <p className="text-cream text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
