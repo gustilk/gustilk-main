@@ -103,7 +103,7 @@ export default function BottomNav() {
             data-testid={`nav-${id}`}
           >
             <div className="relative">
-              <Icon size={20} strokeWidth={isActive ? 2 : 1.5} />
+              <Icon size={26} strokeWidth={isActive ? 2 : 1.5} />
               {isMatches && unreadCount > 0 && (
                 <span
                   className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"

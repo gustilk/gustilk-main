@@ -18,6 +18,11 @@ body {
   width: 100%;
   -webkit-text-size-adjust: 100%;
   background-color: #0d0618;
+  scrollbar-width: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
 }
 
 #root {
