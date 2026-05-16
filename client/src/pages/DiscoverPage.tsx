@@ -51,6 +51,7 @@ export default function DiscoverPage({ user }: Props) {
   const undoStartRef = useRef<number>(0);
   const lastVisitedId = useRef<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const photoTouchRef = useRef<{ startX: number; startY: number; isHoriz: boolean | null }>({ startX: 0, startY: 0, isHoriz: null });
 
   const { data, isLoading } = useQuery<{ profiles: SafeUser[] }>({
     queryKey: ["/api/discover", minAge, maxAge, country],
@@ -343,11 +344,29 @@ export default function DiscoverPage({ user }: Props) {
                     borderRadius: 16,
                     height: "calc(100dvh - 56px - env(safe-area-inset-top) - 62px - env(safe-area-inset-bottom) - 16px)",
                   }}
+                  onTouchStart={(e) => {
+                    photoTouchRef.current = { startX: e.touches[0].clientX, startY: e.touches[0].clientY, isHoriz: null };
+                  }}
+                  onTouchMove={(e) => {
+                    const dx = Math.abs(e.touches[0].clientX - photoTouchRef.current.startX);
+                    const dy = Math.abs(e.touches[0].clientY - photoTouchRef.current.startY);
+                    if (photoTouchRef.current.isHoriz === null && (dx > 6 || dy > 6)) {
+                      photoTouchRef.current.isHoriz = dx > dy;
+                    }
+                    if (photoTouchRef.current.isHoriz) e.preventDefault();
+                  }}
+                  onTouchEnd={(e) => {
+                    if (!photoTouchRef.current.isHoriz || photos.length <= 1) return;
+                    const dx = e.changedTouches[0].clientX - photoTouchRef.current.startX;
+                    if (dx < -40) setPhotoIdx(i => Math.min(photos.length - 1, i + 1));
+                    else if (dx > 40) setPhotoIdx(i => Math.max(0, i - 1));
+                  }}
                 >
                   {/* Photo */}
                   {photo ? (
                     <ProtectedPhoto src={photo} alt={current.fullName ?? ""}
                       className="absolute inset-0 w-full h-full object-cover object-top"
+                      style={{ transition: "opacity 0.15s ease" }}
                       blurred={current.gender === "female" && !!current.photosBlurred} />
                   ) : (
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center"
@@ -394,24 +413,14 @@ export default function DiscoverPage({ user }: Props) {
                     </div>
                   )}
 
-                  {/* Photo nav — drag or tap thirds */}
+                  {/* Photo nav — tap left/right third */}
                   {photos.length > 1 && (
-                    <motion.div
+                    <div
                       className="absolute inset-0 z-10"
-                      drag="x"
-                      dragConstraints={{ left: 0, right: 0 }}
-                      dragElastic={0.15}
-                      style={{ touchAction: "pan-y" }}
-                      onDragEnd={(_, info) => {
-                        if (info.offset.x < -50)
-                          setPhotoIdx(i => Math.min(photos.length - 1, i + 1));
-                        else if (info.offset.x > 50)
-                          setPhotoIdx(i => Math.max(0, i - 1));
-                      }}
-                      onTap={(e) => {
-                        const el = e.target as HTMLElement;
-                        const rect = el.getBoundingClientRect();
-                        const x = (e as PointerEvent).clientX - rect.left;
+                      style={{ touchAction: "none" }}
+                      onClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
                         if (x < rect.width / 3)
                           setPhotoIdx(i => Math.max(0, i - 1));
                         else if (x > (rect.width * 2) / 3)
