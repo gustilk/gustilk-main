@@ -451,6 +451,7 @@ export default function SettingsPage({ user }: Props) {
         icon={Lightbulb}
         placeholder={t("settings.featureRequestPlaceholder")}
         messagePrefix="FEATURE REQUEST: "
+        emailMode
         supportMatch={supportMatch}
         onBack={() => setSubScreen(null)}
         onNavigate={(url) => setLocation(url)}
@@ -886,11 +887,12 @@ function FaqSubScreen({ onBack }: { onBack: () => void }) {
   );
 }
 
-function FeedbackSubScreen({ title, icon: Icon, placeholder, messagePrefix, supportMatch, onBack, onNavigate }: {
+function FeedbackSubScreen({ title, icon: Icon, placeholder, messagePrefix, emailMode, supportMatch, onBack, onNavigate }: {
   title: string;
   icon: any;
   placeholder: string;
   messagePrefix: string;
+  emailMode?: boolean;
   supportMatch: any;
   onBack: () => void;
   onNavigate: (url: string) => void;
@@ -901,6 +903,10 @@ function FeedbackSubScreen({ title, icon: Icon, placeholder, messagePrefix, supp
 
   const sendMutation = useMutation({
     mutationFn: async () => {
+      if (emailMode) {
+        await apiRequest("POST", "/api/feature-request", { message: `${messagePrefix}${text.trim()}` });
+        return null;
+      }
       let matchId = supportMatch?.id as string | undefined;
       if (!matchId) {
         const r = await apiRequest("POST", "/api/support/start");
@@ -911,6 +917,11 @@ function FeedbackSubScreen({ title, icon: Icon, placeholder, messagePrefix, supp
       return matchId as string;
     },
     onSuccess: (matchId) => {
+      if (emailMode) {
+        setText("");
+        toast({ title: "Request sent!", description: "Thank you — we'll review your suggestion." });
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
       toast({ title: "Message sent!", description: "We'll get back to you in the support chat." });
       onNavigate(`/chat/${matchId}?support=1&from=settings`);

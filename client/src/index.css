@@ -34,6 +34,11 @@ body::-webkit-scrollbar {
   -webkit-tap-highlight-color: transparent;
   box-sizing: border-box;
   touch-action: pan-x pan-y pinch-zoom;
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
 }
 
 /* LIGHT MODE */

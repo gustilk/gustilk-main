@@ -107,7 +107,7 @@ export default function ChatPage({ user, matchId }: Props) {
   const [showReport, setShowReport] = useState(false);
   const [showGiftPicker, setShowGiftPicker] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const { startCall, callState } = useVideoCallContext();
+  const { startCall, callState, wsConnected } = useVideoCallContext();
 
   const [location] = useLocation();
   const _qs = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
@@ -197,7 +197,7 @@ export default function ChatPage({ user, matchId }: Props) {
 
   if (!user.isPremium && !isSupportChat && !matchLoading && !matchFetching) {
     return (
-      <div className="flex flex-col h-screen" style={{ background: "#0d0618" }}>
+      <div className="flex flex-col" style={{ height: "100dvh", background: "#0d0618" }}>
         <div className="flex items-center gap-3 px-4 pt-12 pb-3"
           style={{ background: "rgba(13,6,24,0.97)", borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
           <button onClick={() => setLocation(backTo)} data-testid="button-back" className="text-cream/60">
@@ -246,7 +246,7 @@ export default function ChatPage({ user, matchId }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: "#0d0618" }}>
+    <div className="flex flex-col" style={{ height: "100dvh", background: "#0d0618" }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-12 pb-3"
         style={{ background: "rgba(13,6,24,0.97)", borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
@@ -327,6 +327,15 @@ export default function ChatPage({ user, matchId }: Props) {
           </div>
         )}
       </div>
+
+      {/* Reconnecting indicator — shown when the signaling WebSocket drops */}
+      {!wsConnected && (
+        <div className="flex items-center justify-center gap-2 py-1.5 text-xs"
+          style={{ background: "rgba(239,68,68,0.12)", borderBottom: "1px solid rgba(239,68,68,0.2)" }}>
+          <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#f87171" }} />
+          <span style={{ color: "rgba(248,113,113,0.85)" }}>Reconnecting…</span>
+        </div>
+      )}
 
       {/* Timeline */}
       <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">

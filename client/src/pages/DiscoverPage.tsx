@@ -205,7 +205,7 @@ export default function DiscoverPage({ user }: Props) {
   const isPending = likeMutation.isPending || dislikeMutation.isPending;
 
   return (
-    <div className="relative h-screen overflow-hidden" style={{ background: "#0d0618" }}>
+    <div className="relative overflow-hidden" style={{ background: "#0d0618", height: "100dvh" }}>
 
       {/* Lottie overlay */}
       {swipeAnim && (
@@ -302,6 +302,7 @@ export default function DiscoverPage({ user }: Props) {
           opacity: fading ? 0 : 1,
           transition: "opacity 0.25s ease",
           paddingTop: "calc(56px + env(safe-area-inset-top))",
+          paddingBottom: "calc(62px + env(safe-area-inset-bottom))",
         }}
       >
         {isLoading ? (
@@ -311,7 +312,7 @@ export default function DiscoverPage({ user }: Props) {
           </div>
         ) : !current ? (
           <div className="flex flex-col items-center justify-center gap-5 text-center px-8"
-            style={{ minHeight: "calc(100dvh - 56px - 62px - env(safe-area-inset-top) - env(safe-area-inset-bottom))" }}>
+            style={{ height: "calc(100dvh - 56px - 62px - env(safe-area-inset-top) - env(safe-area-inset-bottom))" }}>
             <div className="w-20 h-20 rounded-full flex items-center justify-center"
               style={{ background: "rgba(201,168,76,0.08)", border: "2px solid rgba(201,168,76,0.3)" }}>
               <Heart size={32} color="#c9a84c" />

@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupSession, registerAuthRoutes, isAuthenticated, sessionMiddleware } from "./auth";
+import { uploadBase64Photo, downloadPhoto } from "./photoStorage";
 import { profileUpdateSchema, privacySettingsSchema, users, matches, messages, events, eventAttendees, magicLinkTokens } from "@shared/schema";
 import { verifyCountryFromRequest, verifyIraqFromRequest, getClientIp, lookupIpCountry } from "./geo";
 import { setupWs } from "./ws";
@@ -10,9 +11,9 @@ import { z } from "zod";
 import { checkFacePresent } from "./moderation";
 import { db } from "./db";
 import { cacheDel } from "./cache";
-import { count, sql, eq, asc, desc, or, and, ilike, isNotNull } from "drizzle-orm";
+import { count, sql, eq, asc, desc, or, and, ilike, isNotNull, isNull, ne, inArray } from "drizzle-orm";
 import { randomUUID, randomBytes } from "crypto";
-import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail, sendAdminApprovalNeededEmail } from "./email";
+import { sendMagicLinkEmail, sendPhotoApprovedEmail, sendPhotoRejectedEmail, sendAccountDeletedEmail, sendSupportMessageAlertEmail, sendAdminApprovalNeededEmail, sendFeatureRequestEmail } from "./email";
 import { registerAdminRoutes, writeAuditLog } from "./admin-routes";
 import OpenAI from "openai";
 
@@ -320,6 +321,22 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   // â"€â"€â"€ FACE CHECK â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
+  // ─── PHOTO STORAGE ───────────────────────────────────────────────────────────
+  // Serve photos stored in object storage. Auth required to prevent public scraping.
+  app.get("/api/photos/*", isAuthenticated, async (req: any, res) => {
+    try {
+      const key = req.params[0] as string;
+      if (!key || key.includes("..")) return res.status(400).end();
+      const photo = await downloadPhoto(key);
+      if (!photo) return res.status(404).end();
+      res.setHeader("Content-Type", photo.contentType);
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      res.send(photo.buffer);
+    } catch {
+      res.status(500).end();
+    }
+  });
+
   app.post("/api/check-face", isAuthenticated, async (req, res) => {
     try {
       const { image } = req.body;
@@ -381,6 +398,13 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         }
       }
 
+      // Upload selfie to object storage so the DB row stays small
+      let resolvedSelfie: string | undefined = incomingSelfie;
+      if (incomingSelfie?.startsWith("data:image")) {
+        try { resolvedSelfie = await uploadBase64Photo(incomingSelfie, userId); }
+        catch (e) { console.error("[selfie] object storage upload failed:", (e as Error).message); }
+      }
+
       // Only rebuild photo slots if the request actually included a photos array
       const existingSlots: any[] = (user?.photoSlots as any[] | null) ?? [];
       const existingApproved: string[] = user?.photos ?? [];
@@ -402,6 +426,17 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
         // A photo is "new" if its exact string does not exist in any slot yet.
         newUploads = submittedPhotos.filter(p => !existingSlotUrlSet.has(p));
+
+        // Upload new Base64 images to object storage so the DB row stays small
+        newUploads = await Promise.all(
+          newUploads.map(async (url: string) => {
+            if (url.startsWith("data:image")) {
+              try { return await uploadBase64Photo(url, userId); }
+              catch (e) { console.error("[photos] object storage upload failed:", (e as Error).message); return url; }
+            }
+            return url;
+          })
+        );
 
         // Rebuild slots:
         //   • Approved slots the user kept → stay approved (never reset)
@@ -449,6 +484,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         user?.verificationStatus !== "pending";
       const updated = await storage.updateUser(userId, {
         ...(data as any),
+        ...(incomingSelfie !== undefined ? { verificationSelfie: resolvedSelfie } : {}),
         ...(grantIraqPremium ? { isPremium: true, premiumUntil: null } : {}),
         ...(photosIncluded ? {
           photoSlots: updatedSlots,
@@ -767,6 +803,18 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   // ─── SUPPORT CHAT ─────────────────────────────────────────
+  app.post("/api/feature-request", isAuthenticated, async (req, res) => {
+    const userId = getUserId(req);
+    const { message } = req.body as { message?: string };
+    if (!message?.trim()) return res.status(400).json({ error: "Message required" });
+    const [user] = await db.select({ fullName: users.fullName, firstName: users.firstName, email: users.email })
+      .from(users).where(eq(users.id, userId));
+    const name = user?.fullName || user?.firstName || "User";
+    const email = user?.email || "unknown";
+    await sendFeatureRequestEmail(name, email, message.trim());
+    res.json({ ok: true });
+  });
+
   app.post("/api/support/start", isAuthenticated, async (req, res) => {
     try {
       const userId = getUserId(req);
@@ -821,9 +869,17 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // ─── SEEN ─────────────────────────────────────────────────
   app.post("/api/seen/matches", isAuthenticated, async (req, res) => {
     const userId = getUserId(req);
+    const userMatchIds = db
+      .select({ id: matches.id })
+      .from(matches)
+      .where(or(eq(matches.user1Id, userId), eq(matches.user2Id, userId)));
     await db.update(messages)
       .set({ readAt: new Date() })
-      .where(and(eq(messages.readAt, null as any), sql`${messages.senderId} != ${userId}`));
+      .where(and(
+        isNull(messages.readAt),
+        ne(messages.senderId, userId),
+        inArray(messages.matchId, userMatchIds),
+      ));
     await db.update(users).set({ matchesSeenAt: new Date() } as any).where(eq(users.id, userId));
     cacheDel(`matches:${userId}`);
     res.json({ ok: true });
@@ -1223,6 +1279,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     };
     cSet(ck, result, CT.ADMIN_STATS);
     res.json(result);
+  });
+
+  app.get("/api/admin/events/pending-count", isAuthenticated, requireAdmin, async (_req, res) => {
+    const [row] = await db.select({ count: count() }).from(events).where(eq(events.isApproved, false));
+    res.json({ count: row?.count ?? 0 });
   });
 
   app.get("/api/admin/events", isAuthenticated, requireAdmin, async (_req, res) => {

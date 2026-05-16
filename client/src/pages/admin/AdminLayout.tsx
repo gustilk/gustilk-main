@@ -42,7 +42,7 @@ interface NavItem {
   label: string;
   path: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
-  badgeKey?: "pendingPhotos";
+  badgeKey?: "pendingPhotos" | "pendingEvents";
 }
 
 interface NavGroup {
@@ -101,7 +101,7 @@ const NAV: NavGroup[] = [
     title: "Community",
     items: [
       { label: "Caste Management", path: "/admin/caste",           icon: Hash },
-      { label: "Events",           path: "/admin/events",          icon: Calendar },
+      { label: "Events",           path: "/admin/events",          icon: Calendar, badgeKey: "pendingEvents" },
       { label: "Success Stories",  path: "/admin/success-stories", icon: Heart },
       { label: "Translations",     path: "/admin/translations",    icon: Globe },
     ],
@@ -164,13 +164,23 @@ export default function AdminLayout({ user }: { user: User }) {
     staleTime: 20_000,
   });
 
+  const { data: pendingEventsData } = useQuery<{ count: number }>({
+    queryKey: ["/api/admin/events/pending-count"],
+    queryFn: async () => (await fetch("/api/admin/events/pending-count", { credentials: "include" })).json(),
+    refetchInterval: 30_000,
+    staleTime: 20_000,
+  });
+
   const pendingPhotoCount: number = (pendingPhotosData?.users ?? []).reduce((total: number, u: any) => {
     const slots: any[] = u.photoSlots ?? [];
     return total + slots.filter((s: any) => s.status === "pending").length;
   }, 0);
 
+  const pendingEventCount: number = pendingEventsData?.count ?? 0;
+
   const badges: Record<string, number> = {
     pendingPhotos: pendingPhotoCount,
+    pendingEvents: pendingEventCount,
   };
 
   function resolvePage() {

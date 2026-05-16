@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Lock, MessageCircle, Search } from "lucide-react";
@@ -30,18 +30,19 @@ export default function MatchesPage({ user }: Props) {
   });
 
   const allMatches = data?.matches ?? [];
-  const regularMatches = allMatches.filter(m => !m.otherUser?.isSystemAccount);
+  const regularMatches = useMemo(() => allMatches.filter(m => !m.otherUser?.isSystemAccount), [allMatches]);
 
   const q = search.toLowerCase().trim();
-  const filteredMatches = q
+  const filteredMatches = useMemo(() => q
     ? regularMatches.filter(m => {
         const name = (m.otherUser?.firstName ?? m.otherUser?.fullName ?? "").toLowerCase();
         return name.includes(q);
       })
-    : regularMatches;
+    : regularMatches,
+  [regularMatches, q]);
 
-  const newMatches = filteredMatches.filter(m => !m.lastMessage);
-  const conversations = filteredMatches.filter(m => !!m.lastMessage);
+  const newMatches = useMemo(() => filteredMatches.filter(m => !m.lastMessage), [filteredMatches]);
+  const conversations = useMemo(() => filteredMatches.filter(m => !!m.lastMessage), [filteredMatches]);
 
   return (
     <div className="flex flex-col min-h-screen pb-20" style={{ background: "#0d0618" }}>

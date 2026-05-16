@@ -45,9 +45,14 @@ export default function BottomNav() {
       queryClient.setQueryData(["/api/matches"], (old: any) =>
         old ? { ...old, matches: old.matches?.map((m: any) => ({ ...m, unreadCount: 0 })) } : old
       );
+      const now = new Date().toISOString();
+      queryClient.setQueryData(["/api/auth/me"], (old: any) =>
+        old ? { ...old, user: { ...old.user, matchesSeenAt: now } } : old
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     },
   });
 
@@ -66,6 +71,15 @@ export default function BottomNav() {
 
   const unreadCount = matchData?.matches?.reduce((sum, m) => sum + (m.unreadCount || 0), 0) ?? 0;
 
+  const matchesSeenAt = userData?.user?.matchesSeenAt
+    ? new Date(userData.user.matchesSeenAt as unknown as string)
+    : null;
+
+  const newMatchCount = matchData?.matches?.filter(m =>
+    !m.lastMessage && (matchesSeenAt ? new Date((m as any).createdAt) > matchesSeenAt : true)
+  ).length ?? 0;
+
+  const matchBadge = unreadCount + newMatchCount;
 
   const activitySeenAt = userData?.user?.activitySeenAt
     ? new Date(userData.user.activitySeenAt as unknown as string)
@@ -76,7 +90,7 @@ export default function BottomNav() {
   ).length ?? 0;
 
   const handleNavClick = (id: string) => {
-    if (id === "matches" && unreadCount > 0) {
+    if (id === "matches" && matchBadge > 0) {
       seenMatchesMutation.mutate();
     }
     if (id === "activity" && likesCount > 0) {
@@ -104,13 +118,13 @@ export default function BottomNav() {
           >
             <div className="relative">
               <Icon size={26} strokeWidth={isActive ? 2 : 1.5} />
-              {isMatches && unreadCount > 0 && (
+              {isMatches && matchBadge > 0 && (
                 <span
                   className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
                   style={{ background: "#d4608a", color: "white" }}
                   data-testid="badge-unread"
                 >
-                  {unreadCount > 9 ? "9+" : unreadCount}
+                  {matchBadge > 9 ? "9+" : matchBadge}
                 </span>
               )}
               {isActivity && likesCount > 0 && (

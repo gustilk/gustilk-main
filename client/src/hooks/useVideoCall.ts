@@ -33,6 +33,7 @@ export interface VideoCallCtx {
   toggleCam: () => void;
   callPartnerName: string;
   callPartnerPhoto: string | null;
+  wsConnected: boolean;
 }
 
 export function useVideoCallContext() {
@@ -62,6 +63,8 @@ export function useVideoCallProvider(userId: string | null, isPremium: boolean):
   const [isMuted, setIsMuted] = useState(false);
   const [isCamOff, setIsCamOff] = useState(false);
   const [reconnectCtr, setReconnectCtr] = useState(0);
+  const [wsConnected, setWsConnected] = useState(false);
+  const reconnectDelayRef = useRef(1000);
   const isPremiumRef = useRef(isPremium);
   useEffect(() => { isPremiumRef.current = isPremium; }, [isPremium]);
 
@@ -188,15 +191,24 @@ export function useVideoCallProvider(userId: string | null, isPremium: boolean):
 
     ws.onopen = () => {
       ws.send(JSON.stringify({ type: "register", userId }));
+      setWsConnected(true);
+      reconnectDelayRef.current = 1000;
     };
 
     ws.onmessage = (e) => handleMessage(e.data);
 
     ws.onclose = () => {
       wsRef.current = null;
+      setWsConnected(false);
       if (!intentionalClose) {
-        setTimeout(() => setReconnectCtr(c => c + 1), 3000);
+        const delay = reconnectDelayRef.current;
+        reconnectDelayRef.current = Math.min(delay * 2, 30000);
+        setTimeout(() => setReconnectCtr(c => c + 1), delay);
       }
+    };
+
+    ws.onerror = () => {
+      ws.close();
     };
 
     return () => {
@@ -262,5 +274,6 @@ export function useVideoCallProvider(userId: string | null, isPremium: boolean):
     startCall, acceptCall, rejectCall, endCall,
     isMuted, toggleMute, isCamOff, toggleCam,
     callPartnerName, callPartnerPhoto,
+    wsConnected,
   };
 }

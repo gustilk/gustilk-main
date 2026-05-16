@@ -321,3 +321,24 @@ export async function sendPhotoRejectedEmail(to: string, name: string, reason: s
   } catch {
   }
 }
+
+export async function sendFeatureRequestEmail(fromName: string, fromEmail: string, message: string): Promise<void> {
+  try {
+    const resend = getResend();
+    await resend.emails.send({
+      from: "Gûstîlk <noreply@gustilk.com>",
+      to: "support@gustilk.com",
+      subject: `Feature Request from ${fromName}`,
+      html: emailShell(`
+        <h2 style="margin:0 0 12px;font-size:20px;color:#ffffff;font-weight:normal;">New Feature Request</h2>
+        <p style="margin:0 0 16px;font-size:14px;color:#c8b8e8;line-height:1.7;">
+          From: <strong style="color:#ffffff;">${fromName}</strong> &lt;${fromEmail}&gt;
+        </p>
+        <div style="margin:0 0 24px;padding:18px;background:rgba(201,168,76,0.08);border-radius:12px;border:1px solid rgba(201,168,76,0.2);">
+          <p style="margin:0;font-size:15px;color:#ffffff;line-height:1.8;white-space:pre-wrap;">${message}</p>
+        </div>
+      `),
+    });
+  } catch {
+  }
+}

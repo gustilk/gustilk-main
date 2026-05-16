@@ -69,12 +69,12 @@ declare module "express-session" {
 
 export const sessionMiddleware = session({
   store: new PgSession({ pool, tableName: "sessions" }),
-  secret: process.env.SESSION_SECRET || "gustilk-dev-secret",
+  secret: process.env.SESSION_SECRET || (() => { if (process.env.NODE_ENV === "production") throw new Error("SESSION_SECRET env var is required in production"); return "gustilk-dev-secret"; })(),
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: false,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 30 * 24 * 60 * 60 * 1000,
   },
@@ -112,8 +112,9 @@ function saveSession(req: Request): Promise<void> {
   );
 }
 
-// Skip rate limiting for loopback requests (automated tests running on the same machine).
+// Skip rate limiting for loopback requests in development only.
 function skipLocalhost(req: Request): boolean {
+  if (process.env.NODE_ENV === "production") return false;
   const ip = req.ip ?? req.socket?.remoteAddress ?? "";
   return ip === "127.0.0.1" || ip === "::1" || ip === "::ffff:127.0.0.1";
 }

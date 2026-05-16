@@ -253,22 +253,20 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
                       {u.createdAt ? formatDistanceToNow(new Date(u.createdAt), { addSuffix: true }) : "—"}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-1.5 justify-end">
+                      <div className="flex items-center gap-2 justify-end flex-wrap">
                         <button onClick={() => setLocation(`/admin/users/${u.id}`)}
                           data-testid={`button-view-user-${u.id}`}
-                          title="View profile"
-                          className="w-7 h-7 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-80 transition-opacity"
                           style={{ background: "rgba(59,130,246,0.15)", color: "#3b82f6" }}>
-                          <Eye size={12} />
+                          <Eye size={13} /> View
                         </button>
                         {!u.isAdmin && (
                           <>
                             <button onClick={() => updateMutation.mutate({ id: u.id, isPremium: !u.isPremium })}
                               data-testid={`button-toggle-premium-${u.id}`}
-                              title={u.isPremium ? "Remove premium" : "Grant premium"}
-                              className="w-7 h-7 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity"
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-80 transition-opacity"
                               style={{ background: "rgba(201,168,76,0.15)", color: "#c9a84c" }}>
-                              <Crown size={12} />
+                              <Crown size={13} /> {u.isPremium ? "Unpremium" : "Premium"}
                             </button>
                             <button
                               onClick={() => setPending({
@@ -281,10 +279,9 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
                                 onConfirm: () => updateMutation.mutate({ id: u.id, isBanned: u.verificationStatus !== "banned" }),
                               })}
                               data-testid={`button-ban-user-${u.id}`}
-                              title={u.verificationStatus === "banned" ? "Unban" : "Ban"}
-                              className="w-7 h-7 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity"
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-80 transition-opacity"
                               style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}>
-                              <Ban size={12} />
+                              <Ban size={13} /> {u.verificationStatus === "banned" ? "Unban" : "Ban"}
                             </button>
                             <button
                               onClick={() => setPending({
@@ -295,10 +292,9 @@ export default function UsersPage({ user: adminUser }: { user: User }) {
                                 onConfirm: () => deleteMutation.mutate(u.id),
                               })}
                               data-testid={`button-delete-user-${u.id}`}
-                              title="Delete account"
-                              className="w-7 h-7 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity"
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-80 transition-opacity"
                               style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444" }}>
-                              <Trash2 size={12} />
+                              <Trash2 size={13} /> Delete
                             </button>
                           </>
                         )}

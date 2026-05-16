@@ -5,11 +5,15 @@ export default function ProtectedPhoto({
   alt,
   className,
   blurred = false,
+  style,
+  loading = "lazy",
 }: {
   src: string;
   alt?: string;
   className?: string;
   blurred?: boolean;
+  style?: React.CSSProperties;
+  loading?: "lazy" | "eager";
 }) {
   return (
     <div className="relative w-full h-full overflow-hidden">
@@ -18,6 +22,8 @@ export default function ProtectedPhoto({
         alt={blurred ? "" : (alt ?? "")}
         className={className}
         draggable={false}
+        loading={loading}
+        decoding="async"
         onContextMenu={block}
         onDragStart={block}
         style={{
@@ -25,6 +31,7 @@ export default function ProtectedPhoto({
           userSelect: "none",
           WebkitTouchCallout: "none",
           ...(blurred ? { filter: "blur(22px) brightness(0.65) saturate(0.4)", transform: "scale(1.1)" } : {}),
+          ...style,
         } as React.CSSProperties}
       />
       {blurred && (

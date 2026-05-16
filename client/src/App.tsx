@@ -4,40 +4,50 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import LandingPage from "@/pages/LandingPage";
-import DiscoverPage from "@/pages/DiscoverPage";
-import MatchesPage from "@/pages/MatchesPage";
-import ChatPage from "@/pages/ChatPage";
-import ProfilePage from "@/pages/ProfilePage";
-import EditProfilePage from "@/pages/EditProfilePage";
-import PremiumPage from "@/pages/PremiumPage";
-import EventsPage from "@/pages/EventsPage";
-import EventDetailPage from "@/pages/EventDetailPage";
-import SettingsPage from "@/pages/SettingsPage";
-import ActivityPage from "@/pages/ActivityPage";
-import ViewUserProfilePage from "@/pages/ViewUserProfilePage";
-import VerificationPage from "@/pages/VerificationPage";
-import PendingVerificationPage from "@/pages/PendingVerificationPage";
-import PendingApprovalPage from "@/pages/PendingApprovalPage";
-import SocialSetupPage from "@/pages/SocialSetupPage";
-import LanguageSelectPage from "@/pages/LanguageSelectPage";
 import BottomNav from "@/components/BottomNav";
 import VideoCallPage, { IncomingCallBanner } from "@/pages/VideoCallPage";
 import { VideoCallContext, useVideoCallProvider } from "@/hooks/useVideoCall";
-import TermsPage from "@/pages/TermsPage";
-import RefundPage from "@/pages/RefundPage";
-import PrivacyPage from "@/pages/PrivacyPage";
-import GuidelinesPage from "@/pages/GuidelinesPage";
-import CookiePolicyPage from "@/pages/CookiePolicyPage";
-import GdprPage from "@/pages/GdprPage";
-import SafetyTipsPage from "@/pages/SafetyTipsPage";
-import DataDeletionPage from "@/pages/DataDeletionPage";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
+
+// Page components — loaded on demand so the initial JS bundle stays small
+const LandingPage             = lazy(() => import("@/pages/LandingPage"));
+const DiscoverPage            = lazy(() => import("@/pages/DiscoverPage"));
+const MatchesPage             = lazy(() => import("@/pages/MatchesPage"));
+const ChatPage                = lazy(() => import("@/pages/ChatPage"));
+const ProfilePage             = lazy(() => import("@/pages/ProfilePage"));
+const EditProfilePage         = lazy(() => import("@/pages/EditProfilePage"));
+const PremiumPage             = lazy(() => import("@/pages/PremiumPage"));
+const EventsPage              = lazy(() => import("@/pages/EventsPage"));
+const EventDetailPage         = lazy(() => import("@/pages/EventDetailPage"));
+const SettingsPage            = lazy(() => import("@/pages/SettingsPage"));
+const ActivityPage            = lazy(() => import("@/pages/ActivityPage"));
+const ViewUserProfilePage     = lazy(() => import("@/pages/ViewUserProfilePage"));
+const VerificationPage        = lazy(() => import("@/pages/VerificationPage"));
+const PendingVerificationPage = lazy(() => import("@/pages/PendingVerificationPage"));
+const PendingApprovalPage     = lazy(() => import("@/pages/PendingApprovalPage"));
+const SocialSetupPage         = lazy(() => import("@/pages/SocialSetupPage"));
+const LanguageSelectPage      = lazy(() => import("@/pages/LanguageSelectPage"));
+const TermsPage               = lazy(() => import("@/pages/TermsPage"));
+const RefundPage              = lazy(() => import("@/pages/RefundPage"));
+const PrivacyPage             = lazy(() => import("@/pages/PrivacyPage"));
+const GuidelinesPage          = lazy(() => import("@/pages/GuidelinesPage"));
+const CookiePolicyPage        = lazy(() => import("@/pages/CookiePolicyPage"));
+const GdprPage                = lazy(() => import("@/pages/GdprPage"));
+const SafetyTipsPage          = lazy(() => import("@/pages/SafetyTipsPage"));
+const DataDeletionPage        = lazy(() => import("@/pages/DataDeletionPage"));
 import { Clock, X } from "lucide-react";
 import type { User } from "@shared/schema";
 import type { PhotoSlot } from "@shared/schema";
 import { initPurchases } from "@/lib/purchases";
 import { initPushNotifications } from "@/lib/pushNotifications";
+
+function PageSpinner() {
+  return (
+    <div className="flex items-center justify-center min-h-screen" style={{ background: "#0d0618" }}>
+      <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "rgba(201,168,76,0.6) transparent transparent transparent" }} />
+    </div>
+  );
+}
 
 function PendingReviewBanner() {
   const [dismissed, setDismissed] = useState(false);
@@ -154,7 +164,7 @@ function AppShell({ user }: { user: User }) {
   }, []);
 
   if (!profileIsComplete(user) && location !== "/complete-profile") {
-    return <SocialSetupPage user={user} />;
+    return <Suspense fallback={<PageSpinner />}><SocialSetupPage user={user} /></Suspense>;
   }
 
   const vs = user.verificationStatus;
@@ -166,7 +176,7 @@ function AppShell({ user }: { user: User }) {
   // before re-submitting, and to /profile to view their current photo slots.
   const allowedForRejected = vs === "rejected" && (location === "/profile/edit" || location === "/profile");
   if (isRegularUser && (vs === "rejected" || vs === "banned") && !allowedForRejected) {
-    return <PendingApprovalPage user={user} />;
+    return <Suspense fallback={<PageSpinner />}><PendingApprovalPage user={user} /></Suspense>;
   }
 
   const isPending = isRegularUser && vs === "pending";
@@ -184,8 +194,9 @@ function AppShell({ user }: { user: User }) {
 
         <main className="flex-1 overflow-hidden" style={{ background: "#0d0618" }}>
           {!isAdminRoute && (
-            <Switch>
-              <Route path="/discover" component={() => <DiscoverPage user={user} />} />
+            <Suspense fallback={<PageSpinner />}>
+              <Switch>
+                <Route path="/discover" component={() => <DiscoverPage user={user} />} />
               <Route path="/matches" component={() => <MatchesPage user={user} />} />
               <Route path="/chat/:matchId" component={({ params }) => <ChatPage user={user} matchId={params.matchId} />} />
               <Route path="/profile/edit" component={() => <EditProfilePage user={user} />} />
@@ -200,7 +211,8 @@ function AppShell({ user }: { user: User }) {
               <Route path="/pending-verification" component={() => <PendingVerificationPage user={user} />} />
               <Route path="/complete-profile" component={() => <SocialSetupPage user={user} />} />
               <Route path="/" component={() => <Redirect to="/discover" />} />
-            </Switch>
+              </Switch>
+            </Suspense>
           )}
         </main>
         {!isChat && !isEventDetail && !isVerifyPage && !isInCall && !isSettings && !isAdminRoute && <BottomNav />}
@@ -230,7 +242,9 @@ function Router() {
   if (!data?.user) {
     return (
       <>
-        <LandingPage />
+        <Suspense fallback={<PageSpinner />}>
+          <LandingPage />
+        </Suspense>
         <CookieConsentBanner />
       </>
     );
@@ -268,7 +282,9 @@ export default function App() {
         {langChosen ? (
           <Router />
         ) : (
-          <LanguageSelectPage onSelect={() => setLangChosen(true)} />
+          <Suspense fallback={<PageSpinner />}>
+            <LanguageSelectPage onSelect={() => setLangChosen(true)} />
+          </Suspense>
         )}
       </TooltipProvider>
     </QueryClientProvider>
