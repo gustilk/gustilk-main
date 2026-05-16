@@ -424,6 +424,8 @@ export default function ProfilePage({ user }: Props) {
     try {
       const result = await pickPhoto("prompt");
       if (result) setCropTarget({ imgSrc: result.dataUrl, slotIdx });
+    } catch (err: any) {
+      toast({ title: "Could not open camera", description: err?.message ?? "Please allow camera/photo access in Settings.", variant: "destructive" });
     } finally {
       setPickerBusy(false);
     }

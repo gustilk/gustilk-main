@@ -33,7 +33,7 @@ body::-webkit-scrollbar {
 * {
   -webkit-tap-highlight-color: transparent;
   box-sizing: border-box;
-  touch-action: pan-y pinch-zoom;
+  touch-action: pan-x pan-y pinch-zoom;
 }
 
 /* LIGHT MODE */

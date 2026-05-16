@@ -46,6 +46,10 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Used to select photos for your profile.</string>
+	<string>Gûstîlk accesses your photo library so you can upload profile photos.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Gûstîlk uses your camera for profile photos and verification selfies.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Gûstîlk uses your microphone for video calls with your matches.</string>
 </dict>
 </plist>

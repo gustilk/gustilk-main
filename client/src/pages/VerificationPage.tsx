@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { Capacitor } from "@capacitor/core";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { parseApiError } from "@/lib/apiError";
+import { pickSelfie } from "@/lib/camera";
 import { Camera, CheckCircle, ArrowRight, Shield, RotateCcw, Sun, AlertCircle } from "lucide-react";
 import type { SafeUser } from "@shared/schema";
 
@@ -187,7 +189,18 @@ export default function VerificationPage({ user }: Props) {
               style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
               {submitMutation.isPending ? "Checking & submitting…" : "Submit for Verification"}
             </button>
-            <button onClick={() => { setSelfieData(null); setSubmitError(null); setStep("camera"); }}
+            <button
+              onClick={async () => {
+                setSelfieData(null);
+                setSubmitError(null);
+                if (Capacitor.isNativePlatform()) {
+                  const result = await pickSelfie();
+                  if (result) { setSelfieData(result.dataUrl); setStep("preview"); }
+                  else setStep("intro");
+                } else {
+                  setStep("camera");
+                }
+              }}
               data-testid="button-retake"
               className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
               style={{ background: "rgba(255,255,255,0.06)", color: "rgba(253,248,240,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}>
@@ -294,7 +307,16 @@ export default function VerificationPage({ user }: Props) {
       </div>
 
       <div className="mt-auto pb-10 pt-8 space-y-3">
-        <button onClick={() => setStep("camera")} data-testid="button-start-verification"
+        <button
+          onClick={async () => {
+            if (Capacitor.isNativePlatform()) {
+              const result = await pickSelfie();
+              if (result) { setSelfieData(result.dataUrl); setStep("preview"); }
+            } else {
+              setStep("camera");
+            }
+          }}
+          data-testid="button-start-verification"
           className="w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2"
           style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)", color: "#1a0a2e" }}>
           <Camera size={18} /> Start Verification
