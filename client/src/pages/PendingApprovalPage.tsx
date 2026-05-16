@@ -1,7 +1,9 @@
 import { useState, useRef } from "react";
 import { Clock, Camera, XCircle, Ban, Shield, ArrowRight, LogOut, RotateCcw, CheckCircle, Edit } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
+import { Capacitor } from "@capacitor/core";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { pickSelfie } from "@/lib/camera";
 import { useLocation } from "wouter";
 import type { User } from "@shared/schema";
 
@@ -157,7 +159,14 @@ export default function PendingApprovalPage({ user }: Props) {
               <p className="text-cream/40 text-xs text-center mb-3">Face clearly visible, good lighting, no sunglasses</p>
               {selfieError && <p className="text-sm text-center mb-2" style={{ color: "#d4608a" }}>{selfieError}</p>}
               <button
-                onClick={() => selfieInputRef.current?.click()}
+                onClick={async () => {
+                  if (Capacitor.isNativePlatform()) {
+                    const r = await pickSelfie();
+                    if (r) { setSelfieData(r.dataUrl); setReapplyStep("ready"); }
+                  } else {
+                    selfieInputRef.current?.click();
+                  }
+                }}
                 data-testid="button-take-selfie"
                 className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
                 style={{ background: "linear-gradient(135deg, #7b3fa0, #d4608a)", color: "white" }}

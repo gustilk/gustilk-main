@@ -36,7 +36,7 @@ function SortablePhotoItem({
 
   if (!slot) {
     return (
-      <div ref={setNodeRef} style={style}>
+      <div>
         <button
           onClick={() => onAdd(idx)}
           data-testid={`button-add-photo-${idx}`}

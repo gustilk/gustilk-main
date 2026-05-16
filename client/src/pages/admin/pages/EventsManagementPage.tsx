@@ -1,7 +1,9 @@
 import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Calendar, Plus, Trash2, Edit2, X, CheckCircle, Clock, ImagePlus } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { pickPhoto } from "@/lib/camera";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import type { User, Event } from "@shared/schema";
@@ -132,14 +134,20 @@ export default function EventsManagementPage({ user }: { user: User }) {
               style={{ background: "rgba(13,6,24,0.85)" }}>
               <X size={11} color="rgba(253,248,240,0.8)" />
             </button>
-            <button onClick={() => fileInputRef.current?.click()}
+            <button onClick={async () => {
+                if (Capacitor.isNativePlatform()) { const r = await pickPhoto("prompt"); if (r) f("imageUrl", r.dataUrl); }
+                else fileInputRef.current?.click();
+              }}
               className="absolute bottom-1.5 right-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold"
               style={{ background: "rgba(13,6,24,0.85)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.4)" }}>
               Change
             </button>
           </div>
         ) : (
-          <button onClick={() => fileInputRef.current?.click()}
+          <button onClick={async () => {
+              if (Capacitor.isNativePlatform()) { const r = await pickPhoto("prompt"); if (r) f("imageUrl", r.dataUrl); }
+              else fileInputRef.current?.click();
+            }}
             className="w-full flex items-center justify-center gap-2 rounded-xl text-xs"
             style={{ height: 72, background: "rgba(255,255,255,0.03)", border: "1.5px dashed rgba(201,168,76,0.2)", color: "rgba(201,168,76,0.5)" }}>
             <ImagePlus size={14} /> Add Cover Photo

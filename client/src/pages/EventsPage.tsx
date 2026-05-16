@@ -1,7 +1,9 @@
 import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { Capacitor } from "@capacitor/core";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { pickPhoto } from "@/lib/camera";
 import { CalendarDays, MapPin, Users, ChevronLeft, ChevronRight, Plus, Edit2, Trash2, ImagePlus, X } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
@@ -328,7 +330,14 @@ function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
                 <X size={14} color="rgba(253,248,240,0.8)" />
               </button>
               <button
-                onClick={() => fileInputRef.current?.click()}
+                onClick={async () => {
+                  if (Capacitor.isNativePlatform()) {
+                    const r = await pickPhoto("prompt");
+                    if (r) set("imageUrl", r.dataUrl);
+                  } else {
+                    fileInputRef.current?.click();
+                  }
+                }}
                 className="absolute bottom-2 right-2 px-3 py-1.5 rounded-full text-xs font-semibold"
                 style={{ background: "rgba(13,6,24,0.8)", border: "1px solid rgba(201,168,76,0.4)", color: "#c9a84c" }}
               >
@@ -337,7 +346,14 @@ function EventFormScreen({ initial, isEditing, isPending, onBack, onSubmit }: {
             </div>
           ) : (
             <button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={async () => {
+                if (Capacitor.isNativePlatform()) {
+                  const r = await pickPhoto("prompt");
+                  if (r) set("imageUrl", r.dataUrl);
+                } else {
+                  fileInputRef.current?.click();
+                }
+              }}
               className="w-full flex flex-col items-center justify-center gap-2 rounded-2xl transition-all"
               style={{ height: 120, background: "rgba(255,255,255,0.03)", border: "1.5px dashed rgba(201,168,76,0.25)" }}
             >
