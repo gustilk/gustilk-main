@@ -615,15 +615,13 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     if (!user?.isPremium && !adminChat) return res.status(403).json({ error: "Premium required to send messages" });
     const { text } = z.object({ text: z.string().min(1).max(2000) }).parse(req.body);
     const msg = await storage.sendMessage(req.params.matchId as string, userId, text);
-    // Auto AI reply when a regular user messages the support account or admin chat
+    // Auto AI reply only when a regular user messages the support system account
     const otherUserId = match.user1Id === userId ? match.user2Id : match.user1Id;
     const otherUser = await storage.getUserById(otherUserId);
-    if ((otherUser?.isSystemAccount || otherUser?.isAdmin) && !user?.isAdmin && !user?.isSystemAccount) {
+    if (otherUser?.isSystemAccount && !user?.isAdmin && !user?.isSystemAccount) {
       generateSupportAiReply(match.id, otherUserId);
-      if (otherUser?.isSystemAccount) {
-        const displayName = user?.fullName ?? user?.firstName ?? user?.email ?? "A user";
-        sendSupportMessageAlertEmail(displayName, text, match.id).catch(() => {});
-      }
+      const displayName = user?.fullName ?? user?.firstName ?? user?.email ?? "A user";
+      sendSupportMessageAlertEmail(displayName, text, match.id).catch(() => {});
     }
     res.json({ message: msg });
   });
