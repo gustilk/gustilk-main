@@ -4,6 +4,25 @@ export interface PhotoResult {
   dataUrl: string;
 }
 
+async function requestCameraPermissions(needCamera: boolean, needPhotos: boolean) {
+  const { Camera } = await import("@capacitor/camera");
+  const current = await Camera.checkPermissions();
+
+  const toRequest: ("camera" | "photos")[] = [];
+  if (needCamera && current.camera !== "granted") toRequest.push("camera");
+  if (needPhotos && current.photos !== "granted") toRequest.push("photos");
+
+  if (toRequest.length > 0) {
+    const result = await Camera.requestPermissions({ permissions: toRequest });
+    if (needCamera && result.camera === "denied") {
+      throw new Error("Camera access denied. Please go to Settings → Gûstîlk and enable Camera access.");
+    }
+    if (needPhotos && result.photos === "denied") {
+      throw new Error("Photo library access denied. Please go to Settings → Gûstîlk and enable Photos access.");
+    }
+  }
+}
+
 /**
  * Open a photo picker. On native (iOS/Android) uses the Capacitor Camera plugin
  * which is more reliable than <input type="file"> on iOS. Falls back to a hidden
@@ -15,6 +34,12 @@ export async function pickPhoto(source: "camera" | "photos" | "prompt" = "prompt
   if (Capacitor.isNativePlatform()) {
     try {
       const { Camera, CameraResultType, CameraSource } = await import("@capacitor/camera");
+
+      await requestCameraPermissions(
+        source === "camera" || source === "prompt",
+        source === "photos" || source === "prompt",
+      );
+
       const sourceMap = {
         camera: CameraSource.Camera,
         photos: CameraSource.Photos,
@@ -61,6 +86,9 @@ export async function pickSelfie(): Promise<PhotoResult | null> {
   if (Capacitor.isNativePlatform()) {
     try {
       const { Camera, CameraResultType, CameraSource, CameraDirection } = await import("@capacitor/camera");
+
+      await requestCameraPermissions(true, false);
+
       const photo = await Camera.getPhoto({
         resultType: CameraResultType.DataUrl,
         source: CameraSource.Camera,

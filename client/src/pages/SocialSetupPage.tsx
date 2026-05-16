@@ -652,8 +652,12 @@ export default function SocialSetupPage({ user }: Props) {
                         type="button"
                         onClick={async () => {
                           if (Capacitor.isNativePlatform()) {
-                            const result = await pickPhoto("prompt");
-                            if (result) setCropTarget({ imgSrc: result.dataUrl, index: idx });
+                            try {
+                              const result = await pickPhoto("prompt");
+                              if (result) setCropTarget({ imgSrc: result.dataUrl, index: idx });
+                            } catch (err: any) {
+                              toast({ title: "Cannot access photos", description: err?.message ?? "Please allow photo access in Settings → Gûstîlk.", variant: "destructive" });
+                            }
                           } else {
                             photoInputRefs[idx].current?.click();
                           }
@@ -744,8 +748,12 @@ export default function SocialSetupPage({ user }: Props) {
                     type="button"
                     onClick={async () => {
                       if (Capacitor.isNativePlatform()) {
-                        const result = await pickSelfie();
-                        if (result) setCropTarget({ imgSrc: result.dataUrl, index: "selfie" });
+                        try {
+                          const result = await pickSelfie();
+                          if (result) setCropTarget({ imgSrc: result.dataUrl, index: "selfie" });
+                        } catch (err: any) {
+                          toast({ title: "Cannot access camera", description: err?.message ?? "Please allow camera access in Settings → Gûstîlk.", variant: "destructive" });
+                        }
                       } else {
                         selfieInputRef.current?.click();
                       }

@@ -5,6 +5,7 @@ import { Capacitor } from "@capacitor/core";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { parseApiError } from "@/lib/apiError";
 import { pickSelfie } from "@/lib/camera";
+import { useToast } from "@/hooks/use-toast";
 import { Camera, CheckCircle, ArrowRight, Shield, RotateCcw, Sun, AlertCircle } from "lucide-react";
 import type { SafeUser } from "@shared/schema";
 
@@ -27,6 +28,7 @@ function calcBrightness(canvas: HTMLCanvasElement): number {
 
 export default function VerificationPage({ user }: Props) {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [step, setStep] = useState<"intro" | "camera" | "preview" | "checking" | "done">("intro");
   const [selfieData, setSelfieData] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -194,9 +196,13 @@ export default function VerificationPage({ user }: Props) {
                 setSelfieData(null);
                 setSubmitError(null);
                 if (Capacitor.isNativePlatform()) {
-                  const result = await pickSelfie();
-                  if (result) { setSelfieData(result.dataUrl); setStep("preview"); }
-                  else setStep("intro");
+                  try {
+                    const result = await pickSelfie();
+                    if (result) { setSelfieData(result.dataUrl); setStep("preview"); }
+                    else setStep("intro");
+                  } catch (err: any) {
+                    toast({ title: "Cannot access camera", description: err?.message ?? "Please allow camera access in Settings → Gûstîlk.", variant: "destructive" });
+                  }
                 } else {
                   setStep("camera");
                 }
@@ -310,8 +316,12 @@ export default function VerificationPage({ user }: Props) {
         <button
           onClick={async () => {
             if (Capacitor.isNativePlatform()) {
-              const result = await pickSelfie();
-              if (result) { setSelfieData(result.dataUrl); setStep("preview"); }
+              try {
+                const result = await pickSelfie();
+                if (result) { setSelfieData(result.dataUrl); setStep("preview"); }
+              } catch (err: any) {
+                toast({ title: "Cannot access camera", description: err?.message ?? "Please allow camera access in Settings → Gûstîlk.", variant: "destructive" });
+              }
             } else {
               setStep("camera");
             }
