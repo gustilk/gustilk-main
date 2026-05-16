@@ -323,9 +323,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // â"€â"€â"€ FACE CHECK â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
   // ─── PHOTO STORAGE ───────────────────────────────────────────────────────────
   // Serve photos stored in object storage. Auth required to prevent public scraping.
-  app.get("/api/photos/*", isAuthenticated, async (req: any, res) => {
+  app.get("/api/photos/*path", isAuthenticated, async (req: any, res) => {
     try {
-      const key = req.params[0] as string;
+      const key = (req.params as any).path as string;
       if (!key || key.includes("..")) return res.status(400).end();
       const photo = await downloadPhoto(key);
       if (!photo) return res.status(404).end();
